@@ -4427,31 +4427,80 @@ const TUTORIAL=[
   {t:"知っている語は「既知」に入れる",
    b:"すでに知っている語は出題から外せます。単語帳の各行か、単語をタップした詳細画面から切り替えられます。まちがえたときは自動で既知が外れます。"},
 ];
+/* 漫画で見る使い方。画像は manga/ フォルダに置く（ファイル名はページ番号）。
+   第2話・第3話は pages に番号を足すと表示される */
+const MANGA_CHARA="manga/chara.png";
+const MANGA=[
+  {no:1,title:"なぜRootsは生まれたのか",pages:["1-1","1-2","1-3","1-4","1-5","1-6","1-7","1-8"]},
+  {no:2,title:"Rootsの使い方",pages:[]},
+  {no:3,title:"",pages:[]},
+];
+function MangaPage({C,src,alt}){
+  const [bad,setBad]=useState(false);
+  if(bad) return (
+    <div style={{aspectRatio:"941/1672",display:"flex",alignItems:"center",justifyContent:"center",
+      background:C.card,border:"1px dashed "+C.border,color:C.faint,fontSize:13}}>{alt}（画像を準備中）</div>
+  );
+  return <img src={src} alt={alt} loading="lazy" decoding="async" onError={()=>setBad(true)}
+    style={{display:"block",width:"100%",height:"auto"}}/>;
+}
 function TutorialScreen({C,onBack}){
+  const [ep,setEp]=useState(1);
+  const [showChara,setShowChara]=useState(false);
+  const [showText,setShowText]=useState(false);
+  const cur=MANGA.find(m=>m.no===ep);
+  const pick=(no)=>{setEp(no);window.scrollTo({top:0,behavior:"smooth"});};
+  const tabBtn=(active)=>({flex:1,minHeight:56,borderRadius:4,fontSize:16,fontWeight:700,cursor:"pointer",
+    border:"1px solid "+(active?C.accent:C.border),background:active?C.accentSoft:"transparent",color:active?C.accent:C.sub});
   return (
-    <div className="riseIn" style={{flex:1,padding:"18px 20px 40px"}}>
-      <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:18}}>
+    <div className="riseIn" style={{flex:1,padding:"18px 0 40px"}}>
+      <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:14,padding:"0 20px"}}>
         <button aria-label="戻る" onClick={onBack}
           style={{width:40,height:40,marginLeft:-8,borderRadius:4,border:"none",background:"transparent",
             color:C.sub,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}><Icon.back size={22}/></button>
         <h2 style={{fontSize:19,fontWeight:700,color:C.text,margin:0}}>効果的な使い方</h2>
       </div>
-      <div style={{fontSize:13,color:C.sub,lineHeight:1.9,marginBottom:24}}>
-        このアプリは、単語を語源から覚えるために作られています。次の7つを押さえると、同じ時間でも定着が変わります。
+      <div style={{display:"flex",gap:8,padding:"0 20px",marginBottom:10}}>
+        {MANGA.map(m=>(
+          <button key={m.no} onClick={()=>pick(m.no)} style={tabBtn(ep===m.no)}>第{m.no}話</button>
+        ))}
       </div>
-      {TUTORIAL.map((x,i)=>(
-        <div key={i} style={{padding:"16px 0",borderTop:"1px solid "+C.line}}>
-          <div style={{display:"flex",gap:12,alignItems:"baseline"}}>
-            <span className="num" style={{fontSize:13,fontWeight:700,color:C.accent,flexShrink:0}}>{i+1}</span>
-            <div>
-              <div style={{fontSize:14.5,fontWeight:700,color:C.text,marginBottom:6}}>{x.t}</div>
-              <div style={{fontSize:13,color:C.sub,lineHeight:1.9}}>{x.b}</div>
+      <div style={{padding:"0 20px",marginBottom:14}}>
+        <button onClick={()=>setShowChara(v=>!v)} style={{...tabBtn(false),width:"100%"}}>
+          {showChara?"キャラクター紹介をとじる":"キャラクター紹介を見る"}
+        </button>
+      </div>
+      {showChara&&<div style={{marginBottom:14}}><MangaPage C={C} src={MANGA_CHARA} alt="キャラクター紹介"/></div>}
+
+      {cur.pages.length>0 ? (
+        <div>{cur.pages.map(pg=>(
+          <MangaPage key={pg} C={C} src={"manga/"+pg+".png"} alt={"第"+cur.no+"話 "+pg}/>
+        ))}</div>
+      ) : (
+        <div style={{margin:"0 20px",padding:"48px 16px",textAlign:"center",border:"1px dashed "+C.border,
+          borderRadius:4,color:C.sub,fontSize:16,lineHeight:1.8}}>
+          第{cur.no}話{cur.title?"「"+cur.title+"」":""}は<br/>ただいま準備中です
+        </div>
+      )}
+
+      <div style={{padding:"20px 20px 0"}}>
+        {ep<MANGA.length&&<div style={{marginBottom:10}}><Btn C={C} onClick={()=>pick(ep+1)}>次の話へ（第{ep+1}話）</Btn></div>}
+        <button onClick={()=>setShowText(v=>!v)} style={{...tabBtn(false),width:"100%",marginBottom:10}}>
+          {showText?"文字の説明をとじる":"文字で読む（くわしい説明）"}
+        </button>
+        {showText&&TUTORIAL.map((x,i)=>(
+          <div key={i} style={{padding:"16px 0",borderTop:"1px solid "+C.line}}>
+            <div style={{display:"flex",gap:12,alignItems:"baseline"}}>
+              <span className="num" style={{fontSize:13,fontWeight:700,color:C.accent,flexShrink:0}}>{i+1}</span>
+              <div>
+                <div style={{fontSize:14.5,fontWeight:700,color:C.text,marginBottom:6}}>{x.t}</div>
+                <div style={{fontSize:13,color:C.sub,lineHeight:1.9}}>{x.b}</div>
+              </div>
             </div>
           </div>
-        </div>
-      ))}
-      <div style={{borderTop:"1px solid "+C.line,marginBottom:24}}/>
-      <Btn C={C} onClick={onBack}>戻る</Btn>
+        ))}
+        <div style={{marginTop:14}}><Btn C={C} onClick={onBack}>戻る</Btn></div>
+      </div>
     </div>
   );
 }
