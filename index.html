@@ -3002,6 +3002,7 @@ function WordDetail({C,word:w,onTapRoot,speakOn=true,head=true,relatedLimit=3}){
     <div>
       {head&&(
         <div style={{display:"flex",alignItems:"baseline",gap:8,flexWrap:"wrap"}}>
+          <span className="num" style={{fontSize:12,color:C.sub}}>No. {w.id}</span>
           <Speak C={C} text={w.word} enabled={speakOn} style={{borderBottom:"none"}}>
             <span className="en" style={{fontSize:28,fontWeight:700,color:C.text,lineHeight:1.05,letterSpacing:"-0.02em"}}>
               <ColoredWord C={C} word={w.word} parts={parts}/></span>
@@ -4047,10 +4048,14 @@ function ListScreen({C,words,onTogglePass,onOpen,settings}){
   const now=Date.now();
 
   const rows=useMemo(()=>{
+    const query=q.trim().normalize("NFKC");
+    const numberMatch=query.match(/^(?:no\.?\s*|#\s*)?(\d+)$/i);
     let r=words.filter(w=>{
-      if(q){
-        const s=q.toLowerCase();
-        if(!(w.word.toLowerCase().includes(s)||w.meaning.includes(q)||
+      if(query){
+        const s=query.toLowerCase();
+        if(numberMatch){
+          if(w.id!==Number(numberMatch[1]))return false;
+        }else if(!(w.word.toLowerCase().includes(s)||w.meaning.includes(query)||
             parseRoots(w).some(x=>x.morph.toLowerCase().includes(s)))) return false;
       }else if(w.part!==part) return false;
       if(filter==="mastered")return isMastered(w);
@@ -4064,6 +4069,7 @@ function ListScreen({C,words,onTogglePass,onOpen,settings}){
     if(sort==="weak")r=[...r].sort((a,b)=>b.incorrectCount+b.lapses-(a.incorrectCount+a.lapses));
     else if(sort==="due")r=[...r].sort((a,b)=>(a.due||Infinity)-(b.due||Infinity));
     else if(sort==="alpha")r=[...r].sort((a,b)=>a.word.localeCompare(b.word));
+    else r=[...r].sort((a,b)=>a.id-b.id);
     return r;
   },[words,part,filter,q,sort,now]);
 
@@ -4074,7 +4080,7 @@ function ListScreen({C,words,onTogglePass,onOpen,settings}){
 
         <div style={{position:"relative",marginBottom:14}}>
           <span style={{position:"absolute",left:12,top:"50%",transform:"translateY(-50%)",color:C.faint}}><Icon.search size={18}/></span>
-          <input value={q} onChange={e=>setQ(e.target.value)} placeholder="単語・意味・語根で探す" aria-label="単語を検索"
+          <input value={q} onChange={e=>setQ(e.target.value)} placeholder="番号・単語・意味・語根で探す" aria-label="単語を検索"
             style={{width:"100%",height:46,borderRadius:4,border:"1px solid "+C.border,background:C.card,
               color:C.text,fontSize:14,padding:"0 40px 0 38px"}}/>
           {q&&<button onClick={()=>setQ("")} aria-label="検索を消す"
@@ -4130,6 +4136,7 @@ function ListScreen({C,words,onTogglePass,onOpen,settings}){
                 borderBottom:"1px solid "+C.line,cursor:"pointer"}}>
               <div style={{width:3,alignSelf:"stretch",minHeight:38,borderRadius:4,background:isWeak(w)?C.bad:c,flexShrink:0}}/>
               <div style={{flex:1,minWidth:0}}>
+                <div className="num" style={{fontSize:12,color:C.sub,marginBottom:3}}>No. {w.id}</div>
                 <div className="en" style={{fontSize:14.5,fontWeight:700,color:C.text,overflow:"hidden",
                   textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{w.word}</div>
                 {(()=>{const h=hidden(w.id+":m");const bad=!h&&recall[w.id]===false;
