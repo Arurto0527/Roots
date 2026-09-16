@@ -130,7 +130,8 @@
    バッジ・レベル・進捗はすべて総語数から自動計算されます。
    ============================================================ */
 const RAW_WORDS=[
-  {id:1,word:"agree",partOfSpeech:"自動詞",meaning:"賛成する；意見が一致する",
+  {id:1,word:"agree",partOfSpeech:"自動詞",meaning:"賛成する",
+   meanings:["自|賛成する","自|（主語の中で）意見が一致する","自|（with ～）（気候，食べ物が）（～に）合う"],
    pronunciation:"/əˈɡriː/",part:1,
    example:"The two sides finally agreed on a price.",
    exampleJa:"両者はついに価格の点で意見が一致した。",
@@ -144,7 +145,8 @@ const RAW_WORDS=[
      {word:"congratulate",meaning:"祝う",breakdown:"con（共に）＋ grat（心地よい）＋ ate（動詞）→ 一緒に心地よさを分かち合う"},
      {word:"grace",meaning:"優雅さ；好意",breakdown:"grac（心地よい）→ 見ている人を心地よくさせる美しさ"}]},
 
-  {id:2,word:"oppose",partOfSpeech:"他動詞",meaning:"反対する",
+  {id:2,word:"oppose",partOfSpeech:"他動詞",meaning:"～に反対する",
+   meanings:["他|～に反対する"],
    pronunciation:"/əˈpoʊz/",part:1,
    example:"Many residents opposed the new airport.",
    exampleJa:"多くの住民が新空港に反対した。",
@@ -158,7 +160,8 @@ const RAW_WORDS=[
      {word:"propose",meaning:"提案する",breakdown:"pro（前へ）＋ pos（置く）→ 案を相手の前に差し出して置く"},
      {word:"compose",meaning:"構成する；作曲する",breakdown:"com（共に）＋ pos（置く）→ 部品を並べ置いて一つに組み上げる"}]},
 
-  {id:3,word:"advise",partOfSpeech:"他動詞",meaning:"忠告する；助言する",
+  {id:3,word:"advise",partOfSpeech:"他動詞",meaning:"～に忠告する",
+   meanings:["他|～に忠告する"],
    pronunciation:"/ədˈvaɪz/",part:1,
    example:"The teacher advised me to read the book twice.",
    exampleJa:"先生は私にその本を二度読むよう助言した。",
@@ -172,7 +175,8 @@ const RAW_WORDS=[
      {word:"revise",meaning:"見直す；修正する",breakdown:"re（再び）＋ vis（見る）→ もう一度見直して直す"},
      {word:"supervise",meaning:"監督する",breakdown:"super（上から）＋ vis（見る）→ 高いところから全体を見張る"}]},
 
-  {id:4,word:"tip",partOfSpeech:"名詞",meaning:"助言；先端；チップ",
+  {id:4,word:"tip",partOfSpeech:"名詞",meaning:"助言，ヒント",
+   meanings:["名|助言，ヒント","名|チップ","名|（足や山などの）先，先端"],
    pronunciation:"/tɪp/",part:1,
    example:"He gave me a useful tip for the exam.",
    exampleJa:"彼は試験に役立つ助言をくれた。",
@@ -187,7 +191,8 @@ const RAW_WORDS=[
      {synonym:true,word:"clue",meaning:"手がかり",breakdown:"もとは糸玉。迷路を抜けるためにたどる糸"},
      {synonym:true,word:"suggestion",meaning:"提案",breakdown:"下からそっと持ち上げて差し出す案"}]},
 
-  {id:5,word:"discuss",partOfSpeech:"他動詞",meaning:"話し合う；議論する",
+  {id:5,word:"discuss",partOfSpeech:"他動詞",meaning:"～について話し合う，議論する",
+   meanings:["他|～について話し合う，議論する","他|～を話題に出す"],
    pronunciation:"/dɪˈskʌs/",part:1,
    example:"We discussed the problem for an hour.",
    exampleJa:"私たちはその問題について一時間話し合った。",
@@ -201,7 +206,8 @@ const RAW_WORDS=[
      {synonym:true,word:"debate",meaning:"討論する",breakdown:"賛成と反対に分かれて、形を決めて戦わせる話し合い"},
      {synonym:true,word:"argue",meaning:"（理由を挙げて）主張する",breakdown:"自分の側が正しいとはっきりさせようとする"}]},
 
-  {id:6,word:"blame",partOfSpeech:"他動詞",meaning:"責任があるとする；非難する",
+  {id:6,word:"blame",partOfSpeech:"他動詞",meaning:"～に責任があるとする",
+   meanings:["他|～に責任があるとする"],
    pronunciation:"/bleɪm/",part:1,
    example:"Don't blame others for your own mistakes.",
    exampleJa:"自分の失敗を他人のせいにしてはいけない。",
@@ -216,7 +222,8 @@ const RAW_WORDS=[
      {synonym:true,word:"fault",meaning:"落ち度",breakdown:"fal（欠ける）→ あるべきものが欠けている部分"},
      {synonym:true,word:"responsible",meaning:"責任がある",breakdown:"re（返す）＋ spons（答える）→ 問われたら答えを返す立場にある"}]},
 
-  {id:7,word:"argue",partOfSpeech:"他動詞・自動詞",meaning:"（理由を挙げて）主張する；言い争う",
+  {id:7,word:"argue",partOfSpeech:"他動詞・自動詞",meaning:"（that SV）～と主張する",
+   meanings:["他|（that SV）～と主張する","自|（with ～）（～と）言い争う"],
    pronunciation:"/ˈɑːrɡjuː/",part:1,
    example:"She argued that the rule was unfair.",
    exampleJa:"彼女はその規則は不公平だと主張した。",
@@ -230,7 +237,8 @@ const RAW_WORDS=[
      {synonym:true,word:"insist",meaning:"言い張る",breakdown:"in（上に）＋ sist（立つ）→ 引かずにその場に立ち続ける"},
      {synonym:true,word:"quarrel",meaning:"口げんかする",breakdown:"感情がぶつかり合う、理屈のない言い争い"}]},
 
-  {id:8,word:"claim",partOfSpeech:"他動詞",meaning:"（権利として）要求する；主張する",
+  {id:8,word:"claim",partOfSpeech:"他動詞",meaning:"（that SV）～と主張する",
+   meanings:["他|（that SV）～と主張する","他|～を要求する，主張する","名|主張，要求"],
    pronunciation:"/kleɪm/",part:1,
    example:"He claimed that he had seen the accident.",
    exampleJa:"彼はその事故を目撃したと主張した。",
@@ -244,7 +252,8 @@ const RAW_WORDS=[
      {word:"proclaim",meaning:"宣言する",breakdown:"pro（人前で）＋ claim（叫ぶ）→ みんなの前で高らかに告げる"},
      {word:"reclaim",meaning:"取り戻す",breakdown:"re（戻す）＋ claim（叫ぶ）→ 返せと声を上げて取り返す"}]},
 
-  {id:9,word:"complain",partOfSpeech:"自動詞",meaning:"文句を言う；苦情を言う",
+  {id:9,word:"complain",partOfSpeech:"自動詞",meaning:"文句を言う，苦情を言う",
+   meanings:["自|文句を言う，苦情を言う","自|（of ～）（病気などを）訴える"],
    pronunciation:"/kəmˈpleɪn/",part:1,
    example:"Customers complained about the long wait.",
    exampleJa:"客は長い待ち時間について苦情を言った。",
@@ -258,7 +267,8 @@ const RAW_WORDS=[
      {synonym:true,word:"object",meaning:"異議を唱える",breakdown:"ob（向かって）＋ ject（投げる）→ 相手に向けて反対意見を投げる"},
      {synonym:true,word:"grumble",meaning:"ぶつぶつ言う",breakdown:"表立ってではなく、小声で不満をこぼす"}]},
 
-  {id:10,word:"offer",partOfSpeech:"他動詞",meaning:"申し出る；提供する",
+  {id:10,word:"offer",partOfSpeech:"他動詞",meaning:"～を申し出る",
+   meanings:["他|～を申し出る","名|申し出","名|値引き"],
    pronunciation:"/ˈɔːfər/",part:1,
    example:"The company offered him a job in Osaka.",
    exampleJa:"その会社は彼に大阪での仕事を提供した。",
@@ -272,7 +282,8 @@ const RAW_WORDS=[
      {word:"prefer",meaning:"より好む",breakdown:"pre（先に）＋ fer（運ぶ）→ 心が先にそちらへ運ばれていく"},
      {word:"suffer",meaning:"苦しむ",breakdown:"suf（下で）＋ fer（運ぶ）→ 重荷を下でずっと担ぎ続ける"}]},
 
-  {id:11,word:"suggest",partOfSpeech:"他動詞",meaning:"（案として）提案する；ほのめかす",
+  {id:11,word:"suggest",partOfSpeech:"他動詞",meaning:"～を示唆する",
+   meanings:["他|～を示唆する","他|～を提案する"],
    pronunciation:"/səˈdʒest/",part:1,
    example:"The doctor suggested a short walk after every meal.",
    exampleJa:"医師は毎食後に短い散歩をすることを提案した。",
@@ -286,7 +297,8 @@ const RAW_WORDS=[
      {word:"suggestion",meaning:"提案",breakdown:"sug（下から）＋ gest（運ぶ）＋ ion（名詞）→ そっと差し出された案"},
      {synonym:true,word:"propose",meaning:"提案する",breakdown:"正式に人前に置く。suggest はもっと軽くほのめかす言い方"}]},
 
-  {id:12,word:"recommend",partOfSpeech:"他動詞",meaning:"（よいものとして）人に勧める",
+  {id:12,word:"recommend",partOfSpeech:"他動詞",meaning:"～を推薦する，勧める",
+   meanings:["他|～を推薦する，勧める"],
    pronunciation:"/ˌrekəˈmend/",part:1,
    example:"This dictionary was recommended to me by my English teacher.",
    exampleJa:"この辞書は英語の先生が私に勧めてくれたものだ。",
@@ -300,7 +312,8 @@ const RAW_WORDS=[
      {word:"recommendation",meaning:"推薦；勧め",breakdown:"mend（委ねる）＋ ation（名詞）→ 任せて大丈夫という推し"},
      {synonym:true,word:"advise",meaning:"忠告する",breakdown:"相手のためを思って助言する。recommend は自信をもって推す"}]},
 
-  {id:13,word:"grateful",partOfSpeech:"形容詞",meaning:"感謝している，ありがたく思う",
+  {id:13,word:"grateful",partOfSpeech:"形容詞",meaning:"感謝している",
+   meanings:["形|感謝している"],
    pronunciation:"/ˈɡreɪtfl/",part:1,
    example:"We are grateful to everyone who supported the project.",
    exampleJa:"私たちはこの企画を支えてくれたすべての人に感謝している。",
@@ -314,7 +327,8 @@ const RAW_WORDS=[
      {word:"grace",meaning:"優雅さ；恵み",breakdown:"grat（心地よい）→ 見ていて心地よい、なめらかな身のこなし"},
      {synonym:true,word:"thankful",meaning:"感謝している",breakdown:"やわらかい日常語。grateful は恩を受けた自覚がより強い"}]},
 
-  {id:14,word:"apologize",partOfSpeech:"自動詞",meaning:"（悪かったと）謝る",
+  {id:14,word:"apologize",partOfSpeech:"自動詞",meaning:"（to ～）（～に）謝る",
+   meanings:["自|（to ～）（～に）謝る"],
    pronunciation:"/əˈpɑːlədʒaɪz/",part:1,
    example:"The company apologized to its customers for the delay.",
    exampleJa:"その会社は遅れについて顧客に謝罪した。",
@@ -328,7 +342,8 @@ const RAW_WORDS=[
      {word:"apology",meaning:"謝罪",breakdown:"apo（離れて）＋ log（言葉）→ 一歩下がって述べる言葉"},
      {word:"catalog",meaning:"目録，カタログ",breakdown:"cata（下へ）＋ log（言葉）→ 上から下へ言葉を並べた一覧"}]},
 
-  {id:15,word:"excuse",partOfSpeech:"名詞",meaning:"言い訳；～を許す",
+  {id:15,word:"excuse",partOfSpeech:"名詞",meaning:"言い訳",
+   meanings:["名|言い訳","他|～を許す","他|（A from B）（B からA）を免除する"],
    pronunciation:"/ɪkˈskjuːs/",part:1,
    example:"He gave a poor excuse for missing the meeting.",
    exampleJa:"彼は会議を欠席したことについて下手な言い訳をした。",
@@ -342,7 +357,8 @@ const RAW_WORDS=[
      {word:"accuse",meaning:"非難する，告発する",breakdown:"ad（〜へ）＋ cus（罪）→ 罪を相手の方へ突きつける"},
      {synonym:true,word:"forgive",meaning:"許す",breakdown:"罪をなかったことにする。excuse は小さな過ちを見のがす"}]},
 
-  {id:16,word:"celebrate",partOfSpeech:"他動詞",meaning:"（記念日・出来事）を祝う",
+  {id:16,word:"celebrate",partOfSpeech:"他動詞",meaning:"（特別な日、出来事）を祝う",
+   meanings:["他|（特別な日、出来事）を祝う","他|（儀式など）を挙行する，執り行う"],
    pronunciation:"/ˈselɪbreɪt/",part:1,
    example:"The whole town celebrates the harvest every autumn.",
    exampleJa:"町全体が毎年秋に収穫を祝う。",
@@ -356,7 +372,8 @@ const RAW_WORDS=[
      {synonym:true,word:"congratulate",meaning:"（人）にお祝いを言う",breakdown:"目的語が人。celebrate は日や出来事の方を目的語にとる"},
      {synonym:true,word:"festival",meaning:"祭り，催し",breakdown:"にぎやかな催しそのもの。celebrate はそれを行う動作"}]},
 
-  {id:17,word:"congratulate",partOfSpeech:"他動詞",meaning:"（人）にお祝いの言葉を言う",
+  {id:17,word:"congratulate",partOfSpeech:"他動詞",meaning:"（人）を祝う，～にお祝いを述べる",
+   meanings:["他|（人）を祝う，～にお祝いを述べる"],
    pronunciation:"/kənˈɡrætʃuleɪt/",part:1,
    example:"She was congratulated by everyone on her new job.",
    exampleJa:"彼女は新しい仕事のことでみんなからお祝いを言われた。",
@@ -370,7 +387,8 @@ const RAW_WORDS=[
      {word:"congratulations",meaning:"おめでとう",breakdown:"com（共に）＋ grat（心地よい）→ 喜びを共にする決まり文句"},
      {synonym:true,word:"celebrate",meaning:"（日・出来事）を祝う",breakdown:"祝う対象が日や出来事。congratulate は人を目的語にとる"}]},
 
-  {id:18,word:"admire",partOfSpeech:"他動詞",meaning:"～に感心する，～を称賛する",
+  {id:18,word:"admire",partOfSpeech:"他動詞",meaning:"～を称賛する，～に感心する",
+   meanings:["他|～を称賛する，～に感心する"],
    pronunciation:"/ədˈmaɪər/",part:1,
    example:"Many visitors admired the paintings in the small gallery.",
    exampleJa:"多くの来場者が小さな画廊の絵に感心していた。",
@@ -384,7 +402,8 @@ const RAW_WORDS=[
      {word:"admiration",meaning:"称賛",breakdown:"ad（〜へ）＋ mir（驚く）＋ ation（名詞）→ 見とれる気持ち"},
      {synonym:true,word:"respect",meaning:"尊敬する",breakdown:"人の価値を認めて敬う。admire は感嘆の気持ちが前に出る"}]},
 
-  {id:19,word:"impress",partOfSpeech:"他動詞",meaning:"～に強い印象を与える",
+  {id:19,word:"impress",partOfSpeech:"他動詞",meaning:"～に感銘を与える，～を感心させる",
+   meanings:["他|～に感銘を与える，～を感心させる"],
    pronunciation:"/ɪmˈpres/",part:1,
    example:"Her speech impressed the judges from the first sentence.",
    exampleJa:"彼女のスピーチは最初の一文から審査員に強い印象を与えた。",
@@ -398,7 +417,8 @@ const RAW_WORDS=[
      {word:"pressure",meaning:"圧力",breakdown:"press（押す）＋ ure（名詞）→ 押してくる力そのもの"},
      {word:"impression",meaning:"印象",breakdown:"im（中へ）＋ press（押す）＋ ion（名詞）→ 心に残った押し跡"}]},
 
-  {id:20,word:"award",partOfSpeech:"名詞",meaning:"（審査による）賞；～を授与する",
+  {id:20,word:"award",partOfSpeech:"名詞",meaning:"賞",
+   meanings:["名|賞","他|～を授与する"],
    pronunciation:"/əˈwɔːrd/",part:1,
    example:"The award is given to one student each year.",
    exampleJa:"その賞は毎年1人の生徒に贈られる。",
@@ -412,7 +432,8 @@ const RAW_WORDS=[
      {word:"regard",meaning:"～とみなす；尊重",breakdown:"re（じっと）＋ gard（見張る）→ 目を向けて、そう見なす"},
      {synonym:true,word:"prize",meaning:"賞品",breakdown:"競技などで勝ち取る品。award は審査して贈られる賞"}]},
 
-  {id:21,word:"explain",partOfSpeech:"他動詞",meaning:"（理由・やり方）をわかるように説明する",
+  {id:21,word:"explain",partOfSpeech:"他動詞",meaning:"～を説明する",
+   meanings:["他|～を説明する"],
    pronunciation:"/ɪkˈspleɪn/",part:1,
    example:"She explained the rule to the new members.",
    exampleJa:"彼女は新入部員にその規則を説明した。",
@@ -426,7 +447,8 @@ const RAW_WORDS=[
      {word:"complain",meaning:"文句を言う",breakdown:"com（強く）＋ plain（胸を叩く）→ 胸を叩いて不満を訴える"},
      {synonym:true,word:"describe",meaning:"（様子）を言い表す",breakdown:"どんなものかを言葉で写し取る。explain は理由や仕組みを解く"}]},
 
-  {id:22,word:"describe",partOfSpeech:"他動詞",meaning:"（様子・特徴）を言い表す，描写する",
+  {id:22,word:"describe",partOfSpeech:"他動詞",meaning:"～を説明する",
+   meanings:["他|～を説明する"],
    pronunciation:"/dɪˈskraɪb/",part:1,
    example:"The witness described the man's face in careful detail.",
    exampleJa:"目撃者はその男の顔を細かく言い表した。",
@@ -440,7 +462,8 @@ const RAW_WORDS=[
      {word:"description",meaning:"描写，説明",breakdown:"de（下へ）＋ scrib（書く）＋ ion（名詞）→ 書き写したもの"},
      {synonym:true,word:"explain",meaning:"説明する",breakdown:"理由や仕組みを解きほぐす。describe は見た目や様子を伝える"}]},
 
-  {id:23,word:"communicate",partOfSpeech:"他動詞・自動詞",meaning:"意思を通じ合う；～を伝える",
+  {id:23,word:"communicate",partOfSpeech:"他動詞・自動詞",meaning:"（with ～）（～と）意思の疎通をはかる",
+   meanings:["自|（with ～）（～と）意思の疎通をはかる","他|～を伝える"],
    pronunciation:"/kəˈmjuːnɪkeɪt/",part:1,
    example:"The results were communicated to all members yesterday.",
    exampleJa:"結果は昨日すべての会員に伝えられた。",
@@ -454,7 +477,8 @@ const RAW_WORDS=[
      {word:"communication",meaning:"意思疎通；通信",breakdown:"com（共に）＋ mun（分け合う）＋ ation（名詞）→ 分け合う行い"},
      {synonym:true,word:"express",meaning:"言葉に表す",breakdown:"気持ちを外へ押し出す。communicate は通じ合うところまで"}]},
 
-  {id:24,word:"express",partOfSpeech:"他動詞",meaning:"（気持ち・考え）を言葉に表す",
+  {id:24,word:"express",partOfSpeech:"他動詞",meaning:"（意見，気持ち）を表現する",
+   meanings:["他|（意見，気持ち）を表現する","名|急行（列車，バス）"],
    pronunciation:"/ɪkˈspres/",part:1,
    example:"She expressed her opinion clearly at the meeting.",
    exampleJa:"彼女は会議で自分の意見をはっきりと言葉に表した。",
@@ -468,7 +492,8 @@ const RAW_WORDS=[
      {word:"espresso",meaning:"エスプレッソ",breakdown:"ex（外へ）＋ press（押す）→ 蒸気で押し出して淹れるコーヒー"},
      {word:"expression",meaning:"表現；表情",breakdown:"ex（外へ）＋ press（押す）＋ ion（名詞）→ 外に出てきたもの"}]},
 
-  {id:25,word:"promise",partOfSpeech:"名詞",meaning:"約束；～を約束する",
+  {id:25,word:"promise",partOfSpeech:"名詞",meaning:"約束",
+   meanings:["名|約束","他|～を約束する"],
    pronunciation:"/ˈprɑːmɪs/",part:1,
    example:"A promise made in public is hard to break.",
    exampleJa:"人前でした約束は破りにくい。",
@@ -483,6 +508,7 @@ const RAW_WORDS=[
      {word:"dismiss",meaning:"解散させる；退ける",breakdown:"dis（バラバラに）＋ mis（送る）→ ばらばらに送り出して帰す"}]},
 
   {id:26,word:"information",partOfSpeech:"名詞",meaning:"情報",
+   meanings:["名|情報〈不可算〉"],
    pronunciation:"/ˌɪnfərˈmeɪʃn/",part:2,
    example:"The website provides useful information about local buses.",
    exampleJa:"そのサイトは地元のバスについて役に立つ情報を出している。",
@@ -497,6 +523,7 @@ const RAW_WORDS=[
      {word:"perform",meaning:"行う；演じる",breakdown:"per（すっかり）＋ form（形）→ 最後まで形にしてやりきる"}]},
 
   {id:27,word:"technology",partOfSpeech:"名詞",meaning:"（科学）技術",
+   meanings:["名|（科学）技術"],
    pronunciation:"/tekˈnɑːlədʒi/",part:2,
    example:"New technology has changed the way we read books.",
    exampleJa:"新しい科学技術は本の読み方を変えてきた。",
@@ -510,7 +537,8 @@ const RAW_WORDS=[
      {word:"biology",meaning:"生物学",breakdown:"bio（生命）＋ log（学問）→ 生命について語る学問"},
      {synonym:true,word:"science",meaning:"科学",breakdown:"自然のしくみを調べる学問。technology はそれを道具にする側"}]},
 
-  {id:28,word:"research",partOfSpeech:"名詞",meaning:"（学術）研究，調査；～を研究する",
+  {id:28,word:"research",partOfSpeech:"名詞",meaning:"（学術）研究",
+   meanings:["名|（学術）研究","他|～を研究する"],
    pronunciation:"/rɪˈsɜːrtʃ/",part:2,
    example:"Her research on sleep was published last month.",
    exampleJa:"睡眠についての彼女の研究は先月発表された。",
@@ -524,7 +552,8 @@ const RAW_WORDS=[
      {word:"recycle",meaning:"再生利用する",breakdown:"re（何度も）＋ cycle（回す）→ 同じものを何度も回して使う"},
      {synonym:true,word:"study",meaning:"研究；勉強",breakdown:"学び全般を指す。research は未知を明らかにする調査"}]},
 
-  {id:29,word:"material",partOfSpeech:"名詞",meaning:"材料，素材；資料",
+  {id:29,word:"material",partOfSpeech:"名詞",meaning:"材料，生地",
+   meanings:["名|材料，生地","名|資料，教材","形|物質的な","形|重大な"],
    pronunciation:"/məˈtɪriəl/",part:2,
    example:"This jacket is made of a light, waterproof material.",
    exampleJa:"この上着は軽くて水を通さない材料でできている。",
@@ -538,7 +567,8 @@ const RAW_WORDS=[
      {synonym:true,word:"stuff",meaning:"もの；素材",breakdown:"くだけた言い方で「もの」全般。material は用途のある素材"},
      {synonym:true,word:"ingredient",meaning:"（料理の）材料",breakdown:"料理に混ぜ入れるもの。material は物づくりの素材全般"}]},
 
-  {id:30,word:"artificial",partOfSpeech:"形容詞",meaning:"人工の，人の手で作られた",
+  {id:30,word:"artificial",partOfSpeech:"形容詞",meaning:"人工的な",
+   meanings:["形|人工的な"],
    pronunciation:"/ˌɑːrtɪˈfɪʃl/",part:2,
    example:"The lake looks natural, but it is completely artificial.",
    exampleJa:"その湖は自然に見えるが、完全に人工のものだ。",
@@ -553,6 +583,7 @@ const RAW_WORDS=[
      {synonym:true,word:"natural",meaning:"自然の",breakdown:"手を加えていないさま。artificial はその正反対にある語"}]},
 
   {id:31,word:"electric",partOfSpeech:"形容詞",meaning:"電気の，電動の",
+   meanings:["形|電気の，電動の"],
    pronunciation:"/ɪˈlektrɪk/",part:2,
    example:"The city introduced electric buses last year.",
    exampleJa:"市は昨年、電動バスを導入した。",
@@ -566,7 +597,8 @@ const RAW_WORDS=[
      {word:"electrician",meaning:"電気工事の職人",breakdown:"electr（こはく）＋ ian（人）→ 電気を扱う職人"},
      {word:"electrical",meaning:"電気に関する",breakdown:"electr（こはく）＋ al（形容詞）→ 電気の分野全体にかかわる"}]},
 
-  {id:32,word:"invent",partOfSpeech:"他動詞",meaning:"（今までにない物）を発明する",
+  {id:32,word:"invent",partOfSpeech:"他動詞",meaning:"～を発明する",
+   meanings:["他|～を発明する","他|（話など）をでっち上げる"],
    pronunciation:"/ɪnˈvent/",part:2,
    example:"The machine was invented by a student in her twenties.",
    exampleJa:"その機械は20代の学生によって発明された。",
@@ -580,7 +612,8 @@ const RAW_WORDS=[
      {word:"prevent",meaning:"妨げる，防ぐ",breakdown:"pre（先に）＋ vent（来る）→ 先回りして来て行く手をふさぐ"},
      {word:"invention",meaning:"発明；発明品",breakdown:"in（上に）＋ vent（来る）＋ ion（名詞）→ 降りてきた思いつきの形"}]},
 
-  {id:33,word:"discover",partOfSpeech:"他動詞",meaning:"～を発見する；（that節）～に気づく",
+  {id:33,word:"discover",partOfSpeech:"他動詞",meaning:"～を発見する",
+   meanings:["他|～を発見する","他|（that SV）～を知る，～に気がつく","他|（知るという意味で）～に出会う"],
    pronunciation:"/dɪˈskʌvər/",part:2,
    example:"Scientists discovered a new species deep in the forest.",
    exampleJa:"科学者たちは森の奥で新種を発見した。",
@@ -594,7 +627,8 @@ const RAW_WORDS=[
      {word:"recover",meaning:"回復する；取り戻す",breakdown:"re（再び）＋ cover（覆う）→ 失った物を再び自分の側に取り戻す"},
      {word:"discovery",meaning:"発見",breakdown:"dis（否定）＋ cover（覆う）＋ y（名詞）→ 覆いを外して見つけたもの"}]},
 
-  {id:34,word:"develop",partOfSpeech:"他動詞・自動詞",meaning:"発達する；～を開発する",
+  {id:34,word:"develop",partOfSpeech:"他動詞・自動詞",meaning:"発達する",
+   meanings:["自|発達する","他|～を発達させる","他|～を開発する","他|（話，考え）を発展させる","他|（病気）にかかる"],
    pronunciation:"/dɪˈveləp/",part:2,
    example:"The company is developing a cheaper battery.",
    exampleJa:"その会社はより安い電池を開発している。",
@@ -608,7 +642,8 @@ const RAW_WORDS=[
      {word:"developer",meaning:"開発者",breakdown:"de（逆に）＋ velop（包む）＋ er（人）→ 中身を開いていく人"},
      {synonym:true,word:"grow",meaning:"成長する",breakdown:"自然に大きくなる。develop は中身が開いて次の段階へ進む"}]},
 
-  {id:35,word:"skill",partOfSpeech:"名詞",meaning:"腕前，習って身につけた技術",
+  {id:35,word:"skill",partOfSpeech:"名詞",meaning:"技術，力",
+   meanings:["名|技術，力"],
    pronunciation:"/skɪl/",part:2,
    example:"This job requires a high level of communication skill.",
    exampleJa:"この仕事は高い意思疎通の技術を必要とする。",
@@ -623,7 +658,8 @@ const RAW_WORDS=[
      {synonym:true,word:"talent",meaning:"才能",breakdown:"生まれ持った素質。skill は後から積み上げるもの"},
      {synonym:true,word:"skilled",meaning:"熟練した",breakdown:"skill を持っている状態を表す形容詞"}]},
 
-  {id:36,word:"ability",partOfSpeech:"名詞",meaning:"能力，やればできる力",
+  {id:36,word:"ability",partOfSpeech:"名詞",meaning:"能力",
+   meanings:["名|能力"],
    pronunciation:"/əˈbɪləti/",part:2,
    example:"Her ability to stay calm impressed the whole team.",
    exampleJa:"落ち着いていられる彼女の能力はチーム全体を感心させた。",
@@ -637,7 +673,8 @@ const RAW_WORDS=[
      {word:"enable",meaning:"可能にする",breakdown:"en（〜にする）＋ able（できる）→ できる状態にしてやる"},
      {word:"available",meaning:"利用できる；手が空いた",breakdown:"vail（力がある）＋ able（できる）→ 手が届いて使える"}]},
 
-  {id:37,word:"talent",partOfSpeech:"名詞",meaning:"（生まれつきの）才能",
+  {id:37,word:"talent",partOfSpeech:"名詞",meaning:"才能",
+   meanings:["名|才能"],
    pronunciation:"/ˈtælənt/",part:2,
    example:"He has a real talent for drawing faces.",
    exampleJa:"彼は顔を描くことに本物の才能がある。",
@@ -652,7 +689,8 @@ const RAW_WORDS=[
      {synonym:true,word:"genius",meaning:"天才",breakdown:"才能を持つ人そのもの。talent は力の方を指す"},
      {synonym:true,word:"ability",meaning:"能力",breakdown:"できる力全般。talent は生まれつき備わった飛び抜けた力"}]},
 
-  {id:38,word:"effort",partOfSpeech:"名詞",meaning:"努力，骨折り",
+  {id:38,word:"effort",partOfSpeech:"名詞",meaning:"努力",
+   meanings:["名|努力"],
    pronunciation:"/ˈefərt/",part:2,
    example:"Their effort was finally rewarded with a prize.",
    exampleJa:"彼らの努力はついに賞という形で報われた。",
@@ -666,7 +704,8 @@ const RAW_WORDS=[
      {word:"comfortable",meaning:"心地よい",breakdown:"com（すっかり）＋ fort（力）＋ able（できる）→ 力が抜けて楽"},
      {word:"fort",meaning:"とりで",breakdown:"fort（力）→ 力で守りを固めた建物"}]},
 
-  {id:39,word:"practice",partOfSpeech:"名詞",meaning:"練習；実際に行うこと，慣習",
+  {id:39,word:"practice",partOfSpeech:"名詞",meaning:"練習",
+   meanings:["名|練習","名|実践","名|慣習","他|～を練習する","他|～を実践する"],
    pronunciation:"/ˈpræktɪs/",part:2,
    example:"Daily practice matters more than talent in this sport.",
    exampleJa:"この競技では才能より毎日の練習が大切だ。",
@@ -680,7 +719,8 @@ const RAW_WORDS=[
      {synonym:true,word:"train",meaning:"訓練する",breakdown:"人を鍛えて仕込む側の語。practice は自分で繰り返す側"},
      {synonym:true,word:"custom",meaning:"慣習",breakdown:"社会に根づいたならわし。practice の「慣習」に近い"}]},
 
-  {id:40,word:"achieve",partOfSpeech:"他動詞",meaning:"（目標）を成し遂げる",
+  {id:40,word:"achieve",partOfSpeech:"他動詞",meaning:"～を達成する",
+   meanings:["他|～を達成する"],
    pronunciation:"/əˈtʃiːv/",part:2,
    example:"The team achieved its goal in the final match.",
    exampleJa:"チームは決勝でその目標を成し遂げた。",
@@ -693,7 +733,8 @@ const RAW_WORDS=[
      {word:"chef",meaning:"料理長，シェフ",breakdown:"chief（頭）→ 厨房の頭。フランス語から入った形"},
      {word:"achievement",meaning:"達成，業績",breakdown:"ad（〜へ）＋ chief（頭）＋ ment（名詞）→ 登りつめて得たもの"},
      {synonym:true,word:"reach",meaning:"到達する",breakdown:"距離的に届く。achieve は努力の末に目標へ届く"}]},
-  {id:41,word:"pronunciation",partOfSpeech:"名詞",meaning:"発音（音の出し方）",
+  {id:41,word:"pronunciation",partOfSpeech:"名詞",meaning:"発音",
+   meanings:["名|発音"],
    pronunciation:"/prəˌnʌnsiˈeɪʃn/",part:3,
    example:"Let's check the pronunciation of this new word together.",
    exampleJa:"この新しい語の発音を一緒に確認しましょう。",
@@ -708,7 +749,8 @@ const RAW_WORDS=[
      {word:"announcement",meaning:"お知らせ",breakdown:"ad（〜へ）＋ nunci（告げる）＋ ment（名詞）→ 告げ知らせた中身"},
      {word:"denounce",meaning:"公に非難する",breakdown:"de（下へ）＋ nunci（告げる）→ 相手を下げるように公に告げる"}]},
 
-  {id:42,word:"vocabulary",partOfSpeech:"名詞",meaning:"語彙（覚えている語の全体）",
+  {id:42,word:"vocabulary",partOfSpeech:"名詞",meaning:"語彙",
+   meanings:["名|語彙"],
    pronunciation:"/vəˈkæbjəleri/",part:3,
    example:"Let's review today's new vocabulary before the short test.",
    exampleJa:"小テストの前に、今日の新しい語彙を復習しましょう。",
@@ -723,7 +765,8 @@ const RAW_WORDS=[
      {word:"vocation",meaning:"天職",breakdown:"voc（呼ぶ）＋ ation（名詞）→ 天から呼ばれて就く仕事"},
      {word:"advocate",meaning:"支持を訴える",breakdown:"ad（〜へ）＋ voc（呼ぶ）→ 味方するほうへ声を上げる"}]},
 
-  {id:43,word:"paragraph",partOfSpeech:"名詞",meaning:"段落（文のひとまとまり）",
+  {id:43,word:"paragraph",partOfSpeech:"名詞",meaning:"段落",
+   meanings:["名|段落"],
    pronunciation:"/ˈpærəɡræf/",part:3,
    example:"Read the second paragraph of the passage aloud, please.",
    exampleJa:"その一節の2つ目の段落を声に出して読んでください。",
@@ -737,7 +780,8 @@ const RAW_WORDS=[
      {word:"autograph",meaning:"サイン",breakdown:"auto（自分で）＋ graph（書く）→ 自分の手で書いた名前"},
      {word:"parasite",meaning:"寄生虫",breakdown:"para（横に）＋ site（食べ物）→ 人の横に付いて食べ物にあずかる者"}]},
 
-  {id:44,word:"rehearse",partOfSpeech:"他動詞・自動詞",meaning:"本番通りに通し練習する",
+  {id:44,word:"rehearse",partOfSpeech:"他動詞・自動詞",meaning:"～のリハーサルをする",
+   meanings:["他|～のリハーサルをする","自|リハーサルをする"],
    pronunciation:"/rɪˈhɜːrs/",part:3,
    example:"Rehearse your dialogue with your partner before the presentation.",
    exampleJa:"発表の前に、相手と対話文を通し練習しなさい。",
@@ -752,7 +796,8 @@ const RAW_WORDS=[
      {word:"review",meaning:"見直す",breakdown:"re（再び）＋ vis（見る）→ もう一度見て確かめる"},
      {synonym:true,word:"practice",meaning:"練習する",breakdown:"部分を繰り返し磨く。rehearse は本番通りに通す"}]},
 
-  {id:45,word:"volunteer",partOfSpeech:"名詞",meaning:"自ら進んで引き受ける人",
+  {id:45,word:"volunteer",partOfSpeech:"名詞",meaning:"ボランティア",
+   meanings:["名|ボランティア","自|（to do）（～することを）自発的に申し出る"],
    pronunciation:"/ˌvɑːlənˈtɪr/",part:3,
    example:"We need two volunteers to read the dialogue for us.",
    exampleJa:"対話文を読んでくれる人が2人必要です。",
@@ -767,7 +812,8 @@ const RAW_WORDS=[
      {word:"pioneer",meaning:"先駆者",breakdown:"pion（歩兵）＋ eer（人）→ 先に立って道を切り開く人"},
      {synonym:true,word:"apply",meaning:"応募する",breakdown:"自分から申し込む。volunteer は進んで引き受けること"}]},
 
-  {id:46,word:"intonation",partOfSpeech:"名詞",meaning:"抑揚（声の上がり下がり）",
+  {id:46,word:"intonation",partOfSpeech:"名詞",meaning:"抑揚，イントネーション",
+   meanings:["名|抑揚，イントネーション"],
    pronunciation:"/ˌɪntəˈneɪʃn/",part:3,
    example:"Pay attention to the intonation at the end of questions.",
    exampleJa:"疑問文の終わりの抑揚に注意しなさい。",
@@ -781,7 +827,8 @@ const RAW_WORDS=[
      {synonym:true,word:"stress",meaning:"強勢",breakdown:"語の中で強く言う場所。intonation は文全体の高低"},
      {synonym:true,word:"accent",meaning:"なまり；アクセント",breakdown:"話し方の特徴。intonation は声の上がり下がり"}]},
 
-  {id:47,word:"recite",partOfSpeech:"他動詞",meaning:"暗唱する（覚えて口に出す）",
+  {id:47,word:"recite",partOfSpeech:"他動詞",meaning:"～を暗唱する",
+   meanings:["他|～を暗唱する"],
    pronunciation:"/rɪˈsaɪt/",part:3,
    example:"Can you recite the whole poem without looking at it?",
    exampleJa:"何も見ないでその詩を全部暗唱できますか。",
@@ -795,7 +842,8 @@ const RAW_WORDS=[
      {word:"recital",meaning:"独奏会；暗唱",breakdown:"re（再び）＋ cite（呼び出す）＋ al（名詞）→ 呼び出して披露する場"},
      {synonym:true,word:"memorize",meaning:"暗記する",breakdown:"頭に入れる段階。recite は入れたものを声に出す段階"}]},
 
-  {id:48,word:"homework",partOfSpeech:"名詞",meaning:"宿題（不可算）",
+  {id:48,word:"homework",partOfSpeech:"名詞",meaning:"宿題",
+   meanings:["名|宿題〈不可算〉"],
    pronunciation:"/ˈhoʊmwɜːrk/",part:3,
    example:"Please hand in your homework before Friday's English lesson.",
    exampleJa:"金曜の英語の授業の前に宿題を提出してください。",
@@ -809,7 +857,8 @@ const RAW_WORDS=[
      {word:"workbook",meaning:"問題集",breakdown:"work（仕事）＋ book（本）→ 手を動かして書き込む本"},
      {word:"framework",meaning:"枠組み",breakdown:"frame（枠）＋ work（仕事）→ 組み上げた枠の作り"}]},
 
-  {id:49,word:"handout",partOfSpeech:"名詞",meaning:"配布プリント（紙の資料）",
+  {id:49,word:"handout",partOfSpeech:"名詞",meaning:"配布資料，プリント",
+   meanings:["名|配布資料，プリント","名|施し物"],
    pronunciation:"/ˈhændaʊt/",part:3,
    example:"The teacher gave each student a handout about the test.",
    exampleJa:"先生は生徒一人ずつにテストについての配布プリントを渡した。",
@@ -824,7 +873,8 @@ const RAW_WORDS=[
      {word:"outcome",meaning:"結果",breakdown:"out（外へ）＋ come（来る）→ 最後に外へ出てきたもの"},
      {word:"handle",meaning:"扱う；取っ手",breakdown:"hand（手）＋ le（繰り返し）→ 手で何度も扱う"}]},
 
-  {id:50,word:"hand in",partOfSpeech:"熟語",meaning:"（先生に）提出する",
+  {id:50,word:"hand in",partOfSpeech:"熟語",meaning:"～を提出する",
+   meanings:["熟|～を提出する"],
    pronunciation:"/ˌhænd ˈɪn/",part:3,
    example:"Hand in your essays by Friday afternoon without fail.",
    exampleJa:"金曜の午後までに必ずエッセイを提出しなさい。",
@@ -839,7 +889,8 @@ const RAW_WORDS=[
      {word:"input",meaning:"入力",breakdown:"in（中へ）＋ put（置く）→ 中へ入れて置くこと"},
      {synonym:true,word:"submit",meaning:"提出する",breakdown:"目上へ差し出す硬い語。hand in のほうが口語的"}]},
 
-{id:51,word:"aloud",partOfSpeech:"副詞",meaning:"声に出して（音読で）",
+{id:51,word:"aloud",partOfSpeech:"副詞",meaning:"声に出して",
+   meanings:["副|声に出して"],
    pronunciation:"/əˈlaʊd/",part:3,
    example:"Please read the first paragraph aloud so everyone can hear.",
    exampleJa:"みんなに聞こえるように、最初の段落を声に出して読んでください。",
@@ -853,7 +904,8 @@ const RAW_WORDS=[
      {synonym:true,word:"orally",meaning:"口頭で",breakdown:"文字でなく口で伝える。aloud は音として出すこと自体"},
      {synonym:true,word:"silently",meaning:"黙って",breakdown:"read silently は黙読。read aloud が音読で対になる"}]},
 
-  {id:52,word:"absent",partOfSpeech:"形容詞",meaning:"欠席の（その場にいない）",
+  {id:52,word:"absent",partOfSpeech:"形容詞",meaning:"（from ～）（～を）欠席の",
+   meanings:["形|（from ～）（～を）欠席の","形|ぼんやりした"],
    pronunciation:"/ˈæbsənt/",part:3,
    example:"Three of my classmates were absent from school yesterday.",
    exampleJa:"昨日はクラスメート3人が学校を欠席していた。",
@@ -867,7 +919,8 @@ const RAW_WORDS=[
      {word:"represent",meaning:"代表する",breakdown:"re（再び）＋ pre（先に）＋ sent（いる）→ 人の代わりにその場にいる"},
      {synonym:true,word:"missing",meaning:"見当たらない",breakdown:"あるはずのものが欠けている。absent は人がその場にいない"}]},
 
-  {id:53,word:"attendance",partOfSpeech:"名詞",meaning:"出席（をとること）",
+  {id:53,word:"attendance",partOfSpeech:"名詞",meaning:"出席",
+   meanings:["名|出席","名|出席者数"],
    pronunciation:"/əˈtendəns/",part:3,
    example:"The teacher takes attendance at the start of every lesson.",
    exampleJa:"先生は毎回の授業の初めに出席をとる。",
@@ -881,7 +934,8 @@ const RAW_WORDS=[
      {word:"tent",meaning:"テント",breakdown:"tent（伸ばす）→ 布をぴんと張り伸ばした仮の住まい"},
      {word:"pretend",meaning:"ふりをする",breakdown:"pre（先に）＋ tend（伸ばす）→ 本心の前に見せかけを張り出す"}]},
 
-  {id:54,word:"take turns",partOfSpeech:"熟語",meaning:"交代でやる（順番に回す）",
+  {id:54,word:"take turns",partOfSpeech:"熟語",meaning:"交代でする",
+   meanings:["熟|交代でする"],
    pronunciation:"/ˌteɪk ˈtɜːrnz/",part:3,
    example:"Take turns reading the dialogue with your partner.",
    exampleJa:"相手と交代で対話文を読みなさい。",
@@ -895,7 +949,8 @@ const RAW_WORDS=[
      {word:"tour",meaning:"周遊旅行",breakdown:"tour（回す）→ ぐるりと一周して出発点へ戻る旅"},
      {word:"tournament",meaning:"勝ち抜き戦",breakdown:"tour（回す）＋ ment（名詞）→ 対戦相手を次々に回していく試合"}]},
 
-  {id:55,word:"in pairs",partOfSpeech:"熟語",meaning:"二人一組で（ペアを組んで）",
+  {id:55,word:"in pairs",partOfSpeech:"熟語",meaning:"二人一組で",
+   meanings:["熟|二人一組で"],
    pronunciation:"/ɪn ˈperz/",part:3,
    example:"Work in pairs and check each other's answers.",
    exampleJa:"二人一組で作業して、お互いの答えを確認しなさい。",
@@ -909,7 +964,8 @@ const RAW_WORDS=[
      {word:"comparison",meaning:"比較",breakdown:"com（共に）＋ par（等しい）→ 並べて等しいか見ること"},
      {word:"peer",meaning:"同年代の仲間",breakdown:"par（等しい）→ 立場も年齢も等しい相手"}]},
 
-  {id:56,word:"paraphrase",partOfSpeech:"他動詞",meaning:"やさしい言葉に言い換える",
+  {id:56,word:"paraphrase",partOfSpeech:"他動詞",meaning:"～を言い換える",
+   meanings:["他|～を言い換える","名|言い換え"],
    pronunciation:"/ˈpærəfreɪz/",part:3,
    example:"Can you paraphrase this sentence in easier English?",
    exampleJa:"この文をもっとやさしい英語に言い換えてくれますか。",
@@ -923,7 +979,8 @@ const RAW_WORDS=[
      {word:"paramedic",meaning:"救急救命士",breakdown:"para（横に）＋ medic（医療）→ 医師の横に付いて手当てする人"},
      {synonym:true,word:"rephrase",meaning:"言い直す",breakdown:"別の語で言い直す。paraphrase はやさしく噛み砕く含み"}]},
 
-  {id:57,word:"dialogue",partOfSpeech:"名詞",meaning:"（教科書の）対話文",
+  {id:57,word:"dialogue",partOfSpeech:"名詞",meaning:"（本，劇，映画の中の）会話",
+   meanings:["名|（本，劇，映画の中の）会話","名|対談，対話"],
    pronunciation:"/ˈdaɪəlɔːɡ/",part:3,
    example:"Let's practice the dialogue on page 32 with a partner.",
    exampleJa:"32ページの対話文を相手と練習しましょう。",
@@ -937,7 +994,8 @@ const RAW_WORDS=[
      {word:"apology",meaning:"謝罪",breakdown:"apo（離れて）＋ log（言葉）→ 責めから離れるための言葉"},
      {word:"monologue",meaning:"独白",breakdown:"mono（一つ）＋ log（言葉）→ 一人だけで話し続ける言葉"}]},
 
-  {id:58,word:"row",partOfSpeech:"名詞",meaning:"（座席などの）横の並び",
+  {id:58,word:"row",partOfSpeech:"名詞",meaning:"列",
+   meanings:["名|列","他|（ボート）をこぐ"],
    pronunciation:"/roʊ/",part:3,
    example:"The students in the front row can see the screen clearly.",
    exampleJa:"前の列の生徒は画面がはっきり見える。",
@@ -952,7 +1010,8 @@ const RAW_WORDS=[
      {synonym:true,word:"seat",meaning:"座席",breakdown:"座る場所。row はその座席が横に並んだひとまとまり"},
      {synonym:true,word:"aisle",meaning:"通路",breakdown:"列と列の間の通り道。row の間を歩くところ"}]},
 
-  {id:59,word:"underline",partOfSpeech:"他動詞",meaning:"下線を引く",
+  {id:59,word:"underline",partOfSpeech:"他動詞",meaning:"～に下線を引く",
+   meanings:["他|～に下線を引く","他|～を強調する"],
    pronunciation:"/ˌʌndərˈlaɪn/",part:3,
    example:"Underline the key words in each question before answering.",
    exampleJa:"答える前に、それぞれの問いの重要語に下線を引きなさい。",
@@ -966,7 +1025,8 @@ const RAW_WORDS=[
      {word:"underground",meaning:"地下の",breakdown:"under（下に）＋ ground（地面）→ 地面の下にある"},
      {word:"underwear",meaning:"下着",breakdown:"under（下に）＋ wear（着る）→ 服の下に着るもの"}]},
 
-  {id:60,word:"pass out",partOfSpeech:"熟語",meaning:"（全員に）配って回す",
+  {id:60,word:"pass out",partOfSpeech:"熟語",meaning:"～を配る",
+   meanings:["熟|～を配る","熟|気を失う"],
    pronunciation:"/ˌpæs ˈaʊt/",part:3,
    example:"Could you pass out these worksheets to everyone?",
    exampleJa:"このワークシートをみんなに配ってくれますか。",
@@ -980,7 +1040,8 @@ const RAW_WORDS=[
      {word:"passenger",meaning:"乗客",breakdown:"pass（通る）＋ enger（人）→ 乗り物で通っていく人"},
      {synonym:true,word:"hand out",meaning:"配る",breakdown:"手で配る。pass out は列に沿って順に回していく感じ"}]},
 
-  {id:61,word:"raise",partOfSpeech:"他動詞",meaning:"（手などを）上へ挙げる",
+  {id:61,word:"raise",partOfSpeech:"他動詞",meaning:"～を上げる",
+   meanings:["他|～を上げる","他|（子ども，作物）を育てる","他|（お金，資金）を集める","他|（問題）を提起する","名|賃上げ，昇給"],
    pronunciation:"/reɪz/",part:3,
    example:"Raise your hand if you know the answer to this.",
    exampleJa:"この答えがわかる人は手を挙げなさい。",
@@ -995,7 +1056,8 @@ const RAW_WORDS=[
      {synonym:true,word:"put up",meaning:"上げる；掲げる",breakdown:"Put your hand up. も手を挙げる言い方"},
      {synonym:true,word:"arise",meaning:"生じる",breakdown:"問題が立ち上がってくる。人が手を挙げる意味はない"}]},
 
-  {id:62,word:"open to page",partOfSpeech:"熟語",meaning:"教科書の〜ページを開く",
+  {id:62,word:"open to page",partOfSpeech:"熟語",meaning:"（教科書の～ページ）を開く",
+   meanings:["熟|（教科書の～ページ）を開く"],
    pronunciation:"/ˈoʊpən tə ˈpeɪdʒ/",part:3,
    example:"Open your textbooks to page twenty-five and look here.",
    exampleJa:"教科書の25ページを開いて、ここを見なさい。",
@@ -1010,7 +1072,8 @@ const RAW_WORDS=[
      {synonym:true,word:"look at",meaning:"〜を見る",breakdown:"Look at page 25. も教室でよく使う指示"},
      {synonym:true,word:"close",meaning:"閉じる",breakdown:"Close your textbooks. と対で覚える反対の指示"}]},
 
-  {id:63,word:"due",partOfSpeech:"形容詞",meaning:"提出期限が来ている",
+  {id:63,word:"due",partOfSpeech:"形容詞",meaning:"（due to （名詞））（名詞）が原因で",
+   meanings:["形|（due to （名詞））（名詞）が原因で","形|締め切りの","形|到着［出産］予定の"],
    pronunciation:"/duː/",part:3,
    example:"This essay is due next Monday, so please start early.",
    exampleJa:"このエッセイは来週の月曜が提出期限なので、早く始めてください。",
@@ -1024,7 +1087,8 @@ const RAW_WORDS=[
      {synonym:true,word:"deadline",meaning:"締め切り",breakdown:"期限の日そのもの。due は期限が来ている状態を表す"},
      {synonym:true,word:"hand in",meaning:"提出する",breakdown:"be due と対で使う。The report is due Friday."}]},
 
-  {id:64,word:"cheating",partOfSpeech:"名詞",meaning:"試験での不正行為",
+  {id:64,word:"cheating",partOfSpeech:"名詞",meaning:"不正行為，カンニング",
+   meanings:["名|不正行為，カンニング"],
    pronunciation:"/ˈtʃiːtɪŋ/",part:4,
    example:"There will be no cheating during tomorrow's English test.",
    exampleJa:"明日の英語のテスト中、不正行為は一切認めません。",
@@ -1039,7 +1103,8 @@ const RAW_WORDS=[
      {synonym:true,word:"cunning",meaning:"ずる賢い",breakdown:"形容詞で悪知恵が働くの意味。不正行為は指さない"},
      {synonym:true,word:"honest",meaning:"正直な",breakdown:"ごまかさない。cheating の反対の態度として対で覚える"}]},
 
-  {id:65,word:"eraser",partOfSpeech:"名詞",meaning:"消しゴム・黒板消し",
+  {id:65,word:"eraser",partOfSpeech:"名詞",meaning:"消しゴム",
+   meanings:["名|消しゴム","名|黒板消し"],
    pronunciation:"/ɪˈreɪsər/",part:4,
    example:"Could you pass me the board eraser from the desk?",
    exampleJa:"机の上の黒板消しを取ってくれますか。",
@@ -1054,7 +1119,8 @@ const RAW_WORDS=[
      {synonym:true,word:"chalk",meaning:"チョーク",breakdown:"黒板に書く道具。消すほうが board eraser"},
      {synonym:true,word:"rubber",meaning:"ゴム；（英）消しゴム",breakdown:"英国では消しゴム。米国では通じないので注意"}]},
 
-  {id:66,word:"grade",partOfSpeech:"名詞",meaning:"学年；段階でつける成績",
+  {id:66,word:"grade",partOfSpeech:"名詞",meaning:"（小，中，高の）学年",
+   meanings:["名|（小，中，高の）学年","名|等級","名|成績"],
    pronunciation:"/ɡreɪd/",part:4,
    example:"Your grade depends on this group project and the test.",
    exampleJa:"あなたの成績はこのグループ課題とテストで決まる。",
@@ -1069,7 +1135,8 @@ const RAW_WORDS=[
      {word:"upgrade",meaning:"格上げする",breakdown:"up（上へ）＋ grad（段階）→ 一段上へ引き上げる"},
      {synonym:true,word:"score",meaning:"点数",breakdown:"点そのもの。grade は A・B などの段階評価や学年"}]},
 
-  {id:67,word:"in chorus",partOfSpeech:"熟語",meaning:"全員で声をそろえて",
+  {id:67,word:"in chorus",partOfSpeech:"熟語",meaning:"声をそろえて",
+   meanings:["熟|声をそろえて"],
    pronunciation:"/ɪn ˈkɔːrəs/",part:4,
    example:"Let's read the whole passage in chorus one more time.",
    exampleJa:"もう一度、一節全体を声をそろえて読みましょう。",
@@ -1083,7 +1150,8 @@ const RAW_WORDS=[
      {synonym:true,word:"all together",meaning:"みんな一緒に",breakdown:"同じ指示に使える口語。in chorus より easy"},
      {synonym:true,word:"aloud",meaning:"声に出して",breakdown:"一人でも使う。in chorus は全員がそろって出す"}]},
 
-  {id:68,word:"syllable",partOfSpeech:"名詞",meaning:"音節（一息で言う音の単位）",
+  {id:68,word:"syllable",partOfSpeech:"名詞",meaning:"音節",
+   meanings:["名|音節"],
    pronunciation:"/ˈsɪləbl/",part:4,
    example:"This word has three syllables, so count them carefully.",
    exampleJa:"この語は3つの音節を持つので、注意して数えなさい。",
@@ -1098,7 +1166,8 @@ const RAW_WORDS=[
      {word:"syllabus",meaning:"授業計画",breakdown:"syn（共に）＋ lab（つかむ）→ 内容をひとまとめにつかんだ一覧"},
      {synonym:true,word:"stress",meaning:"強勢",breakdown:"どの音節を強く言うか。syllable はその単位"}]},
 
-  {id:69,word:"synthesize",partOfSpeech:"他動詞",meaning:"（複数の資料を）統合して一つにまとめる",
+  {id:69,word:"synthesize",partOfSpeech:"他動詞",meaning:"～を統合する",
+   meanings:["他|～を統合する","他|～を合成する"],
    pronunciation:"/ˈsɪnθəsaɪz/",part:5,
    example:"Good essays synthesize ideas from several different sources.",
    exampleJa:"よいエッセイは複数の資料の考えを統合して一つにまとめる。",
@@ -1112,7 +1181,8 @@ const RAW_WORDS=[
      {word:"synthetic",meaning:"合成の",breakdown:"syn（共に）＋ the（置く）→ 別々の材料を合わせて作った"},
      {word:"hypothesis",meaning:"仮説",breakdown:"hypo（下に）＋ the（置く）→ 議論の下に仮に置いておく考え"}]},
 
-  {id:70,word:"substantiate",partOfSpeech:"他動詞",meaning:"証拠を挙げて裏づける",
+  {id:70,word:"substantiate",partOfSpeech:"他動詞",meaning:"～を立証する",
+   meanings:["他|～を立証する"],
    pronunciation:"/səbˈstænʃieɪt/",part:5,
    example:"You must substantiate your claim with data from the survey.",
    exampleJa:"あなたは自分の主張を調査のデータで裏づけなければならない。",
@@ -1126,7 +1196,8 @@ const RAW_WORDS=[
      {word:"substance",meaning:"中身；物質",breakdown:"sub（下で）＋ sta（立つ）→ 下で支えて立っている実体"},
      {word:"constant",meaning:"絶え間ない",breakdown:"con（共に・強く）＋ sta（立つ）→ 同じ場に強く立ち続ける"}]},
 
-  {id:71,word:"tangent",partOfSpeech:"名詞",meaning:"本筋からそれた脱線；接線",
+  {id:71,word:"tangent",partOfSpeech:"名詞",meaning:"脱線",
+   meanings:["名|脱線","名|接線"],
    pronunciation:"/ˈtændʒənt/",part:5,
    example:"The lecture went off on a tangent and never returned to the topic.",
    exampleJa:"講義は脱線して、二度と本題に戻らなかった。",
@@ -1140,7 +1211,8 @@ const RAW_WORDS=[
      {word:"intact",meaning:"手つかずの",breakdown:"in（否定）＋ tact（触れる）→ 誰にも触れられず元のまま"},
      {synonym:true,word:"touch",meaning:"触れる",breakdown:"手で触れる基本語。tangent は一点だけ触れて離れる線"}]},
 
-  {id:72,word:"delineate",partOfSpeech:"他動詞",meaning:"境目を線で引いて輪郭を示す",
+  {id:72,word:"delineate",partOfSpeech:"他動詞",meaning:"～を詳しく説明する",
+   meanings:["他|～を詳しく説明する","他|～の輪郭を描く"],
    pronunciation:"/dɪˈlɪnieɪt/",part:5,
    example:"The map clearly delineates the border between the two countries.",
    exampleJa:"その地図は二国の境目をはっきり線で示している。",
@@ -1154,7 +1226,8 @@ const RAW_WORDS=[
      {word:"outline",meaning:"概要；輪郭",breakdown:"out（外へ）＋ line（線）→ 外側をなぞった線＝全体の形"},
      {word:"linear",meaning:"直線の",breakdown:"line（線）＋ ar（形容詞）→ 一本の線のようにまっすぐな"}]},
 
-  {id:73,word:"nuance",partOfSpeech:"名詞",meaning:"言い方でわずかに変わる意味合い",
+  {id:73,word:"nuance",partOfSpeech:"名詞",meaning:"ニュアンス，微妙な違い",
+   meanings:["名|ニュアンス，微妙な違い"],
    pronunciation:"/ˈnuːɑːns/",part:5,
    example:"This word carries a nuance that \"happy\" does not have.",
    exampleJa:"この語には happy にはない微妙な意味合いがある。",
@@ -1169,7 +1242,8 @@ const RAW_WORDS=[
      {synonym:true,word:"subtle",meaning:"微妙な",breakdown:"見分けにくいほど細かい。nuance はその細かい差そのもの"},
      {synonym:true,word:"tone",meaning:"口調；調子",breakdown:"声の調子。nuance はそこに生まれる意味の差"}]},
 
-  {id:74,word:"pertinent",partOfSpeech:"形容詞",meaning:"今の話題に直接つながりのある",
+  {id:74,word:"pertinent",partOfSpeech:"形容詞",meaning:"（直接）関連のある",
+   meanings:["形|（直接）関連のある","形|適切な"],
    pronunciation:"/ˈpɜːrtnənt/",part:5,
    example:"Please ask only questions that are pertinent to today's topic.",
    exampleJa:"今日の話題に直接つながりのある質問だけをしてください。",
@@ -1183,7 +1257,8 @@ const RAW_WORDS=[
      {word:"continent",meaning:"大陸",breakdown:"con（共に・強く）＋ tin（保つ）→ 切れずにつながり続ける陸地"},
      {synonym:true,word:"relevant",meaning:"関連のある",breakdown:"ほぼ同義のやさしい語。pertinent は硬い場面で使う"}]},
 
-  {id:75,word:"cohesive",partOfSpeech:"形容詞",meaning:"部分どうしがつながってまとまりがある",
+  {id:75,word:"cohesive",partOfSpeech:"形容詞",meaning:"まとまりのある",
+   meanings:["形|まとまりのある"],
    pronunciation:"/koʊˈhiːsɪv/",part:5,
    example:"A cohesive paragraph keeps all its sentences on one idea.",
    exampleJa:"まとまりのある段落は、すべての文を一つの考えに保つ。",
@@ -1197,7 +1272,8 @@ const RAW_WORDS=[
      {word:"cohesion",meaning:"結束；つながり",breakdown:"co（共に）＋ hes（くっつく）＋ ion（名詞）→ 互いにくっついている状態"},
      {synonym:true,word:"connected",meaning:"つながった",breakdown:"線でつながっている。cohesive は全体が一つに固まっている"}]},
 
-  {id:76,word:"concise",partOfSpeech:"形容詞",meaning:"むだを削って短くまとめた",
+  {id:76,word:"concise",partOfSpeech:"形容詞",meaning:"簡潔な",
+   meanings:["形|簡潔な"],
    pronunciation:"/kənˈsaɪs/",part:5,
    example:"Your summary should be concise and no longer than ten lines.",
    exampleJa:"要約は簡潔で、10行を超えないようにすべきだ。",
@@ -1211,7 +1287,8 @@ const RAW_WORDS=[
      {word:"precise",meaning:"正確な",breakdown:"pre（先に）＋ cis（切る）→ ふちを先にきっちり切りそろえた"},
      {word:"decision",meaning:"決定",breakdown:"de（離して）＋ cis（切る）＋ ion（名詞）→ 切り落として決めたこと"}]},
 
-  {id:77,word:"extrapolate",partOfSpeech:"他動詞",meaning:"既知の部分から先を推し量る",
+  {id:77,word:"extrapolate",partOfSpeech:"他動詞",meaning:"～を推定する",
+   meanings:["他|～を推定する"],
    pronunciation:"/ɪkˈstræpəleɪt/",part:5,
    example:"Scientists extrapolate future temperatures from the data they have.",
    exampleJa:"科学者は手元のデータから将来の気温を推し量る。",
@@ -1225,7 +1302,8 @@ const RAW_WORDS=[
      {word:"polite",meaning:"礼儀正しい",breakdown:"pol（磨く）＋ ite（形容詞）→ 角が磨かれてなめらかな態度"},
      {word:"extraordinary",meaning:"並外れた",breakdown:"extra（範囲の外へ）＋ ordinary（ふつうの）→ ふつうの外側にある"}]},
 
-  {id:78,word:"clarification",partOfSpeech:"名詞",meaning:"わかりにくい点をはっきりさせる補足説明",
+  {id:78,word:"clarification",partOfSpeech:"名詞",meaning:"説明，明確化",
+   meanings:["名|説明，明確化"],
    pronunciation:"/ˌklærəfɪˈkeɪʃn/",part:5,
    example:"The teacher offered a clarification of the difficult grammar rule.",
    exampleJa:"先生はその難しい文法規則について補足説明をしてくれた。",
@@ -1239,7 +1317,8 @@ const RAW_WORDS=[
      {word:"declare",meaning:"宣言する",breakdown:"de（すっかり）＋ clar（澄んだ）→ すっかり澄ませて公に告げる"},
      {word:"clarity",meaning:"明快さ",breakdown:"clar（澄んだ）＋ ity（名詞）→ 澄んで見通しがよい状態"}]},
 
-  {id:79,word:"plausibility",partOfSpeech:"名詞",meaning:"説明が筋の通っている度合い",
+  {id:79,word:"plausibility",partOfSpeech:"名詞",meaning:"もっともらしさ",
+   meanings:["名|もっともらしさ"],
    pronunciation:"/ˌplɔːzəˈbɪləti/",part:5,
    example:"The teacher questioned the plausibility of my hypothesis.",
    exampleJa:"先生は私の仮説の妥当性に疑問を投げかけた。",
@@ -1253,7 +1332,8 @@ const RAW_WORDS=[
      {word:"plausible",meaning:"もっともらしい",breakdown:"plaus（拍手する）＋ ible（できる）→ 聞いて拍手できるほど筋が通る"},
      {synonym:true,word:"likely",meaning:"ありそうな",breakdown:"起こる見込みが高い。plausibility は理屈の通り具合"}]},
 
-  {id:80,word:"juxtaposition",partOfSpeech:"名詞",meaning:"二つを隣に並べて違いを際立たせること",
+  {id:80,word:"juxtaposition",partOfSpeech:"名詞",meaning:"並置",
+   meanings:["名|並置"],
    pronunciation:"/ˌdʒʌkstəpəˈzɪʃn/",part:5,
    example:"The juxtaposition of the two photos shows the change clearly.",
    exampleJa:"二枚の写真を並べて置くことで、変化がはっきり見える。",
@@ -1268,7 +1348,8 @@ const RAW_WORDS=[
      {word:"purpose",meaning:"目的",breakdown:"pur（前へ）＋ pos（置く）→ 自分の前に置いて目指すもの"},
      {word:"compose",meaning:"組み立てる；作曲する",breakdown:"com（共に）＋ pos（置く）→ 部品を共に置いて一つに組む"}]},
 
-  {id:81,word:"repertoire",partOfSpeech:"名詞",meaning:"いつでも出せる持ちネタの蓄え",
+  {id:81,word:"repertoire",partOfSpeech:"名詞",meaning:"レパートリー",
+   meanings:["名|レパートリー"],
    pronunciation:"/ˈrepərtwɑːr/",part:5,
    example:"Try to add ten new phrases to your writing repertoire.",
    exampleJa:"書くときの持ちネタに、新しい表現を10個加えてみなさい。",
@@ -1283,7 +1364,8 @@ const RAW_WORDS=[
      {word:"repair",meaning:"修理する",breakdown:"re（再び）＋ par（生み出す）→ 壊れた物を再び使える形に出す"},
      {word:"repertory",meaning:"上演目録",breakdown:"re（再び）＋ par（生み出す）→ 何度も出せるよう並べた目録"}]},
 
-  {id:82,word:"tentative",partOfSpeech:"形容詞",meaning:"本決まりでなく試しに置いた",
+  {id:82,word:"tentative",partOfSpeech:"形容詞",meaning:"仮の，試験的な",
+   meanings:["形|仮の，試験的な"],
    pronunciation:"/ˈtentətɪv/",part:5,
    example:"This is only a tentative schedule, so the dates may change.",
    exampleJa:"これは暫定的な予定にすぎないので、日付は変わるかもしれない。",
@@ -1297,7 +1379,8 @@ const RAW_WORDS=[
      {word:"temptation",meaning:"誘惑",breakdown:"tempt（試す）＋ ation（名詞）→ 心を試しにゆさぶってくるもの"},
      {synonym:true,word:"temporary",meaning:"一時的な",breakdown:"期間が短い。tentative はまだ確定していない状態"}]},
 
-  {id:83,word:"redundant",partOfSpeech:"形容詞",meaning:"同じ内容が重なっていて余分な",
+  {id:83,word:"redundant",partOfSpeech:"形容詞",meaning:"余分な，冗長な",
+   meanings:["形|余分な，冗長な","形|解雇された"],
    pronunciation:"/rɪˈdʌndənt/",part:5,
    example:"The second paragraph is redundant because it repeats the first.",
    exampleJa:"2つ目の段落は1つ目の繰り返しなので余分だ。",
@@ -1311,7 +1394,8 @@ const RAW_WORDS=[
      {synonym:true,word:"extra",meaning:"余分な",breakdown:"必要を超えた分。redundant は同じ中身の重複を指す"},
      {synonym:true,word:"unnecessary",meaning:"不要な",breakdown:"要らない。redundant は要らない理由が重複にある"}]},
 
-  {id:84,word:"discourse",partOfSpeech:"名詞",meaning:"一つの主題をめぐる語りのやりとり",
+  {id:84,word:"discourse",partOfSpeech:"名詞",meaning:"談話",
+   meanings:["名|談話","名|講演"],
    pronunciation:"/ˈdɪskɔːrs/",part:5,
    example:"Academic discourse requires evidence rather than personal feelings.",
    exampleJa:"学術的な議論には、個人の感情ではなく根拠が求められる。",
@@ -1325,7 +1409,8 @@ const RAW_WORDS=[
      {word:"recourse",meaning:"頼ること",breakdown:"re（戻す）＋ cours（走る）→ 困って元の助けへ走り戻る"},
      {synonym:true,word:"conversation",meaning:"会話",breakdown:"日常のやりとり。discourse は主題を持つ硬い議論"}]},
 
-  {id:85,word:"scaffold",partOfSpeech:"他動詞",meaning:"足場をかけて段階的に支える",
+  {id:85,word:"scaffold",partOfSpeech:"他動詞",meaning:"（学習）を段階的に支援する",
+   meanings:["他|（学習）を段階的に支援する","名|足場"],
    pronunciation:"/ˈskæfoʊld/",part:5,
    example:"Good teachers scaffold difficult tasks into small, clear steps.",
    exampleJa:"よい教師は難しい課題を小さく明確な段階に分けて支える。",
@@ -1340,7 +1425,8 @@ const RAW_WORDS=[
      {synonym:true,word:"step",meaning:"段階",breakdown:"step by step で使う。足場を一段ずつ上げるイメージ"},
      {synonym:true,word:"support",meaning:"支える",breakdown:"支える一般語。scaffold は外す前提の一時的な支え"}]},
 
-  {id:86,word:"prerequisite",partOfSpeech:"名詞",meaning:"先に満たしておくべき条件",
+  {id:86,word:"prerequisite",partOfSpeech:"名詞",meaning:"前提条件",
+   meanings:["名|前提条件"],
    pronunciation:"/ˌpriːˈrekwəzɪt/",part:5,
    example:"Basic grammar is a prerequisite for writing good essays.",
    exampleJa:"基礎文法はよいエッセイを書くための前提条件だ。",
@@ -1354,7 +1440,8 @@ const RAW_WORDS=[
      {word:"quest",meaning:"探求",breakdown:"quest（求める）→ 求めて長く探し歩くこと"},
      {word:"conquest",meaning:"征服",breakdown:"con（共に・強く）＋ quest（求める）→ 強く求めて手に入れる"}]},
 
-  {id:87,word:"articulate",partOfSpeech:"他動詞",meaning:"考えを筋道立てて言葉にする",
+  {id:87,word:"articulate",partOfSpeech:"他動詞",meaning:"(考えなど)をはっきり述べる",
+   meanings:["他|(考えなど)をはっきり述べる","形|考えを明確に表現できる"],
    pronunciation:"/ɑːrˈtɪkjuleɪt/",part:5,
    example:"Try to articulate your opinion in two clear sentences.",
    exampleJa:"自分の意見を2文でわかりやすく言葉にしてみなさい。",
@@ -1368,7 +1455,8 @@ const RAW_WORDS=[
      {word:"artificial",meaning:"人工の",breakdown:"art（関節）＋ fic（作る）→ 部品を組み合わせて人の手で作った"},
      {word:"art",meaning:"技；芸術",breakdown:"art（関節）→ 部品をうまく組み合わせて形にする技"}]},
 
-  {id:88,word:"elicit",partOfSpeech:"他動詞",meaning:"相手から答えや反応を引き出す",
+  {id:88,word:"elicit",partOfSpeech:"他動詞",meaning:"～を引き出す",
+   meanings:["他|～を引き出す"],
    pronunciation:"/ɪˈlɪsɪt/",part:5,
    example:"A well-designed question elicits an honest answer from students.",
    exampleJa:"よく練られた質問は生徒から正直な答えを引き出す。",
@@ -3940,14 +4028,23 @@ function ListScreen({C,words,onTogglePass,onOpen,settings}){
               <div style={{flex:1,minWidth:0}}>
                 <div className="en" style={{fontSize:14.5,fontWeight:700,color:C.text,overflow:"hidden",
                   textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{w.word}</div>
-                {(()=>{const h=hidden(w.id+":m");return (
+                {(()=>{const h=hidden(w.id+":m");const bad=!h&&recall[w.id]===false;
+                  const ms=w.meanings||["|"+w.meaning];const nums="①②③④⑤⑥⑦⑧⑨⑩";return (
                 <div role={h?"button":undefined} aria-label={h?"意味を見る":undefined}
                   onClick={h?(e=>{e.stopPropagation();revealMeaning(w);}):undefined}
-                  style={{fontSize:12,color:h?"transparent":C.sub,marginTop:2,overflow:"hidden",
-                  textOverflow:"ellipsis",whiteSpace:"nowrap",background:h?C.line:"transparent",
-                  borderRadius:4,userSelect:h?"none":"auto",cursor:h?"pointer":"inherit"}}>{!h&&recall[w.id]===false
-                    ?<span style={{background:"linear-gradient(transparent 55%, rgba(239,68,68,.45) 55%)",padding:"0 2px"}}>{w.meaning}</span>
-                    :w.meaning}</div>);})()}
+                  style={{fontSize:12,color:h?"transparent":C.sub,marginTop:3,lineHeight:1.6,
+                  background:h?C.line:"transparent",
+                  borderRadius:4,userSelect:h?"none":"auto",cursor:h?"pointer":"inherit"}}>
+                  {ms.map((m,i)=>{const [pos,text]=m.split("|");const showPos=pos&&(i===0||ms[i-1].split("|")[0]!==pos);
+                    return (
+                    <div key={i} style={{display:"flex",gap:4,alignItems:"baseline"}}>
+                      {pos?<span style={{fontSize:10,width:18,textAlign:"center",flexShrink:0,lineHeight:1.4,borderRadius:3,
+                        border:"1px solid "+(showPos&&!h?C.border:"transparent")}}>{showPos?pos:""}</span>:null}
+                      <span style={bad?{background:"rgba(239,68,68,.35)",borderRadius:2,padding:"0 2px",
+                        boxDecorationBreak:"clone",WebkitBoxDecorationBreak:"clone"}:undefined}>
+                        {ms.length>1?nums[i]:""}{text}</span>
+                    </div>);})}
+                </div>);})()}
                 {hideMeaning&&shown.has(w.id+":m")&&recall[w.id]===undefined&&(
                   <div style={{display:"flex",gap:8,marginTop:6}} onClick={e=>e.stopPropagation()}>
                     {[[true,"○","覚えていた",C.ok],[false,"×","覚えていなかった",C.bad]].map(([ok,mark,label,col])=>(
