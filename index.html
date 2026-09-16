@@ -4496,6 +4496,47 @@ function SettingsScreen({C,settings,stats,words,earned,onChange,onReset,onTutori
     {id:"data",title:"データ",note:"書き出し・読み込み・削除"},
   ];
   const cur=groups.find(g=>g.id===section);
+  /* 設定の検索。title は画面に出ている見出し（開いたあとその場所までスクロールする）、words は探すときの言い換え */
+  const [q,setQ]=useState("");
+  const [focusTitle,setFocusTitle]=useState(null);
+  const ITEMS=[
+    {title:"1回の目標語数",sec:"study",words:"語数 目標 何語 量 数"},
+    {title:"出題の向き",sec:"study",words:"英→日 日→英 用例 例文 問題 形式 方向"},
+    {title:"制限時間",sec:"study",words:"タイマー 時間 秒 時間切れ"},
+    {title:"単語を自動で読み上げる",sec:"sound",words:"自動 読み上げ 音声 発音 スピーカー"},
+    {title:"答えを見せたときの読み上げ",sec:"sound",words:"読み上げ 例文 めくる 答え 音声"},
+    {title:"発音",sec:"sound",words:"アメリカ英語 イギリス英語 声 アクセント 音声"},
+    {title:"効果音",sec:"sound",words:"音 サウンド 正解 不正解 ミュート 消音"},
+    {title:"復習リマインド",sec:"remind",words:"通知 リマインダー 時刻 お知らせ アラーム"},
+    {title:"名前",sec:"look",words:"ニックネーム 名前 ユーザー"},
+    {title:"外観",sec:"look",words:"ダーク ライト テーマ 色 黒 白 ダークモード"},
+    {title:"文字サイズ",sec:"look",words:"文字 大きさ フォント 小 中 大 見やすさ"},
+    {title:"データの持ち出し",sec:"data",words:"書き出し 読み込み バックアップ 保存 機種変更 引き継ぎ エクスポート インポート"},
+    {title:"学習データを削除する",sec:"data",words:"削除 リセット 初期化 消す 全部消す"},
+    {title:"効果的な使い方",sec:null,words:"使い方 チュートリアル ヘルプ 説明 はじめて"},
+  ];
+  const kw=q.trim().toLowerCase();
+  const hits=kw?ITEMS.filter(it=>(it.title+" "+it.words+" "+(groups.find(g=>g.id===it.sec)||{}).title).toLowerCase().includes(kw)):[];
+  const openItem=it=>{
+    setQ("");
+    if(!it.sec){onTutorial();return;}
+    setSection(it.sec);setFocusTitle(it.title);
+  };
+  /* 検索から開いたときは、その項目までスクロールして少しのあいだ枠を光らせる */
+  useEffect(()=>{
+    if(!section||!focusTitle) return;
+    const t=setTimeout(()=>{
+      const el=[...document.querySelectorAll("div,button")].reverse().find(x=>x.textContent.trim()===focusTitle);
+      const box=el&&(el.closest("[data-setbox]")||el);
+      if(box){
+        box.scrollIntoView({block:"center",behavior:"smooth"});
+        box.style.transition="box-shadow .3s";box.style.boxShadow="0 0 0 2px "+C.accent;
+        setTimeout(()=>{box.style.boxShadow="none";},1600);
+      }
+      setFocusTitle(null);
+    },80);
+    return ()=>clearTimeout(t);
+  },[section,focusTitle]);
   const rowBtn={...box,width:"100%",textAlign:"left",cursor:"pointer",display:"flex",
     justifyContent:"space-between",alignItems:"center",gap:12,minHeight:64};
 
@@ -4508,7 +4549,7 @@ function SettingsScreen({C,settings,stats,words,earned,onChange,onReset,onTutori
       </button>
       <SectionTitle C={C}>{cur.title}</SectionTitle>
       {section==="study"&&(<>
-      <div style={box}>
+      <div style={box} data-setbox="1">
         <div style={{...label,display:"flex",justifyContent:"space-between",alignItems:"baseline"}}>
           <span>1回の目標語数</span>
           <span className="num" style={{fontSize:17,color:C.accent}}>{settings.dailyGoal}</span>
@@ -4518,7 +4559,7 @@ function SettingsScreen({C,settings,stats,words,earned,onChange,onReset,onTutori
           style={{width:"100%",["--trackbg"]:C.border,["--thumb"]:C.accent}}/>
       </div>
 
-      <div style={box}>
+      <div style={box} data-setbox="1">
         <div style={label}>出題の向き</div>
         <div style={{fontSize:11.5,color:C.sub,lineHeight:1.75,marginBottom:12,marginTop:-6}}>
           同じ語でも向きが変わると定着が上がります。全部オンを推奨します。
@@ -4540,7 +4581,7 @@ function SettingsScreen({C,settings,stats,words,earned,onChange,onReset,onTutori
         })}
       </div>
 
-      <div style={box}>
+      <div style={box} data-setbox="1">
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:settings.timerEnabled?16:0}}>
           <div>
             <div style={{fontSize:13.5,fontWeight:700,color:C.text}}>制限時間</div>
@@ -4558,7 +4599,7 @@ function SettingsScreen({C,settings,stats,words,earned,onChange,onReset,onTutori
 
       </>)}
       {section==="sound"&&(<>
-      <div style={box}>
+      <div style={box} data-setbox="1">
         <div style={{paddingBottom:12}}>
           <RowToggle title="単語を自動で読み上げる" note="電車の中などで意図せず鳴らないよう、初期状態はオフです"
             on={settings.autoSpeak===true} onToggle={v=>onChange({autoSpeak:v})}/>
@@ -4578,7 +4619,7 @@ function SettingsScreen({C,settings,stats,words,earned,onChange,onReset,onTutori
 
       </>)}
       {section==="remind"&&(<>
-      <div style={box}>
+      <div style={box} data-setbox="1">
         <div style={{marginBottom:settings.reminderEnabled?16:0}}>
           <RowToggle title="復習リマインド" note="決めた時刻にブラウザ通知を出します（アプリを開いている必要があります）"
             on={settings.reminderEnabled===true} onToggle={v=>onChange({reminderEnabled:v})}/>
@@ -4595,14 +4636,14 @@ function SettingsScreen({C,settings,stats,words,earned,onChange,onReset,onTutori
 
       </>)}
       {section==="look"&&(<>
-      <div style={box}>
+      <div style={box} data-setbox="1">
         <div style={label}>名前</div>
         <input value={settings.name} aria-label="名前" onChange={e=>onChange({name:e.target.value})}
           style={{width:"100%",height:48,borderRadius:4,border:"1px solid "+C.border,background:C.raise,
             color:C.text,fontSize:15,padding:"0 14px"}}/>
       </div>
 
-      <div style={box}>
+      <div style={box} data-setbox="1">
         <div style={label}>外観</div>
         <Seg C={C} options={[["auto","端末に合わせる"],["light","ライト"],["dark","ダーク"]]}
           value={settings.theme||"auto"} onPick={v=>onChange({theme:v})}/>
@@ -4615,7 +4656,7 @@ function SettingsScreen({C,settings,stats,words,earned,onChange,onReset,onTutori
       </>)}
       {section==="data"&&(<>
       {/* バックアップ */}
-      <div style={box}>
+      <div style={box} data-setbox="1">
         <div style={label}>データの持ち出し</div>
         <div style={{fontSize:11.5,color:C.sub,lineHeight:1.8,marginBottom:14,marginTop:-6}}>
           学習データはこの端末のブラウザにだけ保存されます。機種変更やブラウザのデータ削除で消えるので、
@@ -4654,6 +4695,25 @@ function SettingsScreen({C,settings,stats,words,earned,onChange,onReset,onTutori
     <div style={{flex:1,padding:"22px 20px 100px"}} className="riseIn">
       <SectionTitle C={C}>設定</SectionTitle>
 
+      <div style={{position:"relative",marginBottom:14}}>
+        <span style={{position:"absolute",left:12,top:"50%",transform:"translateY(-50%)",color:C.faint}}><Icon.search size={18}/></span>
+        <input value={q} onChange={e=>setQ(e.target.value)} placeholder="設定を検索" aria-label="設定を検索" type="text"
+          style={{width:"100%",height:46,borderRadius:4,border:"1px solid "+C.border,background:C.card,
+            color:C.text,fontSize:16,padding:"0 40px 0 38px"}}/>
+        {q&&<button onClick={()=>setQ("")} aria-label="検索を消す"
+          style={{position:"absolute",right:6,top:"50%",transform:"translateY(-50%)",width:34,height:34,
+            borderRadius:4,border:"none",background:"transparent",color:C.faint,cursor:"pointer"}}><Icon.close size={18}/></button>}
+      </div>
+
+      {kw?(hits.length?hits.map(it=>(
+        <button key={it.title} onClick={()=>openItem(it)} style={rowBtn}>
+          <div style={{minWidth:0}}>
+            <div style={{fontSize:15,fontWeight:700,color:C.text}}>{it.title}</div>
+            <div style={{fontSize:12,color:C.sub,marginTop:3}}>{it.sec?"設定 › "+groups.find(g=>g.id===it.sec).title:"設定"}</div>
+          </div>
+          <span style={{color:C.faint,display:"inline-flex",transform:"rotate(-90deg)",flexShrink:0}}><Icon.chevron size={20}/></span>
+        </button>
+      )):<Empty C={C} title="見つかりません" note="別の言葉で探してみてください"/>):(<>
       <button onClick={onTutorial}
         style={{...box,width:"100%",textAlign:"left",cursor:"pointer",display:"flex",
           justifyContent:"space-between",alignItems:"center",gap:12,minHeight:64}}>
@@ -4673,6 +4733,7 @@ function SettingsScreen({C,settings,stats,words,earned,onChange,onReset,onTutori
           <span style={{color:C.faint,display:"inline-flex",transform:"rotate(-90deg)",flexShrink:0}}><Icon.chevron size={20}/></span>
         </button>
       ))}
+      </>)}
     </div>
   );
 }
