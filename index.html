@@ -3945,7 +3945,9 @@ function ListScreen({C,words,onTogglePass,onOpen,settings}){
                   onClick={h?(e=>{e.stopPropagation();revealMeaning(w);}):undefined}
                   style={{fontSize:12,color:h?"transparent":C.sub,marginTop:2,overflow:"hidden",
                   textOverflow:"ellipsis",whiteSpace:"nowrap",background:h?C.line:"transparent",
-                  borderRadius:4,userSelect:h?"none":"auto",cursor:h?"pointer":"inherit"}}>{w.meaning}</div>);})()}
+                  borderRadius:4,userSelect:h?"none":"auto",cursor:h?"pointer":"inherit"}}>{!h&&recall[w.id]===false
+                    ?<span style={{background:"linear-gradient(transparent 55%, rgba(239,68,68,.45) 55%)",padding:"0 2px"}}>{w.meaning}</span>
+                    :w.meaning}</div>);})()}
                 {hideMeaning&&shown.has(w.id+":m")&&recall[w.id]===undefined&&(
                   <div style={{display:"flex",gap:8,marginTop:6}} onClick={e=>e.stopPropagation()}>
                     {[[true,"○","覚えていた",C.ok],[false,"×","覚えていなかった",C.bad]].map(([ok,mark,label,col])=>(
