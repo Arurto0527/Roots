@@ -2,7 +2,7 @@
    ・音声ファイル：一度聞いたらスマホに保存 → 次からは一瞬で再生、オフラインでもOK
    ・アプリ本体：ネットにつながるときは最新版を取りに行き、つながらないときは保存版を使う
    アプリを更新して音声を作り直したときは、下の VERSION の数字を1つ上げる */
-const VERSION = "v2";
+const VERSION = "v3";
 const AUDIO_CACHE = "roots-audio-" + VERSION;
 const APP_CACHE = "roots-app-" + VERSION;
 
