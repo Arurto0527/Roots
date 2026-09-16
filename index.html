@@ -3846,7 +3846,12 @@ function ListScreen({C,words,onTogglePass,onOpen,settings}){
     setShown(p=>{const n=new Set(p);n.add(w.id+":m");parseRoots(w).forEach((_,i)=>n.add(w.id+":g"+i));return n;});
     speakReveal(w,settings);
   };
-  const hidden=key=>hideMeaning&&!shown.has(key);
+  /* 意味を見たあとの○×の記録。{id:true(○)/false(×)}。○の単語は次から隠さない */
+  const [recall,setRecallState]=useState(()=>lsGet("roots.listRecall")||{});
+  const setRecall=(id,ok)=>setRecallState(p=>{const n={...p,[id]:ok};lsSet("roots.listRecall",n);return n;});
+  const resetRecall=()=>{setRecallState({});lsDel("roots.listRecall");setShown(new Set());};
+  const hasKnown=Object.values(recall).some(v=>v);
+  const hidden=key=>hideMeaning&&!shown.has(key)&&!recall[key.split(":")[0]];
   const now=Date.now();
 
   const rows=useMemo(()=>{
@@ -3916,6 +3921,7 @@ function ListScreen({C,words,onTogglePass,onOpen,settings}){
           <Chip C={C} active={hideMeaning} onClick={()=>setHideMeaning(!hideMeaning)} small>
             {hideMeaning?"意味を隠し中":"意味を隠す"}
           </Chip>
+          {hideMeaning&&hasKnown&&<Chip C={C} onClick={resetRecall} small>全部隠す</Chip>}
         </div>
       </div>
 
@@ -3940,6 +3946,14 @@ function ListScreen({C,words,onTogglePass,onOpen,settings}){
                   style={{fontSize:12,color:h?"transparent":C.sub,marginTop:2,overflow:"hidden",
                   textOverflow:"ellipsis",whiteSpace:"nowrap",background:h?C.line:"transparent",
                   borderRadius:4,userSelect:h?"none":"auto",cursor:h?"pointer":"inherit"}}>{w.meaning}</div>);})()}
+                {hideMeaning&&shown.has(w.id+":m")&&recall[w.id]===undefined&&(
+                  <div style={{display:"flex",gap:8,marginTop:6}} onClick={e=>e.stopPropagation()}>
+                    {[[true,"○","覚えていた",C.ok],[false,"×","覚えていなかった",C.bad]].map(([ok,mark,label,col])=>(
+                      <button key={mark} aria-label={label} onClick={()=>setRecall(w.id,ok)}
+                        style={{minWidth:56,minHeight:40,borderRadius:4,cursor:"pointer",fontSize:18,fontWeight:700,
+                          border:"1px solid "+col,background:"transparent",color:col}}>{mark}</button>
+                    ))}
+                  </div>)}
                 <div style={{marginTop:5}}><RootChips C={C} word={w} size="sm"
                   isGlossHidden={i=>hidden(w.id+":g"+i)} onRevealGloss={i=>reveal(w.id+":g"+i)}/></div>
               </div>
