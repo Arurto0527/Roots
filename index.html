@@ -2927,8 +2927,8 @@ function WordDetail({C,word:w,onTapRoot,speakOn=true,head=true,relatedLimit=3}){
   const parts=parseRoots(w);
   const focus=useMemo(()=>new Set(parts.map(r=>canonRoot(r.morph))),[w.id]);
   const related=(w.relatedWords||[]).filter(r=>!r.synonym).slice(0,relatedLimit);
-  /* 語根コラムへ飛ぶボタンに出す語根（コラムがある語根だけ。同じ語根は1つにまとめる） */
-  const rootParts=parts.filter((p,i)=>morphType(p.morph,i,parts.length)==="root"&&rootNote(p.morph))
+  /* コラムへ飛ぶボタンに出すパーツ（接頭語・語根・接尾語すべて。同じものは1つにまとめる） */
+  const rootParts=parts.map((p,i)=>({...p,type:morphType(p.morph,i,parts.length)}))
     .filter((p,i,a)=>a.findIndex(x=>canonRoot(x.morph)===canonRoot(p.morph))===i);
   const rootMorphs=parts.filter((p,i)=>morphType(p.morph,i,parts.length)==="root").map(p=>p.morph.toLowerCase());
   const sep={marginTop:12,paddingTop:12,borderTop:"1px solid "+C.line};
@@ -2962,11 +2962,11 @@ function WordDetail({C,word:w,onTapRoot,speakOn=true,head=true,relatedLimit=3}){
       {onTapRoot&&rootParts.length>0&&(
         <div style={{display:"flex",gap:8,flexWrap:"wrap",marginTop:10}}>
           {rootParts.map(p=>(
-            <button key={p.morph} onClick={e=>{e.stopPropagation();onTapRoot(p);}} aria-label={p.morph+" の語根コラムを開く"}
+            <button key={p.morph} onClick={e=>{e.stopPropagation();onTapRoot(p);}} aria-label={p.morph+" のコラムを開く"}
               style={{display:"flex",alignItems:"center",gap:6,minHeight:44,padding:"0 12px",borderRadius:4,cursor:"pointer",
                 border:"1px solid "+C.border,background:C.card,color:C.text,fontSize:13}}>
-              <Icon.book size={14}/><span>語根コラム</span>
-              <span className="en" style={{fontWeight:700,color:C.root}}>{p.morph}</span>
+              <Icon.book size={14}/><span>{{prefix:"接頭語",suffix:"接尾語"}[p.type]||"語根"}</span>
+              <span className="en" style={{fontWeight:700,color:typeColor(p.type,C)}}>{p.morph}</span>
             </button>
           ))}
         </div>
@@ -3232,6 +3232,7 @@ function WordSheet({C,word,onClose,onTogglePass,onTapRoot,speakOn=true}){
 function RootSheet({C,entry,onClose,onOpenWord,speakOn=true}){
   if(!entry)return null;
   const col=entry.type?{fg:typeColor(entry.type,C),bg:"transparent"}:rootColor(entry.morph,C);
+  const kind={prefix:"接頭語",suffix:"接尾語"}[entry.type]||"語根";
   return (
     <Overlay C={C} onClose={onClose} z={120}>
       <div className="slideUp" style={{background:C.card,borderRadius:4,width:"100vw",maxWidth:430,
@@ -3244,7 +3245,7 @@ function RootSheet({C,entry,onClose,onOpenWord,speakOn=true}){
           </span>
           <div>
             <div style={{fontSize:15,fontWeight:700,color:C.text}}>{entry.gloss||"—"}</div>
-            <div className="num" style={{fontSize:11.5,color:C.faint,marginTop:2}}>この語根を持つ語 {entry.count}</div>
+            <div className="num" style={{fontSize:11.5,color:C.faint,marginTop:2}}>この{kind}を持つ語 {entry.count}</div>
           </div>
         </div>
         {rootNote(entry.morph)&&(
@@ -3252,7 +3253,7 @@ function RootSheet({C,entry,onClose,onOpenWord,speakOn=true}){
             padding:"13px 15px",border:"1px solid "+(C.isDark?"#3A2E1C":"#F0DFC6")}}>
             <div style={{display:"flex",alignItems:"center",gap:7,marginBottom:8}}>
               <span style={{color:C.warn,display:"inline-flex"}}><Icon.book size={15}/></span>
-              <span style={{fontSize:12,fontWeight:700,color:C.warn}}>語根コラム</span>
+              <span style={{fontSize:12,fontWeight:700,color:C.warn}}>{kind}コラム</span>
             </div>
             <div style={{fontSize:13.5,fontWeight:700,color:C.text,marginBottom:6}}>{rootNote(entry.morph).title}</div>
             <div style={{fontSize:12.5,color:C.text,lineHeight:1.95}}>{rootNote(entry.morph).body}</div>
@@ -5003,12 +5004,12 @@ function App(){
   const nav=id=>{setPrevScreen(screen);setScreen(id);};
   const openRootFromChip=r=>{
     const key=canonRoot(r.morph);
-    const idx=buildRootIndex(words);
+    const idx=buildRootIndex(words,{withAffixes:true});
     const e=idx.find(x=>canonRoot(x.morph)===key);
     /* 索引に無い語根（1語しか持たない語根）でも、コラムがあれば開けるようにする */
     if(e)setRootEntry(e);
     else setRootEntry({morph:key,gloss:r.gloss||"",words:words.filter(w=>
-      parseRoots(w).some(x=>canonRoot(x.morph)===key)),related:[],count:0});
+      parseRoots(w).some(x=>canonRoot(x.morph)===key)),related:[],count:1});
   };
 
   if(screen==="loading")return <div style={shell}/>;
