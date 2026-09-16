@@ -176,6 +176,7 @@ const RAW_WORDS=[
      {word:"supervise",meaning:"監督する",breakdown:"super（上から）＋ vis（見る）→ 高いところから全体を見張る"}]},
 
   {id:4,word:"tip",partOfSpeech:"名詞",meaning:"助言，ヒント",
+   memory:"「ペン先」も「チップ（心づけ）」も、全部“ちょっとだけの先っぽ”。先輩がくれる“ちょっとしたコツ”も tip。useful tips（役立つコツ）で丸ごと覚える。",
    meanings:["名|助言，ヒント","名|チップ","名|（足や山などの）先，先端"],
    pronunciation:"/tɪp/",part:1,
    example:"He gave me a useful tip for the exam.",
@@ -207,6 +208,7 @@ const RAW_WORDS=[
      {synonym:true,word:"argue",meaning:"（理由を挙げて）主張する",breakdown:"自分の側が正しいとはっきりさせようとする"}]},
 
   {id:6,word:"blame",partOfSpeech:"他動詞",meaning:"～に責任があるとする",
+   memory:"blame A for B ＝「B のことで A を責める」。「失敗をぶれーむ（無理やり）人のせいにする」と音で覚える。be to blame ＝「悪いのは〜だ」。",
    meanings:["他|～に責任があるとする"],
    pronunciation:"/bleɪm/",part:1,
    example:"Don't blame others for your own mistakes.",
@@ -643,6 +645,7 @@ const RAW_WORDS=[
      {synonym:true,word:"grow",meaning:"成長する",breakdown:"自然に大きくなる。develop は中身が開いて次の段階へ進む"}]},
 
   {id:35,word:"skill",partOfSpeech:"名詞",meaning:"技術，力",
+   memory:"「スキルアップ」＝練習して上げられる腕前。生まれつきの力は ability、努力で伸ばす技術が skill と分けて覚える。",
    meanings:["名|技術，力"],
    pronunciation:"/skɪl/",part:2,
    example:"This job requires a high level of communication skill.",
@@ -674,6 +677,7 @@ const RAW_WORDS=[
      {word:"available",meaning:"利用できる；手が空いた",breakdown:"vail（力がある）＋ able（できる）→ 手が届いて使える"}]},
 
   {id:37,word:"talent",partOfSpeech:"名詞",meaning:"才能",
+   memory:"テレビの「タレント」は“才能がある人”。英語の talent は“才能そのもの”。人に使うなら talented（才能のある）。",
    meanings:["名|才能"],
    pronunciation:"/ˈtælənt/",part:2,
    example:"He has a real talent for drawing faces.",
@@ -995,6 +999,7 @@ const RAW_WORDS=[
      {word:"monologue",meaning:"独白",breakdown:"mono（一つ）＋ log（言葉）→ 一人だけで話し続ける言葉"}]},
 
   {id:58,word:"row",partOfSpeech:"名詞",meaning:"列",
+   memory:"「教室の横一列」をイメージ。in a row ＝「一列に並んで」→「連続で」。three days in a row ＝ 3日連続。",
    meanings:["名|列","他|（ボート）をこぐ"],
    pronunciation:"/roʊ/",part:3,
    example:"The students in the front row can see the screen clearly.",
@@ -1041,6 +1046,7 @@ const RAW_WORDS=[
      {synonym:true,word:"hand out",meaning:"配る",breakdown:"手で配る。pass out は列に沿って順に回していく感じ"}]},
 
   {id:61,word:"raise",partOfSpeech:"他動詞",meaning:"～を上げる",
+   memory:"raise your hand ＝「手を挙げて」。a がある raise は“何かを上げる”、a のない rise は“自分が上がる”（The sun rises.）。",
    meanings:["他|～を上げる","他|（子ども，作物）を育てる","他|（お金，資金）を集める","他|（問題）を提起する","名|賃上げ，昇給"],
    pronunciation:"/reɪz/",part:3,
    example:"Raise your hand if you know the answer to this.",
@@ -1227,6 +1233,7 @@ const RAW_WORDS=[
      {word:"linear",meaning:"直線の",breakdown:"line（線）＋ ar（形容詞）→ 一本の線のようにまっすぐな"}]},
 
   {id:73,word:"nuance",partOfSpeech:"名詞",meaning:"ニュアンス，微妙な違い",
+   memory:"日本語でも「ニュアンスが違う」と言う。雲（nu）がかかると空の色が“ほんの少し”変わる＝わずかな違い。",
    meanings:["名|ニュアンス，微妙な違い"],
    pronunciation:"/ˈnuːɑːns/",part:5,
    example:"This word carries a nuance that \"happy\" does not have.",
@@ -1410,6 +1417,7 @@ const RAW_WORDS=[
      {synonym:true,word:"conversation",meaning:"会話",breakdown:"日常のやりとり。discourse は主題を持つ硬い議論"}]},
 
   {id:85,word:"scaffold",partOfSpeech:"他動詞",meaning:"（学習）を段階的に支援する",
+   memory:"工事の「足場」を思い浮かべる。先生が足場を組むように少しずつ手助けし、できるようになったら外す＝scaffold。",
    meanings:["他|（学習）を段階的に支援する","名|足場"],
    pronunciation:"/ˈskæfoʊld/",part:5,
    example:"Good teachers scaffold difficult tasks into small, clear steps.",
@@ -2919,6 +2927,9 @@ function WordDetail({C,word:w,onTapRoot,speakOn=true,head=true,relatedLimit=3}){
   const parts=parseRoots(w);
   const focus=useMemo(()=>new Set(parts.map(r=>canonRoot(r.morph))),[w.id]);
   const related=(w.relatedWords||[]).filter(r=>!r.synonym).slice(0,relatedLimit);
+  /* 語根コラムへ飛ぶボタンに出す語根（コラムがある語根だけ。同じ語根は1つにまとめる） */
+  const rootParts=parts.filter((p,i)=>morphType(p.morph,i,parts.length)==="root"&&rootNote(p.morph))
+    .filter((p,i,a)=>a.findIndex(x=>canonRoot(x.morph)===canonRoot(p.morph))===i);
   const rootMorphs=parts.filter((p,i)=>morphType(p.morph,i,parts.length)==="root").map(p=>p.morph.toLowerCase());
   const sep={marginTop:12,paddingTop:12,borderTop:"1px solid "+C.line};
   const label={fontSize:12,color:C.sub};
@@ -2948,6 +2959,19 @@ function WordDetail({C,word:w,onTapRoot,speakOn=true,head=true,relatedLimit=3}){
 
       {parts.length>0&&<MorphTree C={C} word={w.word} parts={parts} partSize={16}/>}
 
+      {onTapRoot&&rootParts.length>0&&(
+        <div style={{display:"flex",gap:8,flexWrap:"wrap",marginTop:10}}>
+          {rootParts.map(p=>(
+            <button key={p.morph} onClick={e=>{e.stopPropagation();onTapRoot(p);}} aria-label={p.morph+" の語根コラムを開く"}
+              style={{display:"flex",alignItems:"center",gap:6,minHeight:44,padding:"0 12px",borderRadius:4,cursor:"pointer",
+                border:"1px solid "+C.border,background:C.card,color:C.text,fontSize:13}}>
+              <Icon.book size={14}/><span>語根コラム</span>
+              <span className="en" style={{fontWeight:700,color:C.root}}>{p.morph}</span>
+            </button>
+          ))}
+        </div>
+      )}
+
       <div style={{...sep,display:"flex",flexDirection:"column",gap:5}}>
         <div style={label}>語源の説明</div>
         <div style={{fontSize:14,fontWeight:700,color:C.text,lineHeight:1.5}}>{imageryOf(w)}</div>
@@ -2960,6 +2984,14 @@ function WordDetail({C,word:w,onTapRoot,speakOn=true,head=true,relatedLimit=3}){
       <div style={{marginTop:12,borderTop:"1px solid "+C.line}}>
         <Examples C={C} word={w} size={13.5} speakOn={speakOn}/>
       </div>
+
+      {related.length===0&&w.memory&&(
+        <div style={{marginTop:6,paddingTop:10,borderTop:"1px solid "+C.line}}>
+          <div style={{...label,marginBottom:6}}>覚え方</div>
+          <div style={{fontSize:14,color:C.text,lineHeight:1.65,background:C.sunken,
+            borderRadius:4,padding:"10px 12px"}}>{w.memory}</div>
+        </div>
+      )}
 
       {related.length>0&&(
         <div style={{marginTop:6,paddingTop:10,borderTop:"1px solid "+C.line}}>
