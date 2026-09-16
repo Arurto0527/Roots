@@ -4429,7 +4429,7 @@ const TUTORIAL=[
 ];
 /* 漫画で見る使い方。画像は manga/ フォルダに置く（ファイル名はページ番号）。
    第2話・第3話は pages に番号を足すと表示される */
-const MANGA_CHARA="manga/chara.png";
+const MANGA_CHARA="manga/chara.jpg";
 const MANGA=[
   {no:1,title:"なぜRootsは生まれたのか",pages:["1-1","1-2","1-3","1-4","1-5","1-6","1-7","1-8"]},
   {no:2,title:"Rootsの使い方",pages:[]},
@@ -4474,7 +4474,7 @@ function TutorialScreen({C,onBack}){
 
       {cur.pages.length>0 ? (
         <div>{cur.pages.map(pg=>(
-          <MangaPage key={pg} C={C} src={"manga/"+pg+".png"} alt={"第"+cur.no+"話 "+pg}/>
+          <MangaPage key={pg} C={C} src={"manga/"+pg+".jpg"} alt={"第"+cur.no+"話 "+pg}/>
         ))}</div>
       ) : (
         <div style={{margin:"0 20px",padding:"48px 16px",textAlign:"center",border:"1px dashed "+C.border,
