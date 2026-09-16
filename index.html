@@ -2692,7 +2692,9 @@ function buildPool(words,cfg,settings,now){
     const due=inR.filter(w=>isDue(w,now)).sort((a,b)=>priority(b,now)-priority(a,now));
     const fresh=inR.filter(isNew);
     const rest=inR.filter(w=>!isDue(w,now)&&!isNew(w)).sort((a,b)=>priority(b,now)-priority(a,now));
-    return [...due,...fresh,...rest].slice(0,goal);
+    const picked=[...due,...fresh,...rest].slice(0,goal);
+    /* 出す順：番号順か、バラバラか */
+    return cfg.order==="seq"?[...picked].sort((a,b)=>a.id-b.id):shuffle(picked);
   }
   /* おまかせ：期限が来た語を優先し、余った枠を新出で埋める */
   const due=active.filter(w=>isDue(w,now)).sort((a,b)=>priority(b,now)-priority(a,now));
@@ -3610,8 +3612,15 @@ function HomeScreen({C,settings,stats,words,cfg,setCfg,pool,onStart,onNav,resume
               </div>
             )}
             {cfg.mode==="range"&&(
+              <>
               <RangeBlock C={C} words={words} start={cfg.rangeStart} end={cfg.rangeEnd} chip={cfg.chip}
                 onSet={v=>setCfg(v)}/>
+              <div style={{marginTop:16}}>
+                <div style={{fontSize:12.5,color:C.sub,marginBottom:8}}>出す順番</div>
+                <Seg C={C} options={[["shuffle","バラバラ"],["seq","番号順"]]}
+                  value={cfg.order} onPick={v=>setCfg({order:v})}/>
+              </div>
+              </>
             )}
             {cfg.mode==="weak"&&(
               <div style={{fontSize:14,color:C.sub,lineHeight:1.7}}>
@@ -4476,27 +4485,29 @@ function SettingsScreen({C,settings,stats,words,earned,onChange,onReset,onTutori
     </div>
   );
 
-  return (
+  /* 設定は項目ごとに分け、一度に1つのグループだけを開く */
+  const [section,setSection]=useState(null);
+  const onFormats=FORMAT_KEYS.filter(x=>(settings.formats||{})[x]!==false).length;
+  const groups=[
+    {id:"study",title:"学習",note:"1回"+settings.dailyGoal+"語・出題の向き"+onFormats+"種類・制限時間"+(settings.timerEnabled?settings.timerSeconds+"秒":"なし")},
+    {id:"sound",title:"音",note:"自動読み上げ"+(settings.autoSpeak?"オン":"オフ")+"・効果音"+(settings.soundEnabled!==false?"オン":"オフ")},
+    {id:"remind",title:"通知",note:"復習リマインド"+(settings.reminderEnabled?(settings.reminderTime||"21:00"):"オフ")},
+    {id:"look",title:"表示",note:"名前・外観・文字サイズ"},
+    {id:"data",title:"データ",note:"書き出し・読み込み・削除"},
+  ];
+  const cur=groups.find(g=>g.id===section);
+  const rowBtn={...box,width:"100%",textAlign:"left",cursor:"pointer",display:"flex",
+    justifyContent:"space-between",alignItems:"center",gap:12,minHeight:64};
+
+  if(cur) return (
     <div style={{flex:1,padding:"22px 20px 100px"}} className="riseIn">
-      <SectionTitle C={C}>設定</SectionTitle>
-
-      <button onClick={onTutorial}
-        style={{...box,width:"100%",textAlign:"left",cursor:"pointer",display:"flex",
-          justifyContent:"space-between",alignItems:"center",gap:12,minHeight:64}}>
-        <div>
-          <div style={{fontSize:13.5,fontWeight:700,color:C.text}}>効果的な使い方</div>
-          <div style={{fontSize:12,color:C.sub,marginTop:3}}>はじめての人はここから</div>
-        </div>
-        <span style={{color:C.faint,display:"inline-flex",transform:"rotate(-90deg)",flexShrink:0}}><Icon.chevron size={20}/></span>
+      <button onClick={()=>setSection(null)} aria-label="設定の一覧に戻る"
+        style={{display:"flex",alignItems:"center",gap:4,minHeight:44,padding:"0 4px 0 0",marginBottom:6,
+          background:"transparent",border:"none",color:C.sub,fontSize:14,cursor:"pointer"}}>
+        <span style={{display:"inline-flex",transform:"rotate(90deg)"}}><Icon.chevron size={18}/></span>設定
       </button>
-
-      <div style={box}>
-        <div style={label}>名前</div>
-        <input value={settings.name} aria-label="名前" onChange={e=>onChange({name:e.target.value})}
-          style={{width:"100%",height:48,borderRadius:4,border:"1px solid "+C.border,background:C.raise,
-            color:C.text,fontSize:15,padding:"0 14px"}}/>
-      </div>
-
+      <SectionTitle C={C}>{cur.title}</SectionTitle>
+      {section==="study"&&(<>
       <div style={box}>
         <div style={{...label,display:"flex",justifyContent:"space-between",alignItems:"baseline"}}>
           <span>1回の目標語数</span>
@@ -4545,8 +4556,9 @@ function SettingsScreen({C,settings,stats,words,earned,onChange,onReset,onTutori
         )}
       </div>
 
+      </>)}
+      {section==="sound"&&(<>
       <div style={box}>
-        <div style={label}>音</div>
         <div style={{paddingBottom:12}}>
           <RowToggle title="単語を自動で読み上げる" note="電車の中などで意図せず鳴らないよう、初期状態はオフです"
             on={settings.autoSpeak===true} onToggle={v=>onChange({autoSpeak:v})}/>
@@ -4564,6 +4576,8 @@ function SettingsScreen({C,settings,stats,words,earned,onChange,onReset,onTutori
         </div>
       </div>
 
+      </>)}
+      {section==="remind"&&(<>
       <div style={box}>
         <div style={{marginBottom:settings.reminderEnabled?16:0}}>
           <RowToggle title="復習リマインド" note="決めた時刻にブラウザ通知を出します（アプリを開いている必要があります）"
@@ -4579,6 +4593,15 @@ function SettingsScreen({C,settings,stats,words,earned,onChange,onReset,onTutori
         )}
       </div>
 
+      </>)}
+      {section==="look"&&(<>
+      <div style={box}>
+        <div style={label}>名前</div>
+        <input value={settings.name} aria-label="名前" onChange={e=>onChange({name:e.target.value})}
+          style={{width:"100%",height:48,borderRadius:4,border:"1px solid "+C.border,background:C.raise,
+            color:C.text,fontSize:15,padding:"0 14px"}}/>
+      </div>
+
       <div style={box}>
         <div style={label}>外観</div>
         <Seg C={C} options={[["auto","端末に合わせる"],["light","ライト"],["dark","ダーク"]]}
@@ -4589,6 +4612,8 @@ function SettingsScreen({C,settings,stats,words,earned,onChange,onReset,onTutori
           value={settings.fontSize} onPick={v=>onChange({fontSize:v})}/>
       </div>
 
+      </>)}
+      {section==="data"&&(<>
       {/* バックアップ */}
       <div style={box}>
         <div style={label}>データの持ち出し</div>
@@ -4621,6 +4646,33 @@ function SettingsScreen({C,settings,stats,words,earned,onChange,onReset,onTutori
       <Btn C={C} variant="danger" style={{marginTop:12}} onClick={onReset}>
         <Icon.trash size={18}/>学習データを削除する
       </Btn>
+      </>)}
+    </div>
+  );
+
+  return (
+    <div style={{flex:1,padding:"22px 20px 100px"}} className="riseIn">
+      <SectionTitle C={C}>設定</SectionTitle>
+
+      <button onClick={onTutorial}
+        style={{...box,width:"100%",textAlign:"left",cursor:"pointer",display:"flex",
+          justifyContent:"space-between",alignItems:"center",gap:12,minHeight:64}}>
+        <div>
+          <div style={{fontSize:13.5,fontWeight:700,color:C.text}}>効果的な使い方</div>
+          <div style={{fontSize:12,color:C.sub,marginTop:3}}>はじめての人はここから</div>
+        </div>
+        <span style={{color:C.faint,display:"inline-flex",transform:"rotate(-90deg)",flexShrink:0}}><Icon.chevron size={20}/></span>
+      </button>
+
+      {groups.map(g=>(
+        <button key={g.id} onClick={()=>{setSection(g.id);window.scrollTo(0,0);}} style={rowBtn}>
+          <div style={{minWidth:0}}>
+            <div style={{fontSize:15,fontWeight:700,color:C.text}}>{g.title}</div>
+            <div style={{fontSize:12,color:C.sub,marginTop:3}}>{g.note}</div>
+          </div>
+          <span style={{color:C.faint,display:"inline-flex",transform:"rotate(-90deg)",flexShrink:0}}><Icon.chevron size={20}/></span>
+        </button>
+      ))}
     </div>
   );
 }
@@ -4643,8 +4695,12 @@ function App(){
   const [canUndo,setCanUndo]=useState(false);
   const [prevScreen,setPrevScreen]=useState("settings");
 
-  const [cfg,setCfgState]=useState({mode:"auto",rangeStart:MIN_ID,rangeEnd:Math.min(MAX_ID,MIN_ID+9),chip:null,count:null});
-  const setCfg=u=>setCfgState(p=>({...p,...u}));
+  const [cfg,setCfgState]=useState(()=>({mode:"auto",rangeStart:MIN_ID,rangeEnd:Math.min(MAX_ID,MIN_ID+9),chip:null,count:null,
+    order:(()=>{try{return localStorage.getItem("roots.rangeOrder")==="seq"?"seq":"shuffle";}catch(e){return "shuffle";}})()}));
+  const setCfg=u=>{
+    if(u.order){try{localStorage.setItem("roots.rangeOrder",u.order);}catch(e){}}
+    setCfgState(p=>({...p,...u}));
+  };
 
   /* --- セッション --- */
   const [queue,setQueue]=useState([]);
