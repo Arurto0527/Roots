@@ -2249,7 +2249,7 @@ const FORMAT_KEYS=["w_en_ja","w_ja_en","s_en_ja","s_ja_en"];
 const DEFAULT_SETTINGS={
   name:"", dailyGoal:10, fontSize:"md", theme:"auto",
   timerEnabled:false, timerSeconds:20,
-  soundEnabled:true, autoSpeak:false, revealSpeak:"word",
+  soundEnabled:true, autoSpeak:true, revealSpeak:"word",
   formats:{w_en_ja:true,w_ja_en:true,s_en_ja:true,s_ja_en:true},
   reminderEnabled:false, reminderTime:"21:00",
   version:3
@@ -4581,7 +4581,7 @@ function SettingsScreen({C,settings,stats,words,earned,onChange,onReset,onTutori
       {section==="sound"&&(<>
       <div style={box} data-setbox="1">
         <div style={{paddingBottom:12}}>
-          <RowToggle title="単語を自動で読み上げる" note="電車の中などで意図せず鳴らないよう、初期状態はオフです"
+          <RowToggle title="単語を自動で読み上げる" note="初期状態はオンです。音を出せない場所ではオフにできます"
             on={settings.autoSpeak===true} onToggle={v=>onChange({autoSpeak:v})}/>
         </div>
         <div style={{padding:"12px 0",borderTop:"1px solid "+C.line}}>
