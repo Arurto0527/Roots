@@ -3102,7 +3102,10 @@ function HighlightParts({C,text,parts}){
 }
 
 /* 語の全情報を1画面ぶんにまとめたもの。学習の答え合わせ面と単語詳細で共用する */
-function WordDetail({C,word:w,onTapRoot,speakOn=true,head=true,relatedLimit=3}){
+function WordDetail({C,word:w,onTapRoot,speakOn=true,head=true,relatedLimit=3,only,big=false,xl=false}){
+  const fs=(n,b,x)=>xl?x:big?b:n;
+  /* only: 表示する部分だけを並べた配列（省略時は全部）。head/meaning/tree/imagery/rootBtns/etymBody/examples/memo */
+  const show=k=>!only||only.includes(k);
   const parts=parseRoots(w);
   const focus=useMemo(()=>new Set(parts.map(r=>canonRoot(r.morph))),[w.id]);
   const related=(w.relatedWords||[]).filter(r=>!r.synonym).slice(0,relatedLimit);
@@ -3124,7 +3127,7 @@ function WordDetail({C,word:w,onTapRoot,speakOn=true,head=true,relatedLimit=3}){
   };
   return (
     <div>
-      {head&&(
+      {head&&show("head")&&(
         <div style={{display:"flex",alignItems:"baseline",gap:8,flexWrap:"wrap"}}>
           <span className="num" style={{fontSize:12,color:C.sub}}>No. {w.id}</span>
           <Speak C={C} text={w.word} enabled={speakOn} style={{borderBottom:"none"}}>
@@ -3135,11 +3138,11 @@ function WordDetail({C,word:w,onTapRoot,speakOn=true,head=true,relatedLimit=3}){
           <span style={{fontSize:13,color:C.faint}}>{w.partOfSpeech}</span>
         </div>
       )}
-      <div style={{fontSize:17,fontWeight:700,color:C.text,margin:"8px 0 10px",lineHeight:1.4}}>{w.meaning}</div>
+      {show("meaning")&&<div style={{fontSize:fs(17,22,26),fontWeight:700,color:C.text,margin:"8px 0 10px",lineHeight:1.4}}>{w.meaning}</div>}
 
-      {parts.length>0&&<MorphTree C={C} word={w.word} parts={parts} partSize={16}/>}
+      {show("tree")&&parts.length>0&&<MorphTree C={C} word={w.word} parts={parts} partSize={xl?19:16}/>}
 
-      {onTapRoot&&rootParts.length>0&&(
+      {show("rootBtns")&&onTapRoot&&rootParts.length>0&&(
         <div style={{display:"flex",gap:8,flexWrap:"wrap",marginTop:10}}>
           {rootParts.map(p=>(
             <button key={p.morph} onClick={e=>{e.stopPropagation();onTapRoot(p);}} aria-label={p.morph+" のコラムを開く"}
@@ -3152,20 +3155,21 @@ function WordDetail({C,word:w,onTapRoot,speakOn=true,head=true,relatedLimit=3}){
         </div>
       )}
 
+      {(show("imagery")||show("etymBody"))&&(
       <div style={{...sep,display:"flex",flexDirection:"column",gap:5}}>
-        <div style={label}>語源の説明</div>
-        <div style={{fontSize:14,fontWeight:700,color:C.text,lineHeight:1.5}}>{imageryOf(w)}</div>
-        <div style={{fontSize:13,color:C.text,lineHeight:1.55}}>
+        {show("etymBody")&&<div style={label}>語源の説明</div>}
+        {show("imagery")&&<div style={{fontSize:fs(14,16,19),fontWeight:700,color:C.text,lineHeight:1.5}}>{imageryOf(w)}</div>}
+        {show("etymBody")&&<div style={{fontSize:fs(13,16,18),color:C.text,lineHeight:1.6}}>
           <HighlightParts C={C} text={String(w.etymologyConclusion||"").split("→")[0].trim()} parts={parts}/>
-        </div>
-        {w.hook&&<div style={{fontSize:13,color:C.text,lineHeight:1.55}}>{w.hook}</div>}
-      </div>
+        </div>}
+        {show("etymBody")&&w.hook&&<div style={{fontSize:fs(13,16,18),color:C.text,lineHeight:1.6}}>{w.hook}</div>}
+      </div>)}
 
-      <div style={{marginTop:12,borderTop:"1px solid "+C.line}}>
-        <Examples C={C} word={w} size={13.5} speakOn={speakOn}/>
-      </div>
+      {show("examples")&&<div style={{marginTop:12,borderTop:"1px solid "+C.line}}>
+        <Examples C={C} word={w} size={fs(13.5,15,17)} speakOn={speakOn}/>
+      </div>}
 
-      {related.length===0&&w.memory&&(
+      {show("memo")&&related.length===0&&w.memory&&(
         <div style={{marginTop:6,paddingTop:10,borderTop:"1px solid "+C.line}}>
           <div style={{...label,marginBottom:6}}>覚え方</div>
           <div style={{fontSize:14,color:C.text,lineHeight:1.65,background:C.sunken,
@@ -3173,7 +3177,7 @@ function WordDetail({C,word:w,onTapRoot,speakOn=true,head=true,relatedLimit=3}){
         </div>
       )}
 
-      {related.length>0&&(
+      {show("memo")&&related.length>0&&(
         <div style={{marginTop:6,paddingTop:10,borderTop:"1px solid "+C.line}}>
           <div style={{...label,marginBottom:4}}>同じ語根の語</div>
           {related.map((r,i)=>(
@@ -3896,8 +3900,19 @@ function AskFace({C,item,timeLeft}){
 }
 
 /* 答え合わせ面。全部を1画面に収める（収まらないときだけ自動で縮む） */
+/* 解答画面：「答え → 語源 → 例文」を横スワイプでめくる。1枚に詰め込まず、文字を大きく読めるようにする */
+const CORE=["head","meaning","tree","imagery"];
 function RevealFace({C,item,onTapRoot,timedOut}){
   const w=item.word;
+  const [page,setPage]=useState(0);
+  const pager=useRef(null);
+  useEffect(()=>{setPage(0);if(pager.current)pager.current.scrollLeft=0;},[w.id]);
+  const pages=[
+    {name:"答え",only:CORE},
+    {name:"語源",only:["etymBody","rootBtns","memo"]},
+    {name:"例文",only:["examples"]},
+  ];
+  const goPage=i=>{const el=pager.current;if(el)el.scrollTo({left:el.clientWidth*i,behavior:"smooth"});};
   return (
     <div style={{flex:1,minHeight:0,display:"flex",flexDirection:"column"}}>
       {timedOut&&(
@@ -3905,10 +3920,23 @@ function RevealFace({C,item,onTapRoot,timedOut}){
           fontSize:13,fontWeight:700,marginBottom:8,flexShrink:0,textAlign:"center"}}>時間切れ</div>
       )}
       <div style={{flex:1,minHeight:0,background:C.bg,border:"1px solid "+C.line,borderRadius:4,
-        padding:14,display:"flex",flexDirection:"column"}}>
-        <FitBox dep={w.id} minScale={0.86} maxScale={1}>
-          <WordDetail C={C} word={w} onTapRoot={onTapRoot}/>
-        </FitBox>
+        display:"flex",flexDirection:"column",overflow:"hidden"}}>
+        <div ref={pager} onScroll={e=>{const el=e.currentTarget;setPage(Math.round(el.scrollLeft/el.clientWidth));}}
+          style={{flex:1,minHeight:0,display:"flex",overflowX:"auto",scrollSnapType:"x mandatory",scrollbarWidth:"none"}}>
+          {pages.map((p,i)=>(
+            <div key={i} style={{flex:"0 0 100%",scrollSnapAlign:"start",overflowY:"auto",padding:16,boxSizing:"border-box"}}>
+              {i>0&&<div style={{fontSize:15,color:C.sub,marginBottom:4}}>{p.name}</div>}
+              <WordDetail C={C} word={w} onTapRoot={onTapRoot} only={p.only} head={i===0} big xl/>
+            </div>
+          ))}
+        </div>
+        <div style={{display:"flex",justifyContent:"center",gap:6,padding:"6px 0 8px",flexShrink:0}}>
+          {pages.map((p,i)=>(
+            <button key={i} onClick={()=>goPage(i)} style={{minHeight:32,padding:"0 10px",borderRadius:16,cursor:"pointer",
+              fontSize:13,border:"1px solid "+(page===i?C.text:C.line),background:page===i?C.text:"transparent",
+              color:page===i?C.bg:C.sub}}>{p.name}</button>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -3916,17 +3944,6 @@ function RevealFace({C,item,onTapRoot,timedOut}){
 
 function StudyScreen({C,item,ui,settings,progress,handlers}){
   const w=item.word;
-  /* 答え合わせ面は左右スワイプでも採点できる（右＝覚えた／左＝もう一度） */
-  const touch=useRef(null);
-  const onStart=e=>{const t=e.touches?e.touches[0]:null;if(t)touch.current={x:t.clientX,y:t.clientY};};
-  const onEnd=e=>{
-    if(!touch.current)return;
-    const t=e.changedTouches?e.changedTouches[0]:null;
-    const st=touch.current;touch.current=null;
-    if(!t)return;
-    const dx=t.clientX-st.x, dy=Math.abs(t.clientY-st.y);
-    if(Math.abs(dx)>Math.max(70,window.innerWidth*0.22)&&Math.abs(dx)>dy*1.6) handlers.onGrade(dx>0?2:0);
-  };
   const {phase,hint,timeLeft}=ui;
   const pct=progress.total?progress.done/progress.total*100:0;
   const fmt=FORMAT_META[item.format];
@@ -3990,7 +4007,7 @@ function StudyScreen({C,item,ui,settings,progress,handlers}){
           )}
         </div>
       ):(
-        <div key={w.id+"-b"} className="riseIn" onTouchStart={onStart} onTouchEnd={onEnd}
+        <div key={w.id+"-b"} className="riseIn"
           style={{flex:1,display:"flex",flexDirection:"column",minHeight:0}}>
           <RevealFace C={C} item={item} onTapRoot={handlers.onTapRoot} timedOut={ui.timedOut}/>
           <div style={{display:"flex",gap:10,marginTop:10,flexShrink:0}}>
