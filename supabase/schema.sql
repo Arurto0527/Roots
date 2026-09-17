@@ -48,6 +48,8 @@ create table if not exists public.study_logs (
   correct     boolean,                    -- 4択の正解・不正解
   answered_at timestamptz not null
 );
+alter table public.study_logs add column if not exists first_try boolean;  -- その回で最初の出題か
+alter table public.study_logs add column if not exists hint_used boolean;  -- 語源ヒントを見たか
 create index if not exists study_logs_user_time on public.study_logs (user_id, answered_at);
 
 -- ============================================================

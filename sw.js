@@ -2,7 +2,7 @@
    ・音声ファイル：一度聞いたらスマホに保存 → 次からは一瞬で再生、オフラインでもOK
    ・アプリ本体：ネットにつながるときは最新版を取りに行き、つながらないときは保存版を使う
    アプリを更新して音声を作り直したときは、下の VERSION の数字を1つ上げる */
-const VERSION = "v4";
+const VERSION = "v5";
 const AUDIO_CACHE = "roots-audio-" + VERSION;
 const APP_CACHE = "roots-app-" + VERSION;
 
@@ -19,6 +19,9 @@ self.addEventListener("fetch", (e) => {
   const req = e.request;
   if (req.method !== "GET") return;
   const url = new URL(req.url);
+
+  // ログインや学習データの通信（Supabase）は保存しない
+  if (url.hostname.endsWith("supabase.co")) return;
 
   // 音声：保存してあればそれを使う。なければ取りに行って保存
   if (url.pathname.includes("/audio/")) {

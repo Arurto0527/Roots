@@ -91,6 +91,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.26.4/babel.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js"></script>
 <script>
   if(!window.React || !window.ReactDOM || !window.Babel){
     window.__ROOTS_BOOT_ERROR__("React / Babel の読み込みに失敗しました。インターネットに接続した状態で開いてください。");
@@ -2272,6 +2273,127 @@ const lsGet=k=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):null;
 const lsSet=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));return true;}catch(e){return false;}};
 const lsDel=k=>{try{localStorage.removeItem(k);}catch(e){}};
 
+/* ============================================================
+   CLOUD（Supabase）：ログイン・同期・学習ログ
+   ・学習データはまず localStorage に保存し、つながるときにクラウドへ送る
+   ・roots.localAt … この端末で最後に保存した時刻。クラウドと比べて新しい方を使う
+   ・roots.owner   … この端末のデータが誰のものか（別の人がログインしたら消す）
+   ・roots.outbox.v1 … まだ送れていない学習ログ
+   ============================================================ */
+const SUPABASE_URL="https://jidcvzmfjmlxwlazaixz.supabase.co";
+const SUPABASE_KEY="sb_publishable_Vjo96oWVhIjWKFGIN6OMKA_keM8C011";
+const sb=window.supabase?window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,
+  {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false,storageKey:"roots.auth"}}):null;
+const SYNC_KEYS={words:KEY.words,stats:KEY.stats,badges:KEY.badges,settings:KEY.settings};
+const uuid=()=>(crypto.randomUUID?crypto.randomUUID():
+  "10000000-1000-4000-8000-100000000000".replace(/[018]/g,c=>(c^crypto.getRandomValues(new Uint8Array(1))[0]&15>>c/4).toString(16)));
+const withTimeout=(p,ms)=>Promise.race([p,new Promise((_,rej)=>setTimeout(()=>rej(new Error("timeout")),ms))]);
+
+const Cloud={
+  user:null,profile:null,pushTimer:null,visibleSince:null,active:0,sessionId:null,sessionStart:null,
+
+  /* ログイン直後：クラウドのデータがこの端末より新しければ、localStorage に書き込む */
+  async pull(user){
+    Cloud.user=user;
+    const owner=lsGet("roots.owner");
+    if(owner&&owner!==user.id){
+      Object.values(KEY).forEach(lsDel);Object.values(LEGACY).forEach(lsDel);
+      lsDel("roots.localAt");lsDel("roots.outbox.v1");lsDel("roots.listRecall");
+    }
+    lsSet("roots.owner",user.id);
+    try{
+      const [{data:prof},{data:row,error}]=await withTimeout(Promise.all([
+        sb.from("profiles").select("student_code,role").eq("user_id",user.id).maybeSingle(),
+        sb.from("progress").select("*").eq("user_id",user.id).maybeSingle(),
+      ]),8000);
+      Cloud.profile=prof||null;
+      if(error)return;
+      const localAt=lsGet("roots.localAt")||0;
+      const remoteAt=row?Date.parse(row.updated_at):0;
+      if(row&&remoteAt>localAt){
+        Object.entries(SYNC_KEYS).forEach(([col,k])=>{if(row[col]!=null)lsSet(k,row[col]);else lsDel(k);});
+        lsSet("roots.localAt",remoteAt);
+      }else if(localAt>remoteAt||(!row&&lsGet(KEY.settings))){
+        Cloud.push();
+      }
+    }catch(e){/* オフライン：この端末のデータで続ける */}
+  },
+
+  /* 保存したら少し待ってからクラウドへ送る */
+  markDirty(){
+    lsSet("roots.localAt",Date.now());
+    clearTimeout(Cloud.pushTimer);
+    Cloud.pushTimer=setTimeout(Cloud.push,2000);
+  },
+  async push(){
+    clearTimeout(Cloud.pushTimer);Cloud.pushTimer=null;
+    if(!sb||!Cloud.user)return;
+    const at=lsGet("roots.localAt")||Date.now();
+    const row={user_id:Cloud.user.id,updated_at:new Date(at).toISOString()};
+    Object.entries(SYNC_KEYS).forEach(([col,k])=>{row[col]=lsGet(k);});
+    try{await sb.from("progress").upsert(row);}catch(e){}
+  },
+
+  /* 1回答ごとの記録（取り消しできるよう、送るのは少しあと） */
+  log(entry){
+    const box=lsGet("roots.outbox.v1")||[];
+    box.push({id:uuid(),word_id:String(entry.id),mode:entry.format,grade:entry.grade,
+      correct:entry.grade>=2,first_try:!!entry.firstTry,hint_used:!!entry.hint,
+      answered_at:new Date(entry.at).toISOString()});
+    lsSet("roots.outbox.v1",box);
+  },
+  unlog(){
+    const box=lsGet("roots.outbox.v1")||[];
+    box.pop();lsSet("roots.outbox.v1",box);
+  },
+
+  /* 使った時間：画面が表示されている間だけ数える */
+  startVisible(){
+    const now=Date.now();
+    if(!Cloud.sessionId||now-(Cloud.lastSeen||0)>30*60000){
+      Cloud.sessionId=uuid();Cloud.sessionStart=now;Cloud.active=0;
+    }
+    Cloud.visibleSince=now;
+  },
+  stopVisible(){
+    if(Cloud.visibleSince){Cloud.active+=Date.now()-Cloud.visibleSince;Cloud.visibleSince=null;}
+    Cloud.lastSeen=Date.now();
+  },
+
+  async flush(){
+    if(!sb||!Cloud.user||!navigator.onLine)return;
+    const box=lsGet("roots.outbox.v1")||[];
+    if(box.length){
+      try{
+        const {error}=await sb.from("study_logs").upsert(box,{onConflict:"id",ignoreDuplicates:true});
+        if(!error){
+          const sent=new Set(box.map(x=>x.id));
+          lsSet("roots.outbox.v1",(lsGet("roots.outbox.v1")||[]).filter(x=>!sent.has(x.id)));
+        }
+      }catch(e){}
+    }
+    if(Cloud.sessionId){
+      const now=Date.now();
+      const act=Cloud.active+(Cloud.visibleSince?now-Cloud.visibleSince:0);
+      try{
+        await sb.from("study_sessions").upsert({id:Cloud.sessionId,
+          started_at:new Date(Cloud.sessionStart).toISOString(),
+          ended_at:new Date(Cloud.visibleSince?now:(Cloud.lastSeen||now)).toISOString(),
+          active_seconds:Math.round(act/1000)});
+      }catch(e){}
+    }
+    if(Cloud.pushTimer)Cloud.push();
+  },
+
+  async signOut(){
+    Cloud.stopVisible();
+    await Cloud.flush();
+    try{await sb.auth.signOut();}catch(e){}
+    Cloud.user=null;Cloud.profile=null;Cloud.sessionId=null;
+    location.reload();
+  },
+};
+
 const clamp=(v,mn,mx)=>Math.max(mn,Math.min(mx,v));
 const pick=arr=>arr[Math.floor(Math.random()*arr.length)];
 function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
@@ -3409,7 +3531,7 @@ function AuthScreen({C,onStart}){
       <div style={{width:"100%",maxWidth:340}}>
         <Btn C={C} onClick={onStart}>はじめる</Btn>
         <p style={{fontSize:11.5,color:C.faint,textAlign:"center",marginTop:16,lineHeight:1.8}}>
-          学習データはこの端末の中だけに保存されます。<br/>設定からいつでも書き出し・読み込みができます。
+          学習データはアカウントに保存されます。<br/>ほかの端末でログインしても、続きから学習できます。
         </p>
       </div>
     </div>
@@ -4726,6 +4848,14 @@ function SettingsScreen({C,settings,stats,words,earned,onChange,onReset,onTutori
         </div>
       </div>
 
+      <div style={{...box,paddingTop:14,paddingBottom:14,marginTop:12}}>
+        <div style={{fontSize:13,color:C.sub,lineHeight:1.9}}>
+          ログイン中：<b style={{color:C.text}}>{(Cloud.profile&&Cloud.profile.student_code)||"—"}</b>
+          <br/><span style={{fontSize:12,color:C.faint,wordBreak:"break-all"}}>{Cloud.user&&Cloud.user.email}</span>
+        </div>
+        <Btn C={C} variant="ghost" style={{marginTop:10}} onClick={()=>Cloud.signOut()}>ログアウト</Btn>
+      </div>
+
       <Btn C={C} variant="danger" style={{marginTop:12}} onClick={onReset}>
         <Icon.trash size={18}/>学習データを削除する
       </Btn>
@@ -4884,6 +5014,7 @@ function App(){
       lastStudiedDate,lastGradedDay,manualPass,manualPassDate})=>
       ({id,ef,interval,reps,lapses,due,correctCount,incorrectCount,lastStudiedDate,lastGradedDay,manualPass,manualPassDate})));
     lsSet(KEY.settings,s);lsSet(KEY.stats,st);lsSet(KEY.badges,b);
+    Cloud.markDirty();
     if(!ok)setNotice({bad:true,text:"保存に失敗しました。ブラウザの空き容量を確認してください。"});
   },[]);
 
@@ -4989,6 +5120,7 @@ function App(){
     haptic(grade>=2?10:[8,36,8]);
     const nw=words.map(w=>w.id===item.word.id?applyGrade(w,grade,now):w);
     const entry={id:item.word.id,format:item.format,firstTry:queue[0].firstTry,grade,at:now};
+    Cloud.log({...entry,hint:uiSafe.hint});
     const nl=[...log,entry];
     const rest=queue.slice(1);
     const nq=grade===0?reinsert(rest,queue[0]):rest;
@@ -4996,12 +5128,13 @@ function App(){
     saveSession(nq,nl,now);
     setCanUndo(true);
     if(!nq.length)finish(nw,nl,now);
-  },[item,words,queue,log,stats,settings.soundEnabled]);
+  },[item,words,queue,log,stats,settings.soundEnabled,uiSafe.hint]);
 
   const doUndo=useCallback(()=>{
     const s=undoRef.current;
     if(!s)return;
     setWords(s.words);setQueue(s.queue);setLog(s.log);setStats(s.stats);
+    Cloud.unlog();
     undoRef.current=null;setCanUndo(false);setSnack(null);
     if(screen==="result")setScreen("study");
   },[screen]);
@@ -5114,6 +5247,7 @@ function App(){
       actions:[
         {label:"すべて削除する",variant:"danger",onClick:()=>{
           Object.values(KEY).forEach(lsDel);Object.values(LEGACY).forEach(lsDel);
+          Cloud.markDirty();
           setWords(INITIAL_WORDS);setSettings(DEFAULT_SETTINGS);setStats(DEFAULT_STATS);setEarned([]);
           setQueue([]);setLog([]);setResumeInfo(null);setModal(null);setScreen("onboarding");
         }},
@@ -5238,6 +5372,20 @@ function App(){
     return ()=>{window.removeEventListener("beforeunload",h);document.removeEventListener("visibilitychange",h);};
   },[queue,log,saveSession]);
 
+  /* クラウドへ学習ログ・使った時間を送る */
+  useEffect(()=>{
+    if(document.visibilityState==="visible")Cloud.startVisible();
+    const vis=()=>{
+      if(document.visibilityState==="visible")Cloud.startVisible();
+      else{Cloud.stopVisible();Cloud.flush();}
+    };
+    const online=()=>Cloud.flush();
+    document.addEventListener("visibilitychange",vis);
+    window.addEventListener("online",online);
+    const id=setInterval(()=>Cloud.flush(),20000);
+    return ()=>{document.removeEventListener("visibilitychange",vis);window.removeEventListener("online",online);clearInterval(id);};
+  },[]);
+
   /* ---------- レンダリング ---------- */
   const shell={width:"100%",maxWidth:430,margin:"0 auto",minHeight:"100vh",display:"flex",flexDirection:"column",
     paddingTop:"env(safe-area-inset-top)",paddingLeft:"env(safe-area-inset-left)",paddingRight:"env(safe-area-inset-right)",
@@ -5313,8 +5461,120 @@ function App(){
   );
 }
 
+/* ============================================================
+   LOGIN（メールに届く6桁のコードでログイン）
+   ============================================================ */
+function LoginScreen({C,onSignedIn}){
+  const [step,setStep]=useState("email");
+  const [email,setEmail]=useState("");
+  const [code,setCode]=useState("");
+  const [busy,setBusy]=useState(false);
+  const [msg,setMsg]=useState(null);
+  const inputStyle={width:"100%",height:52,borderRadius:4,border:"1px solid "+C.border,background:C.card,
+    color:C.text,fontSize:16,padding:"0 16px"};
+  const addr=email.trim().toLowerCase();
+
+  const sendCode=async()=>{
+    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(addr)){setMsg({bad:true,text:"メールアドレスを正しく入力してください。"});return;}
+    setBusy(true);setMsg(null);
+    const {error}=await sb.auth.signInWithOtp({email:addr,options:{shouldCreateUser:true}});
+    setBusy(false);
+    if(error){
+      const t=String(error.message||"");
+      setMsg({bad:true,text:/database error|saving new user|名簿/i.test(t)
+        ?"このメールアドレスは登録されていません。先生に確認してください。"
+        :/rate|seconds|too many/i.test(t)
+        ?"少し時間をおいてから、もう一度送ってください。"
+        :"コードを送れませんでした。インターネットの接続を確認してください。"});
+      return;
+    }
+    setStep("code");setMsg({text:addr+" にコードを送りました。"});
+  };
+  const verify=async()=>{
+    const token=code.replace(/\D/g,"");
+    if(token.length<6){setMsg({bad:true,text:"メールに書かれた数字をすべて入力してください。"});return;}
+    setBusy(true);setMsg(null);
+    const {data,error}=await sb.auth.verifyOtp({email:addr,token,type:"email"});
+    if(error||!data.session){
+      setBusy(false);
+      setMsg({bad:true,text:"コードがちがうか、期限が切れています。もう一度ためしてください。"});
+      return;
+    }
+    await onSignedIn(data.session.user);
+  };
+
+  return (
+    <div className="riseIn" style={{flex:1,display:"flex",flexDirection:"column",padding:"0 20px 40px",
+      justifyContent:"center",alignItems:"center",minHeight:"100vh"}}>
+      <div style={{color:C.accent,marginBottom:20}}><Icon.root size={44}/></div>
+      <div className="en" style={{fontSize:38,fontWeight:700,color:C.text,letterSpacing:"-0.03em"}}>Roots</div>
+      <div style={{fontSize:14,color:C.sub,marginTop:12,textAlign:"center",lineHeight:1.9}}>
+        {step==="email"?"登録したメールアドレスでログインしてください。":"メールに届いた数字を入力してください。"}
+      </div>
+      <div style={{height:32}}/>
+      <div style={{width:"100%",maxWidth:340}}>
+        {step==="email"?(<>
+          <input type="email" inputMode="email" autoComplete="email" value={email} placeholder="メールアドレス"
+            aria-label="メールアドレス" onChange={e=>setEmail(e.target.value)}
+            onKeyDown={e=>{if(e.key==="Enter"&&!busy)sendCode();}} style={inputStyle}/>
+          <Btn C={C} style={{marginTop:12}} disabled={busy} onClick={sendCode}>{busy?"送信中…":"コードを送る"}</Btn>
+        </>):(<>
+          <input type="text" inputMode="numeric" autoComplete="one-time-code" value={code} placeholder="123456"
+            aria-label="確認コード" maxLength={10} onChange={e=>setCode(e.target.value)}
+            onKeyDown={e=>{if(e.key==="Enter"&&!busy)verify();}}
+            style={{...inputStyle,fontSize:24,letterSpacing:"0.3em",textAlign:"center"}}/>
+          <Btn C={C} style={{marginTop:12}} disabled={busy} onClick={verify}>{busy?"確認中…":"ログイン"}</Btn>
+          <Btn C={C} variant="quiet" style={{marginTop:4}} disabled={busy}
+            onClick={()=>{setStep("email");setCode("");setMsg(null);}}>メールアドレスを入れ直す</Btn>
+        </>)}
+        {msg&&<div style={{fontSize:13,color:msg.bad?C.bad:C.sub,marginTop:14,lineHeight:1.8,textAlign:"center"}}>{msg.text}</div>}
+        <p style={{fontSize:11.5,color:C.faint,textAlign:"center",marginTop:16,lineHeight:1.8}}>
+          メールが届かないときは、迷惑メールのフォルダも見てください。
+        </p>
+      </div>
+    </div>
+  );
+}
+
+/* ログインしているか確かめてから App を出す */
+function Gate(){
+  const [state,setState]=useState("loading");
+  const [uid,setUid]=useState(null);
+  const theme=(lsGet(KEY.settings)||{}).theme;
+  const sysDark=!!(window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches);
+  const C=(theme==="dark"||(theme!=="light"&&sysDark))?DARK:LIGHT;
+
+  const enter=async user=>{
+    await Cloud.pull(user);
+    setUid(user.id);setState("app");
+  };
+  useEffect(()=>{
+    if(!sb){
+      window.__ROOTS_BOOT_ERROR__("ログインの部品を読み込めませんでした。インターネットに接続して開き直してください。");
+      return;
+    }
+    sb.auth.getSession().then(({data})=>{
+      const s=data&&data.session;
+      if(s)enter(s.user); else setState("login");
+    }).catch(()=>setState("login"));
+  },[]);
+  useEffect(()=>{
+    document.body.style.background=C.bg;
+    if(state!=="loading"){const b=document.getElementById("boot");if(b)b.style.display="none";}
+  },[state]);
+
+  if(state==="app")return <App key={uid}/>;
+  if(state==="login")return (
+    <div style={{width:"100%",maxWidth:430,margin:"0 auto",minHeight:"100vh",display:"flex",flexDirection:"column",
+      background:C.bg,color:C.text}}>
+      <LoginScreen C={C} onSignedIn={enter}/>
+    </div>
+  );
+  return <div/>;
+}
+
 const rootEl=document.getElementById("root");
-ReactDOM.createRoot(rootEl).render(<App/>);
+ReactDOM.createRoot(rootEl).render(<Gate/>);
 const bootEl=document.getElementById("boot");
 if(bootEl)bootEl.style.display="none";
 </script>
