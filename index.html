@@ -3717,10 +3717,12 @@ function AskFace({C,item,timeLeft}){
   }[f];
 
   return (
-    <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",
-      padding:"18px 20px",position:"relative",minHeight:0,width:"100%"}}>
-      <div style={{position:"absolute",top:18,left:0,right:0,textAlign:"center",
-        fontSize:14,color:C.sub}}>{prompt}</div>
+    <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",
+      padding:"clamp(10px, 2.2vh, 18px) 20px",position:"relative",minHeight:0,width:"100%"}}>
+      {/* 上の問い・真ん中の問題・下の案内を縦に並べる（画面が低くても重ならない） */}
+      <div style={{textAlign:"center",fontSize:14,color:C.sub,flexShrink:0}}>{prompt}</div>
+      <div style={{flex:1,minHeight:0,width:"100%",display:"flex",flexDirection:"column",overflowY:"auto",padding:"8px 0"}}>
+      <div style={{margin:"auto 0",width:"100%",display:"flex",flexDirection:"column",alignItems:"center"}}>
       {timeLeft!=null&&(
         <span className="num" style={{position:"absolute",top:12,right:16,fontSize:15,fontWeight:700,
           color:timeLeft>5?C.sub:C.bad}}>{timeLeft}</span>
@@ -3762,7 +3764,9 @@ function AskFace({C,item,timeLeft}){
         </div>
       )}
 
-      <div style={{position:"absolute",bottom:18,left:0,right:0,textAlign:"center",fontSize:14,color:C.sub}}>
+      </div>
+      </div>
+      <div style={{textAlign:"center",fontSize:14,color:C.sub,flexShrink:0}}>
         タップで答えを見る
       </div>
     </div>
