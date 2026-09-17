@@ -147,3 +147,13 @@ create policy sessions_insert on public.study_sessions
 drop policy if exists sessions_update on public.study_sessions;
 create policy sessions_update on public.study_sessions
   for update to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
+
+-- ============================================================
+-- ログインした人に表を使ってよい許可を出す（新しいプロジェクトでは自動で付かない）
+-- 何を見られるかは、上の RLS でしぼっている
+-- ============================================================
+grant select                 on public.roster         to authenticated;
+grant select                 on public.profiles       to authenticated;
+grant select, insert, update on public.progress       to authenticated;
+grant select, insert         on public.study_logs     to authenticated;
+grant select, insert, update on public.study_sessions to authenticated;
