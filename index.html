@@ -5147,6 +5147,7 @@ function App(){
   /* ---------- セッション終了 ---------- */
   const finish=useCallback((finalWords,finalLog,now)=>{
     lsDel(KEY.session);
+    setTimeout(()=>Cloud.flush(),2500);
     const today=todayKey();
     const mastered=finalWords.filter(isMastered).length;
     const overcome=finalWords.filter(w=>w.incorrectCount>0&&w.correctCount>=w.incorrectCount).length;
@@ -5380,10 +5381,12 @@ function App(){
       else{Cloud.stopVisible();Cloud.flush();}
     };
     const online=()=>Cloud.flush();
+    const hide=()=>{Cloud.stopVisible();Cloud.flush();};
+    window.addEventListener("pagehide",hide);
     document.addEventListener("visibilitychange",vis);
     window.addEventListener("online",online);
     const id=setInterval(()=>Cloud.flush(),20000);
-    return ()=>{document.removeEventListener("visibilitychange",vis);window.removeEventListener("online",online);clearInterval(id);};
+    return ()=>{document.removeEventListener("visibilitychange",vis);window.removeEventListener("online",online);window.removeEventListener("pagehide",hide);clearInterval(id);};
   },[]);
 
   /* ---------- レンダリング ---------- */
