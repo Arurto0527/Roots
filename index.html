@@ -63,7 +63,9 @@
     position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
     padding:32px;text-align:center;color:#767A85;font-size:14px;line-height:1.8;white-space:pre-wrap;
   }
-  .studyroot{height:100vh;height:100dvh;max-height:100vh;max-height:100dvh;}
+  .studyroot{height:100vh;height:calc(100dvh - env(safe-area-inset-top));max-height:100vh;max-height:calc(100dvh - env(safe-area-inset-top));}
+  /* 画面が低いスマホ（iPhone SE・13 mini、Safari表示中など）では余白を詰める */
+  @media (max-height:620px){ .askgap{margin-top:12px !important;} }
   .scrollx{overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
   .scrollx::-webkit-scrollbar{display:none;}
   .scrolly{overflow-y:auto;-webkit-overflow-scrolling:touch;scrollbar-width:thin;}
@@ -3432,7 +3434,7 @@ function OnboardingScreen({C,onDone}){
   const last=step===STEPS.length-1;
   const finish=()=>onDone({name:name.trim()||"あなた",dailyGoal:goal,reminderEnabled,reminderTime});
   return (
-    <div className="riseIn" style={{flex:1,display:"flex",flexDirection:"column",padding:"48px 20px 32px",minHeight:"100vh"}}>
+    <div className="riseIn" style={{flex:1,display:"flex",flexDirection:"column",padding:"clamp(24px, 6vh, 48px) 20px 32px",minHeight:"100vh"}}>
       <div style={{display:"flex",gap:6,marginBottom:36}}>
         {STEPS.map((_,i)=><div key={i} style={{flex:1,height:3,borderRadius:4,background:i<=step?C.accent:C.border}}/>)}
       </div>
@@ -3559,7 +3561,7 @@ function HomeScreen({C,settings,stats,words,cfg,setCfg,pool,onStart,onNav,resume
           {todayDone&&<span className="num" style={{fontSize:14,color:C.sub}}>今日やった分 {todayDone.count}語</span>}
         </div>
         <div style={{display:"flex",alignItems:"baseline",gap:4,marginTop:6}}>
-          <span className="num" style={{fontSize:72,fontWeight:700,color:C.text,lineHeight:.95,letterSpacing:"-0.04em"}}>{pool.length}</span>
+          <span className="num" style={{fontSize:"clamp(52px, min(18vw, 10vh), 72px)",fontWeight:700,color:C.text,lineHeight:.95,letterSpacing:"-0.04em"}}>{pool.length}</span>
           <span style={{fontSize:18,color:C.text}}>語</span>
         </div>
         <div style={{fontSize:16,color:C.sub,marginTop:10,lineHeight:1.5}}>{summary}</div>
@@ -3726,15 +3728,15 @@ function AskFace({C,item,timeLeft}){
 
       {f==="w_en_ja"&&(
         <div style={{textAlign:"center"}}>
-          <div className="en" style={{fontSize:52,fontWeight:700,color:C.text,lineHeight:1.05,letterSpacing:"-0.02em",wordBreak:"break-word"}}>{w.word}</div>
+          <div className="en" style={{fontSize:"clamp(34px, min(13vw, 7.5vh), 52px)",fontWeight:700,color:C.text,lineHeight:1.05,letterSpacing:"-0.02em",wordBreak:"break-word"}}>{w.word}</div>
           <div className="en" style={{fontSize:16,color:C.sub,marginTop:14}}>{w.pronunciation}</div>
-          <div style={{marginTop:20,display:"flex",justifyContent:"center"}}><SpeakDot C={C} text={w.word} size={56}/></div>
+          <div className="askgap" style={{marginTop:20,display:"flex",justifyContent:"center"}}><SpeakDot C={C} text={w.word} size={56}/></div>
         </div>
       )}
 
       {f==="w_ja_en"&&(
         <div style={{textAlign:"center"}}>
-          <div style={{fontSize:26,fontWeight:700,color:C.text,lineHeight:1.5}}>{w.meaning}</div>
+          <div style={{fontSize:"clamp(21px, 6.4vw, 26px)",fontWeight:700,color:C.text,lineHeight:1.5}}>{w.meaning}</div>
           <div style={{fontSize:12.5,color:C.faint,marginTop:12}}>
             {w.partOfSpeech}・{w.word.length}文字・{w.word[0]}…
           </div>
@@ -3743,7 +3745,7 @@ function AskFace({C,item,timeLeft}){
 
       {f==="s_en_ja"&&(
         <div style={{textAlign:"left",width:"100%"}}>
-          <SentenceEn C={C} text={w.example} word={w.word} size={22}/>
+          <SentenceEn C={C} text={w.example} word={w.word} size={innerWidth<375?20:22}/>
           <div style={{marginTop:18,display:"flex",justifyContent:"center"}}><SpeakDot C={C} text={w.example} size={56}/></div>
         </div>
       )}
@@ -3778,7 +3780,7 @@ function RevealFace({C,item,onTapRoot,timedOut}){
       )}
       <div style={{flex:1,minHeight:0,background:C.bg,border:"1px solid "+C.line,borderRadius:4,
         padding:14,display:"flex",flexDirection:"column"}}>
-        <FitBox dep={w.id} minScale={0.68} maxScale={1}>
+        <FitBox dep={w.id} minScale={0.86} maxScale={1}>
           <WordDetail C={C} word={w} onTapRoot={onTapRoot}/>
         </FitBox>
       </div>
@@ -3921,10 +3923,10 @@ function ResultScreen({C,log,newBadges,stats,earned,message,words,onReplay,onHom
     </div>
   );
   return (
-    <div className="riseIn" style={{flex:1,padding:"26px 20px 24px",display:"flex",flexDirection:"column",minHeight:"100vh"}}>
+    <div className="riseIn" style={{flex:1,padding:"clamp(16px, 3.5vh, 26px) 20px 24px",display:"flex",flexDirection:"column",minHeight:"100vh"}}>
       <div style={{textAlign:"center",marginBottom:6}}>
         <div style={{fontSize:12,color:C.faint,fontWeight:700,marginBottom:8}}>一発正解率</div>
-        <div className="num popIn" style={{fontSize:64,fontWeight:700,color:C.text,lineHeight:1}}>
+        <div className="num popIn" style={{fontSize:"clamp(48px, 16vw, 64px)",fontWeight:700,color:C.text,lineHeight:1}}>
           {pct}<span style={{fontSize:24}}>%</span></div>
       </div>
 
@@ -5234,6 +5236,7 @@ function App(){
 
   /* ---------- レンダリング ---------- */
   const shell={width:"100%",maxWidth:430,margin:"0 auto",minHeight:"100vh",display:"flex",flexDirection:"column",
+    paddingTop:"env(safe-area-inset-top)",paddingLeft:"env(safe-area-inset-left)",paddingRight:"env(safe-area-inset-right)",
     background:C.bg,color:C.text,fontSize:FONT_SIZES[settings.fontSize]+"px",position:"relative"};
   const withNav=["home","list","roots","stats","settings"].includes(screen);
   const nav=id=>{setPrevScreen(screen);setScreen(id);};
