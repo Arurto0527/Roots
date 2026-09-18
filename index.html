@@ -4587,7 +4587,9 @@ function RootSheet({C,entry,onClose,onOpenWord,speakOn=true}){
 }
 
 function BottomNav({C,screen,onNav}){
-  const items=[["home","ホーム"],["list","単語帳"],["roots","語根"],["stats","記録"],["settings","設定"]];
+  /* 管理者は「記録」のかわりに「管理」を出す */
+  const isAdmin=Cloud.profile&&Cloud.profile.role==="admin";
+  const items=[["home","ホーム"],["list","単語帳"],["roots","語根"],isAdmin?["admin","管理"]:["stats","記録"],["settings","設定"]];
   return (
     <nav style={{position:"fixed",bottom:0,left:"50%",transform:"translateX(-50%)",width:"100%",maxWidth:430,
       background:C.bg,borderTop:"1px solid "+C.line,display:"flex",zIndex:50,
@@ -5722,7 +5724,7 @@ function MangaPage({C,src,alt}){
    ADMIN（管理者だけが開ける：生徒一覧・最後に学習した日・学習語数・苦手な単語）
    データは Supabase から読むだけ。RLS で管理者にだけ全員分が見える
    ============================================================ */
-function AdminScreen({C,onBack}){
+function AdminScreen({C}){
   const [rows,setRows]=useState(null);
   const [err,setErr]=useState(null);
   const [open,setOpen]=useState(null);
@@ -5776,12 +5778,9 @@ function AdminScreen({C,onBack}){
     border:"1px solid "+(sort===k?C.accent:C.border),background:sort===k?C.accentSoft:"transparent",color:sort===k?C.accent:C.sub});
 
   return (
-    <div className="riseIn" style={{flex:1,padding:"18px 20px 40px"}}>
+    <div className="riseIn" style={{flex:1,padding:"18px 20px 96px"}}>
       <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:14}}>
-        <button aria-label="戻る" onClick={onBack}
-          style={{width:40,height:40,marginLeft:-8,borderRadius:4,border:"none",background:"transparent",
-            color:C.sub,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}><Icon.back size={22}/></button>
-        <h2 style={{fontSize:19,fontWeight:700,color:C.text,margin:0,flex:1}}>管理者画面</h2>
+        <h2 style={{fontSize:19,fontWeight:700,color:C.text,margin:0,flex:1}}>管理</h2>
         <button onClick={load} style={{minHeight:40,padding:"0 12px",borderRadius:4,border:"1px solid "+C.border,
           background:"transparent",color:C.sub,fontSize:14,cursor:"pointer"}}>更新</button>
       </div>
@@ -5903,7 +5902,7 @@ function TutorialScreen({C,onBack}){
 /* ============================================================
    SCREEN: SETTINGS
    ============================================================ */
-function SettingsScreen({C,settings,stats,words,earned,onChange,onReset,onTutorial,onAdmin,onExport,onImport,notice}){
+function SettingsScreen({C,settings,stats,words,earned,onChange,onReset,onTutorial,onExport,onImport,notice}){
   const fileRef=useRef(null);
   const box={background:C.card,border:"1px solid "+C.border,borderRadius:4,padding:16,marginBottom:10};
   const label={fontSize:13.5,fontWeight:700,color:C.text,marginBottom:12};
@@ -6121,8 +6120,6 @@ function SettingsScreen({C,settings,stats,words,earned,onChange,onReset,onTutori
           ログイン中：<b style={{color:C.text}}>{(Cloud.profile&&Cloud.profile.student_code)||"—"}</b>
           <br/><span style={{fontSize:12,color:C.faint,wordBreak:"break-all"}}>{Cloud.user&&Cloud.user.email}</span>
         </div>
-        {Cloud.profile&&Cloud.profile.role==="admin"&&(
-          <Btn C={C} style={{marginTop:10}} onClick={onAdmin}>管理者画面</Btn>)}
         <Btn C={C} variant="ghost" style={{marginTop:10}} onClick={()=>Cloud.signOut()}>ログアウト</Btn>
       </div>
 
@@ -6667,7 +6664,7 @@ function App(){
   const shell={width:"100%",maxWidth:430,margin:"0 auto",minHeight:"100vh",display:"flex",flexDirection:"column",
     paddingTop:"env(safe-area-inset-top)",paddingLeft:"env(safe-area-inset-left)",paddingRight:"env(safe-area-inset-right)",
     background:C.bg,color:C.text,fontSize:FONT_SIZES[settings.fontSize]+"px",position:"relative"};
-  const withNav=["home","list","roots","stats","settings"].includes(screen);
+  const withNav=["home","list","roots","stats","settings","admin"].includes(screen);
   const nav=id=>{setPrevScreen(screen);setScreen(id);};
   const openRootFromChip=r=>{
     const key=canonRoot(r.morph);
@@ -6713,10 +6710,10 @@ function App(){
       {screen==="stats"&&<StatsScreen C={C} words={words} stats={stats} earned={earned}/>}
       {screen==="settings"&&(
         <SettingsScreen C={C} settings={settings} stats={stats} words={words} earned={earned}
-          onChange={changeSettings} onReset={resetAll} onTutorial={()=>nav("tutorial")} onAdmin={()=>nav("admin")}
+          onChange={changeSettings} onReset={resetAll} onTutorial={()=>nav("tutorial")}
           onExport={doExport} onImport={doImport} notice={notice}/>
       )}
-      {screen==="admin"&&<AdminScreen C={C} onBack={()=>setScreen("settings")}/>}
+      {screen==="admin"&&<AdminScreen C={C}/>}
       {screen==="tutorial"&&<TutorialScreen C={C} onBack={()=>setScreen(prevScreen==="tutorial"?"settings":prevScreen)}/>}
 
       {withNav&&<BottomNav C={C} screen={screen} onNav={nav}/>}
