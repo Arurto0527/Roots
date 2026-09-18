@@ -5718,6 +5718,128 @@ function MangaPage({C,src,alt}){
   return <img src={src} alt={alt} loading="lazy" decoding="async" onError={()=>setBad(true)}
     style={{display:"block",width:"100%",height:"auto"}}/>;
 }
+/* ============================================================
+   ADMIN（管理者だけが開ける：生徒一覧・最後に学習した日・学習語数・苦手な単語）
+   データは Supabase から読むだけ。RLS で管理者にだけ全員分が見える
+   ============================================================ */
+function AdminScreen({C,onBack}){
+  const [rows,setRows]=useState(null);
+  const [err,setErr]=useState(null);
+  const [open,setOpen]=useState(null);
+  const [sort,setSort]=useState("last");
+  const load=useCallback(async()=>{
+    setRows(null);setErr(null);
+    try{
+      const [p,g,l]=await withTimeout(Promise.all([
+        sb.from("profiles").select("user_id,student_code,role"),
+        sb.from("progress").select("user_id,words,updated_at"),
+        sb.from("study_logs").select("user_id,answered_at").order("answered_at",{ascending:false}).limit(10000),
+      ]),15000);
+      const e=p.error||g.error||l.error;
+      if(e)throw e;
+      const prog=new Map((g.data||[]).map(r=>[r.user_id,r]));
+      const last=new Map();const cnt=new Map();
+      (l.data||[]).forEach(r=>{
+        if(!last.has(r.user_id))last.set(r.user_id,Date.parse(r.answered_at));
+        cnt.set(r.user_id,(cnt.get(r.user_id)||0)+1);
+      });
+      const byId=new Map(RAW_WORDS.map(w=>[String(w.id),w]));
+      setRows((p.data||[]).filter(x=>x.role!=="admin").map(x=>{
+        const pr=prog.get(x.user_id);
+        const ws=Array.isArray(pr&&pr.words)?pr.words:[];
+        const studied=ws.filter(w=>w.reps>0||w.lapses>0||w.correctCount>0||w.incorrectCount>0);
+        const weak=ws.filter(w=>(w.lapses||0)+(w.incorrectCount||0)>0)
+          .map(w=>{const raw=byId.get(String(w.id));
+            return {id:w.id,word:(raw&&raw.word)||w.w||String(w.id),meaning:raw?raw.meaning:"",
+              miss:w.incorrectCount||0,lapses:w.lapses||0,ok:w.correctCount||0};})
+          .sort((a,b)=>(b.miss+b.lapses)-(a.miss+a.lapses)||a.ok-b.ok);
+        const lastAt=last.get(x.user_id)||(pr?Date.parse(pr.updated_at):null);
+        return {id:x.user_id,code:x.student_code,lastAt,studied:studied.length,
+          mastered:ws.filter(isMastered).length,answers:cnt.get(x.user_id)||0,weak};
+      }));
+    }catch(e){setErr((e&&e.message)||"読み込めませんでした");}
+  },[]);
+  useEffect(()=>{load();},[load]);
+
+  const fmt=t=>{
+    if(!t)return "まだ";
+    const d=daysBetween(t,Date.now());
+    const md=new Date(t);const s=(md.getMonth()+1)+"/"+md.getDate();
+    return d===0?"今日":d===1?"昨日 "+s:d+"日前 "+s;
+  };
+  const list=rows?[...rows].sort((a,b)=>
+    sort==="last"?(a.lastAt||0)-(b.lastAt||0):
+    sort==="studied"?b.studied-a.studied:
+    a.code.localeCompare(b.code)):[];
+  const box={background:C.card,border:"1px solid "+C.border,borderRadius:4,padding:16,marginBottom:10};
+  const sortBtn=k=>({flex:1,minHeight:56,borderRadius:4,fontSize:16,fontWeight:700,cursor:"pointer",
+    border:"1px solid "+(sort===k?C.accent:C.border),background:sort===k?C.accentSoft:"transparent",color:sort===k?C.accent:C.sub});
+
+  return (
+    <div className="riseIn" style={{flex:1,padding:"18px 20px 40px"}}>
+      <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:14}}>
+        <button aria-label="戻る" onClick={onBack}
+          style={{width:40,height:40,marginLeft:-8,borderRadius:4,border:"none",background:"transparent",
+            color:C.sub,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}><Icon.back size={22}/></button>
+        <h2 style={{fontSize:19,fontWeight:700,color:C.text,margin:0,flex:1}}>管理者画面</h2>
+        <button onClick={load} style={{minHeight:40,padding:"0 12px",borderRadius:4,border:"1px solid "+C.border,
+          background:"transparent",color:C.sub,fontSize:14,cursor:"pointer"}}>更新</button>
+      </div>
+
+      {err&&<div style={{...box,color:C.bad,fontSize:14,lineHeight:1.7}}>読み込めませんでした：{err}</div>}
+      {!rows&&!err&&<div style={{color:C.sub,fontSize:16}}>読み込み中…</div>}
+
+      {rows&&(<>
+        <div style={{fontSize:14,color:C.sub,marginBottom:10}}>
+          生徒 <b className="num" style={{color:C.text}}>{rows.length}</b> 人 /
+          今日学習 <b className="num" style={{color:C.text}}>{rows.filter(r=>r.lastAt&&daysBetween(r.lastAt,Date.now())===0).length}</b> 人
+        </div>
+        <div style={{display:"flex",gap:8,marginBottom:12}}>
+          <button style={sortBtn("last")} onClick={()=>setSort("last")}>ご無沙汰順</button>
+          <button style={sortBtn("studied")} onClick={()=>setSort("studied")}>語数順</button>
+          <button style={sortBtn("code")} onClick={()=>setSort("code")}>番号順</button>
+        </div>
+        {list.length===0&&<div style={{...box,color:C.sub,fontSize:16}}>まだ生徒がいません</div>}
+        {list.map(r=>{
+          const on=open===r.id;
+          const away=r.lastAt?daysBetween(r.lastAt,Date.now()):null;
+          return (
+            <div key={r.id} style={box}>
+              <div role="button" tabIndex={0} onClick={()=>setOpen(on?null:r.id)}
+                style={{display:"flex",alignItems:"center",gap:12,minHeight:56,cursor:"pointer"}}>
+                <div style={{flex:1,minWidth:0}}>
+                  <div style={{fontSize:17,fontWeight:700,color:C.text}}>{r.code}</div>
+                  <div style={{fontSize:14,color:away==null||away>=3?C.bad:C.sub,marginTop:4}}>
+                    最後の学習：{fmt(r.lastAt)}
+                  </div>
+                </div>
+                <div style={{textAlign:"right"}}>
+                  <div className="num" style={{fontSize:20,fontWeight:700,color:C.text}}>{r.studied}<span style={{fontSize:13,color:C.sub}}> 語</span></div>
+                  <div style={{fontSize:12,color:C.sub}}>習得 {r.mastered} / 苦手 {r.weak.length}</div>
+                </div>
+              </div>
+              {on&&(
+                <div style={{borderTop:"1px solid "+C.line,marginTop:12,paddingTop:12}}>
+                  <div style={{fontSize:13,color:C.sub,marginBottom:8}}>回答した回数：{r.answers} 回</div>
+                  <div style={{fontSize:14,fontWeight:700,color:C.text,marginBottom:6}}>苦手な単語（まちがいが多い順）</div>
+                  {r.weak.length===0
+                    ?<div style={{fontSize:14,color:C.sub}}>まだありません</div>
+                    :r.weak.slice(0,10).map(w=>(
+                      <div key={w.id} style={{display:"flex",justifyContent:"space-between",gap:8,padding:"6px 0",fontSize:15}}>
+                        <span style={{color:C.text,minWidth:0}}><b>{w.word}</b> <span style={{color:C.sub,fontSize:13}}>{w.meaning}</span></span>
+                        <span className="num" style={{color:C.bad,fontSize:13,flexShrink:0}}>✕{w.miss+w.lapses}</span>
+                      </div>
+                    ))}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </>)}
+    </div>
+  );
+}
+
 function TutorialScreen({C,onBack}){
   const [ep,setEp]=useState(1);
   const [showChara,setShowChara]=useState(false);
@@ -5781,7 +5903,7 @@ function TutorialScreen({C,onBack}){
 /* ============================================================
    SCREEN: SETTINGS
    ============================================================ */
-function SettingsScreen({C,settings,stats,words,earned,onChange,onReset,onTutorial,onExport,onImport,notice}){
+function SettingsScreen({C,settings,stats,words,earned,onChange,onReset,onTutorial,onAdmin,onExport,onImport,notice}){
   const fileRef=useRef(null);
   const box={background:C.card,border:"1px solid "+C.border,borderRadius:4,padding:16,marginBottom:10};
   const label={fontSize:13.5,fontWeight:700,color:C.text,marginBottom:12};
@@ -5999,6 +6121,8 @@ function SettingsScreen({C,settings,stats,words,earned,onChange,onReset,onTutori
           ログイン中：<b style={{color:C.text}}>{(Cloud.profile&&Cloud.profile.student_code)||"—"}</b>
           <br/><span style={{fontSize:12,color:C.faint,wordBreak:"break-all"}}>{Cloud.user&&Cloud.user.email}</span>
         </div>
+        {Cloud.profile&&Cloud.profile.role==="admin"&&(
+          <Btn C={C} style={{marginTop:10}} onClick={onAdmin}>管理者画面</Btn>)}
         <Btn C={C} variant="ghost" style={{marginTop:10}} onClick={()=>Cloud.signOut()}>ログアウト</Btn>
       </div>
 
@@ -6589,9 +6713,10 @@ function App(){
       {screen==="stats"&&<StatsScreen C={C} words={words} stats={stats} earned={earned}/>}
       {screen==="settings"&&(
         <SettingsScreen C={C} settings={settings} stats={stats} words={words} earned={earned}
-          onChange={changeSettings} onReset={resetAll} onTutorial={()=>nav("tutorial")}
+          onChange={changeSettings} onReset={resetAll} onTutorial={()=>nav("tutorial")} onAdmin={()=>nav("admin")}
           onExport={doExport} onImport={doImport} notice={notice}/>
       )}
+      {screen==="admin"&&<AdminScreen C={C} onBack={()=>setScreen("settings")}/>}
       {screen==="tutorial"&&<TutorialScreen C={C} onBack={()=>setScreen(prevScreen==="tutorial"?"settings":prevScreen)}/>}
 
       {withNav&&<BottomNav C={C} screen={screen} onNav={nav}/>}
