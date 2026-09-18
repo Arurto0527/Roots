@@ -223,3 +223,27 @@ end;
 $$;
 revoke all on function public.admin_clear_student_code(uuid) from public, anon;
 grant execute on function public.admin_clear_student_code(uuid) to authenticated;
+
+-- ============================================================
+-- ID の形：大学生 U＋3けた、高校生 H＋4けた、それ以外 O＋4けた
+-- set_student_code は 'ok' / 'taken'（使用中）/ 'format'（形がちがう）を返す
+-- ============================================================
+create or replace function public.set_student_code(code text)
+returns text
+language plpgsql security definer set search_path = public
+as $$
+declare c text := nullif(upper(trim(code)), '');
+begin
+  if c is not null and c !~ '^(U[0-9]{3}|H[0-9]{4}|O[0-9]{4})$' then
+    return 'format';
+  end if;
+  if c is not null and exists (select 1 from public.profiles
+      where lower(student_code) = lower(c) and user_id <> auth.uid()) then
+    return 'taken';
+  end if;
+  update public.profiles set student_code = c where user_id = auth.uid();
+  return 'ok';
+exception when unique_violation then
+  return 'taken';
+end;
+$$;

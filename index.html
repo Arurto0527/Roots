@@ -4834,7 +4834,7 @@ function HomeScreen({C,settings,stats,words,cfg,setCfg,pool,onStart,onNav,resume
                 onSet={v=>setCfg(v)}/>
               <div style={{marginTop:16}}>
                 <div style={{fontSize:12.5,color:C.sub,marginBottom:8}}>出す順番</div>
-                <Seg C={C} options={[["shuffle","バラバラ"],["seq","番号順"]]}
+                <Seg C={C} options={[["seq","番号順"],["shuffle","バラバラ"]]}
                   value={cfg.order} onPick={v=>setCfg({order:v})}/>
               </div>
               </>
@@ -5742,6 +5742,22 @@ async function sbFetchAll(make){
   }
 }
 
+/* 検索のことば → 判定する関数
+   「U20-40」「20-40」「H0001-0100」「U020-U040」は番号の範囲、それ以外はIDかメールの一部 */
+function idQuery(q){
+  q=q.trim().toUpperCase().replace(/[〜～~ー－]/g,"-").replace(/\s+/g,"");
+  const m=q.match(/^([A-Z]?)(\d+)-([A-Z]?)(\d+)$/);
+  if(m){
+    const pre=m[1]||m[3];const lo=Math.min(+m[2],+m[4]),hi=Math.max(+m[2],+m[4]);
+    return p=>{
+      const c=(p.student_code||"").toUpperCase();const x=c.match(/^([A-Z]+)(\d+)$/);
+      return !!x&&(!pre||x[1]===pre)&&+x[2]>=lo&&+x[2]<=hi;
+    };
+  }
+  const t=q.toLowerCase();
+  return p=>!t||(p.student_code||"").toLowerCase().includes(t)||(p.email||"").toLowerCase().includes(t);
+}
+
 /* IDの頭の部分でグループに分ける（UNIV-01 → UNIV、S012 → S）。未設定は "" */
 const idGroup=code=>{
   if(!code)return "";
@@ -5882,11 +5898,11 @@ function AdminScreen({C}){
   /* 絞り込んだ人だけで、クラス・生徒・単語のすべてを計算し直す */
   const data=useMemo(()=>{
     if(!raw)return null;
-    const q=query.trim().toLowerCase();
+    const match=idQuery(query);
     const ps=raw.p.filter(x=>{
       const code=(x.student_code||"").trim();
       if(group!=="all"&&idGroup(code)!==group)return false;
-      return !q||code.toLowerCase().includes(q)||(x.email||"").toLowerCase().includes(q);
+      return match(x);
     });
     return adminBuild(ps,raw.g,raw.l,raw.s);
   },[raw,group,query]);
@@ -6071,12 +6087,12 @@ function AdminScreen({C}){
       {!data&&!err&&<div style={{color:C.sub,fontSize:16}}>読み込み中…</div>}
 
       {data&&(<>
-        <input value={query} onChange={e=>setQuery(e.target.value)} placeholder="IDやメールで検索"
+        <input value={query} onChange={e=>setQuery(e.target.value)} placeholder="ID・メールで検索（範囲は U20-40 など）"
           type="search" autoCapitalize="off" autoCorrect="off" spellCheck={false}
           style={{width:"100%",minHeight:56,padding:"0 14px",fontSize:16,borderRadius:4,marginBottom:8,
             border:"1px solid "+C.border,background:C.bg,color:C.text,boxSizing:"border-box"}}/>
         <div style={{display:"flex",gap:6,overflowX:"auto",marginBottom:12,paddingBottom:2}}>
-          {[["all","すべて",groups.reduce((a,g)=>a+g[1],0)]].concat(groups.map(([g,n])=>[g,g||"ID未設定",n])).map(([k,l,n])=>(
+          {[["all","すべて",groups.reduce((a,g)=>a+g[1],0)]].concat(groups.map(([g,n])=>[g,g?(ID_KIND[g]?ID_KIND[g]+" "+g:g):"ID未設定",n])).map(([k,l,n])=>(
             <button key={"g"+k} onClick={()=>setGroup(k)}
               style={{...small(group===k),flex:"0 0 auto",padding:"0 14px",whiteSpace:"nowrap"}}>{l}（{n}）</button>))}
         </div>
@@ -6156,19 +6172,25 @@ function TutorialScreen({C,onBack}){
 /* ============================================================
    SCREEN: SETTINGS
    ============================================================ */
+/* ID の形：大学生 U＋3けた、高校生 H＋4けた、それ以外 O＋4けた */
+const ID_RE=/^(U\d{3}|H\d{4}|O\d{4})$/;
+const ID_KIND={U:"大学生",H:"高校生",O:"その他"};
+
 /* ID番号：先生や配った人から伝えられた番号を自分で入力する。管理画面ではこのIDで分けて見る */
 function StudentIdBox({C}){
   const [val,setVal]=useState((Cloud.profile&&Cloud.profile.student_code)||"");
   const [msg,setMsg]=useState(null);
   const [busy,setBusy]=useState(false);
   const saved=(Cloud.profile&&Cloud.profile.student_code)||"";
+  const changed=val.trim().toUpperCase()!==saved;
   const save=async()=>{
-    const code=val.trim();
-    if(code.length>40){setMsg({bad:true,text:"40文字以内で入力してください"});return;}
+    const code=val.trim().toUpperCase();
+    if(code&&!ID_RE.test(code)){setMsg({bad:true,text:"大学生は U＋数字3けた（例：U001）、高校生は H＋数字4けた（例：H0001）、それ以外は O＋数字4けた（例：O0001）で入力してください"});return;}
     setBusy(true);setMsg(null);
     try{
       const {data,error}=await withTimeout(sb.rpc("set_student_code",{code}),8000);
       if(error)throw error;
+      if(data==="format"){setMsg({bad:true,text:"IDの形がちがいます（例：U001・H0001・O0001）"});setBusy(false);return;}
       if(data==="taken"){setMsg({bad:true,text:"このIDはほかの人が使っています。IDを確認してください"});setBusy(false);return;}
       Cloud.profile={...(Cloud.profile||{}),student_code:code||null};
       setVal(code);setMsg({text:code?"IDを保存しました":"IDを消しました"});
@@ -6178,15 +6200,15 @@ function StudentIdBox({C}){
   return (
     <div style={{marginTop:14}}>
       <div style={{fontSize:13.5,fontWeight:700,color:C.text,marginBottom:4}}>ID番号</div>
-      <div style={{fontSize:12,color:C.sub,lineHeight:1.7,marginBottom:8}}>伝えられたID（例：UNIV-01）を入力してください。1つのIDは1人しか使えません</div>
+      <div style={{fontSize:12,color:C.sub,lineHeight:1.7,marginBottom:8}}>伝えられたIDを入力してください。大学生は U001、高校生は H0001、それ以外は O0001 の形です。1つのIDは1人しか使えません</div>
       <div style={{display:"flex",gap:8}}>
-        <input value={val} onChange={e=>setVal(e.target.value)} placeholder="未設定" maxLength={40}
+        <input value={val} onChange={e=>setVal(e.target.value)} placeholder="未設定" maxLength={5}
           autoCapitalize="characters" autoCorrect="off" spellCheck={false}
           style={{flex:1,minWidth:0,minHeight:56,padding:"0 14px",fontSize:16,borderRadius:4,
             border:"1px solid "+C.border,background:C.bg,color:C.text}}/>
-        <button onClick={save} disabled={busy||val.trim()===saved}
+        <button onClick={save} disabled={busy||!changed}
           style={{minHeight:56,padding:"0 18px",borderRadius:4,border:"none",fontSize:16,fontWeight:700,
-            background:C.text,color:C.bg,cursor:"pointer",opacity:busy||val.trim()===saved?.4:1}}>保存</button>
+            background:C.text,color:C.bg,cursor:"pointer",opacity:busy||!changed?.4:1}}>保存</button>
       </div>
       {msg&&<div style={{fontSize:12.5,color:msg.bad?C.bad:C.sub,marginTop:8}}>{msg.text}</div>}
     </div>
@@ -6487,7 +6509,7 @@ function App(){
   const [prevScreen,setPrevScreen]=useState("settings");
 
   const [cfg,setCfgState]=useState(()=>({mode:"auto",rangeStart:MIN_ID,rangeEnd:Math.min(MAX_ID,MIN_ID+9),chip:null,count:null,
-    order:(()=>{try{return localStorage.getItem("roots.rangeOrder")==="seq"?"seq":"shuffle";}catch(e){return "shuffle";}})()}));
+    order:(()=>{try{return localStorage.getItem("roots.rangeOrder")==="shuffle"?"shuffle":"seq";}catch(e){return "seq";}})()}));
   const setCfg=u=>{
     if(u.order){try{localStorage.setItem("roots.rangeOrder",u.order);}catch(e){}}
     setCfgState(p=>({...p,...u}));
