@@ -2934,6 +2934,11 @@ const PART_LIST = [...new Set(RAW_WORDS.map(w=>w.part))].sort((a,b)=>(a===ALPHA)
 const MAX_ID = RAW_WORDS.reduce((m,w)=>Math.max(m,w.id),1);
 const MIN_ID = RAW_WORDS.reduce((m,w)=>Math.min(m,w.id),1);
 
+/* 英検の目安の級（単語ごとに1つ）。表示は EikenTag で「英検○級」にそろえる。
+   英検は単語ごとの公式の級を出していないので、英検向け単語帳・教科書の学年などから目安として決めた */
+const EIKEN_LEVELS={"agree":"4級","oppose":"準2級","advise":"準2級","tip":"3級","discuss":"3級","blame":"準2級","argue":"準2級","claim":"2級","complain":"準2級","offer":"3級","suggest":"準2級","recommend":"準2級","grateful":"準2級","apologize":"3級","excuse":"4級","celebrate":"3級","congratulate":"3級","admire":"準2級","impress":"準2級","award":"準2級","explain":"3級","describe":"3級","communicate":"3級","express":"3級","promise":"3級","information":"3級","technology":"3級","research":"準2級","material":"準2級","artificial":"2級","electric":"準2級","invent":"3級","discover":"3級","develop":"準2級","skill":"3級","ability":"準2級","talent":"準2級","effort":"準2級","practice":"4級","achieve":"準2級","pronunciation":"準2級","vocabulary":"準2級","paragraph":"2級","rehearse":"2級","volunteer":"3級","intonation":"2級","recite":"2級","homework":"5級","handout":"2級","hand in":"3級","condition":"準2級","medical":"準2級","stress":"準2級","suffer":"準2級","exercise":"3級","breathe":"準2級","thirsty":"4級","physical":"2級","fever":"3級","strength":"準2級","tear":"準2級","taste":"3級","rule":"3級","role":"準2級","habit":"準2級","custom":"準2級","tradition":"3級","society":"準2級","law":"準2級","ancestor":"2級","population":"準2級","native":"3級","abroad":"3級","local":"3級","survey":"2級","value":"準2級","treasure":"3級","fashion":"3級","public":"準2級","evidence":"2級","vote":"準2級","government":"準2級","nation":"準2級","capital":"3級","state":"準2級","political":"2級","price":"4級","sum":"2級","budget":"2級","fee":"2級","fare":"準2級","bill":"準2級","trade":"準2級","wealth":"2級","economy":"準2級","cost":"3級","company":"4級","task":"準2級","earn":"準2級","hurt":"3級","injure":"準2級","tangent":"1級","delineate":"1級","nuance":"準1級","pertinent":"1級","cohesive":"1級","concise":"準1級","extrapolate":"1級","clarification":"準1級","plausibility":"1級","juxtaposition":"1級","repertoire":"準1級","tentative":"準1級","redundant":"準1級","discourse":"準1級","scaffold":"1級","prerequisite":"準1級","articulate":"準1級","elicit":"準1級"};
+RAW_WORDS.forEach(w=>{w.eikenLevel=EIKEN_LEVELS[w.word];});
+
 /* 学習状態の初期値。SM-2 に必要な値をすべて持つ */
 const freshState=()=>({
   ef:2.5, interval:0, reps:0, lapses:0, due:null,
@@ -3701,6 +3706,19 @@ function Stepper({C,value,onChange,min=MIN_ID,max=MAX_ID,label}){
   );
 }
 
+/* 英検の級タグ。級ごとに色を少しだけ変える（5級→1級で 緑→青→紫→橙→赤） */
+const EIKEN_HUES={"5級":145,"4級":130,"3級":195,"準2級":215,"2級":265,"準1級":30,"1級":0};
+function EikenTag({C,level,style}){
+  if(!level||!(level in EIKEN_HUES))return null;
+  const h=EIKEN_HUES[level];
+  return (
+    <span style={{display:"inline-flex",alignItems:"center",flexShrink:0,whiteSpace:"nowrap",
+      fontSize:10.5,fontWeight:600,lineHeight:1,padding:"3px 6px",borderRadius:4,verticalAlign:"middle",
+      color:C.isDark?`hsl(${h} 45% 72%)`:`hsl(${h} 45% 36%)`,
+      background:C.isDark?`hsl(${h} 30% 18%)`:`hsl(${h} 50% 95%)`,
+      border:"1px solid "+(C.isDark?`hsl(${h} 25% 30%)`:`hsl(${h} 40% 85%)`),...style}}>英検{level}</span>
+  );
+}
 function Chip({C,active,children,onClick,small}){
   return (
     <button onClick={onClick} aria-pressed={!!active} style={{
@@ -4162,6 +4180,7 @@ function WordDetail({C,word:w,onTapRoot,speakOn=true,head=true,relatedLimit=3,on
           </Speak>
           <span className="en" style={{fontSize:fs(14,14,15),color:C.sub}}>{w.pronunciation}</span>
           <span style={{fontSize:fs(13,13,15),color:C.faint}}>{w.partOfSpeech}</span>
+          <EikenTag C={C} level={w.eikenLevel} style={{alignSelf:"center"}}/>
         </div>
       )}
       {show("meaning")&&<div style={{fontSize:fs(17,22,40),fontWeight:700,color:C.text,margin:xl?"6px 0 12px":"8px 0 10px",lineHeight:1.25}}>{w.meaning}</div>}
@@ -4534,6 +4553,7 @@ function RootSheet({C,entry,onClose,onOpenWord,speakOn=true}){
               style={{width:"100%",textAlign:"left",background:"transparent",border:"none",cursor:"pointer",
                 padding:"12px 0",borderTop:"1px solid "+C.line,display:"flex",gap:10,alignItems:"baseline"}}>
               <span className="en" style={{fontSize:15,fontWeight:700,color:C.text}}>{w.word}</span>
+              <EikenTag C={C} level={w.eikenLevel} style={{alignSelf:"center"}}/>
               <span style={{fontSize:12,color:C.sub,flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{w.meaning}</span>
               <span style={{fontSize:10.5,color:C.faint,flexShrink:0}}>見出し</span>
             </button>
@@ -4934,6 +4954,7 @@ function AskFace({C,item,timeLeft}){
         <div style={{textAlign:"center"}}>
           <div className="en" style={{fontSize:"clamp(34px, min(13vw, 7.5vh), 52px)",fontWeight:700,color:C.text,lineHeight:1.05,letterSpacing:"-0.02em",wordBreak:"break-word"}}>{w.word}</div>
           <div className="en" style={{fontSize:16,color:C.sub,marginTop:14}}>{w.pronunciation}</div>
+          <div style={{marginTop:8}}><EikenTag C={C} level={w.eikenLevel}/></div>
           <div className="askgap" style={{marginTop:20,display:"flex",justifyContent:"center"}}><SpeakDot C={C} text={w.word} size={56}/></div>
         </div>
       )}
@@ -5201,6 +5222,7 @@ function ResultScreen({C,log,newBadges,stats,earned,message,words,onReplay,onHom
                 style={{width:"100%",textAlign:"left",background:"transparent",border:"none",cursor:"pointer",
                   padding:"9px 0",borderTop:"1px solid "+C.line,display:"flex",gap:10,alignItems:"baseline"}}>
                 <span className="en" style={{fontSize:14,fontWeight:700,color:C.text}}>{w.word}</span>
+                <EikenTag C={C} level={w.eikenLevel} style={{alignSelf:"center"}}/>
                 <span style={{fontSize:12,color:C.sub,flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{w.meaning}</span>
               </button>
             );
@@ -5369,8 +5391,11 @@ function ListScreen({C,words,onTogglePass,onOpen,settings}){
               <div style={{width:3,alignSelf:"stretch",minHeight:38,borderRadius:4,background:isWeak(w)?C.bad:c,flexShrink:0}}/>
               <div style={{flex:1,minWidth:0}}>
                 <div className="num" style={{fontSize:12,color:C.sub,marginBottom:3}}>No. {w.id}</div>
-                <div className="en" style={{fontSize:14.5,fontWeight:700,color:C.text,overflow:"hidden",
-                  textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{w.word}</div>
+                <div style={{display:"flex",alignItems:"center",gap:6,minWidth:0}}>
+                  <div className="en" style={{fontSize:14.5,fontWeight:700,color:C.text,overflow:"hidden",
+                    textOverflow:"ellipsis",whiteSpace:"nowrap",minWidth:0}}>{w.word}</div>
+                  <EikenTag C={C} level={w.eikenLevel}/>
+                </div>
                 {(()=>{const h=hidden(w.id+":m");const bad=!h&&recall[w.id]===false;
                   const ms=w.meanings||["|"+w.meaning];const nums="①②③④⑤⑥⑦⑧⑨⑩";return (
                 <div role={h?"button":undefined} aria-label={h?"意味を見る":undefined}
