@@ -2950,31 +2950,64 @@ const freshState=()=>({
 
 /* ============================================================
    TUTORIAL（はじめての人への吹き出し案内）
-   ・target … 光らせる部品の data-tour の名前
-   ・screen … その説明をどの画面で出すか（study は見た目だけのデモ。記録は変えない）
-   ・face   … study のとき、カードの問題の面（ask）か答えの面（reveal）か
+   学習者が光っている場所を自分でタップすると、次へ進む
+   ・target … 光らせる部品の data-tour の名前（配列なら、見つかった最初のもの）。null は画面の真ん中に出す
+   ・screen … その説明をどの画面で出すか（study は、タップで動くデモ。記録は変えない）
+   ・pass   … true ならタップが本物のボタンにも届く（画面の移動など）。false なら説明だけして進む
+   ・face   … study のとき、はじめに見せる面（ask＝問題、reveal＝答え）
+   ・tap    … 吹き出しに出す「どこを押すか」
    ============================================================ */
 const TUTORIAL_KEY="roots.tutorialDone";
 const TUTORIAL_ACCENT="#534AB7";
 const TUTORIAL_STEPS=[
-  {target:"home-start",screen:"home",title:"1日10分を、毎日",
-   body:"まとめて1時間より、毎日10分のほうがずっと残ります。「おまかせ」なら、忘れかけた単語と新しい単語をちょうどよく選ぶので、迷ったらまずここを押そう。"},
-  {target:"card",screen:"study",face:"ask",title:"めくる前に、3秒考える",
-   body:"すぐめくらず、意味を頭の中で言ってみてから押そう。思い出そうとがんばる時間こそ、記憶を強くします。わからなくても、考えたこと自体がムダになりません。"},
-  {target:"hint",screen:"study",face:"ask",title:"詰まったら語源のヒント",
-   body:"意味は出さずに、単語のパーツだけを見せます。パーツから意味を推理して当てられたら、ただの暗記よりずっと忘れにくくなります。まず自力で考えてから使おう。"},
-  {target:"root-color",screen:"study",face:"reveal",title:"パーツで意味を組み立てる",
-   body:"青＝接頭辞、オレンジ＝語根、緑＝接尾辞。「a（〜へ）＋gree（心地よい）＝賛成する」のように、パーツの意味をつないで納得してから次へ進もう。"},
-  {target:"reveal-tabs",screen:"study",face:"reveal",title:"例文は声に出して",
-   body:"「語源」「例文」もめくれます。例文を1回声に出して読むと、意味と使い方がセットで残ります。長文やリスニングで出会ったときに気づけるようになります。"},
-  {target:"buttons",screen:"study",face:"reveal",title:"迷ったら「もう一度」",
-   body:"少しでも迷ったら「もう一度」が正解。すぐにまた出てきます。「覚えた」を押した単語は、1日後→3日後→1週間後…と、忘れかけたころに戻ってきます。ごまかすと、この仕組みがうまく働きません。"},
-  {target:"nav-roots",screen:"home",title:"語根で仲間ごと覚える",
-   body:"同じ語根の単語をまとめて見られます。語根を1つ覚えると、初めて見る単語の意味も予想できるようになります。これが語源で覚えるいちばんの強みです。"},
-  {target:"nav-list",screen:"home",title:"すき間時間は単語帳",
-   body:"意味を隠して、自分でテストできます。電車の中や授業の前に、覚えたはずの単語を見直そう。"},
-  {target:"nav-stats",screen:"home",title:"続いた日を見える化",
-   body:"学習した日と、覚えた単語の数が記録されます。1日休んでも大丈夫。次の日にまた再開すれば、ちゃんと取り戻せます。"},
+  {target:"home-start",screen:"home",pass:false,tap:"「学習をはじめる」をタップ",
+   title:"1日10分を、毎日",
+   body:"まとめて1時間より、毎日10分のほうがずっと残ります。ここを押すと、忘れかけた単語と新しい単語をちょうどよく選んで始まります。練習してみよう。"},
+  {target:"hint",screen:"study",face:"ask",pass:true,tap:"「語源のヒント」をタップ",
+   title:"まず3秒、思い出す",
+   body:"すぐに答えを見ず、意味を頭の中で言ってみよう。思い出そうとがんばる時間が、記憶を強くします。詰まったら、語源のヒントを開いてみよう。"},
+  {target:"hint-panel",screen:"study",face:"ask",pass:false,tap:"読んだらここをタップ",
+   title:"パーツから推理する",
+   body:"ヒントには意味は出ず、単語のパーツだけが出ます。パーツから意味を推理して当てられると、ただの暗記より忘れにくくなります。"},
+  {target:"card",screen:"study",face:"ask",pass:true,tap:"カードをタップ",
+   title:"答えを見よう",
+   body:"推理できたら（できなくても）、カードを押して答えを確かめよう。自分の予想と合っていたかを比べるのが大事です。"},
+  {target:"root-color",screen:"study",face:"reveal",pass:true,tap:"色分けの図をタップ",
+   title:"パーツで意味を組み立てる",
+   body:"青＝接頭辞、オレンジ＝語根、緑＝接尾辞。「a（〜へ）＋gree（心地よい）＝賛成する」のように、パーツをつないで納得してから次へ進もう。"},
+  {target:"reveal-tab-2",screen:"study",face:"reveal",pass:true,tap:"「例文」をタップ",
+   title:"例文は声に出して",
+   body:"例文を1回声に出して読むと、意味と使い方がセットで残ります。長文やリスニングで出会ったときに気づけるようになります。"},
+  {target:"buttons",screen:"study",face:"reveal",pass:true,tap:"どちらかをタップ",
+   title:"迷ったら「もう一度」",
+   body:"少しでも迷ったら「もう一度」。すぐにまた出てきます。「覚えた」の単語は、1日後→3日後→1週間後…と、忘れかけたころに戻ってきます。ごまかすと、このしくみが働きません。"},
+  {target:"nav-roots",screen:"home",pass:true,tap:"下の「語根」をタップ",
+   title:"練習はおしまい",
+   body:"今の練習は記録に残りません。次は、語源で覚えるいちばんの強み「語根」の画面を見てみよう。"},
+  {target:"roots-item",screen:"roots",pass:false,tap:"語根をひとつタップ",
+   title:"語根で仲間ごと覚える",
+   body:"同じ語根をもつ単語をまとめて見られます。語根を1つ覚えると、初めて見る単語の意味も予想できるようになります。"},
+  {target:"nav-list",screen:"roots",pass:true,tap:"下の「単語帳」をタップ",
+   title:"次は単語帳",
+   body:"すべての単語を番号順に見られる画面です。"},
+  {target:"list-row",screen:"list",pass:false,tap:"単語をひとつタップ",
+   title:"すき間時間に見直す",
+   body:"単語を押すと、語源・例文・覚え方をまとめて見られます。電車の中や授業の前に、覚えたはずの単語を見直そう。"},
+  {target:["nav-stats","nav-admin"],screen:"list",pass:true,tap:"下の「記録」をタップ",
+   title:"次は記録",
+   body:"がんばりが目に見えると、続けやすくなります。"},
+  {target:"stats-top",screen:"stats",pass:false,tap:"ここをタップ",
+   title:"続いた日を見える化",
+   body:"連続日数と、学習した日が記録されます。1日休んでも大丈夫。次の日にまた再開すれば、ちゃんと取り戻せます。"},
+  {target:"nav-settings",screen:"stats",pass:true,tap:"下の「設定」をタップ",
+   title:"最後に設定",
+   body:"1回に出す語数や、復習の時間などを変えられます。"},
+  {target:"settings-study",screen:"settings",pass:false,tap:"ここをタップ",
+   title:"続けられる量にする",
+   body:"「学習」で1回の語数を変えられます。毎日続けられる量がいちばん効果的。きつければ減らし、慣れたら増やそう。\nIDを伝えられている人は「データ」の中で入力してください。この案内は「使い方」からいつでも見直せます。"},
+  {target:"nav-home",screen:"settings",pass:true,tap:"下の「ホーム」をタップ",
+   title:"ホームにもどろう",
+   body:"毎日ここから始めます。"},
   {target:null,screen:"home",title:"続けるコツ",
    body:"・毎日同じ時間に開く（寝る前や朝の電車など）\n・復習がたまったら、新しい単語より復習を先に\n・よくまちがえる単語は、ホームの「苦手だけ」でまとめて練習\nこのやり方で、今日から始めよう。"},
 ];
@@ -4620,58 +4653,80 @@ function RootSheet({C,entry,onClose,onOpenWord,speakOn=true}){
 
 /* ============================================================
    TutorialOverlay：暗幕をかけて、data-tour の部品だけを切り抜いて見せる
-   ・切り抜きは「部品を囲む四角」に大きな影（box-shadow）をつけて、まわりを暗くする方式
-   ・部品が見つからないときは、暗幕だけ出して吹き出しを画面の真ん中に出す
+   ・切り抜いた場所だけタップできる。タップすると次へ進む（暗い部分は押せない）
+   ・部品が見つからないときは、吹き出しを画面の真ん中に出し、「次へ」ボタンで進めるようにする
    ============================================================ */
-function TutorialOverlay({C,steps,index,onBack,onNext,onSkip,children}){
+const tourSelector=t=>(Array.isArray(t)?t:[t]).map(k=>'[data-tour="'+k+'"]');
+function tourFind(t){
+  if(!t)return null;
+  for(const sel of tourSelector(t)){try{const el=document.querySelector(sel);if(el)return el;}catch(e){}}
+  return null;
+}
+
+function TutorialOverlay({C,steps,index,onNext,onSkip,children}){
   const step=steps[index]||steps[0];
   const last=index>=steps.length-1;
   const [rect,setRect]=useState(null);       /* 光らせる四角（見つからなければ null） */
-  const [pos,setPos]=useState(null);         /* 吹き出しの位置 */
+  const [pos,setPos]=useState(null);         /* 吹き出しの位置。{center:true} なら真ん中 */
   const bubble=useRef(null);
   const PAD=8,GAP=12,EDGE=16;
 
-  /* 部品の位置を測る。画面の切りかえ直後は部品がまだ無いことがあるので、少し待ちながら探す */
   const measure=useCallback(()=>{
-    let el=null;
-    try{el=document.querySelector('[data-tour="'+step.target+'"]');}catch(e){}
-    if(!el){setRect(null);return false;}
+    const el=tourFind(step.target);
+    if(!el)return false;
     const r=el.getBoundingClientRect();
-    if(!step.target)return false;
-    if(!r.width&&!r.height){setRect(null);return false;}
+    if(!r.width&&!r.height)return false;
     setRect({top:r.top-PAD,left:r.left-PAD,width:r.width+PAD*2,height:r.height+PAD*2});
     return true;
   },[step.target]);
 
+  /* 画面の切りかえ直後は部品がまだ無いことがあるので、少し待ちながら探す */
   useLayoutEffect(()=>{
     setRect(null);setPos(null);
     let tries=0,timer=null,alive=true;
     const find=()=>{
       if(!alive)return;
-      if(!step.target){setRect(null);setPos({center:true});return;}
-      let el=null;
-      try{el=document.querySelector('[data-tour="'+step.target+'"]');}catch(e){}
+      if(!step.target){setPos({center:true});return;}
+      const el=tourFind(step.target);
       if(!el){
         if(++tries<20){timer=setTimeout(find,50);return;}
-        setRect(null);setPos({center:true});return;
+        setPos({center:true});return;
       }
       const r=el.getBoundingClientRect();
       const out=r.top<0||r.bottom>window.innerHeight;
       if(out){try{el.scrollIntoView({block:"center"});}catch(e){}}
-      timer=setTimeout(()=>{if(alive&&!measure())setPos({center:true});},out?120:0);
+      timer=setTimeout(()=>{if(alive&&!measure())setPos({center:true});},out?150:0);
     };
     find();
     return ()=>{alive=false;clearTimeout(timer);};
   },[index,step.target,measure]);
 
-  /* 画面の大きさや向きが変わったら測り直す */
+  /* 画面の大きさ・向き・スクロールが変わったら測り直す */
   useEffect(()=>{
-    const on=()=>measure();
+    const on=()=>{if(step.target)measure();};
     window.addEventListener("resize",on);window.addEventListener("orientationchange",on);
-    return ()=>{window.removeEventListener("resize",on);window.removeEventListener("orientationchange",on);};
-  },[measure]);
+    window.addEventListener("scroll",on,true);
+    return ()=>{window.removeEventListener("resize",on);window.removeEventListener("orientationchange",on);
+      window.removeEventListener("scroll",on,true);};
+  },[measure,step.target]);
 
-  /* 吹き出しは部品の下に出す。下に入りきらなければ上に出す。左右ははみ出さないように */
+  /* pass のステップ：光っている本物の部品がタップされたら、その動きのあとで次へ
+     pass でないステップは、切り抜きの上に置いた透明な受け皿で受ける（本物には届かない。押せない状態のボタンでも進める） */
+  useEffect(()=>{
+    if(!step.target||!step.pass)return;
+    const sels=tourSelector(step.target).join(",");
+    let done=false;
+    const on=e=>{
+      let hit=null;try{hit=e.target.closest&&e.target.closest(sels);}catch(err){}
+      if(!hit||done)return;
+      done=true;
+      setTimeout(onNext,180);
+    };
+    document.addEventListener("click",on,true);
+    return ()=>document.removeEventListener("click",on,true);
+  },[index,step.target,step.pass,onNext]);
+
+  /* 吹き出しは部品の下に出す。下に入りきらなければ上に、それも無理なら画面の下のほうに */
   useLayoutEffect(()=>{
     if(!rect)return;
     const vw=window.innerWidth,vh=window.innerHeight;
@@ -4680,7 +4735,6 @@ function TutorialOverlay({C,steps,index,onBack,onNext,onSkip,children}){
     let top=rect.top+rect.height+GAP;
     if(top+bh>vh-EDGE){
       top=rect.top-GAP-bh;
-      /* 上にも入らない（部品がとても大きい）ときは、画面の下のほうに重ねて出す */
       if(top<EDGE)top=vh-EDGE-bh;
     }
     top=Math.max(EDGE,Math.min(top,vh-EDGE-bh));
@@ -4695,62 +4749,79 @@ function TutorialOverlay({C,steps,index,onBack,onNext,onSkip,children}){
     return ()=>{document.body.style.overflow=prev;};
   },[]);
 
-  const center=!rect||(pos&&pos.center);
+  const center=!!(pos&&pos.center);
+  const showRect=rect&&!center;
   const bw=Math.min(360,window.innerWidth-EDGE*2);
   const bubbleStyle=center
     ?{top:"50%",left:"50%",width:bw,transform:"translate(-50%,-50%)"}
     :pos?{top:pos.top,left:pos.left,width:pos.width}:{top:-9999,left:0,width:bw};
+  const shade={position:"fixed",background:"rgba(0,0,0,.72)"};
 
   return (
-    <div role="dialog" aria-modal="true" aria-label="使い方の案内" style={{position:"fixed",inset:0,zIndex:1000}}>
+    <div role="dialog" aria-modal="true" aria-label="使い方の案内" style={{position:"fixed",inset:0,zIndex:1000,pointerEvents:"none"}}>
       <style>{`@keyframes tourIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
-        @keyframes tourInC{from{opacity:0;transform:translate(-50%,calc(-50% + 6px));}to{opacity:1;transform:translate(-50%,-50%);}}`}</style>
+        @keyframes tourInC{from{opacity:0;transform:translate(-50%,calc(-50% + 6px));}to{opacity:1;transform:translate(-50%,-50%);}}
+        @keyframes tourPulse{0%{box-shadow:0 0 0 0 rgba(83,74,183,.55);}100%{box-shadow:0 0 0 12px rgba(83,74,183,0);}}`}</style>
       {/* 学習画面のデモなど、暗幕の下に見せたいもの */}
-      {children}
-      {/* 暗幕：押しても進まない（まちがって進まないように） */}
-      <div style={{position:"absolute",inset:0,background:rect?"transparent":"rgba(0,0,0,.72)"}}/>
-      {rect&&(()=>{
-        /* 切り抜きのまわりに暗い板を4枚（上・下・左・右）。大きな影の方式は、ブラウザによって薄く描かれるため */
-        const shade={position:"fixed",background:"rgba(0,0,0,.72)"};
+      {children&&<div style={{pointerEvents:"auto"}}>{children}</div>}
+      {showRect?(()=>{
+        /* 切り抜きのまわりに暗い板を4枚。板は押せない。切り抜きの中だけ、下の部品を押せる */
         const r=rect,bottom=r.top+r.height,right=r.left+r.width;
+        const pe={pointerEvents:"auto"};
         return (<>
-          <div style={{...shade,top:0,left:0,right:0,height:Math.max(0,r.top)}}/>
-          <div style={{...shade,top:bottom,left:0,right:0,bottom:0}}/>
-          <div style={{...shade,top:r.top,left:0,width:Math.max(0,r.left),height:r.height}}/>
-          <div style={{...shade,top:r.top,left:right,right:0,height:r.height}}/>
-          {/* 四角の四隅（角丸の外側）も暗くする */}
+          <div style={{...shade,...pe,top:0,left:0,right:0,height:Math.max(0,r.top)}}/>
+          <div style={{...shade,...pe,top:bottom,left:0,right:0,bottom:0}}/>
+          <div style={{...shade,...pe,top:r.top,left:0,width:Math.max(0,r.left),height:r.height}}/>
+          <div style={{...shade,...pe,top:r.top,left:right,right:0,height:r.height}}/>
           <div style={{position:"fixed",top:r.top,left:r.left,width:r.width,height:r.height,overflow:"hidden",pointerEvents:"none"}}>
             <div style={{position:"absolute",inset:0,borderRadius:12,border:"2px solid "+TUTORIAL_ACCENT,
               boxShadow:"0 0 0 12px rgba(0,0,0,.72)"}}/>
           </div>
+          <div style={{position:"fixed",top:r.top,left:r.left,width:r.width,height:r.height,borderRadius:12,
+            pointerEvents:"none",animation:"tourPulse 1.4s ease-out infinite"}}/>
+          {!step.pass&&(
+            <div role="button" tabIndex={0} aria-label={step.tap||"次へ"} onClick={onNext}
+              style={{position:"fixed",top:r.top,left:r.left,width:r.width,height:r.height,borderRadius:12,
+                cursor:"pointer",pointerEvents:"auto"}}/>
+          )}
         </>);
-      })()}
-      <div key={index} ref={bubble} style={{position:"fixed",...bubbleStyle,boxSizing:"border-box",
-        background:C.raise,color:C.text,border:"1px solid "+C.border,borderRadius:12,padding:"16px 16px 12px",
+      })():(
+        <div style={{...shade,inset:0,pointerEvents:"auto"}}/>
+      )}
+      <div key={index} ref={bubble} style={{position:"fixed",...bubbleStyle,boxSizing:"border-box",pointerEvents:"auto",
+        background:C.raise,color:C.text,border:"1px solid "+C.border,borderRadius:12,padding:"16px 16px 8px",
         boxShadow:"0 8px 28px rgba(0,0,0,.28)",
         animation:(center?"tourInC":"tourIn")+" .15s ease-out"}}>
         <div className="num" style={{fontSize:12,color:C.sub,marginBottom:6,fontWeight:700,letterSpacing:".04em"}}>
           {index+1} / {steps.length}</div>
         <div style={{fontSize:16,fontWeight:700,marginBottom:6}}>{step.title}</div>
         <div style={{fontSize:14,lineHeight:1.8,color:C.text,whiteSpace:"pre-line"}}>{step.body}</div>
-        <div style={{display:"flex",alignItems:"center",gap:8,marginTop:12}}>
+        <div style={{display:"flex",alignItems:"center",gap:8,marginTop:8}}>
           <button onClick={onSkip} style={{minHeight:56,padding:"0 8px",marginLeft:-8,border:"none",background:"transparent",
             color:C.sub,fontSize:14,cursor:"pointer",fontFamily:"inherit"}}>スキップ</button>
           <div style={{flex:1}}/>
-          {index>0&&(
-            <button onClick={onBack} style={{minHeight:56,padding:"0 16px",borderRadius:8,border:"1px solid "+C.border,
-              background:"transparent",color:C.text,fontSize:16,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>戻る</button>
+          {center?(
+            <button onClick={onNext} style={{minHeight:56,padding:"0 20px",borderRadius:8,border:"none",
+              background:TUTORIAL_ACCENT,color:"#FFFFFF",fontSize:16,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>
+              {last?"はじめる":"次へ"}</button>
+          ):(
+            <span style={{display:"inline-flex",alignItems:"center",gap:6,fontSize:14,fontWeight:700,color:TUTORIAL_ACCENT}}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"
+                strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M9 11V5.5a1.5 1.5 0 0 1 3 0V11"/><path d="M12 10.5V9a1.5 1.5 0 0 1 3 0v2"/>
+                <path d="M15 10.5a1.5 1.5 0 0 1 3 0V15a6 6 0 0 1-6 6h-.6a6 6 0 0 1-4.9-2.6L4.3 15a1.5 1.5 0 0 1 2.4-1.8L9 15.5"/>
+              </svg>
+              {step.tap||"光っているところをタップ"}
+            </span>
           )}
-          <button onClick={onNext} style={{minHeight:56,padding:"0 20px",borderRadius:8,border:"none",
-            background:TUTORIAL_ACCENT,color:"#FFFFFF",fontSize:16,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>
-            {last?"はじめる":"次へ"}</button>
         </div>
       </div>
     </div>
   );
 }
 
-/* 学習画面のステップ用：本物の学習画面の部品で、ダミーの1語を見せるだけ（記録は一切変えない） */
+/* 学習画面のステップ用：本物の学習画面の部品で、ダミーの1語を見せる
+   ヒント・カード・例文はタップで本物と同じように動くが、採点しても記録は一切変えない */
 function TutorialDemoStudy({C,settings,face}){
   const item=useMemo(()=>{
     /* 説明文の例（a＋gree）に合わせて agree を使う。無ければ語源のパーツが2つ以上ある語 */
@@ -4758,14 +4829,18 @@ function TutorialDemoStudy({C,settings,face}){
       ||RAW_WORDS.find(x=>{try{return parseRoots(x).length>=2&&x.example;}catch(e){return false;}})||RAW_WORDS[0];
     return {word:{...w,...freshState()},format:"w_en_ja",cloze:null,firstTry:true,lapse:false,seen:0};
   },[]);
+  const [phase,setPhase]=useState(face==="reveal"?"reveal":"ask");
+  const [hint,setHint]=useState(false);
+  useEffect(()=>{if(face==="reveal")setPhase("reveal");},[face]);
   const noop=()=>{};
   return (
     <div style={{position:"fixed",top:0,bottom:0,left:0,right:0,margin:"0 auto",width:"100%",maxWidth:430,
       zIndex:0,isolation:"isolate",background:C.bg,display:"flex",flexDirection:"column",paddingTop:"env(safe-area-inset-top)"}}>
       <StudyScreen C={C} item={item} settings={settings}
-        ui={{key:"tour",phase:face==="reveal"?"reveal":"ask",hint:false,timedOut:false,timeLeft:null}}
-        progress={{done:0,total:1}}
-        handlers={{onFlip:noop,onHint:noop,onHideHint:noop,onGrade:noop,onExit:noop,onTapRoot:noop,canUndo:false,onUndo:noop}}/>
+        ui={{key:"tour",phase,hint,timedOut:false,timeLeft:null}}
+        progress={{done:phase==="reveal"?1:0,total:1}}
+        handlers={{onFlip:()=>setPhase("reveal"),onHint:()=>setHint(true),onHideHint:()=>setHint(false),
+          onGrade:noop,onExit:noop,onTapRoot:noop,canUndo:false,onUndo:noop}}/>
     </div>
   );
 }
@@ -5226,7 +5301,7 @@ function RevealFace({C,item,onTapRoot,timedOut}){
         </div>
         <div data-tour="reveal-tabs" style={{display:"flex",justifyContent:"center",gap:6,padding:"6px 0 8px",flexShrink:0}}>
           {pages.map((p,i)=>(
-            <button key={i} onClick={()=>goPage(i)} style={{padding:"9px 18px",borderRadius:999,cursor:"pointer",
+            <button key={i} data-tour={"reveal-tab-"+i} onClick={()=>goPage(i)} style={{padding:"9px 18px",borderRadius:999,cursor:"pointer",
               fontSize:14,border:"1px solid "+(page===i?C.text:C.line),background:page===i?C.text:"transparent",
               color:page===i?C.bg:C.sub}}>{p.name}</button>
           ))}
@@ -5277,7 +5352,7 @@ function StudyScreen({C,item,ui,settings,progress,handlers}){
 
           {/* ヒントは最初から押せる。押しても答えは出ない */}
           {hint?(
-            <div className="hintOpen" style={{marginTop:10,border:"1px solid "+C.line,
+            <div data-tour="hint-panel" className="hintOpen" style={{marginTop:10,border:"1px solid "+C.line,
               borderRadius:4,padding:16,flexShrink:0}}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
                 <span style={{fontSize:13,color:C.sub}}>語源のヒント{toEn?"（つづりは伏せています）":""}</span>
@@ -5587,7 +5662,7 @@ function ListScreen({C,words,onTogglePass,onOpen,settings}){
           const c={pass:C.faint,mastered:C.ok,learning:C.accent,new:C.border}[st];
           const due=w.due?daysBetween(now,w.due):null;
           return (
-            <div key={w.id} onClick={()=>onOpen(w)} role="button" tabIndex={0}
+            <div key={w.id} data-tour="list-row" onClick={()=>onOpen(w)} role="button" tabIndex={0}
               onKeyDown={e=>{if(e.key==="Enter")onOpen(w);}}
               style={{display:"flex",gap:12,alignItems:"center",padding:"12px 0",
                 borderBottom:"1px solid "+C.line,cursor:"pointer"}}>
@@ -5695,7 +5770,7 @@ function RootsScreen({C,words,onOpenRoot}){
         {rows.map(e=>{
           const col={fg:typeColor(e.type,C)};
           return (
-            <button key={e.morph} onClick={()=>onOpenRoot(e)}
+            <button key={e.morph} data-tour="roots-item" onClick={()=>onOpenRoot(e)}
               style={{background:C.card,border:"1px solid "+C.border,borderRadius:4,padding:"13px 14px",
                 cursor:"pointer",display:"flex",alignItems:"center",gap:13,textAlign:"left",width:"100%"}}>
               <span style={{color:col.fg,borderLeft:"3px solid "+col.fg,padding:"2px 0 2px 10px",flexShrink:0,
@@ -5786,7 +5861,7 @@ function StatsScreen({C,words,stats,earned}){
     <div style={{flex:1,padding:"22px 20px 100px"}} className="riseIn">
       <SectionTitle C={C}>記録</SectionTitle>
 
-      <div style={{...card,display:"flex",gap:10}}>
+      <div data-tour="stats-top" style={{...card,display:"flex",gap:10}}>
         <KPI label="連続日数" value={stats.streak} unit="日" color={stats.streak>0?C.warn:C.text}/>
         <KPI label="のべ学習日" value={stats.totalDays} unit="日"/>
         <KPI label="一発正解率" value={acc==null?"—":acc} unit={acc==null?"":"%"} color={C.ok}/>
@@ -6424,7 +6499,7 @@ function StudentIdBox({C}){
     setBusy(false);
   };
   return (
-    <div style={{marginTop:14}}>
+    <div data-tour="settings-id" style={{marginTop:14}}>
       <div style={{fontSize:13.5,fontWeight:700,color:C.text,marginBottom:4}}>ID番号</div>
       <div style={{fontSize:12,color:C.sub,lineHeight:1.7,marginBottom:8}}>伝えられたIDを入力してください。大学生は U001、高校生は H0001、それ以外は O0001 の形です。1つのIDは1人しか使えません</div>
       <div style={{display:"flex",gap:8}}>
@@ -6463,7 +6538,7 @@ function SettingsScreen({C,settings,stats,words,earned,onChange,onReset,onTutori
     {id:"sound",title:"音",note:"自動読み上げ"+(settings.autoSpeak?"オン":"オフ")+"・効果音"+(settings.soundEnabled!==false?"オン":"オフ")},
     {id:"remind",title:"通知",note:"復習リマインド"+(settings.reminderEnabled?(settings.reminderTime||"21:00"):"オフ")},
     {id:"look",title:"表示",note:"名前・外観・文字サイズ"},
-    {id:"data",title:"データ",note:"書き出し・読み込み・削除"},
+    {id:"data",title:"データ",note:"ID番号・書き出し・読み込み・削除"},
   ];
   const cur=groups.find(g=>g.id===section);
   /* 設定の検索。title は画面に出ている見出し（開いたあとその場所までスクロールする）、words は探すときの言い換え */
@@ -6711,7 +6786,7 @@ function SettingsScreen({C,settings,stats,words,earned,onChange,onReset,onTutori
       </button>
 
       {groups.map(g=>(
-        <button key={g.id} onClick={()=>{setSection(g.id);window.scrollTo(0,0);}} style={rowBtn}>
+        <button key={g.id} data-tour={"settings-"+g.id} onClick={()=>{setSection(g.id);window.scrollTo(0,0);}} style={rowBtn}>
           <div style={{minWidth:0}}>
             <div style={{fontSize:15,fontWeight:700,color:C.text}}>{g.title}</div>
             <div style={{fontSize:12,color:C.sub,marginTop:3}}>{g.note}</div>
@@ -6729,6 +6804,16 @@ function SettingsScreen({C,settings,stats,words,earned,onChange,onReset,onTutori
 function App(){
   const [screen,setScreen]=useState("loading");
   const [tour,setTour]=useState(null);   /* 吹き出し案内の何番目か（null＝出していない） */
+  /* 次のステップへ。そのステップの画面（デモ以外）を開く */
+  const tourNext=useCallback(()=>{
+    setTour(t=>{
+      if(t==null)return null;
+      if(t>=TUTORIAL_STEPS.length-1){lsSet(TUTORIAL_KEY,true);return null;}
+      const nx=TUTORIAL_STEPS[t+1];
+      if(nx.screen!=="study")setScreen(nx.screen);
+      return t+1;
+    });
+  },[]);
   const [words,setWords]=useState(INITIAL_WORDS);
   const [settings,setSettings]=useState(DEFAULT_SETTINGS);
   const [stats,setStats]=useState(DEFAULT_STATS);
@@ -7272,13 +7357,7 @@ function App(){
 
       {tour!=null&&(
         <TutorialOverlay C={C} steps={TUTORIAL_STEPS} index={Math.min(tour,TUTORIAL_STEPS.length-1)}
-          onBack={()=>setTour(t=>Math.max(0,t-1))}
-          onNext={()=>{
-            if(tour>=TUTORIAL_STEPS.length-1){lsSet(TUTORIAL_KEY,true);setTour(null);return;}
-            const nx=TUTORIAL_STEPS[tour+1];
-            if(nx.screen==="home"&&screen!=="home")setScreen("home");
-            setTour(tour+1);
-          }}
+          onNext={tourNext}
           onSkip={()=>{lsSet(TUTORIAL_KEY,true);setTour(null);}}>
           {TUTORIAL_STEPS[tour]&&TUTORIAL_STEPS[tour].screen==="study"&&
             <TutorialDemoStudy C={C} settings={settings} face={TUTORIAL_STEPS[tour].face}/>}
