@@ -5926,6 +5926,16 @@ function AdminScreen({C}){
 
   const goStudent=id=>{setTab("students");setOpen(id);window.scrollTo({top:0});};
 
+  /* IDを外す（その人は設定画面で入れ直せる。学習データは消えない） */
+  const clearId=async r=>{
+    if(!window.confirm(r.code+" のIDを解除しますか？\n（"+(r.email||"この人")+"）\n学習データは消えません。"))return;
+    try{
+      const {error}=await withTimeout(sb.rpc("admin_clear_student_code",{target:r.id}),8000);
+      if(error)throw error;
+      load();
+    }catch(e){window.alert("解除できませんでした："+((e&&e.message)||""));}
+  };
+
   const StudentDetail=({r})=>(
     <div style={{borderTop:"1px solid "+C.line,marginTop:12,paddingTop:12}}>
       <div style={{fontSize:14,fontWeight:700,color:C.text,marginBottom:6}}>14日間の回答数</div>
@@ -5947,6 +5957,7 @@ function AdminScreen({C}){
             <span className="num" style={{color:C.sub,fontSize:13,flexShrink:0}}>✕{w.miss}　○{w.ok}</span>
           </div>
         ))}
+      {r.code&&<Btn C={C} variant="ghost" style={{marginTop:14}} onClick={()=>clearId(r)}>このIDを解除する</Btn>}
     </div>
   );
 
@@ -6156,8 +6167,9 @@ function StudentIdBox({C}){
     if(code.length>40){setMsg({bad:true,text:"40文字以内で入力してください"});return;}
     setBusy(true);setMsg(null);
     try{
-      const {error}=await withTimeout(sb.rpc("set_student_code",{code}),8000);
+      const {data,error}=await withTimeout(sb.rpc("set_student_code",{code}),8000);
       if(error)throw error;
+      if(data==="taken"){setMsg({bad:true,text:"このIDはほかの人が使っています。IDを確認してください"});setBusy(false);return;}
       Cloud.profile={...(Cloud.profile||{}),student_code:code||null};
       setVal(code);setMsg({text:code?"IDを保存しました":"IDを消しました"});
     }catch(e){setMsg({bad:true,text:"保存できませんでした。通信を確認してもう一度押してください"});}
@@ -6166,7 +6178,7 @@ function StudentIdBox({C}){
   return (
     <div style={{marginTop:14}}>
       <div style={{fontSize:13.5,fontWeight:700,color:C.text,marginBottom:4}}>ID番号</div>
-      <div style={{fontSize:12,color:C.sub,lineHeight:1.7,marginBottom:8}}>伝えられたID（例：UNIV-01）を入力してください</div>
+      <div style={{fontSize:12,color:C.sub,lineHeight:1.7,marginBottom:8}}>伝えられたID（例：UNIV-01）を入力してください。1つのIDは1人しか使えません</div>
       <div style={{display:"flex",gap:8}}>
         <input value={val} onChange={e=>setVal(e.target.value)} placeholder="未設定" maxLength={40}
           autoCapitalize="characters" autoCorrect="off" spellCheck={false}

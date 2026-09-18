@@ -181,14 +181,45 @@ begin
 end;
 $$;
 
--- 自分のID番号だけを変える（role は変えられない）
-create or replace function public.set_student_code(code text)
-returns void
-language sql security definer set search_path = public
+
+-- ============================================================
+-- 1つのIDは1人まで（大文字・小文字は同じとみなす）。管理者はIDを解除できる
+-- ============================================================
+create unique index if not exists profiles_student_code_uniq
+  on public.profiles (lower(student_code)) where student_code is not null;
+
+-- 自分のID番号だけを変える（role は変えられない）。'ok' か 'taken'（ほかの人が使用中）を返す
+drop function if exists public.set_student_code(text);
+create function public.set_student_code(code text)
+returns text
+language plpgsql security definer set search_path = public
 as $$
-  update public.profiles
-     set student_code = nullif(left(trim(code), 40), '')
-   where user_id = auth.uid();
+declare c text := nullif(left(trim(code), 40), '');
+begin
+  if c is not null and exists (select 1 from public.profiles
+      where lower(student_code) = lower(c) and user_id <> auth.uid()) then
+    return 'taken';
+  end if;
+  update public.profiles set student_code = c where user_id = auth.uid();
+  return 'ok';
+exception when unique_violation then
+  return 'taken';
+end;
 $$;
 revoke all on function public.set_student_code(text) from public, anon;
 grant execute on function public.set_student_code(text) to authenticated;
+
+-- 管理者が、ある人のIDを外す
+create or replace function public.admin_clear_student_code(target uuid)
+returns void
+language plpgsql security definer set search_path = public
+as $$
+begin
+  if not public.is_admin() then
+    raise exception 'not admin';
+  end if;
+  update public.profiles set student_code = null where user_id = target;
+end;
+$$;
+revoke all on function public.admin_clear_student_code(uuid) from public, anon;
+grant execute on function public.admin_clear_student_code(uuid) to authenticated;
