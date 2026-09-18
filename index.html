@@ -3195,6 +3195,7 @@ const PICTO_ROOT={
   hand:G.hand,
   loud:<><path d="M8 20v8h6l14 8V12l-14 8z"/><path d="M34 17l5-3M35 24h6M34 31l5 3"/></>,
   sent:<><circle cx="24" cy="10" r="4"/><path d="M24 14v12M17 19h14M24 26l-5 8M24 26l5 8"/><path d="M8 40h32"/><circle cx="24" cy="40" r="3"/></>,
+  sta:<><circle cx="24" cy="10" r="4"/><path d="M24 14v12M17 19h14M24 26l-5 8M24 26l5 8"/><path d="M8 40h32"/><circle cx="24" cy="40" r="3"/></>,
   tend:<><path d="M10 14v20M38 14v20"/><path d="M16 24h16"/><path d="M10 24h6M32 24h6"/><path d="M4 24h6M9 20l-5 4 5 4M44 24h-6M39 20l5 4-5 4"/></>,
   turn:<><path d="M36 20a13 13 0 1 0 1 10"/><path d="M37 11v9h-9"/></>,
   par:<><path d="M8 18h32M8 30h32"/></>,
@@ -3256,10 +3257,11 @@ function Pictogram({C,word:w}){
   const n=parts.length;
   const items=parts.map((p,i)=>{
     const k=canonRoot(p.morph), t=morphType(p.morph,i,n);
-    const g=t==="suffix"?null:(PICTO_ROOT[k]||PICTO_PREFIX[k]);
-    return g?{g,morph:p.morph,gloss:p.gloss,type:t}:null;
+    /* 接尾語でも語根の絵があるものは出す（award の ward など） */
+    const g=PICTO_ROOT[k]||(t!=="suffix"?PICTO_PREFIX[k]:null);
+    return g?{g,morph:p.morph,gloss:p.gloss,type:t,isRoot:!!PICTO_ROOT[k]}:null;
   }).filter(Boolean);
-  if(!items.some(x=>x.type==="root"))return null;
+  if(!items.some(x=>x.isRoot))return null;
   return (
     <div style={{display:"flex",alignItems:"flex-start",justifyContent:"center",gap:12,marginTop:18,flexWrap:"wrap"}}>
       {items.map((x,i)=>(
