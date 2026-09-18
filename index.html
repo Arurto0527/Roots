@@ -3706,17 +3706,23 @@ function Stepper({C,value,onChange,min=MIN_ID,max=MAX_ID,label}){
   );
 }
 
-/* 英検の級タグ。級ごとに色を少しだけ変える（5級→1級で 緑→青→紫→橙→赤） */
-const EIKEN_HUES={"5級":145,"4級":130,"3級":195,"準2級":215,"2級":265,"準1級":30,"1級":0};
+/* 英検の級バッジ（34px の正方形・左に級カラーの帯）。デザイン案「04 左サイドバー」 */
+const EIKEN_COLORS={"5級":["#4a9d5f","#7fd196"],"4級":["#3f9199","#6fc5cd"],"3級":["#3b7ec4","#79b2ee"],
+  "準2級":["#6b5fc4","#a49af0"],"2級":["#8a55b8","#c188ea"],"準1級":["#c2683a","#eb9c6d"],"1級":["#b8474f","#ef8188"]};
 function EikenTag({C,level,style}){
-  if(!level||!(level in EIKEN_HUES))return null;
-  const h=EIKEN_HUES[level];
+  if(!level||!(level in EIKEN_COLORS))return null;
+  const col=EIKEN_COLORS[level][C.isDark?1:0];
+  const g=level.replace("級","");
   return (
-    <span style={{display:"inline-flex",alignItems:"center",flexShrink:0,whiteSpace:"nowrap",
-      fontSize:10.5,fontWeight:600,lineHeight:1,padding:"3px 6px",borderRadius:4,verticalAlign:"middle",
-      color:C.isDark?`hsl(${h} 45% 72%)`:`hsl(${h} 45% 36%)`,
-      background:C.isDark?`hsl(${h} 30% 18%)`:`hsl(${h} 50% 95%)`,
-      border:"1px solid "+(C.isDark?`hsl(${h} 25% 30%)`:`hsl(${h} 40% 85%)`),...style}}>英検{level}</span>
+    <span role="img" aria-label={"英検"+level} style={{display:"inline-flex",flexShrink:0,width:34,height:34,
+      borderRadius:7,overflow:"hidden",background:C.isDark?C.sunken:"#fff",
+      border:"1px solid "+(C.isDark?C.border:"#e0ddd8"),boxSizing:"border-box",verticalAlign:"middle",...style}}>
+      <span aria-hidden="true" style={{width:5,background:col,flexShrink:0}}/>
+      <span aria-hidden="true" style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",color:col}}>
+        <span style={{fontSize:6.5,fontWeight:700,lineHeight:1,opacity:.7,whiteSpace:"nowrap"}}>英検</span>
+        <span style={{fontSize:g.length>1?12:17,fontWeight:900,lineHeight:1.05,whiteSpace:"nowrap"}}>{g}</span>
+      </span>
+    </span>
   );
 }
 function Chip({C,active,children,onClick,small}){
