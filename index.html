@@ -3313,20 +3313,25 @@ function hashCode(s){let h=0;for(let i=0;i<s.length;i++){h=(h*31+s.charCodeAt(i)
 const rootNote=m=>ROOT_NOTES[canonRoot(m)]||null;
 
 const PREFIXES=new Set(["a","ab","abs","ac","ad","af","ag","al","an","ap","ar","as","at","ambi","ana","ante","anti","auto",
-  "bene","bi","circum","co","col","com","con","contra","cor","counter","de","di","dia","dis","dif","dys","e","ef","em","en",
-  "epi","ex","extra","fore","hyper","hypo","il","im","in","inter","intra","intro","ir","juxta","mal","mis","mono","multi",
+  "apo","be","bene","bi","cata","circum","co","col","com","con","contra","cor","counter","de","di","dia","dis","dif","dys","e","ef","em","en",
+  "epi","ex","extra","fore","hyper","hypo","il","im","in","inter","intra","intro","ir","juxta","mal","mono","multi",
   "non","ob","oc","of","op","out","over","para","per","peri","poly","post","pre","pro","pur","re","red","retro","se","semi",
-  "sub","suc","suf","sup","super","sur","sus","sym","syn","tele","tra","trans","tri","un","under","uni","up","with"]);
+  "sub","suc","suf","sug","sup","super","sur","sus","sym","syn","tele","tra","trans","tri","un","under","uni","up","with"]);
 const SUFFIXES=new Set(["ion","ation","tion","sion","ition","ment","ful","able","ible","ate","ry","ous","ive","ative",
   "al","ty","ity","ness","er","or","ist","ing","ed","ic","ical","y","ly","ure","age","ize","ise","ify","fy","ian","ique",
-  "ary","ory","ence","ance","ency","ancy","ent","ant","ism","ish","ee","ess","en","ile","oire","ite","ar","less","ward","hood","ship","dom","ic","ics","ial","ual","ular",
-  "th","et","ety","it"]);
-/* 語源パーツの種類を決める。データの並び順（先頭＝接頭辞候補、末尾＝接尾辞候補）も手がかりにする */
-function morphType(morph,index,count){
+  "ary","ory","ence","ance","ency","ancy","ent","ant","ism","ish","ee","ess","en","ile","oire","ite","ar","less","hood","ship","dom","ic","ics","ial","ual","ular",
+  "th","et","ety","it","ice","eer","ific","cul",
+  "ious","t","cle","icle","ain","le","ine","yer","id","ury","ble"]);
+/* 語源パーツの種類を決める。データの並び順（先頭＝接頭辞候補、末尾＝接尾辞候補）も手がかりにする。
+   all（その語のパーツ全部）を渡すと、並びの途中のものも判断できる：
+   ・先頭から接頭語が続く間は接頭語（re＋com＋mend の com）
+   ・末尾まで接尾語が続く部分は接尾語（plaus＋ible＋ity の ible） */
+function morphType(morph,index,count,all){
   const k=String(morph||"").toLowerCase();
   if(count!=null&&count>1){
-    if(index===0&&PREFIXES.has(k)) return "prefix";
-    if(index===count-1&&index>0&&SUFFIXES.has(k)) return "suffix";
+    const ks=Array.isArray(all)&&all.length===count?all.map(p=>String(p&&p.morph!=null?p.morph:p).toLowerCase()):null;
+    if(index<count-1&&PREFIXES.has(k)&&(index===0||(ks&&ks.slice(0,index).every(x=>PREFIXES.has(x))))) return "prefix";
+    if(index>0&&SUFFIXES.has(k)&&(index===count-1||(ks&&ks.slice(index+1).every(x=>SUFFIXES.has(x))))) return "suffix";
     return "root";
   }
   if(PREFIXES.has(k)) return "prefix";
@@ -3335,8 +3340,8 @@ function morphType(morph,index,count){
 }
 const TYPE_LABEL={prefix:"接頭",root:"語根",suffix:"接尾"};
 const typeColor=(t,C)=>t==="prefix"?C.pre:t==="suffix"?C.suf:C.root;
-function rootColor(morph,C,index,count){
-  return {fg:typeColor(morphType(morph,index,count),C),bg:"transparent"};
+function rootColor(morph,C,index,count,all){
+  return {fg:typeColor(morphType(morph,index,count,all),C),bg:"transparent"};
 }
 
 /* 文法的な接尾辞は「語根マップ」に出しても意味がないので外す */
@@ -3361,21 +3366,21 @@ function splitMorphs(text){
    見出し語だけでなく、関連語の成り立ち説明に出てくる語根もすべて拾う。 */
 function buildRootIndex(words,{withAffixes=false}={}){
   const map={};
-  const touch=(r,i,n)=>{
+  const touch=(r,i,n,all)=>{
     const k=canonRoot(r.morph);
     if(!map[k]) map[k]={morph:k,glosses:[],words:[],related:[],tally:{prefix:0,root:0,suffix:0}};
     if(r.gloss&&!map[k].glosses.includes(r.gloss)) map[k].glosses.push(r.gloss);
-    map[k].tally[morphType(r.morph,i,n)]++;
+    map[k].tally[morphType(r.morph,i,n,all)]++;
     return map[k];
   };
   words.forEach(w=>{
     const ps=parseRoots(w);
-    ps.forEach((r,i)=>{ touch(r,i,ps.length).words.push(w); });
+    ps.forEach((r,i)=>{ touch(r,i,ps.length,ps).words.push(w); });
     (w.relatedWords||[]).forEach(rw=>{
       if(rw.synonym) return;
       const ms=splitMorphs(rw.breakdown);
       ms.forEach((r,i)=>{
-        const e=touch(r,i,ms.length);
+        const e=touch(r,i,ms.length,ms);
         if(!e.related.some(x=>x.word===rw.word)&&!e.words.some(x=>x.word===rw.word)) e.related.push(rw);
       });
     });
@@ -3809,13 +3814,16 @@ function ColoredWord({C,word,parts,colored=true}){
     if(!m) return;
     /* 綴りが語中で少し変わる語（agree の a＋gree など）も拾えるよう、末尾を削りながら探す */
     let found=-1,len=m.length;
-    for(let L=m.length;L>=Math.min(2,m.length);L--){
+    /* 先頭のパーツは1文字でもよい（award の ad → a） */
+    for(let L=m.length;L>=(i===0?1:Math.min(2,m.length));L--){
       const k=low.indexOf(m.slice(0,L),pos);
       if(k>=0&&(i>0||k===0)&&k-pos<=2){found=k;len=L;break;}
     }
+    /* 最後のパーツは語の終わりにあれば離れていてもよい（vol＋unt＋eer の eer） */
+    if(found<0&&i>0&&i===parts.length-1&&m.length>=2&&low.endsWith(m)&&low.length-m.length>=pos){found=low.length-m.length;len=m.length;}
     if(found<0) return;
     if(found>pos) out.push(<span key={"g"+i}>{text.slice(pos,found)}</span>);
-    out.push(<span key={i} style={{color:typeColor(morphType(p.morph,i,parts.length),C)}}>{text.slice(found,found+len)}</span>);
+    out.push(<span key={i} style={{color:typeColor(morphType(p.morph,i,parts.length,parts),C)}}>{text.slice(found,found+len)}</span>);
     pos=found+len;
   });
   if(pos<text.length) out.push(<span key="tail">{text.slice(pos)}</span>);
@@ -3829,7 +3837,7 @@ function MorphTree({C,word,parts,hideSpelling=false,wordSize=17,partSize=17,boxe
   if(boxed) return (
     <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:6,flexWrap:"wrap"}}>
       {parts.map((p,i)=>{
-        const t=morphType(p.morph,i,n);
+        const t=morphType(p.morph,i,n,parts);
         return (
           <React.Fragment key={i}>
             {i>0&&<span style={{fontSize:20,color:C.faint}}>+</span>}
@@ -3857,7 +3865,7 @@ function MorphTree({C,word,parts,hideSpelling=false,wordSize=17,partSize=17,boxe
       )}
       <div style={{display:"flex",width,maxWidth:"100%"}}>
         {parts.map((p,i)=>{
-          const t=morphType(p.morph,i,n);
+          const t=morphType(p.morph,i,n,parts);
           return (
             <div key={i} style={{flex:1,minWidth:0,display:"flex",flexDirection:"column",alignItems:"center",textAlign:"center"}}>
               {n>1&&<div style={{width:1,height:12,background:C.faint}}/>}
@@ -3876,7 +3884,7 @@ function MorphTree({C,word,parts,hideSpelling=false,wordSize=17,partSize=17,boxe
 /* 本文中のパーツ名を、その色＋太字で目立たせる */
 function HighlightParts({C,text,parts}){
   const src=String(text||"");
-  const names=parts.map((p,i)=>({m:String(p.morph||""),t:morphType(p.morph,i,parts.length)})).filter(x=>x.m.length>=2);
+  const names=parts.map((p,i)=>({m:String(p.morph||""),t:morphType(p.morph,i,parts.length,parts)})).filter(x=>x.m.length>=2);
   if(!names.length) return <>{src}</>;
   const re=new RegExp("("+names.map(x=>esc(x.m)).sort((a,b)=>b.length-a.length).join("|")+")(?=（|\\()","g");
   return <>{src.split(re).map((seg,i)=>{
@@ -4090,7 +4098,7 @@ function Pictogram({C,word:w,onTapRoot}){
   const parts=parseRoots(w);
   const n=parts.length;
   const items=parts.map((p,i)=>{
-    const k=canonRoot(p.morph), t=morphType(p.morph,i,n);
+    const k=canonRoot(p.morph), t=morphType(p.morph,i,n,parts);
     /* 接尾語でも語根の絵があるものは出す（award の ward など） */
     /* 否定の意味の接頭語（injure の in など）は「中へ」の絵ではなく禁止マークにする */
     const g=PICTO_ROOT[k]||(t==="suffix"?null:t==="prefix"&&/でない/.test(p.gloss||"")?PRE_NOT:PICTO_PREFIX[k]);
@@ -4128,9 +4136,9 @@ function WordDetail({C,word:w,onTapRoot,speakOn=true,head=true,relatedLimit=3,on
   const focus=useMemo(()=>new Set(parts.map(r=>canonRoot(r.morph))),[w.id]);
   const related=(w.relatedWords||[]).filter(r=>!r.synonym).slice(0,relatedLimit);
   /* コラムへ飛ぶボタンに出すパーツ（接頭語・語根・接尾語すべて。同じものは1つにまとめる） */
-  const rootParts=parts.map((p,i)=>({...p,type:morphType(p.morph,i,parts.length)}))
+  const rootParts=parts.map((p,i)=>({...p,type:morphType(p.morph,i,parts.length,parts)}))
     .filter((p,i,a)=>a.findIndex(x=>canonRoot(x.morph)===canonRoot(p.morph))===i);
-  const rootMorphs=parts.filter((p,i)=>morphType(p.morph,i,parts.length)==="root").map(p=>p.morph.toLowerCase());
+  const rootMorphs=parts.filter((p,i)=>morphType(p.morph,i,parts.length,parts)==="root").map(p=>p.morph.toLowerCase());
   const sep={marginTop:12,paddingTop:12,borderTop:"1px solid "+C.line};
   const label={fontSize:12,color:C.sub};
   const relWord=word=>{
@@ -4273,6 +4281,7 @@ function Breakdown({C,text,size=11,lineHeight=1.55,focus}){
   const head=cut>=0?src.slice(0,cut):src;
   const tail=cut>=0?src.slice(cut):"";
   const segs=head.split(/([+＋])/);
+  const ms=splitMorphs(src);
   return (
     <span style={{fontSize:size,color:C.sub,lineHeight}}>
       {segs.map((seg,i)=>{
@@ -4287,7 +4296,9 @@ function Breakdown({C,text,size=11,lineHeight=1.55,focus}){
            全部塗ると「どこが共通なのか」がかえって読み取れなくなる。 */
         if(focus&&!focus.has(canonRoot(morph)))
           return <span key={i}>{seg}</span>;
-        const col=focus?{fg:C.root}:rootColor(morph,C);
+        /* 成り立ち全体の並びから種類を決める（re＋ward の ward は語根、just＋ice の ice は接尾語） */
+        const at=ms.findIndex(x=>x.morph===morph);
+        const col=focus?{fg:C.root}:at>=0?rootColor(morph,C,at,ms.length,ms):rootColor(morph,C);
         return (
           <span key={i}>
             {m[1]}
@@ -4309,7 +4320,7 @@ function RootChips({C,word,size="md",onTapRoot,isGlossHidden,onRevealGloss}){
   return (
     <div style={{display:"flex",flexWrap:"wrap",alignItems:"center",gap:s.g}}>
       {parts.map((r,i)=>{
-        const col=rootColor(r.morph,C,i,parts.length);
+        const col=rootColor(r.morph,C,i,parts.length,parts);
         const hasNote=!!rootNote(r.morph);
         const inner=(
           <span style={{display:"inline-flex",flexDirection:"column",alignItems:"center",position:"relative",
