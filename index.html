@@ -5721,119 +5721,320 @@ function MangaPage({C,src,alt}){
     style={{display:"block",width:"100%",height:"auto"}}/>;
 }
 /* ============================================================
-   ADMIN（管理者だけが開ける：生徒一覧・最後に学習した日・学習語数・苦手な単語）
+   ADMIN（管理者だけ：下のメニューの「記録」が「管理」になる）
+   ・クラス … 全体の様子と、声かけが必要な人
+   ・生徒   … 一人ずつの学習の様子
+   ・単語   … クラス全体でまちがいが多い単語
    データは Supabase から読むだけ。RLS で管理者にだけ全員分が見える
    ============================================================ */
+const ADMIN_DAYS=28;      /* 何日前までの記録を読むか */
+const AWAY_DAYS=3;        /* この日数以上あいたら「声かけ」 */
+const LOW_RATE=0.6;       /* 今週の正答率がこれ未満なら「声かけ」 */
+
+/* Supabase は1回に1000件までしか返さないので、分けて全部読む */
+async function sbFetchAll(make){
+  const out=[];const step=1000;
+  for(let from=0;;from+=step){
+    const {data,error}=await make().range(from,from+step-1);
+    if(error)throw error;
+    out.push(...(data||[]));
+    if(!data||data.length<step)return out;
+  }
+}
+
+function adminBuild(profiles,progress,logs,sessions){
+  const now=Date.now();const today=startOfDay(now);
+  const weekFrom=today-6*DAY;
+  const prog=new Map(progress.map(r=>[r.user_id,r]));
+  const byId=new Map(RAW_WORDS.map(w=>[String(w.id),w]));
+  const students=profiles.filter(p=>p.role!=="admin");
+  const ids=new Set(students.map(s=>s.user_id));
+  const dayIdx=t=>daysBetween(t,now);   /* 0=今日 */
+
+  const per=new Map(students.map(s=>[s.user_id,{
+    days:Array(14).fill(0),mins:Array(14).fill(0),week:0,weekOk:0,weekHint:0,weekSec:0,
+    all:0,allOk:0,lastLog:0}]));
+  const wordStat=new Map();   /* 単語ごと：{n,ok,users:Set(まちがえた人)} */
+  const classDays=Array.from({length:14},()=>new Set());
+
+  logs.forEach(l=>{
+    const s=per.get(l.user_id);if(!s)return;
+    const t=Date.parse(l.answered_at);const d=dayIdx(t);
+    s.all++;if(l.correct)s.allOk++;
+    if(t>s.lastLog)s.lastLog=t;
+    if(d<14){s.days[d]++;classDays[d].add(l.user_id);}
+    if(t>=weekFrom){s.week++;if(l.correct)s.weekOk++;if(l.hint_used)s.weekHint++;}
+    const w=wordStat.get(l.word_id)||{n:0,ok:0,users:new Set(),tried:new Set()};
+    w.n++;if(l.correct)w.ok++;else w.users.add(l.user_id);w.tried.add(l.user_id);
+    wordStat.set(l.word_id,w);
+  });
+  sessions.forEach(x=>{
+    const s=per.get(x.user_id);if(!s)return;
+    const t=Date.parse(x.started_at);const d=dayIdx(t);
+    if(d<14)s.mins[d]+=x.active_seconds/60;
+    if(t>=weekFrom)s.weekSec+=x.active_seconds;
+  });
+
+  const rows=students.map(p=>{
+    const s=per.get(p.user_id);const pr=prog.get(p.user_id);
+    const ws=Array.isArray(pr&&pr.words)?pr.words:[];
+    const studied=ws.filter(w=>w.reps>0||w.lapses>0||w.correctCount>0||w.incorrectCount>0);
+    const weak=ws.filter(w=>(w.lapses||0)+(w.incorrectCount||0)>0).map(w=>{
+      const raw=byId.get(String(w.id));
+      return {id:w.id,word:(raw&&raw.word)||w.w||String(w.id),meaning:raw?raw.meaning:"",
+        miss:(w.incorrectCount||0)+(w.lapses||0),ok:w.correctCount||0};
+    }).sort((a,b)=>b.miss-a.miss||a.ok-b.ok);
+    const lastAt=s.lastLog||(pr&&studied.length?Date.parse(pr.updated_at):0)||null;
+    const away=lastAt?dayIdx(lastAt):null;
+    const weekRate=s.week?s.weekOk/s.week:null;
+    const reasons=[];
+    if(!studied.length&&!s.all)reasons.push("まだ始めていない");
+    else if(away!=null&&away>=AWAY_DAYS)reasons.push(away+"日学習していない");
+    if(weekRate!=null&&s.week>=10&&weekRate<LOW_RATE)reasons.push("今週の正答率が"+Math.round(weekRate*100)+"%");
+    return {id:p.user_id,code:p.student_code,lastAt,away,
+      studied:studied.length,mastered:ws.filter(isMastered).length,
+      due:ws.filter(w=>isDue(w,now)).length,
+      week:s.week,weekRate,weekMin:Math.round(s.weekSec/60),
+      hintRate:s.week?s.weekHint/s.week:null,
+      days:s.days,mins:s.mins,activeDays:s.days.slice(0,7).filter(n=>n>0).length,
+      weak,reasons};
+  });
+
+  const hard=[...wordStat.entries()].map(([id,w])=>{
+    const raw=byId.get(String(id));
+    return {id,word:raw?raw.word:id,meaning:raw?raw.meaning:"",n:w.n,rate:w.ok/w.n,
+      wrongUsers:[...w.users].filter(u=>ids.has(u)).length,tried:w.tried.size};
+  }).filter(w=>w.n>=3&&w.rate<1).sort((a,b)=>b.wrongUsers-a.wrongUsers||a.rate-b.rate);
+
+  const weekAns=rows.reduce((a,r)=>a+r.week,0);
+  const weekOk=rows.reduce((a,r)=>a+(r.weekRate||0)*r.week,0);
+  return {rows,hard,
+    summary:{n:rows.length,
+      today:rows.filter(r=>r.away===0).length,
+      week:rows.filter(r=>r.week>0).length,
+      weekAns,weekRate:weekAns?weekOk/weekAns:null,
+      weekMin:rows.reduce((a,r)=>a+r.weekMin,0),
+      classDays:classDays.map(s=>s.size)}};
+}
+
+/* 14日分の小さな棒グラフ（左が古い日、右が今日） */
+function DayBars({C,values,max,height=36,labels}){
+  const m=Math.max(1,max!=null?max:Math.max(...values));
+  const v=[...values].reverse();
+  return (
+    <div>
+      <div style={{display:"flex",alignItems:"flex-end",gap:3,height}}>
+        {v.map((x,i)=>(
+          <div key={i} title={x+""} style={{flex:1,height:x?Math.max(3,x/m*height):2,
+            background:x?C.text:C.line,borderRadius:1}}/>
+        ))}
+      </div>
+      {labels&&<div style={{display:"flex",justifyContent:"space-between",fontSize:11,color:C.faint,marginTop:4}}>
+        <span>14日前</span><span>今日</span></div>}
+    </div>
+  );
+}
+
 function AdminScreen({C}){
-  const [rows,setRows]=useState(null);
+  const [data,setData]=useState(null);
   const [err,setErr]=useState(null);
+  const [tab,setTab]=useState("class");
   const [open,setOpen]=useState(null);
   const [sort,setSort]=useState("last");
+  const [loadedAt,setLoadedAt]=useState(null);
+
   const load=useCallback(async()=>{
-    setRows(null);setErr(null);
+    setErr(null);
     try{
-      const [p,g,l]=await withTimeout(Promise.all([
-        sb.from("profiles").select("user_id,student_code,role"),
-        sb.from("progress").select("user_id,words,updated_at"),
-        sb.from("study_logs").select("user_id,answered_at").order("answered_at",{ascending:false}).limit(10000),
-      ]),15000);
-      const e=p.error||g.error||l.error;
-      if(e)throw e;
-      const prog=new Map((g.data||[]).map(r=>[r.user_id,r]));
-      const last=new Map();const cnt=new Map();
-      (l.data||[]).forEach(r=>{
-        if(!last.has(r.user_id))last.set(r.user_id,Date.parse(r.answered_at));
-        cnt.set(r.user_id,(cnt.get(r.user_id)||0)+1);
-      });
-      const byId=new Map(RAW_WORDS.map(w=>[String(w.id),w]));
-      setRows((p.data||[]).filter(x=>x.role!=="admin").map(x=>{
-        const pr=prog.get(x.user_id);
-        const ws=Array.isArray(pr&&pr.words)?pr.words:[];
-        const studied=ws.filter(w=>w.reps>0||w.lapses>0||w.correctCount>0||w.incorrectCount>0);
-        const weak=ws.filter(w=>(w.lapses||0)+(w.incorrectCount||0)>0)
-          .map(w=>{const raw=byId.get(String(w.id));
-            return {id:w.id,word:(raw&&raw.word)||w.w||String(w.id),meaning:raw?raw.meaning:"",
-              miss:w.incorrectCount||0,lapses:w.lapses||0,ok:w.correctCount||0};})
-          .sort((a,b)=>(b.miss+b.lapses)-(a.miss+a.lapses)||a.ok-b.ok);
-        const lastAt=last.get(x.user_id)||(pr?Date.parse(pr.updated_at):null);
-        return {id:x.user_id,code:x.student_code,lastAt,studied:studied.length,
-          mastered:ws.filter(isMastered).length,answers:cnt.get(x.user_id)||0,weak};
-      }));
+      const since=new Date(startOfDay(Date.now())-ADMIN_DAYS*DAY).toISOString();
+      const [p,g,l,s]=await withTimeout(Promise.all([
+        sbFetchAll(()=>sb.from("profiles").select("user_id,student_code,role").order("student_code")),
+        sbFetchAll(()=>sb.from("progress").select("user_id,words,updated_at").order("user_id")),
+        sbFetchAll(()=>sb.from("study_logs").select("user_id,word_id,correct,hint_used,answered_at")
+          .gte("answered_at",since).order("answered_at").order("id")),
+        sbFetchAll(()=>sb.from("study_sessions").select("user_id,started_at,active_seconds")
+          .gte("started_at",since).order("started_at").order("id")),
+      ]),30000);
+      setData(adminBuild(p,g,l,s));setLoadedAt(Date.now());
     }catch(e){setErr((e&&e.message)||"読み込めませんでした");}
   },[]);
   useEffect(()=>{load();},[load]);
 
-  const fmt=t=>{
-    if(!t)return "まだ";
-    const d=daysBetween(t,Date.now());
-    const md=new Date(t);const s=(md.getMonth()+1)+"/"+md.getDate();
-    return d===0?"今日":d===1?"昨日 "+s:d+"日前 "+s;
+  const fmtLast=t=>{
+    if(!t)return "記録なし";
+    const d=daysBetween(t,Date.now());const x=new Date(t);const md=(x.getMonth()+1)+"/"+x.getDate();
+    return d===0?"今日":d===1?"昨日（"+md+"）":d+"日前（"+md+"）";
   };
-  const list=rows?[...rows].sort((a,b)=>
-    sort==="last"?(a.lastAt||0)-(b.lastAt||0):
-    sort==="studied"?b.studied-a.studied:
-    a.code.localeCompare(b.code)):[];
+  const pct=r=>r==null?"—":Math.round(r*100)+"%";
+
+  const exportCsv=()=>{
+    const head=["生徒番号","最後の学習","今週の回答数","今週の正答率","今週の学習時間(分)","今週学習した日数",
+      "学習した語数","習得した語数","復習待ちの語数","苦手な語数","苦手な単語(上位5)"];
+    const q=v=>'"'+String(v).replace(/"/g,'""')+'"';
+    const lines=[head.map(q).join(",")].concat(data.rows.map(r=>[
+      r.code,r.lastAt?new Date(r.lastAt).toLocaleDateString("ja-JP"):"",r.week,
+      r.weekRate==null?"":Math.round(r.weekRate*100),r.weekMin,r.activeDays,
+      r.studied,r.mastered,r.due,r.weak.length,r.weak.slice(0,5).map(w=>w.word).join(" / ")].map(q).join(",")));
+    const blob=new Blob(["﻿"+lines.join("\r\n")],{type:"text/csv"});
+    const a=document.createElement("a");a.href=URL.createObjectURL(blob);
+    a.download="roots-"+todayKey()+".csv";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+  };
+
   const box={background:C.card,border:"1px solid "+C.border,borderRadius:4,padding:16,marginBottom:10};
-  const sortBtn=k=>({flex:1,minHeight:56,borderRadius:4,fontSize:16,fontWeight:700,cursor:"pointer",
-    border:"1px solid "+(sort===k?C.accent:C.border),background:sort===k?C.accentSoft:"transparent",color:sort===k?C.accent:C.sub});
+  const h3={fontSize:16,fontWeight:700,color:C.text,margin:"0 0 10px"};
+  const pill=(on)=>({flex:1,minHeight:56,borderRadius:4,fontSize:16,fontWeight:700,cursor:"pointer",
+    border:"1px solid "+(on?C.accent:C.border),background:on?C.accentSoft:"transparent",color:on?C.accent:C.sub});
+  const small=(on)=>({...pill(on),minHeight:44,fontSize:14,fontWeight:on?700:400});
+  const Stat=({label,value,unit})=>(
+    <div style={{flex:"1 1 45%",border:"1px solid "+C.border,borderRadius:4,padding:"12px 14px"}}>
+      <div style={{fontSize:13,color:C.sub}}>{label}</div>
+      <div className="num" style={{fontSize:24,fontWeight:700,color:C.text,marginTop:4}}>
+        {value}<span style={{fontSize:13,color:C.sub,fontWeight:400}}>{unit}</span></div>
+    </div>
+  );
+
+  const goStudent=id=>{setTab("students");setOpen(id);window.scrollTo({top:0});};
+
+  const StudentDetail=({r})=>(
+    <div style={{borderTop:"1px solid "+C.line,marginTop:12,paddingTop:12}}>
+      <div style={{fontSize:14,fontWeight:700,color:C.text,marginBottom:6}}>14日間の回答数</div>
+      <DayBars C={C} values={r.days} labels/>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"6px 12px",fontSize:14,color:C.sub,margin:"14px 0"}}>
+        <div>今週学習した日：<b style={{color:C.text}}>{r.activeDays}日</b></div>
+        <div>今週の時間：<b style={{color:C.text}}>{r.weekMin}分</b></div>
+        <div>今週の正答率：<b style={{color:C.text}}>{pct(r.weekRate)}</b></div>
+        <div>ヒントを見た割合：<b style={{color:C.text}}>{pct(r.hintRate)}</b></div>
+        <div>習得した語：<b style={{color:C.text}}>{r.mastered}語</b></div>
+        <div>復習待ち：<b style={{color:C.text}}>{r.due}語</b></div>
+      </div>
+      <div style={{fontSize:14,fontWeight:700,color:C.text,marginBottom:6}}>苦手な単語（まちがいが多い順）</div>
+      {r.weak.length===0
+        ?<div style={{fontSize:14,color:C.sub}}>まだありません</div>
+        :r.weak.slice(0,10).map(w=>(
+          <div key={w.id} style={{display:"flex",justifyContent:"space-between",gap:8,padding:"6px 0",fontSize:15,borderBottom:"1px solid "+C.line}}>
+            <span style={{color:C.text,minWidth:0}}><b>{w.word}</b> <span style={{color:C.sub,fontSize:13}}>{w.meaning}</span></span>
+            <span className="num" style={{color:C.sub,fontSize:13,flexShrink:0}}>✕{w.miss}　○{w.ok}</span>
+          </div>
+        ))}
+    </div>
+  );
+
+  const renderClass=()=>{
+    const {summary:s,rows}=data;
+    const need=rows.filter(r=>r.reasons.length).sort((a,b)=>(b.away||99)-(a.away||99));
+    return (<>
+      <div style={{display:"flex",flexWrap:"wrap",gap:8,marginBottom:10}}>
+        <Stat label="今日学習した人" value={s.today} unit={" / "+s.n+"人"}/>
+        <Stat label="今週学習した人" value={s.week} unit={" / "+s.n+"人"}/>
+        <Stat label="今週の回答数" value={s.weekAns} unit="回"/>
+        <Stat label="今週の正答率" value={pct(s.weekRate)} unit=""/>
+        <Stat label="今週の学習時間（全員）" value={s.weekMin} unit="分"/>
+        <Stat label="1人あたり" value={s.n?Math.round(s.weekMin/s.n):0} unit="分"/>
+      </div>
+      <div style={box}>
+        <h3 style={h3}>毎日の学習人数</h3>
+        <DayBars C={C} values={s.classDays} max={s.n} height={56} labels/>
+      </div>
+      <div style={box}>
+        <h3 style={h3}>声かけが必要な人（{need.length}人）</h3>
+        <div style={{fontSize:13,color:C.sub,marginBottom:8,lineHeight:1.7}}>
+          {AWAY_DAYS}日以上あいている・まだ始めていない・今週の正答率が{Math.round(LOW_RATE*100)}%未満の人です
+        </div>
+        {need.length===0?<div style={{fontSize:15,color:C.sub}}>いません。みんな続いています</div>
+          :need.map(r=>(
+            <div key={r.id} role="button" tabIndex={0} onClick={()=>goStudent(r.id)}
+              style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10,minHeight:56,
+                borderTop:"1px solid "+C.line,cursor:"pointer"}}>
+              <b style={{fontSize:16,color:C.text}}>{r.code}</b>
+              <span style={{fontSize:14,color:C.sub,textAlign:"right"}}>{r.reasons.join("・")} ›</span>
+            </div>
+          ))}
+      </div>
+    </>);
+  };
+
+  const renderStudents=()=>{
+    const list=[...data.rows].sort((a,b)=>
+      sort==="last"?(a.lastAt||0)-(b.lastAt||0):
+      sort==="week"?b.week-a.week:
+      sort==="studied"?b.studied-a.studied:
+      a.code.localeCompare(b.code));
+    return (<>
+      <div style={{display:"flex",gap:6,marginBottom:12}}>
+        {[["last","ご無沙汰"],["week","今週"],["studied","語数"],["code","番号"]].map(([k,l])=>(
+          <button key={k} style={small(sort===k)} onClick={()=>setSort(k)}>{l}順</button>))}
+      </div>
+      {list.length===0&&<div style={{...box,color:C.sub,fontSize:16}}>まだ生徒がいません</div>}
+      {list.map(r=>{
+        const on=open===r.id;
+        return (
+          <div key={r.id} style={box}>
+            <div role="button" tabIndex={0} onClick={()=>setOpen(on?null:r.id)} style={{cursor:"pointer"}}>
+              <div style={{display:"flex",alignItems:"center",gap:12,minHeight:40}}>
+                <div style={{flex:1,minWidth:0}}>
+                  <div style={{fontSize:17,fontWeight:700,color:C.text}}>
+                    {r.code}{r.reasons.length>0&&<span style={{marginLeft:8,fontSize:12,fontWeight:700,
+                      border:"1px solid "+C.text,borderRadius:3,padding:"1px 6px"}}>声かけ</span>}
+                  </div>
+                  <div style={{fontSize:14,color:C.sub,marginTop:4}}>最後の学習：{fmtLast(r.lastAt)}</div>
+                </div>
+                <div style={{textAlign:"right"}}>
+                  <div className="num" style={{fontSize:20,fontWeight:700,color:C.text}}>{r.studied}<span style={{fontSize:13,color:C.sub}}> 語</span></div>
+                  <div style={{fontSize:12,color:C.sub}}>今週 {r.week}回・{pct(r.weekRate)}</div>
+                </div>
+              </div>
+              <div style={{marginTop:10}}><DayBars C={C} values={r.days} height={20}/></div>
+            </div>
+            {on&&<StudentDetail r={r}/>}
+          </div>
+        );
+      })}
+    </>);
+  };
+
+  const renderWords=()=>(
+    <div style={box}>
+      <h3 style={h3}>クラスで苦手な単語</h3>
+      <div style={{fontSize:13,color:C.sub,marginBottom:8,lineHeight:1.7}}>
+        直近{ADMIN_DAYS}日で、まちがえた人が多い順です。授業で取り上げる単語を選ぶのに使えます
+      </div>
+      {data.hard.length===0?<div style={{fontSize:15,color:C.sub}}>まだデータがありません</div>
+        :data.hard.slice(0,30).map((w,i)=>(
+          <div key={w.id} style={{display:"flex",alignItems:"center",gap:10,minHeight:52,borderTop:"1px solid "+C.line}}>
+            <span className="num" style={{width:22,fontSize:13,color:C.faint}}>{i+1}</span>
+            <span style={{flex:1,minWidth:0,fontSize:15,color:C.text}}><b>{w.word}</b>
+              <span style={{color:C.sub,fontSize:13}}> {w.meaning}</span></span>
+            <span style={{fontSize:13,color:C.sub,textAlign:"right",flexShrink:0}}>
+              {w.wrongUsers}/{w.tried}人がミス<br/>正答率 {pct(w.rate)}</span>
+          </div>
+        ))}
+    </div>
+  );
 
   return (
     <div className="riseIn" style={{flex:1,padding:"18px 20px 96px"}}>
-      <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:14}}>
+      <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:4}}>
         <h2 style={{fontSize:19,fontWeight:700,color:C.text,margin:0,flex:1}}>管理</h2>
         <button onClick={load} style={{minHeight:40,padding:"0 12px",borderRadius:4,border:"1px solid "+C.border,
           background:"transparent",color:C.sub,fontSize:14,cursor:"pointer"}}>更新</button>
       </div>
+      <div style={{fontSize:12,color:C.faint,marginBottom:12}}>
+        {loadedAt?"読み込んだ時刻："+new Date(loadedAt).toLocaleTimeString("ja-JP",{hour:"2-digit",minute:"2-digit"}):""}
+        {"　「今週」は今日を含む7日間"}
+      </div>
 
-      {err&&<div style={{...box,color:C.bad,fontSize:14,lineHeight:1.7}}>読み込めませんでした：{err}</div>}
-      {!rows&&!err&&<div style={{color:C.sub,fontSize:16}}>読み込み中…</div>}
+      {err&&<div style={{...box,fontSize:14,lineHeight:1.7}}>読み込めませんでした：{err}<br/>通信を確認して「更新」を押してください</div>}
+      {!data&&!err&&<div style={{color:C.sub,fontSize:16}}>読み込み中…</div>}
 
-      {rows&&(<>
-        <div style={{fontSize:14,color:C.sub,marginBottom:10}}>
-          生徒 <b className="num" style={{color:C.text}}>{rows.length}</b> 人 /
-          今日学習 <b className="num" style={{color:C.text}}>{rows.filter(r=>r.lastAt&&daysBetween(r.lastAt,Date.now())===0).length}</b> 人
+      {data&&(<>
+        <div role="tablist" style={{display:"flex",gap:8,marginBottom:12}}>
+          {[["class","クラス"],["students","生徒"],["words","単語"]].map(([k,l])=>(
+            <button key={k} role="tab" aria-selected={tab===k} style={pill(tab===k)} onClick={()=>setTab(k)}>{l}</button>))}
         </div>
-        <div style={{display:"flex",gap:8,marginBottom:12}}>
-          <button style={sortBtn("last")} onClick={()=>setSort("last")}>ご無沙汰順</button>
-          <button style={sortBtn("studied")} onClick={()=>setSort("studied")}>語数順</button>
-          <button style={sortBtn("code")} onClick={()=>setSort("code")}>番号順</button>
-        </div>
-        {list.length===0&&<div style={{...box,color:C.sub,fontSize:16}}>まだ生徒がいません</div>}
-        {list.map(r=>{
-          const on=open===r.id;
-          const away=r.lastAt?daysBetween(r.lastAt,Date.now()):null;
-          return (
-            <div key={r.id} style={box}>
-              <div role="button" tabIndex={0} onClick={()=>setOpen(on?null:r.id)}
-                style={{display:"flex",alignItems:"center",gap:12,minHeight:56,cursor:"pointer"}}>
-                <div style={{flex:1,minWidth:0}}>
-                  <div style={{fontSize:17,fontWeight:700,color:C.text}}>{r.code}</div>
-                  <div style={{fontSize:14,color:away==null||away>=3?C.bad:C.sub,marginTop:4}}>
-                    最後の学習：{fmt(r.lastAt)}
-                  </div>
-                </div>
-                <div style={{textAlign:"right"}}>
-                  <div className="num" style={{fontSize:20,fontWeight:700,color:C.text}}>{r.studied}<span style={{fontSize:13,color:C.sub}}> 語</span></div>
-                  <div style={{fontSize:12,color:C.sub}}>習得 {r.mastered} / 苦手 {r.weak.length}</div>
-                </div>
-              </div>
-              {on&&(
-                <div style={{borderTop:"1px solid "+C.line,marginTop:12,paddingTop:12}}>
-                  <div style={{fontSize:13,color:C.sub,marginBottom:8}}>回答した回数：{r.answers} 回</div>
-                  <div style={{fontSize:14,fontWeight:700,color:C.text,marginBottom:6}}>苦手な単語（まちがいが多い順）</div>
-                  {r.weak.length===0
-                    ?<div style={{fontSize:14,color:C.sub}}>まだありません</div>
-                    :r.weak.slice(0,10).map(w=>(
-                      <div key={w.id} style={{display:"flex",justifyContent:"space-between",gap:8,padding:"6px 0",fontSize:15}}>
-                        <span style={{color:C.text,minWidth:0}}><b>{w.word}</b> <span style={{color:C.sub,fontSize:13}}>{w.meaning}</span></span>
-                        <span className="num" style={{color:C.bad,fontSize:13,flexShrink:0}}>✕{w.miss+w.lapses}</span>
-                      </div>
-                    ))}
-                </div>
-              )}
-            </div>
-          );
-        })}
+        {tab==="class"&&renderClass()}
+        {tab==="students"&&renderStudents()}
+        {tab==="words"&&renderWords()}
+        <Btn C={C} variant="ghost" style={{marginTop:12}} onClick={exportCsv}>一覧をCSVで保存（Excel用）</Btn>
       </>)}
     </div>
   );
