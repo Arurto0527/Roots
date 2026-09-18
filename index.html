@@ -5742,20 +5742,37 @@ async function sbFetchAll(make){
   }
 }
 
-/* 検索のことば → 判定する関数
-   「U20-40」「20-40」「H0001-0100」「U020-U040」は番号の範囲、それ以外はIDかメールの一部 */
-function idQuery(q){
-  q=q.trim().toUpperCase().replace(/[〜～~ー－]/g,"-").replace(/\s+/g,"");
-  const m=q.match(/^([A-Z]?)(\d+)-([A-Z]?)(\d+)$/);
-  if(m){
-    const pre=m[1]||m[3];const lo=Math.min(+m[2],+m[4]),hi=Math.max(+m[2],+m[4]);
-    return p=>{
-      const c=(p.student_code||"").toUpperCase();const x=c.match(/^([A-Z]+)(\d+)$/);
-      return !!x&&(!pre||x[1]===pre)&&+x[2]>=lo&&+x[2]<=hi;
-    };
-  }
-  const t=q.toLowerCase();
-  return p=>!t||(p.student_code||"").toLowerCase().includes(t)||(p.email||"").toLowerCase().includes(t);
+/* ID を「頭の英字」と「番号（数）」に分ける。H001 と H0001 は同じ番号とみなす */
+const idParts=c=>{const x=String(c||"").toUpperCase().match(/^([A-Z]+)0*(\d+)$/);return x?{pre:x[1],num:+x[2]}:null;};
+const idFormat=(pre,num)=>pre+String(num).padStart(pre==="U"?3:4,"0");
+const SLOT_MAX=1000;   /* 枠を並べるのはこの数まで */
+
+/* 検索のことば → {match: 判定する関数, slots: 並べる番号の枠 or null}
+   ・カンマ（、）で区切ると複数：「H001, H003, H005」「U1-20, U35」
+   ・「U20-40」「H0001-0100」「U020〜U040」は番号の範囲。英字なしの「20-40」も使える
+   ・英字が決まっている番号・範囲は、使っていない番号も「未使用」の枠として並べる
+   ・それ以外はIDかメールの一部 */
+function idQuery(q,groupPre){
+  const terms=q.toUpperCase().replace(/[〜～~ー－]/g,"-").split(/[,、，\s]+/).map(t=>t.trim()).filter(Boolean);
+  if(!terms.length)return {match:()=>true,slots:null};
+  const tests=[];const slots=[];let slotOk=true;
+  terms.forEach(t=>{
+    const m=t.match(/^([A-Z]?)(\d+)(?:-([A-Z]?)(\d+))?$/);
+    if(m){
+      const pre=m[1]||m[3]||groupPre||"";
+      const a=+m[2],b=m[4]!=null?+m[4]:a;const lo=Math.min(a,b),hi=Math.max(a,b);
+      /* 英字も範囲もない「20」だけは、番号の一部として検索する */
+      if(!m[1]&&m[4]==null&&!groupPre){const s=t.toLowerCase();
+        tests.push(p=>(p.student_code||"").toLowerCase().includes(s));slotOk=false;return;}
+      tests.push(p=>{const x=idParts(p.student_code);return !!x&&(!pre||x.pre===pre)&&x.num>=lo&&x.num<=hi;});
+      if(pre&&slots.length+(hi-lo+1)<=SLOT_MAX){for(let n=lo;n<=hi;n++)slots.push(idFormat(pre,n));}
+      else slotOk=false;
+      return;
+    }
+    const s=t.toLowerCase();slotOk=false;
+    tests.push(p=>(p.student_code||"").toLowerCase().includes(s)||(p.email||"").toLowerCase().includes(s));
+  });
+  return {match:p=>tests.some(f=>f(p)),slots:slotOk&&slots.length?[...new Set(slots)]:null};
 }
 
 /* IDの頭の部分でグループに分ける（UNIV-01 → UNIV、S012 → S）。未設定は "" */
@@ -5898,13 +5915,13 @@ function AdminScreen({C}){
   /* 絞り込んだ人だけで、クラス・生徒・単語のすべてを計算し直す */
   const data=useMemo(()=>{
     if(!raw)return null;
-    const match=idQuery(query);
+    const {match,slots}=idQuery(query,group!=="all"&&ID_KIND[group]?group:"");
     const ps=raw.p.filter(x=>{
       const code=(x.student_code||"").trim();
       if(group!=="all"&&idGroup(code)!==group)return false;
       return match(x);
     });
-    return adminBuild(ps,raw.g,raw.l,raw.s);
+    return {...adminBuild(ps,raw.g,raw.l,raw.s),slots};
   },[raw,group,query]);
 
   const fmtLast=t=>{
@@ -6012,19 +6029,7 @@ function AdminScreen({C}){
     </>);
   };
 
-  const renderStudents=()=>{
-    const list=[...data.rows].sort((a,b)=>
-      sort==="last"?(a.lastAt||0)-(b.lastAt||0):
-      sort==="week"?b.week-a.week:
-      sort==="studied"?b.studied-a.studied:
-      (a.code||"\uffff").localeCompare(b.code||"\uffff",undefined,{numeric:true}));
-    return (<>
-      <div style={{display:"flex",gap:6,marginBottom:12}}>
-        {[["last","ご無沙汰"],["week","今週"],["studied","語数"],["code","番号"]].map(([k,l])=>(
-          <button key={k} style={small(sort===k)} onClick={()=>setSort(k)}>{l}順</button>))}
-      </div>
-      {list.length===0&&<div style={{...box,color:C.sub,fontSize:16}}>まだ生徒がいません</div>}
-      {list.map(r=>{
+  const studentCard=r=>{
         const on=open===r.id;
         return (
           <div key={r.id} style={box}>
@@ -6048,7 +6053,44 @@ function AdminScreen({C}){
             {on&&<StudentDetail r={r}/>}
           </div>
         );
+  };
+
+  /* 範囲や番号を検索したときは、番号の枠を順に並べる（使っていない番号は「未使用」） */
+  const renderSlots=()=>{
+    const byKey=new Map();
+    data.rows.forEach(r=>{const x=idParts(r.code);if(x)byKey.set(idFormat(x.pre,x.num),r);});
+    const used=data.slots.filter(k=>byKey.has(k)).length;
+    return (<>
+      <div style={{fontSize:14,color:C.sub,marginBottom:10}}>
+        <b className="num" style={{color:C.text}}>{data.slots.length}</b> 件中　使用中 <b className="num" style={{color:C.text}}>{used}</b>　未使用 {data.slots.length-used}
+      </div>
+      {data.slots.map(k=>{
+        const r=byKey.get(k);
+        if(!r)return (
+          <div key={k} style={{...box,display:"flex",justifyContent:"space-between",alignItems:"center",
+            minHeight:56,padding:"8px 16px",background:"transparent",borderStyle:"dashed"}}>
+            <span className="num" style={{fontSize:16,color:C.faint}}>{k}</span>
+            <span style={{fontSize:13,color:C.faint}}>未使用</span>
+          </div>);
+        return studentCard(r);
       })}
+    </>);
+  };
+
+  const renderStudents=()=>{
+    if(data.slots)return renderSlots();
+    const list=[...data.rows].sort((a,b)=>
+      sort==="last"?(a.lastAt||0)-(b.lastAt||0):
+      sort==="week"?b.week-a.week:
+      sort==="studied"?b.studied-a.studied:
+      (a.code||"\uffff").localeCompare(b.code||"\uffff",undefined,{numeric:true}));
+    return (<>
+      <div style={{display:"flex",gap:6,marginBottom:12}}>
+        {[["last","ご無沙汰"],["week","今週"],["studied","語数"],["code","番号"]].map(([k,l])=>(
+          <button key={k} style={small(sort===k)} onClick={()=>setSort(k)}>{l}順</button>))}
+      </div>
+      {list.length===0&&<div style={{...box,color:C.sub,fontSize:16}}>まだ生徒がいません</div>}
+      {list.map(studentCard)}
     </>);
   };
 
@@ -6087,7 +6129,7 @@ function AdminScreen({C}){
       {!data&&!err&&<div style={{color:C.sub,fontSize:16}}>読み込み中…</div>}
 
       {data&&(<>
-        <input value={query} onChange={e=>setQuery(e.target.value)} placeholder="ID・メールで検索（範囲は U20-40 など）"
+        <input value={query} onChange={e=>setQuery(e.target.value)} placeholder="ID・メールで検索（例：H1-100 / U001, U003）"
           type="search" autoCapitalize="off" autoCorrect="off" spellCheck={false}
           style={{width:"100%",minHeight:56,padding:"0 14px",fontSize:16,borderRadius:4,marginBottom:8,
             border:"1px solid "+C.border,background:C.bg,color:C.text,boxSizing:"border-box"}}/>
