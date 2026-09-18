@@ -119,7 +119,7 @@
      partOfSpeech       : 品詞
      meaning            : 意味（複数は「；」区切り。先頭が主要語義）
      pronunciation      : 発音記号
-     part               : パート番号（LEAP の章立て）
+     part               : パート番号（実際は番号順に10語ずつ自動で決まる。No.102〜 は Part α）
      example/exampleJa  : 例文1と和訳
      example2/exampleJa2: 例文2と和訳
      hook               : 覚え方のひとこと（任意）
@@ -740,6 +740,7 @@ const RAW_WORDS=[
      {word:"chef",meaning:"料理長，シェフ",breakdown:"chief（頭）→ 厨房の頭。フランス語から入った形"},
      {word:"captain",meaning:"キャプテン；船長",breakdown:"capt（頭）＋ ain（人）→ チームや船の頭に立つ人"},
      {synonym:true,word:"reach",meaning:"到達する",breakdown:"距離的に届く。achieve は努力の末に目標へ届く"}]},
+
   {id:41,word:"pronunciation",partOfSpeech:"名詞",meaning:"発音",
    meanings:["名|発音"],
    pronunciation:"/prəˌnʌnsiˈeɪʃn/",part:3,
@@ -896,318 +897,828 @@ const RAW_WORDS=[
      {word:"input",meaning:"入力",breakdown:"in（中へ）＋ put（置く）→ 中へ入れて置くこと"},
      {synonym:true,word:"submit",meaning:"提出する",breakdown:"目上へ差し出す硬い語。hand in のほうが口語的"}]},
 
-{id:51,word:"aloud",partOfSpeech:"副詞",meaning:"声に出して",
-   meanings:["副|声に出して"],
-   pronunciation:"/əˈlaʊd/",part:3,
-   example:"Please read the first paragraph aloud so everyone can hear.",
-   exampleJa:"みんなに聞こえるように、最初の段落を声に出して読んでください。",
-   example2:"I always read English aloud when I practice at home.",
-   exampleJa2:"家で練習するとき、私はいつも英語を声に出して読む。",
-   etymologyProcess:"ad（〜へ）＋ loud（声の大きい）→ 声を外へ届くほうへ…？",
-   etymologyConclusion:"ad（〜へ）＋ loud（声の大きい）→ 頭の中の文字を、聞こえる音のほうへ出す＝声に出して",
+  {id:51,word:"condition",partOfSpeech:"名詞",meaning:"状態，容態",
+   meanings:["名|状態，容態","名|（通例 ―s）（周囲の）状況，条件"],
+   pronunciation:"/kənˈdɪʃn/",part:6,
+   example:"The doctor said my grandfather's condition was getting better.",
+   exampleJa:"医者は祖父の容態が良くなってきていると言った。",
+   example2:"Working conditions at the factory were improved last year.",
+   exampleJa2:"その工場の労働条件は昨年改善された。",
+   etymologyProcess:"con（共に）＋ dic（言う）＋ tion（名詞）→ お互いに言い合って決めたものは…？",
+   etymologyConclusion:"con（共に）＋ dic（言う）＋ tion（名詞）→ お互いに言い合って決めた取り決め＝条件。その条件のもとでの有り様＝状態",
+   hook:"in good condition（よい状態で）。「状況・条件」の意味ではふつう複数形 conditions にする。",
    relatedWords:[
-     {word:"loud",meaning:"（音が）大きい",breakdown:"loud（声の大きい）→ 遠くまで届くほど音が大きい"},
-     {synonym:true,word:"audible",meaning:"聞こえる",breakdown:"聞き取れるほどの音。aloud は黙らずに声に出すこと"},
-     {synonym:true,word:"orally",meaning:"口頭で",breakdown:"文字でなく口で伝える。aloud は音として出すこと自体"},
-     {synonym:true,word:"silently",meaning:"黙って",breakdown:"read silently は黙読。read aloud が音読で対になる"}]},
+     {word:"dictionary",meaning:"辞書",breakdown:"dict（言う）＋ ion（名詞）＋ ary（集まり）→ 言葉を集めた本"},
+     {word:"predict",meaning:"予言する，予測する",breakdown:"pre（前もって）＋ dict（言う）→ 起こる前に言う"},
+     {word:"contradict",meaning:"矛盾する；反論する",breakdown:"contra（逆に）＋ dict（言う）→ 反対のことを言う"},
+     {synonym:true,word:"state",meaning:"状態",breakdown:"そのときの有り様全般。condition は体調や品物の具合によく使う"}]},
 
-  {id:52,word:"absent",partOfSpeech:"形容詞",meaning:"（from ～）（～を）欠席の",
-   meanings:["形|（from ～）（～を）欠席の","形|ぼんやりした"],
-   pronunciation:"/ˈæbsənt/",part:3,
-   example:"Three of my classmates were absent from school yesterday.",
-   exampleJa:"昨日はクラスメート3人が学校を欠席していた。",
-   example2:"Tell me in advance if you will be absent from practice.",
-   exampleJa2:"練習を欠席するなら前もって言ってください。",
-   etymologyProcess:"ab（離れて）＋ sent（いる）→ その場から離れたところに…？",
-   etymologyConclusion:"ab（離れて）＋ sent（いる）→ 体が離れた場所にあって、ここにいない＝欠席の",
+  {id:52,word:"medical",partOfSpeech:"形容詞",meaning:"医療の",
+   meanings:["形|医療の","形|医学の"],
+   pronunciation:"/ˈmedɪkl/",part:6,
+   example:"You should get medical help right away.",
+   exampleJa:"すぐに医療の手当てを受けるべきだ。",
+   example2:"My cousin is studying at a medical school in Tokyo.",
+   exampleJa2:"いとこは東京の医科大学で学んでいる。",
+   etymologyProcess:"medic（治す）＋ al（〜に関する）→ 病気を治すことに…？",
+   etymologyConclusion:"medic（治す）＋ al（〜に関する）→ 病気やけがを治すことに関する＝医療の・医学の",
+   hook:"medical care（医療）、medical checkup（健康診断）の形でよく出る。",
    relatedWords:[
-     {word:"present",meaning:"出席している；現在の",breakdown:"pre（先に）＋ sent（いる）→ 人の前に出て、その場にいる"},
-     {word:"essence",meaning:"本質",breakdown:"ess（ある）＋ ence（名詞）→ そのものが「ある」ためのいちばん大事な中身"},
-     {word:"represent",meaning:"代表する",breakdown:"re（再び）＋ pre（先に）＋ sent（いる）→ 人の代わりにその場にいる"},
-     {synonym:true,word:"missing",meaning:"見当たらない",breakdown:"あるはずのものが欠けている。absent は人がその場にいない"}]},
+     {word:"medicine",meaning:"薬；医学",breakdown:"medic（治す）＋ ine（もの）→ 病気を治すもの・治す学問"},
+     {word:"remedy",meaning:"治療法；解決策",breakdown:"re（元へ）＋ med（治す）→ 元の元気な状態へ治す手だて"},
+     {word:"paramedic",meaning:"救急救命士",breakdown:"para（そばで）＋ medic（治す）→ 医者のそばで治療を助ける人"},
+     {synonym:true,word:"physical",meaning:"身体の",breakdown:"体そのものについて。medical は病気を治す医療について"}]},
 
-  {id:53,word:"attendance",partOfSpeech:"名詞",meaning:"出席",
-   meanings:["名|出席","名|出席者数"],
-   pronunciation:"/əˈtendəns/",part:3,
-   example:"The teacher takes attendance at the start of every lesson.",
-   exampleJa:"先生は毎回の授業の初めに出席をとる。",
-   example2:"Attendance at morning practice dropped during exam week.",
-   exampleJa2:"試験週間の間、朝練の出席は落ち込んだ。",
-   etymologyProcess:"ad（〜へ）＋ tend（伸ばす）＋ ance（名詞）→ 心と体をその場へ…？",
-   etymologyConclusion:"ad（〜へ）＋ tend（伸ばす）＋ ance（名詞）→ その場へ自分を伸ばして出向いた記録＝出席",
+  {id:53,word:"stress",partOfSpeech:"名詞",meaning:"ストレス",
+   meanings:["名|ストレス","名|（on ～）（～に対する）強調","他|～を強調する"],
+   pronunciation:"/stres/",part:6,
+   example:"Many students feel a lot of stress before exams.",
+   exampleJa:"多くの生徒が試験の前に強いストレスを感じる。",
+   example2:"Our coach always puts stress on teamwork.",
+   exampleJa2:"私たちのコーチはいつもチームワークを強調する。",
+   etymologyProcess:"stress（締めつける）→ 心や体をぎゅっと締めつけると…？",
+   etymologyConclusion:"stress（締めつける）→ distress（苦しめる）の頭が落ちた形。心や体をぎゅっと締めつける圧力＝ストレス；一か所に力を込める＝強調",
+   hook:"動詞では「〜を強調する」。stress the importance of 〜（〜の大切さを強調する）で覚える。",
    relatedWords:[
-     {word:"attend",meaning:"出席する",breakdown:"ad（〜へ）＋ tend（伸ばす）→ その場へ自分を伸ばして行く"},
-     {word:"extend",meaning:"延ばす",breakdown:"ex（外へ）＋ tend（伸ばす）→ 外側へどこまでも伸ばしていく"},
-     {word:"tent",meaning:"テント",breakdown:"tent（伸ばす）→ 布をぴんと張り伸ばした仮の住まい"},
-     {word:"pretend",meaning:"ふりをする",breakdown:"pre（先に）＋ tend（伸ばす）→ 本心の前に見せかけを張り出す"}]},
+     {word:"strict",meaning:"厳しい",breakdown:"strict（締めつける）→ 決まりでぎゅっと締めつける"},
+     {word:"restrict",meaning:"制限する",breakdown:"re（後ろへ）＋ strict（締めつける）→ 後ろへ引き締めて広がらせない"},
+     {word:"district",meaning:"地区",breakdown:"di（離れて）＋ strict（締めつける）→ 線を引いて区切り、締めて治める範囲"},
+     {word:"distress",meaning:"苦悩",breakdown:"di（離れて）＋ stress（締めつける）→ 締めつけられて引き裂かれるように苦しむ"}]},
 
-  {id:54,word:"take turns",partOfSpeech:"熟語",meaning:"交代でする",
-   meanings:["熟|交代でする"],
-   pronunciation:"/ˌteɪk ˈtɜːrnz/",part:3,
-   example:"Take turns reading the dialogue with your partner.",
-   exampleJa:"相手と交代で対話文を読みなさい。",
-   example2:"We took turns carrying the heavy boxes to the gym.",
-   exampleJa2:"私たちは交代で重い箱を体育館まで運んだ。",
-   etymologyProcess:"turn（回す）→ 順番をぐるりと回して一人ずつ…？",
-   etymologyConclusion:"turn（回す）→ 役目をぐるりと回し、回ってきた人がやる＝交代でやる",
+  {id:54,word:"suffer",partOfSpeech:"自動詞・他動詞",meaning:"（from ～）（病気などで）苦しむ",
+   meanings:["自|（from ～）（病気などで）苦しむ","他|（苦痛，損害）を経験する"],
+   pronunciation:"/ˈsʌfər/",part:6,
+   example:"My grandmother suffers from back pain.",
+   exampleJa:"祖母は腰痛に苦しんでいる。",
+   example2:"The town suffered serious damage from the typhoon.",
+   exampleJa2:"その町は台風で深刻な被害を受けた。",
+   etymologyProcess:"suf（下で）＋ fer（運ぶ）→ 重い荷物を下から支えて運ぶと…？",
+   etymologyConclusion:"suf（下で）＋ fer（運ぶ）→ 重い荷物の下に入って支え運ぶ＝つらさに耐える・苦しむ",
+   hook:"suffer from 〜 は「〜（病気など）に苦しむ」。suffer damage（被害を受ける）のように目的語もとる。",
    relatedWords:[
-     {word:"turn",meaning:"回る；順番",breakdown:"turn（回す）→ ぐるりと向きを変える。回ってきたものが順番"},
-     {word:"return",meaning:"戻る；返す",breakdown:"re（戻す）＋ turn（回す）→ 向きを回して元の場所へ戻る"},
-     {word:"tour",meaning:"周遊旅行",breakdown:"tour（回す）→ ぐるりと一周して出発点へ戻る旅"},
-     {word:"tournament",meaning:"勝ち抜き戦",breakdown:"tour（回す）＋ ment（名詞）→ 対戦相手を次々に回していく試合"}]},
+     {word:"transfer",meaning:"移す；乗り換える",breakdown:"trans（向こうへ）＋ fer（運ぶ）→ 別の場所へ運び移す"},
+     {word:"prefer",meaning:"〜のほうを好む",breakdown:"pre（前へ）＋ fer（運ぶ）→ 好きなほうを前へ運び出す"},
+     {word:"refer",meaning:"参照する；言及する",breakdown:"re（元へ）＋ fer（運ぶ）→ 話を元の資料へ運び戻す"},
+     {synonym:true,word:"endure",meaning:"耐える",breakdown:"がまんして持ちこたえる。suffer は苦しみを受ける側"}]},
 
-  {id:55,word:"in pairs",partOfSpeech:"熟語",meaning:"二人一組で",
-   meanings:["熟|二人一組で"],
-   pronunciation:"/ɪn ˈperz/",part:3,
-   example:"Work in pairs and check each other's answers.",
-   exampleJa:"二人一組で作業して、お互いの答えを確認しなさい。",
-   example2:"Our teacher had us practice the new dialogue in pairs.",
-   exampleJa2:"先生は私たちに新しい対話文を二人一組で練習させた。",
-   etymologyProcess:"par（等しい）→ 釣り合う相手と二人ずつ…？",
-   etymologyConclusion:"par（等しい）→ 釣り合う相手と等しい立場で二人ひと組になる＝二人一組で",
+  {id:55,word:"exercise",partOfSpeech:"名詞",meaning:"運動",
+   meanings:["名|運動","名|（―s）練習","自|運動する","他|～を行使する"],
+   pronunciation:"/ˈeksərsaɪz/",part:6,
+   example:"Regular exercise is good for both your body and your mind.",
+   exampleJa:"定期的な運動は体にも心にもよい。",
+   example2:"Do the grammar exercises on page 20 for homework.",
+   exampleJa2:"宿題として20ページの文法の練習問題をやりなさい。",
+   etymologyProcess:"ex（外へ）＋ erc（囲い込む）→ 囲いの中の家畜を外へ出すと…？",
+   etymologyConclusion:"ex（外へ）＋ erc（囲い込む）→ 囲いから家畜を外へ出して働かせる＝体を動かして鍛える・運動",
+   hook:"「運動」の意味では数えない（get exercise）。「練習問題」は数える（exercises）。exercise a right は「権利を行使する」。",
    relatedWords:[
-     {word:"pair",meaning:"一組；ペア",breakdown:"par（等しい）→ 釣り合う同じもの2つでひと組"},
-     {word:"compare",meaning:"比べる",breakdown:"com（共に）＋ par（等しい）→ 二つを並べて等しいか見る"},
-     {word:"umpire",meaning:"審判",breakdown:"non（否定）＋ par（等しい）→ どちらのチームとも対等ではない第三の人"},
-     {word:"peer",meaning:"同年代の仲間",breakdown:"par（等しい）→ 立場も年齢も等しい相手"}]},
+     {word:"coerce",meaning:"強制する",breakdown:"co（共に）＋ erce（囲い込む）→ 囲いの中に押し込めて無理にやらせる"},
+     {synonym:true,word:"practice",meaning:"練習",breakdown:"上達のための繰り返し。exercise は体や頭を動かす訓練"},
+     {synonym:true,word:"workout",meaning:"トレーニング",breakdown:"ジムなどで体を鍛える運動。口語的"},
+     {synonym:true,word:"drill",meaning:"反復練習",breakdown:"同じことを何度も繰り返す練習"}]},
 
-  {id:56,word:"paraphrase",partOfSpeech:"他動詞",meaning:"～を言い換える",
-   meanings:["他|～を言い換える","名|言い換え"],
-   pronunciation:"/ˈpærəfreɪz/",part:3,
-   example:"Can you paraphrase this sentence in easier English?",
-   exampleJa:"この文をもっとやさしい英語に言い換えてくれますか。",
-   example2:"She paraphrased the long article in her own simple words.",
-   exampleJa2:"彼女はその長い記事を自分のやさしい言葉に言い換えた。",
-   etymologyProcess:"para（横に）＋ phrase（言い回し）→ 元の言い方の横に別の…？",
-   etymologyConclusion:"para（横に）＋ phrase（言い回し）→ 元の言い方の横に別の言い方を並べる＝言い換える",
+  {id:56,word:"breathe",partOfSpeech:"自動詞",meaning:"呼吸する，息をする",
+   meanings:["自|呼吸する，息をする"],
+   pronunciation:"/briːð/",part:6,
+   example:"Breathe in slowly through your nose.",
+   exampleJa:"鼻からゆっくり息を吸いなさい。",
+   example2:"The room was so smoky that I could hardly breathe.",
+   exampleJa2:"部屋が煙だらけで、ほとんど息ができなかった。",
+   etymologyProcess:"breath（息）→ 名詞の breath に e が付くと…？",
+   etymologyConclusion:"breath（息）→ 名詞 breath の終わりに e が付いて、息をする動作を表す動詞になった＝呼吸する",
+   hook:"名詞 breath［ブレス］、動詞 breathe［ブリーズ］。e が付くと音が変わる。breathe in（吸う）・breathe out（吐く）。",
    relatedWords:[
-     {word:"phrase",meaning:"語句；言い回し",breakdown:"phrase（言い回し）→ ひとまとまりで意味を持つ言葉の並び"},
-     {word:"paragraph",meaning:"段落",breakdown:"para（横に）＋ graph（書く）→ 横に印を書いて区切った文のまとまり"},
-     {word:"paramedic",meaning:"救急救命士",breakdown:"para（横に）＋ medic（医療）→ 医師の横に付いて手当てする人"},
-     {synonym:true,word:"rephrase",meaning:"言い直す",breakdown:"別の語で言い直す。paraphrase はやさしく噛み砕く含み"}]},
+     {word:"breath",meaning:"息，呼吸",breakdown:"breath（息）→ 吸ったり吐いたりする空気そのもの"},
+     {word:"breathless",meaning:"息を切らした",breakdown:"breath（息）＋ less（ない）→ 息が足りなくなった"},
+     {synonym:true,word:"inhale",meaning:"息を吸い込む",breakdown:"breathe in の硬い言い方。in（中へ）＋ hale（息をする）"},
+     {synonym:true,word:"exhale",meaning:"息を吐き出す",breakdown:"breathe out の硬い言い方。ex（外へ）＋ hale（息をする）"}]},
 
-  {id:57,word:"dialogue",partOfSpeech:"名詞",meaning:"（本，劇，映画の中の）会話",
-   meanings:["名|（本，劇，映画の中の）会話","名|対談，対話"],
-   pronunciation:"/ˈdaɪəlɔːɡ/",part:3,
-   example:"Let's practice the dialogue on page 32 with a partner.",
-   exampleJa:"32ページの対話文を相手と練習しましょう。",
-   example2:"The dialogues in this textbook sound natural and easy.",
-   exampleJa2:"この教科書の対話文は自然でやさしく聞こえる。",
-   etymologyProcess:"dia（間を通して）＋ log（言葉）→ 二人の間を言葉が…？",
-   etymologyConclusion:"dia（間を通して）＋ log（言葉）→ 二人の間を言葉が行き来する＝対話文",
+  {id:57,word:"thirsty",partOfSpeech:"形容詞",meaning:"のどが渇いた",
+   meanings:["形|のどが渇いた","形|（for ～）（～を）切望して"],
+   pronunciation:"/ˈθɜːrsti/",part:6,
+   example:"I got really thirsty after running around the track.",
+   exampleJa:"トラックを走り回ったあと、とてものどが渇いた。",
+   example2:"The young players are thirsty for their first win.",
+   exampleJa2:"若い選手たちは初勝利を切望している。",
+   etymologyProcess:"thirst（渇き）＋ y（〜な状態の）→ 体の中が乾いていると…？",
+   etymologyConclusion:"thirst（渇き）＋ y（〜な状態の）→ 体の中がからからに乾いた状態の＝のどが渇いた",
+   hook:"be thirsty for 〜 は、水以外のもの（知識・勝利など）を「強く求める」ときにも使う。",
    relatedWords:[
-     {word:"logic",meaning:"論理",breakdown:"log（言葉）＋ ic（形容詞）→ 言葉を筋道立てて組んだもの"},
-     {word:"catalog",meaning:"カタログ；目録",breakdown:"cata（下へ）＋ log（言葉）→ 上から下へ並べ書いた言葉の一覧"},
-     {word:"apology",meaning:"謝罪",breakdown:"apo（離れて）＋ log（言葉）→ 責めから離れるための言葉"},
-     {word:"monologue",meaning:"独白",breakdown:"mono（一つ）＋ log（言葉）→ 一人だけで話し続ける言葉"}]},
+     {word:"thirst",meaning:"のどの渇き；渇望",breakdown:"thirst（渇き）→ 水や何かを強くほしがる気持ち"},
+     {word:"hungry",meaning:"空腹の；渇望して",breakdown:"hungr（飢え）＋ y（〜な状態の）→ おなかがすいた状態の"},
+     {word:"sleepy",meaning:"眠い",breakdown:"sleep（眠り）＋ y（〜な状態の）→ 眠気がやってきた状態の"},
+     {synonym:true,word:"eager",meaning:"熱望して",breakdown:"be eager for で「〜を熱望する」。thirsty for より広く使う"}]},
 
-  {id:58,word:"row",partOfSpeech:"名詞",meaning:"列",
-   memory:"「教室の横一列」をイメージ。in a row ＝「一列に並んで」→「連続で」。three days in a row ＝ 3日連続。",
-   meanings:["名|列","他|（ボート）をこぐ"],
-   pronunciation:"/roʊ/",part:3,
-   example:"The students in the front row can see the screen clearly.",
-   exampleJa:"前の列の生徒は画面がはっきり見える。",
-   example2:"Please pass these handouts back down your own row.",
-   exampleJa2:"このプリントを自分の列の後ろへ回してください。",
-   etymologyProcess:"row（並び）→ 横一直線につながった…？",
-   etymologyConclusion:"row（並び）→ 横一直線につながった並び。教室なら横の座席＝横の列",
-   hook:"「一直線の並び」が核。ボートを漕ぐ row は綴りが同じだけの別語。",
+  {id:58,word:"physical",partOfSpeech:"形容詞",meaning:"身体的な",
+   meanings:["形|身体的な","形|物理的な"],
+   pronunciation:"/ˈfɪzɪkl/",part:6,
+   example:"Physical activity helps you sleep better at night.",
+   exampleJa:"体を動かす活動は夜の眠りをよくしてくれる。",
+   example2:"The physical distance between us did not change our friendship.",
+   exampleJa2:"私たちの物理的な距離は友情を変えなかった。",
+   etymologyProcess:"physic（自然）＋ al（〜に関する）→ 自然の中の形あるものに…？",
+   etymologyConclusion:"physic（自然）＋ al（〜に関する）→ 自然の中の形あるもの（体や物体）に関する＝身体的な・物理的な",
+   hook:"反対は mental（精神的な）。physical education（体育）は P.E. と略す。",
    relatedWords:[
-     {synonym:true,word:"column",meaning:"縦の列；円柱",breakdown:"柱のように縦に伸びる列。row は横の並び"},
-     {synonym:true,word:"line",meaning:"線；順番待ちの列",breakdown:"一直線の並び。並んで待つ列は line、座席の横並びは row"},
-     {synonym:true,word:"seat",meaning:"座席",breakdown:"座る場所。row はその座席が横に並んだひとまとまり"},
-     {synonym:true,word:"aisle",meaning:"通路",breakdown:"列と列の間の通り道。row の間を歩くところ"}]},
+     {word:"physics",meaning:"物理学",breakdown:"phys（自然）＋ ics（学問）→ 自然のしくみを調べる学問"},
+     {word:"physician",meaning:"内科医",breakdown:"physic（自然）＋ ian（人）→ 体という自然を治す人"},
+     {word:"physique",meaning:"体格",breakdown:"phys（自然）＋ ique（名詞）→ 生まれ持った体つき"},
+     {synonym:true,word:"mental",meaning:"精神的な",breakdown:"physical の反対。心や頭のはたらきについて"}]},
 
-  {id:59,word:"underline",partOfSpeech:"他動詞",meaning:"～に下線を引く",
-   meanings:["他|～に下線を引く","他|～を強調する"],
-   pronunciation:"/ˌʌndərˈlaɪn/",part:3,
-   example:"Underline the key words in each question before answering.",
-   exampleJa:"答える前に、それぞれの問いの重要語に下線を引きなさい。",
-   example2:"I underlined every word I didn't know in the passage.",
-   exampleJa2:"私はその一節で知らない語すべてに下線を引いた。",
-   etymologyProcess:"under（下に）＋ line（線）→ 語の下に線を引いて…？",
-   etymologyConclusion:"under（下に）＋ line（線）→ 語の下に線を引いて目立たせる＝下線を引く",
+  {id:59,word:"fever",partOfSpeech:"名詞",meaning:"（体温の）熱",
+   memory:"日本語の「フィーバー」＝熱狂。体温の「熱」も同じ語。have a fever（熱がある）、a high fever（高熱）の形で丸ごと覚える。",
+   meanings:["名|（体温の）熱","名|熱狂"],
+   pronunciation:"/ˈfiːvər/",part:6,
+   example:"I stayed home from school because I had a high fever.",
+   exampleJa:"高い熱があったので学校を休んだ。",
+   example2:"World Cup fever spread across the country.",
+   exampleJa2:"ワールドカップの熱狂が国中に広がった。",
+   etymologyProcess:"fever（熱）→ 体が燃えるように熱くなると…？",
+   etymologyConclusion:"fever（熱）→ ラテン語 febris（熱病）から。体が燃えるように熱くなる＝熱；心が燃え上がる＝熱狂",
+   hook:"「熱がある」は have a fever。冠詞の a を忘れない。",
    relatedWords:[
-     {word:"line",meaning:"線；行",breakdown:"line（線）→ まっすぐに引かれた一本の筋"},
-     {word:"outline",meaning:"概要；輪郭",breakdown:"out（外へ）＋ line（線）→ 外側をなぞった線＝全体の形"},
-     {word:"underground",meaning:"地下の",breakdown:"under（下に）＋ ground（地面）→ 地面の下にある"},
-     {word:"underwear",meaning:"下着",breakdown:"under（下に）＋ wear（着る）→ 服の下に着るもの"}]},
+     {synonym:true,word:"temperature",meaning:"体温；熱",breakdown:"have a temperature でも「熱がある」。fever は病気による高い熱"},
+     {synonym:true,word:"heat",meaning:"熱さ",breakdown:"物や空気の熱さ。fever は体の熱"},
+     {synonym:true,word:"enthusiasm",meaning:"熱中",breakdown:"何かに夢中になる気持ち。fever は一時的に広がる熱狂"},
+     {synonym:true,word:"craze",meaning:"大流行",breakdown:"一時的な熱狂的流行。fever とほぼ同じ場面で使う"}]},
 
-  {id:60,word:"pass out",partOfSpeech:"熟語",meaning:"～を配る",
-   meanings:["熟|～を配る","熟|気を失う"],
-   pronunciation:"/ˌpæs ˈaʊt/",part:3,
-   example:"Could you pass out these worksheets to everyone?",
-   exampleJa:"このワークシートをみんなに配ってくれますか。",
-   example2:"He passed out the test papers before the bell rang.",
-   exampleJa2:"彼はチャイムが鳴る前に試験用紙を配った。",
-   etymologyProcess:"pass（通る）＋ out（外へ）→ 手から手へ通して外へ…？",
-   etymologyConclusion:"pass（通る）＋ out（外へ）→ 手から手へ通して全体へ行き渡らせる＝配って回す",
+  {id:60,word:"strength",partOfSpeech:"名詞",meaning:"（physical ―）体力",
+   meanings:["名|（physical ―）体力","名|力"],
+   pronunciation:"/streŋθ/",part:6,
+   example:"Swimming is a good way to build physical strength.",
+   exampleJa:"水泳は体力をつけるのによい方法だ。",
+   example2:"I didn't have the strength to lift the heavy box.",
+   exampleJa2:"私にはその重い箱を持ち上げる力がなかった。",
+   etymologyProcess:"streng（強い）＋ th（名詞）→ 強いという性質に名前をつけると…？",
+   etymologyConclusion:"streng（強い）＋ th（名詞）→ strong の o が e に変わり、強さそのものを表す名詞に＝力・体力",
+   hook:"strong→strength、long→length。形容詞に th を付けると名詞になる。",
    relatedWords:[
-     {word:"pass",meaning:"通る；手渡す",breakdown:"pass（通る）→ 通り抜ける。手から手へ通していく"},
-     {word:"passage",meaning:"一節；通路",breakdown:"pass（通る）＋ age（名詞）→ 通っていく道。文章を通り読む一区切り"},
-     {word:"passenger",meaning:"乗客",breakdown:"pass（通る）＋ enger（人）→ 乗り物で通っていく人"},
-     {synonym:true,word:"hand out",meaning:"配る",breakdown:"手で配る。pass out は列に沿って順に回していく感じ"}]},
+     {word:"strong",meaning:"強い",breakdown:"strong（強い）→ 力がみなぎっている"},
+     {word:"strengthen",meaning:"強くする",breakdown:"streng（強い）＋ th（名詞）＋ en（〜にする）→ 力のある状態にする"},
+     {word:"length",meaning:"長さ",breakdown:"leng（長い）＋ th（名詞）→ long の o が e に変わって「長さ」"},
+     {word:"width",meaning:"幅",breakdown:"wid（広い）＋ th（名詞）→ wide の e が落ちて「幅」"}]},
 
-  {id:61,word:"raise",partOfSpeech:"他動詞",meaning:"～を上げる",
-   memory:"raise your hand ＝「手を挙げて」。a がある raise は“何かを上げる”、a のない rise は“自分が上がる”（The sun rises.）。",
-   meanings:["他|～を上げる","他|（子ども，作物）を育てる","他|（お金，資金）を集める","他|（問題）を提起する","名|賃上げ，昇給"],
-   pronunciation:"/reɪz/",part:3,
-   example:"Raise your hand if you know the answer to this.",
-   exampleJa:"この答えがわかる人は手を挙げなさい。",
-   example2:"She raised her hand and asked a very good question.",
-   exampleJa2:"彼女は手を挙げて、とてもよい質問をした。",
-   etymologyProcess:"raise（高く上げる）→ 下にあるものを自分の力で…？",
-   etymologyConclusion:"raise（高く上げる）→ 下にあるものを自分の力で上へ動かす＝手などを挙げる",
-   hook:"raise は他動詞で目的語が要る。自動詞は rise（The sun rises.）。",
+  {id:61,word:"tear",partOfSpeech:"名詞",meaning:"（通例 ―s）涙",
+   meanings:["名|（通例 ―s）涙〈可算〉","他|（up）～を引き裂く"],
+   pronunciation:"/tɪr/",part:7,
+   example:"Tears ran down her face when she heard the news.",
+   exampleJa:"その知らせを聞いて、彼女の顔を涙が伝った。",
+   example2:"He tore up the old letter and threw it away.",
+   exampleJa2:"彼はその古い手紙を引き裂いて捨てた。",
+   etymologyProcess:"tear（しずく）→ 目からこぼれ落ちるしずくは…？",
+   etymologyConclusion:"tear（しずく）→ 目からこぼれ落ちるしずく＝涙。「裂く」の tear は発音も語源も別の語",
+   hook:"涙は［ティア］、裂くは［テア］（tear-tore-torn）。in tears で「泣いて」。",
    relatedWords:[
-     {synonym:true,word:"rise",meaning:"上がる",breakdown:"自動詞でひとりでに上がる。raise は目的語が必要"},
-     {synonym:true,word:"lift",meaning:"持ち上げる",breakdown:"重いものを持ち上げる。raise は高さを上げる全般"},
-     {synonym:true,word:"put up",meaning:"上げる；掲げる",breakdown:"Put your hand up. も手を挙げる言い方"},
-     {synonym:true,word:"arise",meaning:"生じる",breakdown:"問題が立ち上がってくる。人が手を挙げる意味はない"}]},
+     {word:"tearful",meaning:"涙ぐんだ",breakdown:"tear（しずく）＋ ful（いっぱいの）→ 目が涙でいっぱいの"},
+     {synonym:true,word:"cry",meaning:"泣く",breakdown:"声をあげて泣く。tear は流れる涙そのもの"},
+     {synonym:true,word:"weep",meaning:"しくしく泣く",breakdown:"涙を流して静かに泣く。やや硬い語"},
+     {synonym:true,word:"rip",meaning:"引き裂く",breakdown:"勢いよくびりっと裂く。「裂く」の tear に近い"}]},
 
-  {id:62,word:"open to page",partOfSpeech:"熟語",meaning:"（教科書の～ページ）を開く",
-   meanings:["熟|（教科書の～ページ）を開く"],
-   pronunciation:"/ˈoʊpən tə ˈpeɪdʒ/",part:3,
-   example:"Open your textbooks to page twenty-five and look here.",
-   exampleJa:"教科書の25ページを開いて、ここを見なさい。",
-   example2:"Please open your notebooks to a clean page for this.",
-   exampleJa2:"これのために、ノートの新しいページを開いてください。",
-   etymologyProcess:"open（開く）→ 本を開いて狙いのページまで…？",
-   etymologyConclusion:"open（開く）→ 本を開いて、狙いのページのほうまで進める＝〜ページを開く",
-   hook:"前置詞は米が to、英が at。Open page 25. とは言わない。",
+  {id:62,word:"taste",partOfSpeech:"自動詞・他動詞",meaning:"～の味がする",
+   meanings:["自|～の味がする","他|～の味をみる","名|味","名|好み"],
+   pronunciation:"/teɪst/",part:7,
+   example:"This soup tastes a little too salty.",
+   exampleJa:"このスープは少ししょっぱすぎる味がする。",
+   example2:"My sister has good taste in clothes.",
+   exampleJa2:"姉は服の好みがよい。",
+   etymologyProcess:"tast（触れて確かめる）→ 舌でそっと触れて確かめると…？",
+   etymologyConclusion:"tast（触れて確かめる）→ 舌で触れて確かめる＝味をみる・味がする；何が合うかを確かめた結果＝好み",
+   hook:"taste＋形容詞で「〜な味がする」（taste sweet）。「〜のような味」は taste like 〜。",
    relatedWords:[
-     {word:"opening",meaning:"開始；すき間",breakdown:"open（開く）＋ ing（名詞）→ 開いたところ・開き始め"},
-     {synonym:true,word:"turn to",meaning:"〜ページを開く",breakdown:"ページをめくって行く。open to と同じ場面で使う"},
-     {synonym:true,word:"look at",meaning:"〜を見る",breakdown:"Look at page 25. も教室でよく使う指示"},
-     {synonym:true,word:"close",meaning:"閉じる",breakdown:"Close your textbooks. と対で覚える反対の指示"}]},
+     {word:"tax",meaning:"税金",breakdown:"tax（値ぶみする）→ 財産を値ぶみして割り当てるお金"},
+     {word:"task",meaning:"仕事",breakdown:"task（割り当てた税）→ 割り当てられてやるべき務め"},
+     {synonym:true,word:"flavor",meaning:"風味",breakdown:"香りも含めた食べ物の味わい。taste は舌で感じる味"},
+     {synonym:true,word:"preference",meaning:"好み",breakdown:"いくつかの中で好むもの。taste in 〜 は趣味のよしあし"}]},
 
-  {id:63,word:"due",partOfSpeech:"形容詞",meaning:"（due to （名詞））（名詞）が原因で",
-   meanings:["形|（due to （名詞））（名詞）が原因で","形|締め切りの","形|到着［出産］予定の"],
-   pronunciation:"/duː/",part:3,
-   example:"This essay is due next Monday, so please start early.",
-   exampleJa:"このエッセイは来週の月曜が提出期限なので、早く始めてください。",
-   example2:"The club application was due yesterday, but I forgot it.",
-   exampleJa2:"部活の申込書は昨日が提出期限だったが、私は忘れていた。",
-   etymologyProcess:"du（支払うべき）→ 期日までに相手へ渡さねばならない…？",
-   etymologyConclusion:"du（支払うべき）→ 期日までに相手へ渡さねばならない状態＝提出期限が来ている",
+  {id:63,word:"rule",partOfSpeech:"名詞",meaning:"規則",
+   meanings:["名|規則","他|～を支配する"],
+   pronunciation:"/ruːl/",part:7,
+   example:"Everyone has to follow the school rules.",
+   exampleJa:"全員が校則に従わなければならない。",
+   example2:"The king ruled the country for forty years.",
+   exampleJa2:"その王は40年間国を支配した。",
+   etymologyProcess:"rule（まっすぐな棒）→ 線をまっすぐに引く物差しのように…？",
+   etymologyConclusion:"rule（まっすぐな棒）→ まっすぐ線を引く定規。人の行いをまっすぐそろえる決まり＝規則；上から治める＝支配する",
+   hook:"as a rule（ふつうは・概して）も重要。",
    relatedWords:[
-     {word:"duty",meaning:"義務",breakdown:"du（支払うべき）＋ ty（名詞）→ 果たして渡すべきもの"},
-     {word:"debt",meaning:"借金",breakdown:"du（支払うべき）＋ t（名詞）→ まだ返していない分"},
-     {synonym:true,word:"deadline",meaning:"締め切り",breakdown:"期限の日そのもの。due は期限が来ている状態を表す"},
-     {synonym:true,word:"hand in",meaning:"提出する",breakdown:"be due と対で使う。The report is due Friday."}]},
+     {word:"ruler",meaning:"定規；支配者",breakdown:"rule（まっすぐな棒）＋ er（道具・人）→ 線を引く道具、国を治める人"},
+     {word:"regular",meaning:"規則正しい；いつもの",breakdown:"regul（まっすぐな棒）＋ ar（〜の）→ 定規で測ったようにきちんとした"},
+     {word:"region",meaning:"地域",breakdown:"reg（治める）＋ ion（名詞）→ 一人の王が治める範囲"},
+     {synonym:true,word:"law",meaning:"法律",breakdown:"国が定めた決まり。rule は学校やゲームなどの規則にも使う"}]},
 
-  {id:64,word:"cheating",partOfSpeech:"名詞",meaning:"不正行為，カンニング",
-   meanings:["名|不正行為，カンニング"],
-   pronunciation:"/ˈtʃiːtɪŋ/",part:4,
-   example:"There will be no cheating during tomorrow's English test.",
-   exampleJa:"明日の英語のテスト中、不正行為は一切認めません。",
-   example2:"Cheating on an exam can cost you all your points.",
-   exampleJa2:"試験での不正行為は、点数を全部失うことになりかねない。",
-   etymologyProcess:"cheat（だまし取る）＋ ing（名詞）→ 規則を破って人のものを…？",
-   etymologyConclusion:"cheat（だまし取る）＋ ing（名詞）→ 規則を破ってこっそり答えを取る行い＝不正行為",
-   hook:"「カンニング」は和製英語。cunning は「ずる賢い」で不正の意味はない。",
+  {id:64,word:"role",partOfSpeech:"名詞",meaning:"役割",
+   meanings:["名|役割"],
+   pronunciation:"/roʊl/",part:7,
+   example:"She played an important role in the project.",
+   exampleJa:"彼女はその計画で重要な役割を果たした。",
+   example2:"My role in the school play was a talking cat.",
+   exampleJa2:"学校の劇での私の役は、しゃべる猫だった。",
+   etymologyProcess:"role（巻いた紙）→ 役者に渡された、せりふを書いた巻物は…？",
+   etymologyConclusion:"role（巻いた紙）→ 役者一人ひとりに渡された、せりふを書いた巻物。その人が受け持つ分＝役割",
+   hook:"play a role in 〜（〜で役割を果たす）で覚える。「ロールプレイ」は役を演じる練習。",
    relatedWords:[
-     {word:"cheat",meaning:"ずるをする",breakdown:"cheat（だまし取る）→ 規則を破って有利を取る"},
-     {synonym:true,word:"copy",meaning:"写す",breakdown:"人の答案を写すこと。それが cheating にあたる"},
-     {synonym:true,word:"cunning",meaning:"ずる賢い",breakdown:"形容詞で悪知恵が働くの意味。不正行為は指さない"},
-     {synonym:true,word:"honest",meaning:"正直な",breakdown:"ごまかさない。cheating の反対の態度として対で覚える"}]},
+     {word:"roll",meaning:"転がる；巻いたもの；名簿",breakdown:"roll（巻いたもの）→ くるくる巻いた紙。出席を取る名簿にも"},
+     {word:"control",meaning:"管理する，支配する",breakdown:"contra（向かい合わせて）＋ rol（巻いた紙）→ 写しの帳簿と向かい合わせて確かめる"},
+     {word:"enroll",meaning:"入学する，登録する",breakdown:"en（中に）＋ roll（名簿）→ 名簿の中に名前を書き入れる"},
+     {synonym:true,word:"part",meaning:"役；役割",breakdown:"play a part in も「〜で役割を果たす」。role とほぼ同じ"}]},
 
-  {id:65,word:"eraser",partOfSpeech:"名詞",meaning:"消しゴム",
-   meanings:["名|消しゴム","名|黒板消し"],
-   pronunciation:"/ɪˈreɪsər/",part:4,
-   example:"Could you pass me the board eraser from the desk?",
-   exampleJa:"机の上の黒板消しを取ってくれますか。",
-   example2:"I lent my eraser to the student sitting next to me.",
-   exampleJa2:"私は隣に座っている生徒に消しゴムを貸した。",
-   etymologyProcess:"ex（外へ）＋ ras（こする）＋ er（もの）→ こすって跡を外へ…？",
-   etymologyConclusion:"ex（外へ）＋ ras（こする）＋ er（もの）→ こすって跡を外へ消し去る道具＝消しゴム",
-   hook:"英国の rubber は米国では別の意味になる。黒板消しは board eraser。",
+  {id:65,word:"habit",partOfSpeech:"名詞",meaning:"習慣，癖",
+   meanings:["名|習慣，癖"],
+   pronunciation:"/ˈhæbɪt/",part:7,
+   example:"I have a habit of biting my nails when I'm nervous.",
+   exampleJa:"私は緊張すると爪をかむ癖がある。",
+   example2:"Reading before bed is a good habit.",
+   exampleJa2:"寝る前に読書をするのはよい習慣だ。",
+   etymologyProcess:"hab（持つ）＋ it（〜された）→ 体がいつも持っているものは…？",
+   etymologyConclusion:"hab（持つ）＋ it（〜された）→ 体がいつの間にか持ち続けているふるまい＝習慣・癖",
+   hook:"habit は個人の習慣・癖、custom は社会の習慣。have a habit of 〜ing（〜する癖がある）。",
    relatedWords:[
-     {synonym:true,word:"delete",meaning:"削除する",breakdown:"データを消す。erase はこすって跡を消す"},
-     {word:"razor",meaning:"かみそり",breakdown:"ras（こする）＋ or（もの）→ こすって削り取る道具"},
-     {synonym:true,word:"chalk",meaning:"チョーク",breakdown:"黒板に書く道具。消すほうが board eraser"},
-     {synonym:true,word:"rubber",meaning:"ゴム；（英）消しゴム",breakdown:"英国では消しゴム。米国では通じないので注意"}]},
+     {word:"inhabit",meaning:"住む",breakdown:"in（中に）＋ habit（持ち続ける）→ ある場所の中に居続ける"},
+     {word:"exhibit",meaning:"展示する",breakdown:"ex（外へ）＋ hibit（持つ）→ 外へ持ち出して見せる"},
+     {word:"prohibit",meaning:"禁止する",breakdown:"pro（前に）＋ hibit（持つ）→ 前に手をかざして押しとどめる"},
+     {synonym:true,word:"custom",meaning:"習慣",breakdown:"社会や地域に根づいた習慣。habit は個人の癖"}]},
 
-  {id:66,word:"grade",partOfSpeech:"名詞",meaning:"（小，中，高の）学年",
-   meanings:["名|（小，中，高の）学年","名|等級","名|成績"],
-   pronunciation:"/ɡreɪd/",part:4,
-   example:"Your grade depends on this group project and the test.",
-   exampleJa:"あなたの成績はこのグループ課題とテストで決まる。",
-   example2:"My brother is in the third grade of junior high school.",
-   exampleJa2:"弟は中学3年生だ。",
-   etymologyProcess:"grad（段階）→ 一段ずつ区切った位置のうち…？",
-   etymologyConclusion:"grad（段階）→ 一段ずつ区切った位置。学校なら学年、評価なら段階＝学年・成績",
-   hook:"点数そのものは score、英国では mark。grade は段階評価と学年。",
+  {id:66,word:"custom",partOfSpeech:"名詞",meaning:"習慣",
+   meanings:["名|習慣","名|（―s）税関，関税"],
+   pronunciation:"/ˈkʌstəm/",part:7,
+   example:"It is a Japanese custom to take off your shoes at the door.",
+   exampleJa:"玄関で靴を脱ぐのは日本の習慣だ。",
+   example2:"We had our bags checked at customs.",
+   exampleJa2:"私たちは税関でかばんを調べられた。",
+   etymologyProcess:"custom（慣れ親しむ）→ みんなが慣れ親しんで続けてきたことは…？",
+   etymologyConclusion:"custom（慣れ親しむ）→ ラテン語 consuetudo（すっかり慣れること）が縮まった語。みんなが慣れ親しんだやり方＝習慣；しきたりで納める税＝関税",
+   hook:"customer は「いつも慣れて通ってくる人」＝お客。税関・関税は複数形の customs。",
    relatedWords:[
-     {word:"graduate",meaning:"卒業する",breakdown:"grad（段階）＋ ate（動詞）→ 段を上りきって次へ進む"},
-     {word:"gradually",meaning:"だんだんと",breakdown:"grad（段階）＋ ly（副詞）→ 一段ずつ進むように少しずつ"},
-     {word:"upgrade",meaning:"格上げする",breakdown:"up（上へ）＋ grad（段階）→ 一段上へ引き上げる"},
-     {synonym:true,word:"score",meaning:"点数",breakdown:"点そのもの。grade は A・B などの段階評価や学年"}]},
+     {word:"customer",meaning:"客",breakdown:"custom（慣れ親しむ）＋ er（人）→ いつも決まって通ってくる人"},
+     {word:"accustom",meaning:"慣れさせる",breakdown:"ac（〜へ）＋ custom（慣れ親しむ）→ 慣れた状態へ持っていく"},
+     {word:"costume",meaning:"衣装",breakdown:"costume（慣れ親しむ）→ その土地や時代のいつもの装い"},
+     {synonym:true,word:"habit",meaning:"癖，習慣",breakdown:"個人の癖や習慣。custom は社会の習慣"}]},
 
-  {id:67,word:"in chorus",partOfSpeech:"熟語",meaning:"声をそろえて",
-   meanings:["熟|声をそろえて"],
-   pronunciation:"/ɪn ˈkɔːrəs/",part:4,
-   example:"Let's read the whole passage in chorus one more time.",
-   exampleJa:"もう一度、一節全体を声をそろえて読みましょう。",
-   example2:"The class answered in chorus when the teacher asked that.",
-   exampleJa2:"先生がそう尋ねると、クラスは声をそろえて答えた。",
-   etymologyProcess:"chor（合唱隊）→ 全員が一つの合唱隊のように…？",
-   etymologyConclusion:"chor（合唱隊）→ 全員が一つの合唱隊のように同じ声を出す＝声をそろえて",
+  {id:67,word:"tradition",partOfSpeech:"名詞",meaning:"伝統",
+   meanings:["名|伝統"],
+   pronunciation:"/trəˈdɪʃn/",part:7,
+   example:"Our town has a long tradition of summer festivals.",
+   exampleJa:"私たちの町には夏祭りの長い伝統がある。",
+   example2:"Eating rice cakes at New Year is a Japanese tradition.",
+   exampleJa2:"正月に餅を食べるのは日本の伝統だ。",
+   etymologyProcess:"tra（向こうへ）＋ dit（渡す）＋ ion（名詞）→ 親から子へと手渡していくものは…？",
+   etymologyConclusion:"tra（向こうへ）＋ dit（渡す）＋ ion（名詞）→ 世代から世代へと手渡されてきたもの＝伝統",
+   hook:"形容詞は traditional（伝統的な）。traitor（裏切り者＝味方を敵へ引き渡す人）も同じ語源。",
    relatedWords:[
-     {word:"chorus",meaning:"合唱；サビ",breakdown:"chor（合唱隊）→ 全員で同じところを歌う部分"},
-     {word:"choir",meaning:"聖歌隊",breakdown:"chor（合唱隊）→ そろって歌う人の集まり"},
-     {synonym:true,word:"all together",meaning:"みんな一緒に",breakdown:"同じ指示に使える口語。in chorus より easy"},
-     {synonym:true,word:"aloud",meaning:"声に出して",breakdown:"一人でも使う。in chorus は全員がそろって出す"}]},
+     {word:"edition",meaning:"（本の）版",breakdown:"e（外へ）＋ dit（渡す）＋ ion（名詞）→ 世の中へ出して渡したもの"},
+     {word:"data",meaning:"データ，資料",breakdown:"data（与えられたもの）→ 考える材料として与えられた事実"},
+     {word:"donate",meaning:"寄付する",breakdown:"don（与える）＋ ate（〜する）→ お金や物を人に与える"},
+     {synonym:true,word:"custom",meaning:"慣習",breakdown:"社会のならわし。tradition は長く受け継がれてきたもの"}]},
 
-  {id:68,word:"syllable",partOfSpeech:"名詞",meaning:"音節",
-   meanings:["名|音節"],
-   pronunciation:"/ˈsɪləbl/",part:4,
-   example:"This word has three syllables, so count them carefully.",
-   exampleJa:"この語は3つの音節を持つので、注意して数えなさい。",
-   example2:"Japanese counts moras, but English counts syllables instead.",
-   exampleJa2:"日本語は拍を数えるが、英語は代わりに音節を数える。",
-   etymologyProcess:"syn（共に）＋ lab（つかむ）→ 一息でひとつかみに言える…？",
-   etymologyConclusion:"syn（共に）＋ lab（つかむ）→ 一息でひとつかみに言える音のまとまり＝音節",
-   hook:"母音1つで1音節。日本語の拍とは数え方が違う（strike は1音節）。",
+  {id:68,word:"society",partOfSpeech:"名詞",meaning:"社会",
+   meanings:["名|社会〈不可算〉","名|（ある具体的な）社会〈可算〉","名|（one's ―）～と同席すること","名|協会"],
+   pronunciation:"/səˈsaɪəti/",part:7,
+   example:"We live in a society that changes very quickly.",
+   exampleJa:"私たちは非常に速く変化する社会に生きている。",
+   example2:"My sister joined the English Speaking Society at her university.",
+   exampleJa2:"姉は大学の英語研究会（ESS）に入った。",
+   etymologyProcess:"soci（仲間）＋ ety（名詞）→ 仲間どうしが集まってできるものは…？",
+   etymologyConclusion:"soci（仲間）＋ ety（名詞）→ 仲間どうしが結びついてできた集まり＝社会・協会",
+   hook:"世の中全体を指す「社会」は数えない。social（社会の）・sociable（人付き合いのよい）もセットで。",
    relatedWords:[
-     {word:"symbol",meaning:"記号",breakdown:"syn（共に）＋ bol（投げる）→ 意味と形を一つに合わせたしるし"},
-     {word:"sympathy",meaning:"共感",breakdown:"syn（共に）＋ path（感じる）→ 相手と同じ気持ちを共に感じる"},
-     {word:"syllabus",meaning:"授業計画",breakdown:"syn（共に）＋ lab（つかむ）→ 内容をひとまとめにつかんだ一覧"},
-     {synonym:true,word:"stress",meaning:"強勢",breakdown:"どの音節を強く言うか。syllable はその単位"}]},
+     {word:"social",meaning:"社会の",breakdown:"soci（仲間）＋ al（〜に関する）→ 仲間の集まりに関する"},
+     {word:"associate",meaning:"結びつけて考える",breakdown:"as（〜へ）＋ soci（仲間）＋ ate（〜にする）→ 仲間に加えて結びつける"},
+     {word:"soccer",meaning:"サッカー",breakdown:"soc（仲間）→ association football（協会のフットボール）の soc から"},
+     {synonym:true,word:"community",meaning:"地域社会",breakdown:"同じ地域や関心でつながる集団。society はもっと大きな社会全体"}]},
 
-  {id:69,word:"synthesize",partOfSpeech:"他動詞",meaning:"～を統合する",
-   meanings:["他|～を統合する","他|～を合成する"],
-   pronunciation:"/ˈsɪnθəsaɪz/",part:5,
-   example:"Good essays synthesize ideas from several different sources.",
-   exampleJa:"よいエッセイは複数の資料の考えを統合して一つにまとめる。",
-   example2:"She synthesized her club notes into one clear summary.",
-   exampleJa2:"彼女は部活のメモを統合して一枚のわかりやすい要約にした。",
-   etymologyProcess:"syn（共に）＋ the（置く）＋ ize（動詞）→ ばらばらの考えを一つ所に…？",
-   etymologyConclusion:"syn（共に）＋ the（置く）＋ ize（動詞）→ ばらばらの資料を一つ所に置き直して組み上げる＝統合する",
+  {id:69,word:"law",partOfSpeech:"名詞",meaning:"（the ―）（集合的に）法律，国法",
+   meanings:["名|（the ―）（集合的に）法律，国法","名|（個々の）法律","名|（科学などの）法則"],
+   pronunciation:"/lɔː/",part:7,
+   example:"Everyone must obey the law.",
+   exampleJa:"誰もが法律に従わなければならない。",
+   example2:"Newton discovered the law of gravity.",
+   exampleJa2:"ニュートンは重力の法則を発見した。",
+   etymologyProcess:"law（置かれたもの）→ 社会の中にしっかり置かれたものは…？",
+   etymologyConclusion:"law（置かれたもの）→ 古ノルド語で「定めて置かれたもの」。社会にしっかり置かれた決まり＝法律；自然の中の決まり＝法則",
+   hook:"break the law（法律を破る）、against the law（法律に反して）。",
    relatedWords:[
-     {word:"theme",meaning:"主題；テーマ",breakdown:"the（置く）→ 話の土台として置かれた中心の題"},
-     {word:"sympathy",meaning:"共感",breakdown:"syn（共に）＋ path（感じる）→ 相手と同じ気持ちを共に感じる"},
-     {word:"thesis",meaning:"論文；主張",breakdown:"the（置く）＋ sis（名詞）→ 自分の立場として置いた主張"},
-     {word:"hypothesis",meaning:"仮説",breakdown:"hypo（下に）＋ the（置く）→ 議論の下に仮に置いておく考え"}]},
+     {word:"lay",meaning:"置く；横たえる",breakdown:"lay（置く）→ 物をそっと置く。law と同じ根"},
+     {word:"layer",meaning:"層",breakdown:"lay（置く）＋ er（もの）→ 上へ上へと置き重ねたもの"},
+     {word:"lawyer",meaning:"弁護士",breakdown:"law（置かれたもの）＋ yer（人）→ 法律をあつかう人"},
+     {synonym:true,word:"rule",meaning:"規則",breakdown:"学校や競技の決まり。law は国が定める法律"}]},
 
-  {id:70,word:"substantiate",partOfSpeech:"他動詞",meaning:"～を立証する",
-   meanings:["他|～を立証する"],
-   pronunciation:"/səbˈstænʃieɪt/",part:5,
-   example:"You must substantiate your claim with data from the survey.",
-   exampleJa:"あなたは自分の主張を調査のデータで裏づけなければならない。",
-   example2:"He substantiated his excuse by showing the train delay slip.",
-   exampleJa2:"彼は遅延証明書を見せて自分の言い訳を裏づけた。",
-   etymologyProcess:"sub（下で）＋ sta（立つ）＋ ate（動詞）→ 主張の下に支えを入れて…？",
-   etymologyConclusion:"sub（下で）＋ sta（立つ）＋ ate（動詞）→ 主張の下に証拠を入れて倒れないように立たせる＝裏づける",
+  {id:70,word:"ancestor",partOfSpeech:"名詞",meaning:"祖先",
+   meanings:["名|祖先"],
+   pronunciation:"/ˈænsestər/",part:7,
+   example:"Our ancestors lived by hunting and fishing.",
+   exampleJa:"私たちの祖先は狩りや漁をして暮らしていた。",
+   example2:"Scientists say the wolf is the ancestor of the dog.",
+   exampleJa2:"科学者によると、オオカミは犬の祖先だ。",
+   etymologyProcess:"ante（前に）＋ cest（行く）＋ or（人）→ 自分より前を行った人は…？",
+   etymologyConclusion:"ante（前に）＋ cest（行く）＋ or（人）→ 自分たちより前を歩いていった人＝祖先",
+   hook:"反対は descendant（子孫）。",
    relatedWords:[
-     {word:"stand",meaning:"立つ",breakdown:"sta（立つ）→ 足で地面をとらえて立っている"},
-     {word:"stable",meaning:"安定した",breakdown:"sta（立つ）＋ able（できる）→ ぐらつかずに立っていられる"},
-     {word:"substance",meaning:"中身；物質",breakdown:"sub（下で）＋ sta（立つ）→ 下で支えて立っている実体"},
-     {word:"constant",meaning:"絶え間ない",breakdown:"con（共に・強く）＋ sta（立つ）→ 同じ場に強く立ち続ける"}]},
+     {word:"precede",meaning:"先に起こる",breakdown:"pre（先に）＋ ced（行く）→ 先に行く"},
+     {word:"access",meaning:"接近；利用する権利",breakdown:"ac（〜へ）＋ cess（行く）→ 目的のところへ行くこと"},
+     {word:"process",meaning:"過程",breakdown:"pro（前へ）＋ cess（行く）→ 前へ進んでいく道のり"},
+     {synonym:true,word:"descendant",meaning:"子孫",breakdown:"ancestor の反対。de（下へ）＋ scend（登る）で「下って来た人」"}]},
 
-  {id:71,word:"tangent",partOfSpeech:"名詞",meaning:"脱線",
+  {id:71,word:"population",partOfSpeech:"名詞",meaning:"人口，個体数",
+   meanings:["名|人口，個体数","名|（一定の地域に住む）住民"],
+   pronunciation:"/ˌpɑːpjuˈleɪʃn/",part:8,
+   example:"Tokyo has a population of about 14 million.",
+   exampleJa:"東京の人口は約1400万人だ。",
+   example2:"The population of wild tigers is slowly increasing.",
+   exampleJa2:"野生のトラの個体数はゆっくり増えている。",
+   etymologyProcess:"popul（人々）＋ ation（名詞）→ そこに住む人々を数えると…？",
+   etymologyConclusion:"popul（人々）＋ ation（名詞）→ ある土地に住む人々の数やまとまり＝人口・住民",
+   hook:"人口が「多い／少ない」は large／small で表す（many／few は使わない）。",
+   relatedWords:[
+     {word:"popular",meaning:"人気のある",breakdown:"popul（人々）＋ ar（〜の）→ 人々に好かれている"},
+     {word:"people",meaning:"人々",breakdown:"peopl（人々）→ ラテン語 populus がフランス語を通って変わった形"},
+     {word:"public",meaning:"公共の",breakdown:"publ（人々）＋ ic（〜の）→ 人々みんなの"},
+     {synonym:true,word:"inhabitant",meaning:"住民",breakdown:"その土地に住む一人ひとり。population は住民全体"}]},
+
+  {id:72,word:"native",partOfSpeech:"形容詞",meaning:"母国の，その土地の",
+   meanings:["形|母国の，その土地の","名|（ある土地の）生まれの人"],
+   pronunciation:"/ˈneɪtɪv/",part:8,
+   example:"Her native language is Spanish.",
+   exampleJa:"彼女の母語はスペイン語だ。",
+   example2:"My grandfather is a native of Okinawa.",
+   exampleJa2:"祖父は沖縄の生まれだ。",
+   etymologyProcess:"nat（生まれる）＋ ive（〜な性質の）→ 生まれたときからそこに…？",
+   etymologyConclusion:"nat（生まれる）＋ ive（〜な性質の）→ 生まれたときからそこにある、その土地に生まれた＝母国の・その土地の",
+   hook:"native speaker（その言語を母語とする人）、be native to 〜（〜原産の）。",
+   relatedWords:[
+     {word:"nature",meaning:"自然；性質",breakdown:"nat（生まれる）＋ ure（名詞）→ 生まれたままの姿"},
+     {word:"nation",meaning:"国家；国民",breakdown:"nat（生まれる）＋ ion（名詞）→ 同じ土地に生まれた人々のまとまり"},
+     {word:"innate",meaning:"生まれつきの",breakdown:"in（中に）＋ nat（生まれる）→ 生まれたときから中にある"},
+     {synonym:true,word:"local",meaning:"地元の",breakdown:"その場所の。native はその土地に生まれた"}]},
+
+  {id:73,word:"abroad",partOfSpeech:"副詞",meaning:"海外へ，海外で",
+   meanings:["副|海外へ，海外で"],
+   pronunciation:"/əˈbrɔːd/",part:8,
+   example:"My sister wants to study abroad after high school.",
+   exampleJa:"姉は高校を卒業したら留学したいと思っている。",
+   example2:"More and more Japanese people are traveling abroad.",
+   exampleJa2:"海外旅行をする日本人がますます増えている。",
+   etymologyProcess:"a（〜に）＋ broad（広い）→ 家の外の広いところへ出ると…？",
+   etymologyConclusion:"a（〜に）＋ broad（広い）→ 家の外の広々とした所へ、さらに海の向こうへ＝海外へ・海外で",
+   hook:"副詞なので前置詞は付けない。go abroad（× go to abroad）、study abroad（留学する）。",
+   relatedWords:[
+     {word:"broad",meaning:"幅の広い",breakdown:"broad（広い）→ 横にゆったり広がった"},
+     {word:"broaden",meaning:"広げる",breakdown:"broad（広い）＋ en（〜にする）→ 広い状態にする"},
+     {word:"breadth",meaning:"幅，広さ",breakdown:"bread（広い）＋ th（名詞）→ broad の名詞形"},
+     {synonym:true,word:"overseas",meaning:"海外へ［の］",breakdown:"海を越えて。abroad と違い、形容詞としても使える"}]},
+
+  {id:74,word:"local",partOfSpeech:"形容詞",meaning:"その土地の，地元の",
+   meanings:["形|その土地の，地元の","形|地方の","名|地元の人"],
+   pronunciation:"/ˈloʊkl/",part:8,
+   example:"We bought fresh vegetables from a local farmer.",
+   exampleJa:"私たちは地元の農家から新鮮な野菜を買った。",
+   example2:"The locals told us about a great ramen shop.",
+   exampleJa2:"地元の人たちがすばらしいラーメン店を教えてくれた。",
+   etymologyProcess:"loc（場所）＋ al（〜に関する）→ ある一つの場所に…？",
+   etymologyConclusion:"loc（場所）＋ al（〜に関する）→ ある特定の場所に関する＝その土地の・地元の",
+   hook:"local は「田舎の」ではなく「その場所の」。local train は各駅停車。",
+   relatedWords:[
+     {word:"location",meaning:"場所，位置",breakdown:"loc（場所）＋ ation（名詞）→ ものがある場所"},
+     {word:"locate",meaning:"（場所を）突き止める",breakdown:"loc（場所）＋ ate（〜にする）→ 場所をはっきりさせる"},
+     {word:"locomotive",meaning:"機関車",breakdown:"loco（場所）＋ motive（動かす）→ 場所から場所へ動いていく"},
+     {synonym:true,word:"regional",meaning:"地方の",breakdown:"ある地域全体の。local はもっと狭いその場所の"}]},
+
+  {id:75,word:"survey",partOfSpeech:"名詞",meaning:"調査",
+   meanings:["名|調査〈可算〉","他|～を調査する"],
+   pronunciation:"/ˈsɜːrveɪ/",part:8,
+   example:"Our school did a survey of students' sleeping habits.",
+   exampleJa:"学校は生徒の睡眠習慣について調査を行った。",
+   example2:"We surveyed 200 people about their favorite sports.",
+   exampleJa2:"私たちは200人に好きなスポーツについて調査した。",
+   etymologyProcess:"sur（上から）＋ vey（見る）→ 高いところから全体を…？",
+   etymologyConclusion:"sur（上から）＋ vey（見る）→ 高いところから全体を見渡して調べる＝調査（する）",
+   hook:"名詞は前［サーヴェイ］、動詞は後ろ［サヴェイ］を強く読むことが多い。",
+   relatedWords:[
+     {word:"supervise",meaning:"監督する",breakdown:"super（上から）＋ vis（見る）→ 高いところから全体を見張る"},
+     {word:"surface",meaning:"表面",breakdown:"sur（上の）＋ face（顔）→ ものの上側に見えている面"},
+     {word:"view",meaning:"眺め；見方",breakdown:"view（見る）→ 目に見える景色、ものの見方"},
+     {synonym:true,word:"research",meaning:"研究",breakdown:"学術的な研究。survey はアンケートなどで広く調べること"}]},
+
+  {id:76,word:"value",partOfSpeech:"名詞",meaning:"価値",
+   meanings:["名|価値","名|（―s）価値観","名|お買い得品〈不可算〉","他|～を重んじる"],
+   pronunciation:"/ˈvæljuː/",part:8,
+   example:"The value of this old coin has doubled.",
+   exampleJa:"この古い硬貨の価値は2倍になった。",
+   example2:"I value my friends more than anything.",
+   exampleJa2:"私は何よりも友人を大切にしている。",
+   etymologyProcess:"val（力がある）→ 力があって役に立つと認められるものは…？",
+   etymologyConclusion:"val（力がある）→ 力があって役に立つと認められる度合い＝価値；価値を認めて大切にする＝重んじる",
+   hook:"valuable（貴重な）も invaluable（計り知れないほど貴重な）も、どちらもほめ言葉。",
+   relatedWords:[
+     {word:"valuable",meaning:"高価な，貴重な",breakdown:"valu（価値）＋ able（〜できる）→ 価値を認められる"},
+     {word:"evaluate",meaning:"評価する",breakdown:"e（外へ）＋ valu（価値）＋ ate（〜にする）→ 価値を外へ引き出して示す"},
+     {word:"available",meaning:"利用できる",breakdown:"a（〜へ）＋ vail（役に立つ）＋ able（〜できる）→ 役に立てることができる"},
+     {word:"valid",meaning:"有効な",breakdown:"val（力がある）＋ id（〜な状態の）→ ちゃんと力を持っている"}]},
+
+  {id:77,word:"treasure",partOfSpeech:"名詞",meaning:"財宝，宝",
+   meanings:["名|財宝，宝","名|大事な物［人］","他|（思い出など）を大事にする"],
+   pronunciation:"/ˈtreʒər/",part:8,
+   example:"The pirates buried their treasure on a small island.",
+   exampleJa:"海賊たちは小さな島に財宝を埋めた。",
+   example2:"I will always treasure the memories of this trip.",
+   exampleJa2:"この旅の思い出をいつまでも大切にします。",
+   etymologyProcess:"treas（宝の倉）→ 倉にしまっておくほど大切なものは…？",
+   etymologyConclusion:"treas（宝の倉）→ ギリシャ語 thesauros（宝をしまう倉）が形を変えた語。倉にしまうほど大切なもの＝宝；大切にする",
+   hook:"動詞の treasure は「宝物のように大切にする」。cherish とほぼ同じ。",
+   relatedWords:[
+     {word:"treasury",meaning:"宝物庫；国庫",breakdown:"treas（宝の倉）＋ ury（場所）→ 宝やお金をしまう所"},
+     {word:"thesaurus",meaning:"類語辞典",breakdown:"thesaur（宝の倉）→ 言葉をたくさんしまった倉"},
+     {synonym:true,word:"cherish",meaning:"大事にする",breakdown:"愛情をこめて大切にする。動詞の treasure とほぼ同じ"},
+     {synonym:true,word:"fortune",meaning:"財産；運",breakdown:"大きな財産。treasure は金銀などの宝物"}]},
+
+  {id:78,word:"fashion",partOfSpeech:"名詞",meaning:"流行",
+   meanings:["名|流行","名|流儀，やり方","他|（手などで）～を作る"],
+   pronunciation:"/ˈfæʃn/",part:8,
+   example:"Long skirts are back in fashion this year.",
+   exampleJa:"今年はロングスカートが再び流行している。",
+   example2:"He answered the question in a calm fashion.",
+   exampleJa2:"彼は落ち着いた様子で質問に答えた。",
+   etymologyProcess:"fash（作る）＋ ion（名詞）→ 物の作り方、形の作り方が…？",
+   etymologyConclusion:"fash（作る）＋ ion（名詞）→ 物や形の作り方。その時代に好まれる作り方＝流行；物事のやり方＝流儀",
+   hook:"in fashion（流行して）⇔ out of fashion（すたれて）。in a 〜 fashion は「〜なやり方で」。",
+   relatedWords:[
+     {word:"factory",meaning:"工場",breakdown:"fact（作る）＋ ory（場所）→ 物を作る場所"},
+     {word:"manufacture",meaning:"製造する",breakdown:"manu（手）＋ fact（作る）＋ ure（名詞）→ もとは手で作ること"},
+     {word:"feature",meaning:"特徴",breakdown:"feat（作る）＋ ure（名詞）→ 作られた形・顔つき"},
+     {synonym:true,word:"trend",meaning:"傾向，流行",breakdown:"世の中の流れの向き。fashion は服装などの流行"}]},
+
+  {id:79,word:"public",partOfSpeech:"名詞",meaning:"（the ―）大衆",
+   meanings:["名|（the ―）大衆","形|公共の，公の"],
+   pronunciation:"/ˈpʌblɪk/",part:8,
+   example:"Smoking is not allowed in public places.",
+   exampleJa:"公共の場所での喫煙は禁止されている。",
+   example2:"The museum is open to the public on weekends.",
+   exampleJa2:"その博物館は週末に一般公開されている。",
+   etymologyProcess:"publ（人々）＋ ic（〜の）→ 特定の人ではなく、人々みんなの…？",
+   etymologyConclusion:"publ（人々）＋ ic（〜の）→ 一部の人ではなく人々みんなのもの＝公共の；人々全体＝大衆",
+   hook:"in public（人前で）も重要。反対は private（私的な）。",
+   relatedWords:[
+     {word:"publish",meaning:"出版する，公表する",breakdown:"publ（人々）＋ ish（〜にする）→ 人々みんなに知らせる"},
+     {word:"publicity",meaning:"評判；宣伝",breakdown:"publ（人々）＋ ic（〜の）＋ ity（名詞）→ 人々に広く知られること"},
+     {word:"pub",meaning:"パブ，酒場",breakdown:"pub（人々の）→ public house（みんなの家）を縮めた語"},
+     {synonym:true,word:"private",meaning:"私的な",breakdown:"public の反対。個人の・人目に触れない"}]},
+
+  {id:80,word:"evidence",partOfSpeech:"名詞",meaning:"証拠",
+   meanings:["名|証拠〈不可算〉"],
+   pronunciation:"/ˈevɪdəns/",part:8,
+   example:"The police found no evidence that he broke the window.",
+   exampleJa:"警察は、彼が窓を割ったという証拠を見つけられなかった。",
+   example2:"There is growing evidence that sleep helps memory.",
+   exampleJa2:"睡眠が記憶を助けるという証拠が増えている。",
+   etymologyProcess:"e（外へ）＋ vid（見る）＋ ence（名詞）→ 外からはっきり見えるものは…？",
+   etymologyConclusion:"e（外へ）＋ vid（見る）＋ ence（名詞）→ 誰の目にも外からはっきり見えるもの＝証拠",
+   hook:"数えないので an evidence とは言わない。1つなら a piece of evidence。形容詞 evident は「明らかな」。",
+   relatedWords:[
+     {word:"evident",meaning:"明らかな",breakdown:"e（外へ）＋ vid（見る）＋ ent（〜している）→ 外からはっきり見えている"},
+     {word:"video",meaning:"ビデオ，動画",breakdown:"vid（見る）→ ラテン語で「私は見る」"},
+     {word:"provide",meaning:"供給する，用意する",breakdown:"pro（前もって）＋ vid（見る）→ 先を見通して用意しておく"},
+     {synonym:true,word:"proof",meaning:"証明，証拠",breakdown:"決定的な証拠。evidence は判断の材料になる証拠"}]},
+
+  {id:81,word:"vote",partOfSpeech:"名詞",meaning:"投票（数）",
+   meanings:["名|投票（数）","自|投票する"],
+   pronunciation:"/voʊt/",part:9,
+   example:"We took a vote to choose the design of our class T-shirt.",
+   exampleJa:"クラスTシャツのデザインを決めるため、投票を行った。",
+   example2:"In Japan, you can vote when you turn eighteen.",
+   exampleJa2:"日本では18歳になると投票できる。",
+   etymologyProcess:"vot（誓う・願う）→ 神に向かって願いや誓いを表すと…？",
+   etymologyConclusion:"vot（誓う・願う）→ 神への誓いや願いを表すこと。自分の願う人や案をはっきり示す＝投票（する）",
+   hook:"vote for 〜（〜に賛成の票を入れる）⇔ vote against 〜（〜に反対の票を入れる）。",
+   relatedWords:[
+     {word:"vow",meaning:"誓い；誓う",breakdown:"vow（誓う）→ vote と同じ語から出た、神への誓い"},
+     {word:"devote",meaning:"捧げる",breakdown:"de（すっかり）＋ vot（誓う）→ 誓って自分をすっかり差し出す"},
+     {word:"voter",meaning:"投票者，有権者",breakdown:"vot（誓う・願う）＋ er（人）→ 票を入れる人"},
+     {synonym:true,word:"election",meaning:"選挙",breakdown:"投票で代表を選ぶ行事。vote は一人ひとりの票"}]},
+
+  {id:82,word:"government",partOfSpeech:"名詞",meaning:"政府",
+   meanings:["名|政府"],
+   pronunciation:"/ˈɡʌvərnmənt/",part:9,
+   example:"The government decided to raise the tax on cigarettes.",
+   exampleJa:"政府はたばこへの税を上げることを決めた。",
+   example2:"Many people criticized the government's new plan.",
+   exampleJa2:"多くの人が政府の新しい計画を批判した。",
+   etymologyProcess:"govern（舵を取る）＋ ment（名詞）→ 船の舵を取るように国を…？",
+   etymologyConclusion:"govern（舵を取る）＋ ment（名詞）→ 船の舵を取るように、国の進む方向を決める組織＝政府",
+   hook:"govern（治める）＋ ment。つづりの n を落とさない（× goverment）。",
+   relatedWords:[
+     {word:"govern",meaning:"治める",breakdown:"govern（舵を取る）→ 国や組織の進む向きを決める"},
+     {word:"governor",meaning:"知事",breakdown:"govern（舵を取る）＋ or（人）→ 州や県の舵を取る人"},
+     {word:"cyber",meaning:"コンピューターの，ネットの",breakdown:"cyber（舵を取る）→ govern と同じギリシャ語から。機械を操るしくみの学問 cybernetics から生まれた語"},
+     {synonym:true,word:"administration",meaning:"政権；管理",breakdown:"〈米〉では大統領の政権。government は政府全般"}]},
+
+  {id:83,word:"nation",partOfSpeech:"名詞",meaning:"国家",
+   meanings:["名|国家","名|（the ―）国民"],
+   pronunciation:"/ˈneɪʃn/",part:9,
+   example:"More than 190 nations belong to the United Nations.",
+   exampleJa:"190を超える国家が国際連合に加盟している。",
+   example2:"The whole nation watched the final match on TV.",
+   exampleJa2:"国民全体がテレビで決勝戦を見守った。",
+   etymologyProcess:"nat（生まれる）＋ ion（名詞）→ 同じ土地に生まれた人々が…？",
+   etymologyConclusion:"nat（生まれる）＋ ion（名詞）→ 同じ土地に生まれ、言葉や歴史を分け合う人々のまとまり＝国家・国民",
+   hook:"national（国の）、international（国際的な）、nationality（国籍）もまとめて覚える。",
+   relatedWords:[
+     {word:"national",meaning:"国の，国民の",breakdown:"nat（生まれる）＋ ion（名詞）＋ al（〜に関する）→ 国家に関する"},
+     {word:"international",meaning:"国際的な",breakdown:"inter（間の）＋ nation（国家）＋ al（〜に関する）→ 国と国の間の"},
+     {word:"native",meaning:"母国の",breakdown:"nat（生まれる）＋ ive（〜な性質の）→ 生まれた土地の"},
+     {synonym:true,word:"country",meaning:"国",breakdown:"国土も含めたふつうの「国」。nation は人々のまとまりとしての国"}]},
+
+  {id:84,word:"capital",partOfSpeech:"名詞",meaning:"首都",
+   meanings:["名|首都","名|資本","形|重大な，死に値する"],
+   pronunciation:"/ˈkæpɪtl/",part:9,
+   example:"Canberra is the capital of Australia.",
+   exampleJa:"キャンベラはオーストラリアの首都だ。",
+   example2:"You need a lot of capital to start a new business.",
+   exampleJa2:"新しい事業を始めるには多くの資本が必要だ。",
+   etymologyProcess:"capit（頭）＋ al（〜に関する）→ 体でいちばん大事な頭のように…？",
+   etymologyConclusion:"capit（頭）＋ al（〜に関する）→ 頭にあたる、いちばん大事な＝首都（国の頭）・資本（お金の元手）・重大な",
+   hook:"capital letter は「大文字」、capital punishment は「死刑（首を失う罰）」。",
+   relatedWords:[
+     {word:"captain",meaning:"主将；船長",breakdown:"capt（頭）＋ ain（人）→ チームや船の頭に立つ人"},
+     {word:"chapter",meaning:"（本の）章",breakdown:"chapt（頭）→ 見出しの頭で区切られたひとまとまり"},
+     {word:"cape",meaning:"岬",breakdown:"cape（頭）→ 陸地が頭のように海へ突き出た所"},
+     {synonym:true,word:"metropolis",meaning:"大都市",breakdown:"国や地方の中心となる大都市。capital は政府がある首都"}]},
+
+  {id:85,word:"state",partOfSpeech:"名詞",meaning:"州",
+   meanings:["名|州","名|状態","名|国家","他|（意見，情報）を述べる"],
+   pronunciation:"/steɪt/",part:9,
+   example:"Texas is the second largest state in the U.S.",
+   exampleJa:"テキサスはアメリカで2番目に大きな州だ。",
+   example2:"The old house was in a terrible state.",
+   exampleJa2:"その古い家はひどい状態だった。",
+   etymologyProcess:"sta（立つ）→ 今どんなふうに立っているかは…？",
+   etymologyConclusion:"sta（立つ）→ 今どのように立っているか＝状態；しっかり立つ国の形＝国家・州；立場をはっきり示す＝述べる",
+   hook:"statement（声明）は「述べたこと」。the United States は「州が集まってできた国」。",
+   relatedWords:[
+     {word:"statue",meaning:"像",breakdown:"sta（立つ）→ 立っている姿をかたどった像"},
+     {word:"status",meaning:"地位",breakdown:"sta（立つ）→ 社会の中で立っている位置"},
+     {word:"stable",meaning:"安定した",breakdown:"sta（立つ）＋ ble（〜できる）→ しっかり立っていられる"},
+     {synonym:true,word:"condition",meaning:"状態",breakdown:"体や物の具合。state はもっと広く、そのときの有り様"}]},
+
+  {id:86,word:"political",partOfSpeech:"形容詞",meaning:"政治的な，政治の",
+   meanings:["形|政治的な，政治の"],
+   pronunciation:"/pəˈlɪtɪkl/",part:9,
+   example:"Young people should be more interested in political issues.",
+   exampleJa:"若者はもっと政治の問題に関心を持つべきだ。",
+   example2:"The two countries have close political ties.",
+   exampleJa2:"その2国は政治的に密接な関係にある。",
+   etymologyProcess:"polit（都市・市民）＋ ical（〜の）→ 都市に住む市民みんなの…？",
+   etymologyConclusion:"polit（都市・市民）＋ ical（〜の）→ 古代ギリシャの都市（ポリス）で市民がみんなで決める事柄の＝政治の",
+   hook:"politics（政治）、politician（政治家）、policy（政策）。強く読む位置が変わる：pólitics／polítical。",
+   relatedWords:[
+     {word:"politics",meaning:"政治",breakdown:"polit（都市・市民）＋ ics（学問・活動）→ 市民の事柄を扱うこと"},
+     {word:"police",meaning:"警察",breakdown:"polic（都市）→ 都市の秩序を守るしくみ"},
+     {word:"policy",meaning:"政策，方針",breakdown:"polic（都市）＋ y（名詞）→ 都市や国の治め方"},
+     {word:"metropolis",meaning:"大都市",breakdown:"metro（母）＋ polis（都市）→ 母のように中心となる都市"}]},
+
+  {id:87,word:"price",partOfSpeech:"名詞",meaning:"価格",
+   meanings:["名|価格","名|（―s）物価","名|代償"],
+   pronunciation:"/praɪs/",part:9,
+   example:"The price of vegetables went up because of the bad weather.",
+   exampleJa:"悪天候のせいで野菜の価格が上がった。",
+   example2:"Prices are usually higher in big cities.",
+   exampleJa2:"大都市ではたいてい物価が高い。",
+   etymologyProcess:"price（値打ち）→ ものの値打ちを数字で表すと…？",
+   etymologyConclusion:"price（値打ち）→ ラテン語 pretium（値打ち）から。ものの値打ちを表す数字＝価格；何かを得るために払う値打ち＝代償",
+   hook:"値段が「高い／安い」は high／low（× expensive price）。at any price は「どんな犠牲を払っても」。",
+   relatedWords:[
+     {word:"precious",meaning:"貴重な",breakdown:"preci（値打ち）＋ ous（〜に満ちた）→ 値打ちがたっぷりある"},
+     {word:"appreciate",meaning:"真価を認める；感謝する",breakdown:"ap（〜へ）＋ preci（値打ち）＋ ate（〜にする）→ 値打ちをきちんと認める"},
+     {word:"prize",meaning:"賞品",breakdown:"prize（値打ち）→ price と同じ語から分かれた、値打ちのあるごほうび"},
+     {synonym:true,word:"cost",meaning:"費用",breakdown:"何かにかかるお金全体。price は売り手がつけた値段"}]},
+
+  {id:88,word:"sum",partOfSpeech:"名詞",meaning:"（修飾語を伴って）金額",
+   meanings:["名|（修飾語を伴って）金額","名|合計","名|（簡単な）計算","他|（up）～を要約する"],
+   pronunciation:"/sʌm/",part:9,
+   example:"He spent a large sum of money on his new bike.",
+   exampleJa:"彼は新しい自転車に多額のお金を使った。",
+   example2:"Can you sum up the story in three sentences?",
+   exampleJa2:"その話を3文で要約できますか。",
+   etymologyProcess:"sum（いちばん上）→ 数を下から足していって、いちばん上に…？",
+   etymologyConclusion:"sum（いちばん上）→ 古代ローマでは数を下から上へ足し、合計をいちばん上に書いたとされる＝合計・金額；要点をまとめる＝要約する",
+   hook:"a large sum of money（多額のお金）、to sum up（要約すると）の形で覚える。",
+   relatedWords:[
+     {word:"summit",meaning:"頂上；首脳会談",breakdown:"summ（いちばん上）→ 山のいちばん上。国のトップが集まる会議にも"},
+     {word:"summary",meaning:"要約",breakdown:"summ（いちばん上）＋ ary（もの）→ 全体をまとめて上に示したもの"},
+     {synonym:true,word:"total",meaning:"合計",breakdown:"全部を合わせた数。sum とほぼ同じ"},
+     {synonym:true,word:"amount",meaning:"量；総額",breakdown:"積み上がった量。an amount of money も「金額」"}]},
+
+  {id:89,word:"budget",partOfSpeech:"名詞",meaning:"予算",
+   meanings:["名|予算","形|安い"],
+   pronunciation:"/ˈbʌdʒɪt/",part:9,
+   example:"Our class has only a small budget for the school festival.",
+   exampleJa:"私たちのクラスの文化祭の予算はほんのわずかだ。",
+   example2:"We stayed at a budget hotel near the station.",
+   exampleJa2:"私たちは駅の近くの格安ホテルに泊まった。",
+   etymologyProcess:"budg（革袋）＋ et（小さい）→ お金を入れる小さな革袋は…？",
+   etymologyConclusion:"budg（革袋）＋ et（小さい）→ お金を入れておく小さな革袋。袋の中の使えるお金＝予算",
+   hook:"on a budget（限られた予算で）、over budget（予算オーバーで）。",
+   relatedWords:[
+     {word:"bulge",meaning:"ふくらみ",breakdown:"bulg（革袋）→ 袋がぱんぱんにふくらんだ形"},
+     {word:"pocket",meaning:"ポケット",breakdown:"pock（袋）＋ et（小さい）→ 服についた小さな袋"},
+     {word:"tablet",meaning:"錠剤；タブレット",breakdown:"table（板）＋ et（小さい）→ 小さな板"},
+     {synonym:true,word:"cost",meaning:"費用",breakdown:"実際にかかったお金。budget は前もって決めた使える額"}]},
+
+  {id:90,word:"fee",partOfSpeech:"名詞",meaning:"（会費，遊園地などの）料金",
+   memory:"入場料・会費・授業料など「サービスを受けるため」に払うのが fee。乗り物に乗るのは fare、使用料やサービス料は charge と使い分ける。",
+   meanings:["名|（会費，遊園地などの）料金","名|（専門職への）謝礼"],
+   pronunciation:"/fiː/",part:9,
+   example:"The entrance fee for the zoo is 500 yen.",
+   exampleJa:"その動物園の入場料は500円だ。",
+   example2:"The lawyer's fee was higher than we expected.",
+   exampleJa2:"弁護士への謝礼は思っていたより高かった。",
+   etymologyProcess:"fee（家畜＝財産）→ 昔、支払いに使われた家畜は…？",
+   etymologyConclusion:"fee（家畜＝財産）→ 昔は牛や羊が財産で、支払いにも使われた。サービスの見返りに払う財産＝料金・謝礼",
+   hook:"entrance fee（入場料）、school fees（学費）。",
+   relatedWords:[
+     {synonym:true,word:"fare",meaning:"運賃",breakdown:"バスや電車など乗り物の料金"},
+     {synonym:true,word:"charge",meaning:"料金",breakdown:"サービスや使用に対して請求される料金"},
+     {synonym:true,word:"tuition",meaning:"授業料",breakdown:"学校に払う授業の料金"},
+     {synonym:true,word:"cost",meaning:"費用",breakdown:"何かをするのにかかるお金全体"}]},
+
+  {id:91,word:"fare",partOfSpeech:"名詞",meaning:"運賃",
+   meanings:["名|運賃"],
+   pronunciation:"/fer/",part:10,
+   example:"The bus fare to the station is 230 yen.",
+   exampleJa:"駅までのバスの運賃は230円だ。",
+   example2:"Train fares will go up next spring.",
+   exampleJa2:"来年の春に電車の運賃が上がる。",
+   etymologyProcess:"fare（旅をする）→ 旅をするのに払うお金は…？",
+   etymologyConclusion:"fare（旅をする）→ 古英語 faran（行く・旅をする）から。旅の道のりに払うお金＝運賃",
+   hook:"fee（入場料・会費）と fare（乗り物の運賃）を区別する。fair（公平な）と同じ発音。",
+   relatedWords:[
+     {word:"farewell",meaning:"別れ（の言葉）",breakdown:"fare（旅をする）＋ well（うまく）→「無事に行ってらっしゃい」"},
+     {word:"welfare",meaning:"福祉",breakdown:"wel（うまく）＋ fare（やっていく）→ 人々がうまく暮らしていけること"},
+     {synonym:true,word:"fee",meaning:"料金",breakdown:"入場料・会費などのサービスの料金"},
+     {synonym:true,word:"ticket",meaning:"切符",breakdown:"乗るための券。fare はそのためのお金"}]},
+
+  {id:92,word:"bill",partOfSpeech:"名詞",meaning:"勘定",
+   meanings:["名|勘定","名|請求書","名|〈米〉紙幣","名|法案"],
+   pronunciation:"/bɪl/",part:10,
+   example:"Could we have the bill, please?",
+   exampleJa:"お勘定をお願いします。",
+   example2:"I paid the electricity bill at a convenience store.",
+   exampleJa2:"コンビニで電気料金の請求書を支払った。",
+   etymologyProcess:"bill（封をした書類）→ 封印を押した書き付けは…？",
+   etymologyConclusion:"bill（封をした書類）→ ラテン語 bulla（丸い封印）から。封をした書き付け＝請求書・勘定；お札；議会に出す書類＝法案",
+   hook:"〈米〉a ten-dollar bill（10ドル札）。〈英〉では紙幣は note という。",
+   relatedWords:[
+     {word:"billboard",meaning:"広告板，看板",breakdown:"bill（書き付け）＋ board（板）→ はり紙をはる大きな板"},
+     {word:"bulletin",meaning:"公報；掲示",breakdown:"bulletin（小さな書き付け）→ bulla（封印）から出た、短いお知らせ"},
+     {synonym:true,word:"check",meaning:"〈米〉勘定書",breakdown:"レストランの会計で使う。bill とほぼ同じ"},
+     {synonym:true,word:"receipt",meaning:"領収書",breakdown:"払ったあとにもらう紙。bill は払う前の請求書"}]},
+
+  {id:93,word:"trade",partOfSpeech:"名詞",meaning:"貿易",
+   meanings:["名|貿易","名|（the ～ trade）～業","名|商売","他|～を交換する"],
+   pronunciation:"/treɪd/",part:10,
+   example:"Japan has a long history of trade with China.",
+   exampleJa:"日本には中国との長い貿易の歴史がある。",
+   example2:"I traded my old comics for a video game.",
+   exampleJa2:"私は古い漫画をテレビゲームと交換した。",
+   etymologyProcess:"trade（踏み固めた道）→ 何度も行き来して踏み固めた道を通って…？",
+   etymologyConclusion:"trade（踏み固めた道）→ 何度も行き来して踏み固めた道すじ。その道で品物をやりとりする＝貿易・商売・交換",
+   hook:"trade A for B（A を B と交換する）。the tourist trade は「観光業」。",
+   relatedWords:[
+     {word:"tread",meaning:"踏む",breakdown:"tread（踏む）→ 足で踏みしめる。trade と同じ「踏む」の根"},
+     {word:"trademark",meaning:"商標",breakdown:"trade（商売）＋ mark（しるし）→ 商品につけるしるし"},
+     {synonym:true,word:"exchange",meaning:"交換する",breakdown:"取り替える。trade とほぼ同じ"},
+     {synonym:true,word:"commerce",meaning:"商業",breakdown:"売り買い全体を表す硬い語。trade より大きな商業全体"}]},
+
+  {id:94,word:"wealth",partOfSpeech:"名詞",meaning:"富，財産",
+   meanings:["名|富，財産〈不可算〉","名|（a ― of ～）豊富な～"],
+   pronunciation:"/welθ/",part:10,
+   example:"He gained great wealth through his business.",
+   exampleJa:"彼は事業で大きな富を得た。",
+   example2:"This book has a wealth of information about space.",
+   exampleJa2:"この本には宇宙についての豊富な情報がある。",
+   etymologyProcess:"weal（よい状態）＋ th（名詞）→ 暮らしがよい状態であることは…？",
+   etymologyConclusion:"weal（よい状態）＋ th（名詞）→ well（よく）と同じ根。暮らしが満ち足りたよい状態＝富・財産",
+   hook:"health（健康）と同じ -th の名詞。形容詞は wealthy（裕福な）。",
+   relatedWords:[
+     {word:"wealthy",meaning:"裕福な",breakdown:"weal（よい状態）＋ th（名詞）＋ y（〜な状態の）→ 富がある状態の"},
+     {word:"well",meaning:"よく；健康な",breakdown:"well（よく）→ 満ち足りてうまくいっている"},
+     {word:"health",meaning:"健康",breakdown:"heal（丸ごと無事な）＋ th（名詞）→ 体が欠けずに無事なこと"},
+     {synonym:true,word:"fortune",meaning:"財産",breakdown:"大きな財産。wealth は持っている富全体"}]},
+
+  {id:95,word:"economy",partOfSpeech:"名詞",meaning:"経済",
+   meanings:["名|経済","名|節約"],
+   pronunciation:"/ɪˈkɑːnəmi/",part:10,
+   example:"Tourism is very important to the local economy.",
+   exampleJa:"観光は地元の経済にとってとても重要だ。",
+   example2:"We flew economy class to save money.",
+   exampleJa2:"お金を節約するため、エコノミークラスで飛行機に乗った。",
+   etymologyProcess:"eco（家）＋ nom（切り盛りする）＋ y（名詞）→ 家の中をうまく…？",
+   etymologyConclusion:"eco（家）＋ nom（切り盛りする）＋ y（名詞）→ 家の中をうまく切り盛りすること＝節約；それを国の規模で行う＝経済",
+   hook:"economic（経済の）と economical（節約になる）は意味が違う。",
+   relatedWords:[
+     {word:"ecology",meaning:"生態学；環境保護",breakdown:"eco（家）＋ log（学問）→ 生き物のすみかを調べる学問"},
+     {word:"economical",meaning:"節約になる，経済的な",breakdown:"eco（家）＋ nom（切り盛りする）＋ ical（〜の）→ 家計をうまくやりくりする"},
+     {word:"astronomy",meaning:"天文学",breakdown:"astro（星）＋ nom（決まり）＋ y（名詞）→ 星の決まりを調べる学問"},
+     {synonym:true,word:"finance",meaning:"財政",breakdown:"お金のやりくりそのもの。economy は社会全体の経済"}]},
+
+  {id:96,word:"cost",partOfSpeech:"他動詞",meaning:"（費用）を要する，～がかかる",
+   meanings:["他|（費用）を要する，～がかかる","他|～を犠牲にする","名|費用，犠牲"],
+   pronunciation:"/kɔːst/",part:10,
+   example:"The concert tickets cost 5,000 yen each.",
+   exampleJa:"そのコンサートのチケットは1枚5,000円かかる。",
+   example2:"One careless mistake cost our team the game.",
+   exampleJa2:"一つの不注意なミスで、私たちのチームは試合を落とした。",
+   etymologyProcess:"con（しっかり）＋ st（立つ）→ 品物がある値段のところにしっかり立つと…？",
+   etymologyConclusion:"con（しっかり）＋ st（立つ）→ ラテン語 constare（〜の値でしっかり立つ）が縮まった語。その値段で成り立つ＝費用がかかる；代わりに何かを失う＝犠牲",
+   hook:"cost-cost-cost と形が変わらない。It costs 〜 to do（…するのに〜かかる）。",
+   relatedWords:[
+     {word:"constant",meaning:"一定の，絶え間ない",breakdown:"con（しっかり）＋ stant（立っている）→ しっかり立ち続けている"},
+     {word:"costly",meaning:"高くつく，高価な",breakdown:"cost（費用）＋ ly（〜のような）→ 費用がたくさんかかる"},
+     {synonym:true,word:"expense",meaning:"費用",breakdown:"出ていくお金。cost は何かにかかる費用全体"},
+     {synonym:true,word:"price",meaning:"価格",breakdown:"売り手がつけた値段。cost は実際にかかるお金"}]},
+
+  {id:97,word:"company",partOfSpeech:"名詞",meaning:"会社",
+   meanings:["名|会社","名|（one's ―）一緒にいること","名|仲間","名|来客"],
+   pronunciation:"/ˈkʌmpəni/",part:10,
+   example:"My father works for a car company.",
+   exampleJa:"父は自動車会社で働いている。",
+   example2:"Thank you for your company today. I had a great time.",
+   exampleJa2:"今日は一緒にいてくれてありがとう。とても楽しかった。",
+   etymologyProcess:"com（共に）＋ pan（パン）＋ y（名詞）→ 一緒にパンを食べる人たちは…？",
+   etymologyConclusion:"com（共に）＋ pan（パン）＋ y（名詞）→ 一緒にパンを食べる仲間＝仲間・一緒にいること；仲間が集まって働く所＝会社",
+   hook:"「一緒にいること」の意味では数えない。keep 〜 company は「〜に付き合う」。",
+   relatedWords:[
+     {word:"companion",meaning:"仲間，連れ",breakdown:"com（共に）＋ pan（パン）→ 一緒にパンを分け合う連れ"},
+     {word:"accompany",meaning:"同行する",breakdown:"ac（〜へ）＋ company（仲間）→ 仲間として一緒について行く"},
+     {word:"pantry",meaning:"食料庫",breakdown:"pan（パン）→ パンや食べ物をしまっておく部屋"},
+     {synonym:true,word:"firm",meaning:"会社",breakdown:"会社の硬い言い方。company のほうが一般的"}]},
+
+  {id:98,word:"task",partOfSpeech:"名詞",meaning:"仕事",
+   meanings:["名|仕事〈可算〉"],
+   pronunciation:"/tæsk/",part:10,
+   example:"My task today is to clean the classroom windows.",
+   exampleJa:"今日の私の仕事は教室の窓をふくことだ。",
+   example2:"Learning a new language is not an easy task.",
+   exampleJa2:"新しい言語を学ぶのは簡単な仕事ではない。",
+   etymologyProcess:"task（割り当てた税）→ 領主から割り当てられた税や労働は…？",
+   etymologyConclusion:"task（割り当てた税）→ ラテン語 taxa（税）の変化形。上から割り当てられてやるべき務め＝仕事",
+   hook:"task は割り当てられた一つひとつの仕事なので数えられる。work は数えない。",
+   relatedWords:[
+     {word:"tax",meaning:"税金",breakdown:"tax（値ぶみする）→ 財産を値ぶみして割り当てるお金"},
+     {word:"taste",meaning:"味；味わう",breakdown:"tast（触れて確かめる）→ 舌で触れて確かめる"},
+     {synonym:true,word:"job",meaning:"仕事",breakdown:"職業にも個々の仕事にも使う。task は割り当てられた作業"},
+     {synonym:true,word:"duty",meaning:"義務，任務",breakdown:"しなければならない務め"}]},
+
+  {id:99,word:"earn",partOfSpeech:"他動詞",meaning:"（金）を稼ぐ，もうける",
+   meanings:["他|（金）を稼ぐ，もうける","他|（評判など）を得る"],
+   pronunciation:"/ɜːrn/",part:10,
+   example:"She earns money by teaching the piano.",
+   exampleJa:"彼女はピアノを教えてお金を稼いでいる。",
+   example2:"He earned the respect of his teammates.",
+   exampleJa2:"彼はチームメイトの尊敬を得た。",
+   etymologyProcess:"earn（働いて報いを得る）→ 働いた分の見返りを手にすると…？",
+   etymologyConclusion:"earn（働いて報いを得る）→ 古英語 earnian（働いて報いを得る）から。働いた見返りを手にする＝稼ぐ；努力に見合う評判を得る",
+   hook:"earn a living（生計を立てる）。get と違い「努力の見返りとして得る」感じがある。",
+   relatedWords:[
+     {word:"earnings",meaning:"収入，稼ぎ",breakdown:"earn（稼ぐ）＋ ing（〜したもの）→ 稼いだお金。ふつう複数形"},
+     {synonym:true,word:"gain",meaning:"得る",breakdown:"増やす・手に入れる全般。earn は働いて得る"},
+     {synonym:true,word:"deserve",meaning:"〜に値する",breakdown:"努力などに見合う。earn は実際にそれを手にする"},
+     {synonym:true,word:"make",meaning:"（お金を）稼ぐ",breakdown:"make money も「お金を稼ぐ」。口語的"}]},
+
+  {id:100,word:"hurt",partOfSpeech:"自動詞・他動詞",meaning:"（身体の部位が）痛む",
+   memory:"hurt-hurt-hurt と形が変わらない。「どこが痛いの？」は Where does it hurt?、「けがをする」は get hurt。心を傷つけるときにも使える。",
+   meanings:["自|（身体の部位が）痛む","他|（身体，感情）を傷つける"],
+   pronunciation:"/hɜːrt/",part:10,
+   example:"My legs hurt after the long hike.",
+   exampleJa:"長いハイキングのあと、足が痛む。",
+   example2:"I'm sorry. I didn't mean to hurt your feelings.",
+   exampleJa2:"ごめんなさい。あなたの気持ちを傷つけるつもりはなかったの。",
+   etymologyProcess:"hurt（ぶつける）→ 何かに強くぶつかると…？",
+   etymologyConclusion:"hurt（ぶつける）→ 古フランス語 hurter（ぶつかる）から。体をぶつけて痛い＝痛む；心にぶつかって傷つける＝傷つける",
+   hook:"heart（心）と発音を区別する。hurt は口をあまり開けずに［ハ～ト］。",
+   relatedWords:[
+     {synonym:true,word:"injure",meaning:"けがをさせる",breakdown:"事故などでけがをさせる。hurt より「けが」がはっきりしている"},
+     {synonym:true,word:"harm",meaning:"害を与える",breakdown:"人や物に広く害を与える"},
+     {synonym:true,word:"ache",meaning:"（ずきずき）痛む",breakdown:"headache のように続く鈍い痛み"},
+     {synonym:true,word:"pain",meaning:"痛み",breakdown:"痛みそのものを表す名詞"}]},
+
+  {id:101,word:"injure",partOfSpeech:"他動詞",meaning:"～を痛める",
+   meanings:["他|～を痛める","他|～をけがさせる"],
+   pronunciation:"/ˈɪndʒər/",part:11,
+   example:"He injured his knee while playing soccer.",
+   exampleJa:"彼はサッカーをしていてひざを痛めた。",
+   example2:"Five people were injured in the car accident.",
+   exampleJa2:"その自動車事故で5人がけがをした。",
+   etymologyProcess:"in（〜でない）＋ jur（正しい）→ 正しくないやり方で…？",
+   etymologyConclusion:"in（〜でない）＋ jur（正しい）→ 正しくない、不当なことをする＝傷つける・けがをさせる",
+   hook:"「けがをする」は be injured／get injured。名詞は injury（けが）。",
+   relatedWords:[
+     {word:"injury",meaning:"けが",breakdown:"in（〜でない）＋ jur（正しい）＋ y（名詞）→ 不当に受けた害"},
+     {word:"justice",meaning:"正義",breakdown:"just（正しい）＋ ice（名詞）→ 正しいこと"},
+     {word:"jury",meaning:"陪審（員）",breakdown:"jur（法）＋ y（名詞）→ 法のもとで誓って判断する人々"},
+     {synonym:true,word:"hurt",meaning:"傷つける",breakdown:"体にも心にも使う。injure は体のけが"}]},
+
+  {id:102,word:"tangent",partOfSpeech:"名詞",meaning:"脱線",
    meanings:["名|脱線","名|接線"],
-   pronunciation:"/ˈtændʒənt/",part:5,
+   pronunciation:"/ˈtændʒənt/",part:"α",
    example:"The lecture went off on a tangent and never returned to the topic.",
    exampleJa:"講義は脱線して、二度と本題に戻らなかった。",
    example2:"My friend's long story about cats was a complete tangent.",
@@ -1220,9 +1731,9 @@ const RAW_WORDS=[
      {word:"intact",meaning:"手つかずの",breakdown:"in（否定）＋ tact（触れる）→ 誰にも触れられず元のまま"},
      {synonym:true,word:"touch",meaning:"触れる",breakdown:"手で触れる基本語。tangent は一点だけ触れて離れる線"}]},
 
-  {id:72,word:"delineate",partOfSpeech:"他動詞",meaning:"～を詳しく説明する",
+  {id:103,word:"delineate",partOfSpeech:"他動詞",meaning:"～を詳しく説明する",
    meanings:["他|～を詳しく説明する","他|～の輪郭を描く"],
-   pronunciation:"/dɪˈlɪnieɪt/",part:5,
+   pronunciation:"/dɪˈlɪnieɪt/",part:"α",
    example:"The map clearly delineates the border between the two countries.",
    exampleJa:"その地図は二国の境目をはっきり線で示している。",
    example2:"Please delineate your main points before you start writing.",
@@ -1235,10 +1746,10 @@ const RAW_WORDS=[
      {word:"outline",meaning:"概要；輪郭",breakdown:"out（外へ）＋ line（線）→ 外側をなぞった線＝全体の形"},
      {word:"linear",meaning:"直線の",breakdown:"line（線）＋ ar（形容詞）→ 一本の線のようにまっすぐな"}]},
 
-  {id:73,word:"nuance",partOfSpeech:"名詞",meaning:"ニュアンス，微妙な違い",
+  {id:104,word:"nuance",partOfSpeech:"名詞",meaning:"ニュアンス，微妙な違い",
    memory:"日本語でも「ニュアンスが違う」と言う。雲（nu）がかかると空の色が“ほんの少し”変わる＝わずかな違い。",
    meanings:["名|ニュアンス，微妙な違い"],
-   pronunciation:"/ˈnuːɑːns/",part:5,
+   pronunciation:"/ˈnuːɑːns/",part:"α",
    example:"This word carries a nuance that \"happy\" does not have.",
    exampleJa:"この語には happy にはない微妙な意味合いがある。",
    example2:"I missed the nuance in my friend's text and replied too bluntly.",
@@ -1252,9 +1763,9 @@ const RAW_WORDS=[
      {synonym:true,word:"subtle",meaning:"微妙な",breakdown:"見分けにくいほど細かい。nuance はその細かい差そのもの"},
      {synonym:true,word:"tone",meaning:"口調；調子",breakdown:"声の調子。nuance はそこに生まれる意味の差"}]},
 
-  {id:74,word:"pertinent",partOfSpeech:"形容詞",meaning:"（直接）関連のある",
+  {id:105,word:"pertinent",partOfSpeech:"形容詞",meaning:"（直接）関連のある",
    meanings:["形|（直接）関連のある","形|適切な"],
-   pronunciation:"/ˈpɜːrtnənt/",part:5,
+   pronunciation:"/ˈpɜːrtnənt/",part:"α",
    example:"Please ask only questions that are pertinent to today's topic.",
    exampleJa:"今日の話題に直接つながりのある質問だけをしてください。",
    example2:"Her comment was pertinent, so our group changed its plan.",
@@ -1267,9 +1778,9 @@ const RAW_WORDS=[
      {word:"continent",meaning:"大陸",breakdown:"con（共に・強く）＋ tin（保つ）→ 切れずにつながり続ける陸地"},
      {synonym:true,word:"relevant",meaning:"関連のある",breakdown:"ほぼ同義のやさしい語。pertinent は硬い場面で使う"}]},
 
-  {id:75,word:"cohesive",partOfSpeech:"形容詞",meaning:"まとまりのある",
+  {id:106,word:"cohesive",partOfSpeech:"形容詞",meaning:"まとまりのある",
    meanings:["形|まとまりのある"],
-   pronunciation:"/koʊˈhiːsɪv/",part:5,
+   pronunciation:"/koʊˈhiːsɪv/",part:"α",
    example:"A cohesive paragraph keeps all its sentences on one idea.",
    exampleJa:"まとまりのある段落は、すべての文を一つの考えに保つ。",
    example2:"Our team became more cohesive after the summer training camp.",
@@ -1282,9 +1793,9 @@ const RAW_WORDS=[
      {word:"inherent",meaning:"本来備わっている",breakdown:"in（中に）＋ her（くっつく）＋ ent（形容詞）→ もともと中にくっついて離れない"},
      {synonym:true,word:"connected",meaning:"つながった",breakdown:"線でつながっている。cohesive は全体が一つに固まっている"}]},
 
-  {id:76,word:"concise",partOfSpeech:"形容詞",meaning:"簡潔な",
+  {id:107,word:"concise",partOfSpeech:"形容詞",meaning:"簡潔な",
    meanings:["形|簡潔な"],
-   pronunciation:"/kənˈsaɪs/",part:5,
+   pronunciation:"/kənˈsaɪs/",part:"α",
    example:"Your summary should be concise and no longer than ten lines.",
    exampleJa:"要約は簡潔で、10行を超えないようにすべきだ。",
    example2:"The teacher praised my concise answer on the history test.",
@@ -1297,9 +1808,9 @@ const RAW_WORDS=[
      {word:"precise",meaning:"正確な",breakdown:"pre（先に）＋ cis（切る）→ ふちを先にきっちり切りそろえた"},
      {word:"pesticide",meaning:"殺虫剤",breakdown:"pest（害虫）＋ cide（切る・殺す）→ 害虫を断ち切る薬"}]},
 
-  {id:77,word:"extrapolate",partOfSpeech:"他動詞",meaning:"～を推定する",
+  {id:108,word:"extrapolate",partOfSpeech:"他動詞",meaning:"～を推定する",
    meanings:["他|～を推定する"],
-   pronunciation:"/ɪkˈstræpəleɪt/",part:5,
+   pronunciation:"/ɪkˈstræpəleɪt/",part:"α",
    example:"Scientists extrapolate future temperatures from the data they have.",
    exampleJa:"科学者は手元のデータから将来の気温を推し量る。",
    example2:"You cannot extrapolate my whole ability from a single test score.",
@@ -1312,9 +1823,9 @@ const RAW_WORDS=[
      {word:"polite",meaning:"礼儀正しい",breakdown:"pol（磨く）＋ ite（形容詞）→ 角が磨かれてなめらかな態度"},
      {word:"extraordinary",meaning:"並外れた",breakdown:"extra（範囲の外へ）＋ ordinary（ふつうの）→ ふつうの外側にある"}]},
 
-  {id:78,word:"clarification",partOfSpeech:"名詞",meaning:"説明，明確化",
+  {id:109,word:"clarification",partOfSpeech:"名詞",meaning:"説明，明確化",
    meanings:["名|説明，明確化"],
-   pronunciation:"/ˌklærəfɪˈkeɪʃn/",part:5,
+   pronunciation:"/ˌklærəfɪˈkeɪʃn/",part:"α",
    example:"The teacher offered a clarification of the difficult grammar rule.",
    exampleJa:"先生はその難しい文法規則について補足説明をしてくれた。",
    example2:"I emailed my teacher for clarification about the homework deadline.",
@@ -1327,9 +1838,9 @@ const RAW_WORDS=[
      {word:"declare",meaning:"宣言する",breakdown:"de（すっかり）＋ clar（澄んだ）→ すっかり澄ませて公に告げる"},
      {word:"clarinet",meaning:"クラリネット",breakdown:"clar（澄んだ）＋ et（小さい）→ 澄んだ音を出す小さな管楽器"}]},
 
-  {id:79,word:"plausibility",partOfSpeech:"名詞",meaning:"もっともらしさ",
+  {id:110,word:"plausibility",partOfSpeech:"名詞",meaning:"もっともらしさ",
    meanings:["名|もっともらしさ"],
-   pronunciation:"/ˌplɔːzəˈbɪləti/",part:5,
+   pronunciation:"/ˌplɔːzəˈbɪləti/",part:"α",
    example:"The teacher questioned the plausibility of my hypothesis.",
    exampleJa:"先生は私の仮説の妥当性に疑問を投げかけた。",
    example2:"We checked the plausibility of our plan before the school festival.",
@@ -1342,9 +1853,9 @@ const RAW_WORDS=[
      {word:"plausible",meaning:"もっともらしい",breakdown:"plaus（拍手する）＋ ible（できる）→ 聞いて拍手できるほど筋が通る"},
      {synonym:true,word:"likely",meaning:"ありそうな",breakdown:"起こる見込みが高い。plausibility は理屈の通り具合"}]},
 
-  {id:80,word:"juxtaposition",partOfSpeech:"名詞",meaning:"並置",
+  {id:111,word:"juxtaposition",partOfSpeech:"名詞",meaning:"並置",
    meanings:["名|並置"],
-   pronunciation:"/ˌdʒʌkstəpəˈzɪʃn/",part:5,
+   pronunciation:"/ˌdʒʌkstəpəˈzɪʃn/",part:"α",
    example:"The juxtaposition of the two photos shows the change clearly.",
    exampleJa:"二枚の写真を並べて置くことで、変化がはっきり見える。",
    example2:"In class we compared the two poems through juxtaposition.",
@@ -1358,9 +1869,9 @@ const RAW_WORDS=[
      {word:"purpose",meaning:"目的",breakdown:"pur（前へ）＋ pos（置く）→ 自分の前に置いて目指すもの"},
      {word:"compose",meaning:"組み立てる；作曲する",breakdown:"com（共に）＋ pos（置く）→ 部品を共に置いて一つに組む"}]},
 
-  {id:81,word:"repertoire",partOfSpeech:"名詞",meaning:"レパートリー",
+  {id:112,word:"repertoire",partOfSpeech:"名詞",meaning:"レパートリー",
    meanings:["名|レパートリー"],
-   pronunciation:"/ˈrepərtwɑːr/",part:5,
+   pronunciation:"/ˈrepərtwɑːr/",part:"α",
    example:"Try to add ten new phrases to your writing repertoire.",
    exampleJa:"書くときの持ちネタに、新しい表現を10個加えてみなさい。",
    example2:"Her repertoire of songs grew after she joined the chorus club.",
@@ -1374,9 +1885,9 @@ const RAW_WORDS=[
      {word:"repair",meaning:"修理する",breakdown:"re（再び）＋ par（生み出す）→ 壊れた物を再び使える形に出す"},
      {word:"separate",meaning:"分ける；別々の",breakdown:"se（離して）＋ par（用意する）→ 離して別々に用意する"}]},
 
-  {id:82,word:"tentative",partOfSpeech:"形容詞",meaning:"仮の，試験的な",
+  {id:113,word:"tentative",partOfSpeech:"形容詞",meaning:"仮の，試験的な",
    meanings:["形|仮の，試験的な"],
-   pronunciation:"/ˈtentətɪv/",part:5,
+   pronunciation:"/ˈtentətɪv/",part:"α",
    example:"This is only a tentative schedule, so the dates may change.",
    exampleJa:"これは暫定的な予定にすぎないので、日付は変わるかもしれない。",
    example2:"We made a tentative plan to meet at the station after the exam.",
@@ -1389,9 +1900,9 @@ const RAW_WORDS=[
      {synonym:true,word:"provisional",meaning:"暫定的な",breakdown:"ひとまずの措置。tentative は試しに置いた状態"},
      {synonym:true,word:"temporary",meaning:"一時的な",breakdown:"期間が短い。tentative はまだ確定していない状態"}]},
 
-  {id:83,word:"redundant",partOfSpeech:"形容詞",meaning:"余分な，冗長な",
+  {id:114,word:"redundant",partOfSpeech:"形容詞",meaning:"余分な，冗長な",
    meanings:["形|余分な，冗長な","形|解雇された"],
-   pronunciation:"/rɪˈdʌndənt/",part:5,
+   pronunciation:"/rɪˈdʌndənt/",part:"α",
    example:"The second paragraph is redundant because it repeats the first.",
    exampleJa:"2つ目の段落は1つ目の繰り返しなので余分だ。",
    example2:"Cut the redundant words and your essay will read much better.",
@@ -1404,9 +1915,9 @@ const RAW_WORDS=[
      {synonym:true,word:"extra",meaning:"余分な",breakdown:"必要を超えた分。redundant は同じ中身の重複を指す"},
      {synonym:true,word:"unnecessary",meaning:"不要な",breakdown:"要らない。redundant は要らない理由が重複にある"}]},
 
-  {id:84,word:"discourse",partOfSpeech:"名詞",meaning:"談話",
+  {id:115,word:"discourse",partOfSpeech:"名詞",meaning:"談話",
    meanings:["名|談話","名|講演"],
-   pronunciation:"/ˈdɪskɔːrs/",part:5,
+   pronunciation:"/ˈdɪskɔːrs/",part:"α",
    example:"Academic discourse requires evidence rather than personal feelings.",
    exampleJa:"学術的な議論には、個人の感情ではなく根拠が求められる。",
    example2:"Our class discourse about school rules lasted the whole period.",
@@ -1419,10 +1930,10 @@ const RAW_WORDS=[
      {word:"recourse",meaning:"頼ること",breakdown:"re（戻す）＋ cours（走る）→ 困って元の助けへ走り戻る"},
      {synonym:true,word:"conversation",meaning:"会話",breakdown:"日常のやりとり。discourse は主題を持つ硬い議論"}]},
 
-  {id:85,word:"scaffold",partOfSpeech:"他動詞",meaning:"（学習）を段階的に支援する",
+  {id:116,word:"scaffold",partOfSpeech:"他動詞",meaning:"（学習）を段階的に支援する",
    memory:"工事の「足場」を思い浮かべる。先生が足場を組むように少しずつ手助けし、できるようになったら外す＝scaffold。",
    meanings:["他|（学習）を段階的に支援する","名|足場"],
-   pronunciation:"/ˈskæfoʊld/",part:5,
+   pronunciation:"/ˈskæfoʊld/",part:"α",
    example:"Good teachers scaffold difficult tasks into small, clear steps.",
    exampleJa:"よい教師は難しい課題を小さく明確な段階に分けて支える。",
    example2:"Our teacher scaffolded the essay by starting with a simple outline.",
@@ -1436,9 +1947,9 @@ const RAW_WORDS=[
      {synonym:true,word:"step",meaning:"段階",breakdown:"step by step で使う。足場を一段ずつ上げるイメージ"},
      {synonym:true,word:"support",meaning:"支える",breakdown:"支える一般語。scaffold は外す前提の一時的な支え"}]},
 
-  {id:86,word:"prerequisite",partOfSpeech:"名詞",meaning:"前提条件",
+  {id:117,word:"prerequisite",partOfSpeech:"名詞",meaning:"前提条件",
    meanings:["名|前提条件"],
-   pronunciation:"/ˌpriːˈrekwəzɪt/",part:5,
+   pronunciation:"/ˌpriːˈrekwəzɪt/",part:"α",
    example:"Basic grammar is a prerequisite for writing good essays.",
    exampleJa:"基礎文法はよいエッセイを書くための前提条件だ。",
    example2:"This course has no prerequisite, so first-year students can take it.",
@@ -1451,9 +1962,9 @@ const RAW_WORDS=[
      {word:"quest",meaning:"探求",breakdown:"quest（求める）→ 求めて長く探し歩くこと"},
      {word:"conquest",meaning:"征服",breakdown:"con（共に・強く）＋ quest（求める）→ 強く求めて手に入れる"}]},
 
-  {id:87,word:"articulate",partOfSpeech:"他動詞",meaning:"(考えなど)をはっきり述べる",
-   meanings:["他|(考えなど)をはっきり述べる","形|考えを明確に表現できる"],
-   pronunciation:"/ɑːrˈtɪkjuleɪt/",part:5,
+  {id:118,word:"articulate",partOfSpeech:"他動詞",meaning:"（考えなど）をはっきり述べる",
+   meanings:["他|（考えなど）をはっきり述べる","形|考えを明確に表現できる"],
+   pronunciation:"/ɑːrˈtɪkjuleɪt/",part:"α",
    example:"Try to articulate your opinion in two clear sentences.",
    exampleJa:"自分の意見を2文でわかりやすく言葉にしてみなさい。",
    example2:"She articulated her reasons calmly during the club meeting.",
@@ -1466,9 +1977,9 @@ const RAW_WORDS=[
      {word:"artificial",meaning:"人工の",breakdown:"art（関節）＋ fic（作る）→ 部品を組み合わせて人の手で作った"},
      {word:"art",meaning:"技；芸術",breakdown:"art（関節）→ 部品をうまく組み合わせて形にする技"}]},
 
-  {id:88,word:"elicit",partOfSpeech:"他動詞",meaning:"～を引き出す",
+  {id:119,word:"elicit",partOfSpeech:"他動詞",meaning:"～を引き出す",
    meanings:["他|～を引き出す"],
-   pronunciation:"/ɪˈlɪsɪt/",part:5,
+   pronunciation:"/ɪˈlɪsɪt/",part:"α",
    example:"A well-designed question elicits an honest answer from students.",
    exampleJa:"よく練られた質問は生徒から正直な答えを引き出す。",
    example2:"Our teacher elicited three different opinions during the debate.",
@@ -1482,7 +1993,7 @@ const RAW_WORDS=[
      {synonym:true,word:"draw out",meaning:"引き出す",breakdown:"外へ引っ張り出す。elicit の意味をそのまま表す句"}]}
 ];
 /* ============================================================
-   語根コラム  ここから  ── 全126種そろえた版（2026-09-15 校閲反映）
+   語根コラム  ここから  ── 2026-09-18 に Part 6〜11 のパーツを追加
 
    roots_v3.html の「語根コラム ここから 〜 ここまで」の間を
    このファイルの中身で丸ごと差し替える。
@@ -1503,7 +2014,7 @@ const ROOT_NOTES={
   },
   "ad":{
     title:"アドバイスの「アド」は「〜のほうへ」",
-    body:"【なぜ】ラテン語 ad は「〜へ向かって」。発音しやすいように、あとの子音に合わせて ac・af・ap・ar・at・a と形を変えました（ad-gree より agree が言いやすい）。\n【身近な日本語】アドバイス（見えるほうへ導く）、アドレス（〜へ向けて整える＝宛先）、アピール（〜へ呼びかける）、アクセス（〜へ近づく）。\n【覚え方】語頭で同じ子音が2つ重なる ac-c・ap-p・at-t は「ad が化けた」合図。「〜のほうへ」と読めばほどけます。"
+    body:"【なぜ】ラテン語 ad は「〜へ向かって」。発音しやすいように、あとの子音に合わせて ac・af・ap・ar・at・a と形を変えました（ad-gree より agree が言いやすい）。\n【身近な日本語】アドバイス（見えるほうへ導く）、アドレス（〜へ向けて整える＝宛先）、アピール（〜へ呼びかける）、アクセス（〜へ近づく）。\n【覚え方】語頭で同じ子音が2つ重なる ac-c・ap-p・at-t は「ad が化けた」合図。「〜のほうへ」と読めばほどけます。※abroad の a は英語本来の on（〜に）が縮んだ形です。"
   },
   "com":{
     title:"コンビ・コラボの「コ」は「一緒に」",
@@ -1580,10 +2091,6 @@ const ROOT_NOTES={
   "out":{
     title:"アウトプットの「アウト」は「外へ」",
     body:"【なぜ】英語本来の語で「外へ」。外へはみ出るほど大きい、から「〜より勝る」という意味にもなりました。\n【身近な日本語】アウトプット（外へ出す）、アウトレット（外へ出す店）、アウトドア、アウトライン（外側の線）。\n【覚え方】野球の「アウト」は外へ出されること。handout は手から外へ配るプリント、outcome は外へ出てきた結果。"
-  },
-  "syn":{
-    title:"シンクロ・シンフォニーの「シン」は「一緒に」",
-    body:"【なぜ】ギリシャ語 syn は「共に」。次の音によって sym・syl・sy に変わります。ラテン語の com にあたります。\n【身近な日本語】シンクロ（時間を一緒にする）、シンフォニー（音を一緒に鳴らす）、シンパシー（一緒に感じる）、システム（一緒に立てたもの）。\n【覚え方】「シンクロ」＝ぴったり一緒。synthesize は一緒に置いてまとめる、syllable は一緒につかまれた音のまとまり。"
   },
   "vis":{
     title:"ビジョン・テレビの「ビ」は「見る」",
@@ -1689,10 +2196,6 @@ const ROOT_NOTES={
     title:"ジェスチャーは「体で運んで伝える」",
     body:"【なぜ】ラテン語 gerere（運ぶ・行う）の形 gest から。気持ちを体で運んで見せる＝身ぶり、考えを下からそっと運ぶ＝提案、になりました。\n【身近な日本語】ジェスチャー（身ぶり）、サジェスト（検索候補＝下から差し出す提案）、ダイジェスト（ばらばらに運び分けた要約）。\n【覚え方】検索の「サジェスト」＝そっと差し出される候補。suggest は下からそっと運んで出す＝提案する。"
   },
-  "grad":{
-    title:"グラデーションは「一段ずつ」",
-    body:"【なぜ】ラテン語 gradus（歩み・階段の段）から。一段ずつ上がる、段を上りきる＝卒業、という発想です。\n【身近な日本語】グラデーション（少しずつ変わる色）、グレード（等級）、アップグレード（段を上げる）。\n【覚え方】色が一段ずつ変わるグラデーション。grade は段階・成績、graduate は段を上りきる＝卒業する。"
-  },
   "graph":{
     title:"グラフは「書いたもの」",
     body:"【なぜ】ギリシャ語 graphein（書く）。もとは「ひっかく」で、粘土や板を尖ったもので刻むことが書くことの始まりでした。\n【身近な日本語】グラフ、フォトグラフ（光で書く＝写真）、グラフィック、オートグラフ（自分で書く＝サイン）。\n【覚え方】写真は「光で書いた絵」＝photograph。paragraph は横に区切りの印を書いた＝段落。"
@@ -1725,10 +2228,6 @@ const ROOT_NOTES={
     title:"パラグラフの「パラ」は「横に・そばに」",
     body:"【なぜ】ギリシャ語 para は「そばに・横に」。そばに置く、横に並べる、というイメージです。※パラシュート・パラソルの para は「防ぐ」という別系統です。\n【身近な日本語】パラグラフ（横に印を書いた段落）、パラリンピック（オリンピックのそばで並ぶ大会）、パラレル（並行）。\n【覚え方】パラリンピック＝オリンピックと並ぶ大会。paraphrase は横に別の言い方を並べる＝言い換える。"
   },
-  "pass":{
-    title:"パスは「歩いて通り抜ける」",
-    body:"【なぜ】ラテン語 passus（歩み・歩幅）から。一歩ずつ歩いて通る、から「通る・通す・渡す」の意味になりました。\n【身近な日本語】パス（通す・渡す）、パスポート（港を通る許可証）、パスワード（通るための合言葉）、パッセンジャー（通る人＝乗客）。\n【覚え方】ボールを「パス」する＝渡す。pass out は外へ渡す＝配る、または意識が外へ抜ける＝気絶する。"
-  },
   "plain":{
     title:"プレーンは「平ら」、でも complain は別",
     body:"【なぜ】explain の plain はラテン語 planus（平ら）から。平らに広げると見通しがよくなる＝説明する。complain は plangere（胸を叩いて嘆く）という別の語です。\n【身近な日本語】プレーンヨーグルト（飾りのない平らな）、プラン（平面図＝計画）、プレーン（飛行機の翼）。\n【覚え方】しわくちゃの紙を平らに広げて見せる＝explain。complain は胸を叩いて嘆く＝文句を言う。"
@@ -1741,21 +2240,9 @@ const ROOT_NOTES={
     title:"スクリプトは「書かれたもの」",
     body:"【なぜ】ラテン語 scribere（書く）から。書き写す、下に書く＝署名する、前もって書く＝処方する、と書く場所で意味が変わります。\n【身近な日本語】スクリプト（台本）、サブスク（下に署名する＝定期購読）、プリスクリプション（処方箋）。\n【覚え方】「サブスク」は申込書の下にサインすること。describe は見たまま書き写す＝描写する。"
   },
-  "sent":{
-    title:"プレゼントは「目の前にある」",
-    body:"【なぜ】absent・present の sent はラテン語 esse（ある・いる）の形。「前にいる」のが present、「離れていていない」のが absent です。※sense の sent（感じる）は別系統。\n【身近な日本語】プレゼント（目の前に差し出す物）、プレゼンテーション（人前に出して見せる）。\n【覚え方】プレゼントは目の前に「ある」。absent は離れていて、ここに「いない」＝欠席の。"
-  },
   "tempt":{
     title:"「試しに触る」のが誘惑",
     body:"【なぜ】ラテン語 temptare（手で探る・試す）から。試しにやってみる＝試みる、相手の心を試しにつつく＝誘惑する、になりました。\n【身近な日本語】テンプテーション（誘惑）。tentative（仮の）も同じ根です。\n【覚え方】指でつんつん試す。attempt は試しにやってみる、tempt は心をつついて誘う。"
-  },
-  "tend":{
-    title:"テントは「ピンと張ったもの」",
-    body:"【なぜ】ラテン語 tendere（伸ばす・張る）から。手や心をそちらへ伸ばす、から「注意を向ける・向かう」になりました。\n【身近な日本語】テント（張ったもの）、テンション（張り）、エクステ（エクステンション＝伸ばしたもの）。\n【覚え方】テントのロープをピンと張る。attend は心をそちらへ伸ばす＝出席する・注意する、extend は外へ伸ばす。"
-  },
-  "the":{
-    title:"テーマは「そこに置かれたもの」",
-    body:"【なぜ】ギリシャ語 tithenai（置く）から。話の真ん中に置かれたもの＝主題、下に置いた仮の考え＝仮説、です。ラテン語の pos に当たります。\n【身近な日本語】テーマ（置かれた主題）、テーゼ（立てた主張）、アンチテーゼ（反対に置かれた主張）。\n【覚え方】話の真ん中に「置かれた」テーマ。synthesize はいくつかを一緒に置く＝まとめる・合成する。"
   },
   "tin":{
     title:"「持ち続ける」ことが中身と続き",
@@ -1781,14 +2268,6 @@ const ROOT_NOTES={
     title:"セレブは「人が大勢集まる」",
     body:"【なぜ】ラテン語 celeber は「人でにぎわう」。人がたくさん集まる＝盛大に祝う、たくさんの人が集まる人＝有名人、になりました。\n【身近な日本語】セレブ（有名人＝人が集まってくる人）、セレブレーション（お祝い）。\n【覚え方】セレブのまわりには人が集まる。celebrate は人を集めて盛大に祝う。"
   },
-  "chor":{
-    title:"コーラスは「みんなで歌い踊る」",
-    body:"【なぜ】ギリシャ語 khoros は、劇で一緒に歌い踊る集団のこと。みんなで声を合わせるのが合唱です。\n【身近な日本語】コーラス（合唱）、クワイア（聖歌隊）、コレオグラフィー（振り付け＝踊りを書く）。\n【覚え方】合唱コンクールのコーラス。in chorus は声をそろえて一斉に。"
-  },
-  "du":{
-    title:"「支払うべき」が締め切り",
-    body:"【なぜ】ラテン語 debere（借りがある・〜しなければならない）から。払うべき時が来た＝期限、果たすべきこと＝義務、になりました。\n【身近な日本語】デューデート（期日）、デビットカード（借り＝すぐ引き落とし）。\n【覚え方】借りを返す日＝due date（締め切り）。due は期限の来た、duty は果たすべき義務、debt は借金。"
-  },
   "eer":{
     title:"ボランティア・エンジニアの「イア」は「人」",
     body:"【なぜ】フランス語経由の -ier から。「それに携わる人」を作り、アクセントがこの部分にきます（volun-TEER）。\n【身近な日本語】ボランティア（自分の意志で関わる人）、エンジニア（機械に携わる人）、パイオニア（先頭を歩く人）。\n【覚え方】「〜イア」は人。volunteer は vol（意志）＋eer（人）＝自分から進んでやる人。"
@@ -1809,10 +2288,6 @@ const ROOT_NOTES={
     title:"「熊手でならす」が稽古に",
     body:"【なぜ】古フランス語 herce は「熊手（まぐわ）」。畑を熊手で何度もならすように、何度も繰り返しさらう＝下稽古する、が rehearse です。\n【身近な日本語】リハーサル（本番前の通し稽古）。\n【覚え方】畑を熊手で何度もかき返す＝rehearse。「リハ」は同じことを繰り返してならす練習。"
   },
-  "loud":{
-    title:"ラウドは「大きく聞こえる」",
-    body:"【なぜ】古英語 hlud（聞こえる）から。大きく聞こえる＝うるさい、声に出して聞こえるように＝aloud、です。\n【身近な日本語】ラウドスピーカー（拡声器）、ラウドロック（音の大きいロック）。\n【覚え方】ラウドスピーカーで聞こえるように。read aloud は声に出して読む（黙読の反対）。allowed と同じ発音に注意。"
-  },
   "mater":{
     title:"マテリアルは「母なる材料」",
     body:"【なぜ】ラテン語 mater（母）から。物を生み出す母＝もとになるもの、という発想で material（材料）や matter（物質）が生まれました。\n【身近な日本語】マテリアル（素材）、マタニティ（母であること）、マザー（同じ根）。\n【覚え方】すべての物を生み出す「母」が材料。material は材料・資料、maternity は母の。"
@@ -1824,10 +2299,6 @@ const ROOT_NOTES={
   "pol":{
     title:"ポリッシュは「磨く」",
     body:"【なぜ】ラテン語 polire（磨く・なめらかにする）から。人柄が磨かれている＝礼儀正しい、という比喩も昔からありました。\n【身近な日本語】ポリッシュ（つや出し）、ネイルポリッシュ（マニキュア）。※ポリス（警察）は別系統。\n【覚え方】ネイルをポリッシュで磨く。polite は磨かれた＝礼儀正しい、extrapolate は線を外へ磨き延ばす。"
-  },
-  "ras":{
-    title:"「こすって消す」",
-    body:"【なぜ】ラテン語 radere（こする・削る）から。紙を削って字を消していた時代の動作がそのまま残っています。\n【身近な日本語】イレイザー（消しゴム）。かみそりの razor も同じ根です。\n【覚え方】消しゴムでごしごしこする＝erase。eraser は消すもの、razor は削る道具。"
   },
   "search":{
     title:"サーチは「ぐるぐる回って探す」",
@@ -1844,10 +2315,6 @@ const ROOT_NOTES={
   "ton":{
     title:"トーンは「ピンと張った弦の音」",
     body:"【なぜ】ギリシャ語 tonos は「張ること」。弦をどれだけ張るかで音の高さが決まるので、「音の調子」の意味になりました。\n【身近な日本語】トーン（声の調子）、モノトーン（一つの音・色）、チューニング（tune はもともと tone が変化した語）。\n【覚え方】ギターの弦を張ると音が変わる。intonation は文の中の音の上がり下がり＝抑揚。"
-  },
-  "turn":{
-    title:"ターンは「くるっと回る」",
-    body:"【なぜ】ギリシャ語 tornos（ろくろ）から。ろくろが回る動きが「回る・向きを変える」になりました。\n【身近な日本語】Uターン、ターン（回る）、リターン（戻る）、ツアー・トーナメント（同じ根）。\n【覚え方】くるっと回って順番が来る。take turns は順番を回す＝交代でやる、return は回って戻る。"
   },
   "und":{
     title:"「波があふれる」",
@@ -1872,10 +2339,6 @@ const ROOT_NOTES={
   "ary":{
     title:"ライブラリーの「リー」は「集まる場所」",
     body:"【なぜ】ラテン語 -arius から。「〜に関する」形容詞や、「〜が集まる場所・物」の名詞を作ります。\n【身近な日本語】ライブラリー（本の集まる場所）、ディクショナリー（言葉の集まり）、ボキャブラリー（呼び名の集まり）。\n【覚え方】ライブラリー＝本の集まり。vocabulary は言葉の集まり＝語彙、dictionary は言葉を集めた本。"
-  },
-  "cheat":{
-    title:"「没収」から「だます」へ",
-    body:"【なぜ】中世英語 escheat は「持ち主のいない土地を役人が取り上げること」。役人がよく人をだまして取り上げたので、「だまし取る・ずるをする」になりました。\n【身近な日本語】チート（ゲームのずる）、カンニング（英語では cheating）。\n【覚え方】ゲームの「チート」＝ずる。cheating はテストのカンニング。cunning は「ずる賢い」で別の意味。"
   },
   "co":{
     title:"コーディネートの「コ」は「一緒に」",
@@ -1929,10 +2392,6 @@ const ROOT_NOTES={
     title:"「すぐ隣に」置く",
     body:"【なぜ】ラテン語 juxta は「すぐそばに・隣に」。二つを隣に並べて違いを目立たせる技法を juxtaposition と呼びます。\n【身近な日本語】直接のカタカナ語はありませんが、アジャスト（adjust＝すぐそばへ合わせる）が同じ仲間です。\n【覚え方】アジャストはぴったり隣に合わせる。juxtaposition はすぐ隣に置く＝並べて比べる。"
   },
-  "lab":{
-    title:"シラバスの「ラ」は「つかむ」",
-    body:"【なぜ】ギリシャ語 lambanein（つかむ）から。一息でひとまとめにつかめる音の束が「音節」です。\n【身近な日本語】シラバス（授業内容をまとめてつかんだ一覧）。\n【覚え方】大学のシラバス＝まとめてつかんだ一覧。syllable は一緒につかんだ音のかたまり＝音節。"
-  },
   "ly":{
     title:"「〜リー」は「〜のように」",
     body:"【なぜ】古英語 lic（姿・形）から来ていて、like（〜のような）と同じ根です。「〜のような様子で」と副詞を作ります。\n【身近な日本語】フレンドリー（友だちのような＝形容詞）、リアリー（本当に）、ナチュラリー（自然に）。\n【覚え方】フレンドリー＝友だちのよう。gradually は一段ずつのように＝徐々に。friendly・lovely は形容詞なので注意。"
@@ -1944,14 +2403,6 @@ const ROOT_NOTES={
   "op":{
     title:"「向かい合って立ちはだかる」",
     body:"【なぜ】ラテン語 ob（〜に向かって・立ちはだかって）が p の前で op に変わった形。向かい合う位置は、対立にもチャンスにもなります。\n【身近な日本語】オポジット（反対の）、オポチュニティ（港に向かう風＝好機）。\n【覚え方】相手と向かい合って立つ。oppose は向かい合わせに置く＝反対する、opposite は向かい側の。"
-  },
-  "open":{
-    title:"オープンは「開いた」",
-    body:"【なぜ】古英語 open から。up（上へ）と同じ根で、ふたを持ち上げることが「開く」でした。\n【身近な日本語】オープン（開店）、オープンカー、オープニング（始まり）、オープンキャンパス。\n【覚え方】ふたを「アップ」すると「オープン」。open to page 10 は「10ページを開いて」。"
-  },
-  "phrase":{
-    title:"フレーズは「言い回し」",
-    body:"【なぜ】ギリシャ語 phrasis（言い方・話しぶり）から。意味の中身よりも「どう言うか」を指す語です。\n【身近な日本語】フレーズ（決まり文句）、キャッチフレーズ、ワンフレーズ。\n【覚え方】キャッチフレーズ＝印象に残る言い回し。paraphrase は横に別の言い回しを並べる＝言い換える。"
   },
   "prac":{
     title:"プラクティカルは「実際にやる」",
@@ -1976,10 +2427,6 @@ const ROOT_NOTES={
   "tang":{
     title:"タンジェントは「円にちょんと触れる線」",
     body:"【なぜ】tact と同じ tangere（触れる）の形。円に一点だけ触れて、そのまま離れていく線が「接線」です。\n【身近な日本語】タンジェント（数学の tan）、タンジブル（触れられる）。\n【覚え方】数学の tan＝円に触れる線。tangent は話が接線のようにそれていく＝脱線、の意味もあります。"
-  },
-  "tour":{
-    title:"ツアーは「ぐるっと回って戻る旅」",
-    body:"【なぜ】ギリシャ語 tornos（ろくろ）から。ろくろのように円を描いて回り、出発点に戻ってくる旅が tour です。turn と同じ根です。\n【身近な日本語】ツアー、ツーリスト（旅行者）、トーナメント（馬で回り込んで戦った試合）。\n【覚え方】ツアーとターンはもとは同じ「回る」。tournament は勝ち抜き戦。"
   },
   "un":{
     title:"アンハッピーの「アン」は「〜でない」",
@@ -2027,7 +2474,7 @@ const ROOT_NOTES={
   },
   "abil":{
     title:"「扱える」から「できる」",
-    body:"【なぜ】ラテン語 habilis（手で扱いやすい）から。うまく扱える＝できる、になりました。単語 able もここから来ています。\n【身近な日本語】アビリティ（能力、ゲームの特殊能力）、リハビリ（rehabilitation＝再び体を扱えるようにする）。\n【覚え方】ゲームの「アビリティ」＝使える能力。リハビリは「もう一度できるように」。ability は能力、enable はできるようにする。"
+    body:"【なぜ】ラテン語 habilis（手で扱いやすい）から。うまく扱える＝できる、になりました。単語 able もここから来ています。大もとは habere（持つ）で、habit（身についたふるまい＝習慣）も親戚です。\n【身近な日本語】アビリティ（能力、ゲームの特殊能力）、リハビリ（rehabilitation＝再び体を扱えるようにする）。\n【覚え方】ゲームの「アビリティ」＝使える能力。リハビリは「もう一度できるように」。ability は能力、enable はできるようにする。"
   },
   "ef":{
     title:"「外へ」の ex が f の前で ef に",
@@ -2036,14 +2483,6 @@ const ROOT_NOTES={
   "ice":{
     title:"「〜ス」で行いを名詞に",
     body:"【なぜ】ラテン語 -itia から。行い・性質を名詞にします。\n【身近な日本語】サービス（仕えること）、ジャスティス（正義）、ノーティス（通知）、プラクティス。\n【覚え方】サービス＝仕える行い。practice は繰り返し行うこと＝練習・実践。"
-  },
-  "row":{
-    title:"「横一列」の並び",
-    body:"【なぜ】古英語 rāw（並び・列）から。一直線につながった並びを指します。ボートを「漕ぐ」row は別の語です。\n【身近な日本語】直接のカタカナ語は少ないですが、「3連続」を英語で three in a row と言います。\n【覚え方】教室の横一列の席。in a row は一列に並んで＝連続で。縦の列は column。"
-  },
-  "raise":{
-    title:"レイズは「持ち上げる」",
-    body:"【なぜ】古ノルド語 reisa（持ち上げる）から。rise（上がる）と同じ根です。raise は何かを上げる、rise は自分が上がる。\n【身近な日本語】レイズ（ポーカーで賭け金を上げる）。\n【覚え方】ポーカーの「レイズ」＝賭け金を上げる。raise your hand＝手を挙げる、raise money＝お金を集める。"
   },
   "nu":{
     title:"ニュアンスは「雲のかげり」",
@@ -2085,6 +2524,215 @@ const ROOT_NOTES={
     title:"「外へ」の ex が縮んだ e",
     body:"【なぜ】ex（外へ）が l・m・v・d などの前で x を落としました。\n【身近な日本語】エモーション（外へ動く気持ち＝感情）、エデュケーション（外へ導く＝教育）、エレクト（選び出す）。\n【覚え方】エモーション＝気持ちが外へ動き出す。elicit は外へ誘い出す＝引き出す。"
   },
+  /* ---- ここから Part 6〜11（No.51〜101）で増えたパーツ ---- */
+  "dict":{
+    title:"ディクテーションの「ディク」は「言う」",
+    body:"【なぜ】ラテン語 dicere（言う）から。dic・dict の形で出てきます。「言う」から、言い渡す・言い合って決める、にも広がりました。\n【身近な日本語】ディクショナリー（言葉を集めた本）、ディクテーション（言ったことを書き取る）、インデックス（指し示すもの＝索引）。\n【覚え方】ディクテーション＝先生が言うのを書き取る。predict は前もって言う＝予言する、condition は言い合って決めた取り決め＝条件。"
+  },
+  "medic":{
+    title:"メディカルの「メディ」は「治す」",
+    body:"【なぜ】ラテン語 mederi（治す）から。medic・med の形で「病気やけがを治す」ことを表します。\n【身近な日本語】メディカル（医療の）、メディスン（薬）、パラメディック（救急救命士）。※メディア（媒体）は「中間」を表す別の語です。\n【覚え方】ドラマの「メディカル〜」は病院が舞台。medicine は治すもの＝薬、remedy は元どおりに治す＝治療法。"
+  },
+  "strict":{
+    title:"ストレスは「ぎゅっと締めつける」",
+    body:"【なぜ】ラテン語 stringere（きつく締める）の形 strict から。stress は distress（締めつけて苦しめる）の頭が落ちてできた語です。\n【身近な日本語】ストレス（心を締めつける圧力）、ストリクト（厳格な）、ディストリクト（区切られた地区）。\n【覚え方】ストレス＝心がぎゅっと締めつけられる。strict は決まりで締めつける＝厳しい、restrict は引き締める＝制限する。"
+  },
+  "suf":{
+    title:"sub が f の前で変わった形",
+    body:"【なぜ】sub（下に）が f の前で suf になりました。重い物の下に入って支えるイメージです。\n【身近な日本語】サフィックス（suffix＝語の後ろ〔下〕に付けるもの、接尾辞）。\n【覚え方】suffer は重荷の下で運ぶ＝苦しむ、sufficient は下から作り足す＝十分な。"
+  },
+  "erc":{
+    title:"エクササイズは囲いから「外へ出す」",
+    body:"【なぜ】ラテン語 arcere（閉じ込める・囲う）が、ex などの後ろで erc に変わった形です。exercise は、囲いに入れていた家畜を外へ出して働かせることから生まれたと考えられています。\n【身近な日本語】エクササイズ（運動）。\n【覚え方】エクササイズ＝囲いから外へ出て体を動かす。coerce は囲いに押し込めて無理にやらせる＝強制する。"
+  },
+  "breath":{
+    title:"ブレスは「息」",
+    body:"【なぜ】古英語 bræth（吐く息・におい）から。名詞 breath に e が付いた breathe が「息をする」という動詞です。\n【身近な日本語】ブレス（歌の息つぎ）、ブレスケア（息のにおいのケア）。\n【覚え方】歌う前の「ブレス」＝息を吸う。breath［ブレス］は名詞、breathe［ブリーズ］は動詞。bath（入浴）と bathe（水浴びする）も同じ関係。"
+  },
+  "thirst":{
+    title:"サースト（thirst）は「からからに乾く」",
+    body:"【なぜ】古英語 thurst（渇き）から。もとは「乾く」を表す古い根で、ラテン語 terra（乾いた土地＝大地）とも遠い親戚だとされます。\n【身近な日本語】テラス（terrace）の terr も、この「乾いた土地」から来ています。\n【覚え方】thirst（渇き）＋ y で thirsty（のどが渇いた）。hunger→hungry と同じ作り方。"
+  },
+  "y":{
+    title:"「〜な状態の」を作る -y",
+    body:"【なぜ】英語本来の語尾 -y は、名詞に付けて「〜がある・〜な状態の」という形容詞を作ります。economy・company の -y のように、名詞を作る別の -y もあります。\n【身近な日本語】ラッキー（運がある）、ジューシー（果汁たっぷりの）、スパイシー、クリーミー。\n【覚え方】ジューシー＝ジュースたっぷりの。thirsty は渇いた状態の、sleepy は眠い状態の。"
+  },
+  "physic":{
+    title:"フィジカルは「自然・体」",
+    body:"【なぜ】ギリシャ語 physis（自然）から。自然の中の形あるもの、つまり体や物体を表すようになりました。\n【身近な日本語】フィジカル（体の強さ）、フィジックス（物理学）、フィジーク（体格）。\n【覚え方】スポーツの「フィジカルが強い」＝体が強い。physics は自然のしくみの学問＝物理学、physician は体を治す人＝内科医。"
+  },
+  "fever":{
+    title:"フィーバーは「燃えるような熱」",
+    body:"【なぜ】ラテン語 febris（熱病）から。体が熱くなる病気を指し、そこから人々が熱に浮かされたような「熱狂」も表すようになりました。\n【身近な日本語】フィーバー（大当たり・熱狂）、「〇〇フィーバー」（大ブーム）。\n【覚え方】「パンダフィーバー」＝みんなが熱に浮かされる。have a fever は熱がある、feverish は熱っぽい。"
+  },
+  "strong":{
+    title:"ストロングは「強い」",
+    body:"【なぜ】古英語 strang（強い）から。th を付けて名詞にすると、o が e に変わって strength になりました。long→length も同じ変化です。\n【身近な日本語】ストロング（強い）、ストロングポイント（強み）。\n【覚え方】strong（強い）→ strength（強さ）→ strengthen（強くする）。3つ並べて覚える。"
+  },
+  "th":{
+    title:"「〜さ」を作る -th",
+    body:"【なぜ】英語本来の語尾。形容詞や動詞に付けて「〜さ・〜すること」という名詞を作ります。そのとき母音が変わることがあります。\n【身近な日本語】ヘルスケア（health＝健康）、グロース（growth＝成長）、トゥルース（truth＝真実）。\n【覚え方】strong→strength、long→length、wide→width、true→truth。形容詞＋th＝「その性質」。"
+  },
+  "tear":{
+    title:"ティアドロップは「涙のしずく」",
+    body:"【なぜ】古英語 tear（涙）から。ラテン語 lacrima・ギリシャ語 dakry（涙）と同じ根をもつ古い語です。「裂く」の tear［テア］は、たまたま同じ綴りになった別の語です。\n【身近な日本語】ティアドロップ（涙のしずく形）。\n【覚え方】ティアドロップ型のサングラス＝涙のしずく形。in tears は泣いて、burst into tears はわっと泣き出す。"
+  },
+  "tax":{
+    title:"タクシーとテイストは「触れて値ぶみする」",
+    body:"【なぜ】ラテン語 taxare（触れる・値ぶみする）から。値ぶみして割り当てるお金が tax（税）、割り当てられた務めが task（仕事）です。舌で触れて確かめる taste（味わう）も、ここから来たと考えられています。\n【身近な日本語】タックス（税）、タクシー（料金をメーターで値ぶみする車）、テイスト（味・好み）。\n【覚え方】タクシーのメーター＝料金の値ぶみ。tax・task・taste は「触れて確かめ、値をつける」仲間。"
+  },
+  "reg":{
+    title:"ルールとレギュラーは「まっすぐ」",
+    body:"【なぜ】ラテン語 regere（まっすぐ導く・治める）と regula（まっすぐな棒＝定規）から。行いをまっすぐにそろえる決まりが rule です。\n【身近な日本語】ルール（規則）、レギュラー（いつもの・正規の）、レギュレーション（規定）。\n【覚え方】定規（ruler）で線をまっすぐ引く。regular は定規で測ったようにきちんとした、region は王が治める範囲＝地域。"
+  },
+  "roll":{
+    title:"ロールは「くるくる巻いたもの」",
+    body:"【なぜ】ラテン語 rotulus（小さな車輪・巻物）から。役者のせりふを書いた巻物が role（役割）、帳簿の巻物と照らし合わせることが control（管理する）になりました。\n【身近な日本語】ロールケーキ、ロールプレイ（役を演じる練習）、ロールモデル（手本となる人）。\n【覚え方】ロールプレイ＝台本の役を演じる。roll は巻く・名簿、enroll は名簿に書き入れる＝登録する。"
+  },
+  "custom":{
+    title:"カスタマーは「いつもの」お客さん",
+    body:"【なぜ】ラテン語 consuetudo（すっかり慣れること）がフランス語を通って縮まった語です。みんなが慣れ親しんだやり方が custom、いつも決まって来てくれる人が customer です。\n【身近な日本語】カスタマー（顧客）、コスチューム（その土地・時代のいつもの装い）。\n【覚え方】カスタマー＝慣れて通う常連さん。customs は昔からのしきたりで納める税＝関税、それを扱う所＝税関。"
+  },
+  "trans":{
+    title:"トランジットの「トラン」は「向こうへ」",
+    body:"【なぜ】ラテン語 trans（越えて・向こうへ）。あとの音によって tra のように短くなることもあります。\n【身近な日本語】トランジット（通り越して行く）、トランスファー（乗り継ぎ）、トランスポート（向こうへ運ぶ＝輸送）。\n【覚え方】空港の「トランジット」＝通り越して向こうへ。tradition は向こうへ手渡すもの＝伝統、translate は向こうへ移す＝翻訳する。"
+  },
+  "dat":{
+    title:"データは「与えられたもの」",
+    body:"【なぜ】ラテン語 dare（与える・渡す）から。dat・dit・don などの形で出てきます。tradition は世代から世代へ手渡されたもの、edition は世の中へ出して渡したものです。\n【身近な日本語】データ（与えられた事実）、ドナー（与える人）、エディション（版）。\n【覚え方】ドナー＝臓器や血液を与える人。data は与えられた材料、donate は与える＝寄付する。"
+  },
+  "soci":{
+    title:"ソーシャルの「ソシ」は「仲間」",
+    body:"【なぜ】ラテン語 socius（仲間・連れ）から。仲間どうしのつながりや、その集まりを表します。\n【身近な日本語】ソーシャルメディア（人とつながるメディア）、ソサエティ（協会）、サッカー（association football の soc）。\n【覚え方】ソーシャルメディア＝仲間とつながる場所。society は仲間の集まり＝社会、associate は仲間に加える＝結びつける。"
+  },
+  "lay":{
+    title:"レイアウトは「置く」、law は「置かれた決まり」",
+    body:"【なぜ】「置く」を表す英語本来の古い根から。古ノルド語で「定めて置かれたもの」を意味した語が英語に入り、law（法）になりました。\n【身近な日本語】レイアウト（配置）、レイヤー（置き重ねた層）。\n【覚え方】レイアウト＝物を置いて並べる。law は社会にしっかり置かれた決まり、lawyer はそれを扱う人＝弁護士。"
+  },
+  "ante":{
+    title:"a.m. の「a」は「前に」",
+    body:"【なぜ】ラテン語 ante は「前に・先に」。場所の前にも、時間の前にも使います。フランス語を通ると an に縮むことがあります。\n【身近な日本語】a.m.（ante meridiem＝正午の前）、アンティーク（前の時代のもの）。\n【覚え方】a.m. は「正午の前」。ancestor は前を行った人＝祖先、anticipate は先に取る＝予想する。"
+  },
+  "ced":{
+    title:"プロセスとアクセスは「行く・進む」",
+    body:"【なぜ】ラテン語 cedere（行く・進む・ゆずる）から。ced・cess・ceed などの形になります。\n【身近な日本語】プロセス（前へ進む道のり）、アクセス（〜へ行く）、サクセス（次に続いて行く＝成功）。\n【覚え方】サクセス＝うまく進む。ancestor は前を行った人＝祖先、precede は先に行く。"
+  },
+  "or":{
+    title:"アクターの「ター」は「〜する人」",
+    body:"【なぜ】ラテン語の語尾 -or から。動詞に付けて「〜する人・もの」を表します。英語本来の -er と同じはたらきです。\n【身近な日本語】アクター（演じる人）、ディレクター（指示する人）、エレベーター（持ち上げるもの）。\n【覚え方】-er と -or はどちらも「〜する人」。ancestor は前を行った人＝祖先、governor は舵を取る人＝知事。"
+  },
+  "popul":{
+    title:"ポピュラーの「ポピュ」は「人々」",
+    body:"【なぜ】ラテン語 populus（人々）から。popul・publ・peopl などに形を変えて出てきます。\n【身近な日本語】ポピュラー（人々に好かれる）、ポップス（大衆音楽）、パブリック（人々みんなの）、ピープル。\n【覚え方】ポピュラーソング＝みんなに好かれる歌。population は人々の数＝人口、public はみんなの＝公共の。"
+  },
+  "nat":{
+    title:"ネイティブの「ナ」は「生まれる」",
+    body:"【なぜ】ラテン語 nasci（生まれる）の形 nat から。生まれたままの姿や、生まれた土地を表します。\n【身近な日本語】ネイティブ（その土地で生まれた）、ネイチャー（生まれたままの自然）、ナショナル（国の）、ナチュラル。\n【覚え方】ネイティブスピーカー＝その言葉の国に生まれた人。nation は同じ土地に生まれた人々＝国家。"
+  },
+  "broad":{
+    title:"ブロードウェイは「広い通り」",
+    body:"【なぜ】英語本来の語で「幅が広い」。「広いところへ」が、家の外・海の外へと広がって abroad（海外へ）になりました。\n【身近な日本語】ブロードウェイ（広い通り）、ブロードバンド（広い帯域の回線）。\n【覚え方】ブロードウェイ＝広い通り。abroad は広い外の世界へ＝海外へ、broaden は広げる。"
+  },
+  "loc":{
+    title:"ロケ地の「ロケ」は「場所」",
+    body:"【なぜ】ラテン語 locus（場所）から。ある場所に関すること、場所を決めること、を表します。\n【身近な日本語】ロケーション（場所・立地）、ロケ（撮影場所に出かける撮影）、ローカル線。\n【覚え方】ドラマの「ロケ地」＝撮影した場所。local はその場所の、locate は場所を突き止める。"
+  },
+  "super":{
+    title:"スーパーの「上に」、sur にもなる",
+    body:"【なぜ】ラテン語 super（上に・越えて）。フランス語を通ると sur になりました。上から見る、上を越える、というイメージです。\n【身近な日本語】スーパーマン（人を超えた人）、スーパーバイザー（上から見る人）、サーフェス（表面）。\n【覚え方】スーパーマン＝人を超えた人。survey は上から見渡す＝調査する、supervise は上から見張る＝監督する。"
+  },
+  "val":{
+    title:"バリューは「力がある・値打ちがある」",
+    body:"【なぜ】ラテン語 valere（強い・値打ちがある）から。力がある＝役に立つ＝価値がある、と広がりました。\n【身近な日本語】バリュー（価値）、「バリューセット」（お得なセット）。\n【覚え方】バリューセット＝値打ちのあるセット。valuable は価値のある、evaluate は値打ちを示す＝評価する、available は役に立てられる＝利用できる。"
+  },
+  "treas":{
+    title:"トレジャーは「宝をしまう倉」",
+    body:"【なぜ】ギリシャ語 thesauros（宝物をしまう倉）が、ラテン語・フランス語を通って treasure になりました。\n【身近な日本語】トレジャーハンター（宝探しをする人）、シソーラス（言葉の倉＝類語辞典）。\n【覚え方】トレジャーハンター＝宝を探す人。treasury は宝をしまう所＝宝物庫・国庫。"
+  },
+  "vot":{
+    title:"vote はもともと「神への誓い・願い」",
+    body:"【なぜ】ラテン語 votum（誓い・願い）から。神に誓いや願いを表すことが、自分の選ぶ人や案を示す「投票」になりました。乗り物のボート（boat）とは別の語です。\n【身近な日本語】カタカナではあまり使いませんが、結婚式の「誓いの言葉」は英語で wedding vows です。\n【覚え方】vote は願いを示す＝投票する、vow は誓い、devote は誓って捧げる。"
+  },
+  "govern":{
+    title:"ガバナーは「舵を取る人」",
+    body:"【なぜ】ギリシャ語 kybernan（船の舵を取る）がラテン語 gubernare を通って govern になりました。国の舵取りが「治める」ことです。\n【身近な日本語】ガバナンス（組織の舵取り＝統治）、ガバナー（知事・総裁）、サイバー（機械の舵取りの学問から）。\n【覚え方】国という船の舵を取る。government は舵取りをする組織＝政府、governor は舵取り役＝知事。"
+  },
+  "polit":{
+    title:"ポリスは「都市」",
+    body:"【なぜ】ギリシャ語 polis（都市国家）から。都市の市民がみんなで決める事柄が「政治」、都市の秩序を守るしくみが「警察」です。polish（磨く）の pol とは別の語です。\n【身近な日本語】ポリス（警察）、ポリシー（方針）、メトロポリス（大都市）。\n【覚え方】古代ギリシャの「ポリス」＝都市国家。political は市民の事柄の＝政治の、policy は都市の治め方＝政策。"
+  },
+  "preci":{
+    title:"プライスとプライズは「値打ち」",
+    body:"【なぜ】ラテン語 pretium（値打ち・値段）から。price（値段）と prize（賞品）は、もとは同じ語が分かれたものです。\n【身近な日本語】プライス（値段）、プライスレス（値段をつけられないほど貴重な）、プレシャス（貴重な）。\n【覚え方】「プライスレス」＝値段をつけられないほど貴重。appreciate は値打ちを認める＝真価を認める・感謝する。"
+  },
+  "sum":{
+    title:"サミットの「サム」は「いちばん上」",
+    body:"【なぜ】ラテン語 summus（いちばん上の）から。古代ローマでは数を下から足して、合計をいちばん上に書いたとされます。そこから「合計」になりました。\n【身近な日本語】サミット（頂上＝首脳会議）、サマリー（要約）。\n【覚え方】サミット＝山のいちばん上。sum は足した結果の合計、sum up は全体をまとめる＝要約する。"
+  },
+  "budg":{
+    title:"バジェットは「小さな革袋」",
+    body:"【なぜ】フランス語 bougette（小さな革袋）から。お金の入った袋を開いて、その年のお金の使い道を発表したことから「予算」になったとされます。\n【身近な日本語】バジェット（予算）、ローバジェット（低予算の）。\n【覚え方】お財布の中身＝使えるお金。budget は予算、bulge は袋がふくらむ＝ふくらみ。"
+  },
+  "et":{
+    title:"「〜ット」は「小さい」",
+    body:"【なぜ】フランス語から来た「小さい」を表す語尾 -et（-ette）。名詞に付けて、その小さなものを表します。\n【身近な日本語】ポケット（小さな袋）、タブレット（小さな板）、カセット（小さな箱）、シガレット（小さな葉巻）。\n【覚え方】ポケット＝服に付いた小さな袋。budget は小さな革袋、tablet は小さな板。"
+  },
+  "fee":{
+    title:"fee はもともと「家畜＝財産」",
+    body:"【なぜ】「家畜・財産」を意味したゲルマン語から。昔は牛や羊が財産で、支払いにも使われました。英語の fee は、サービスを受けたときに払うお金を表します。\n【身近な日本語】レッスンフィー（レッスン料）、エントリーフィー（参加料）。\n【覚え方】入場料は entrance fee、学費は school fees。乗り物の料金は fare と区別する。"
+  },
+  "fare":{
+    title:"フェアウェルは「無事に行ってらっしゃい」",
+    body:"【なぜ】古英語 faran（行く・旅をする）から。旅に払うお金が fare（運賃）、「うまく行け」が farewell（さようなら）、うまくやっていけることが welfare（福祉）です。\n【身近な日本語】フェアウェルパーティー（送別会）。\n【覚え方】送別会＝farewell party。fare は旅の料金＝運賃。"
+  },
+  "bill":{
+    title:"ビルボードの「ビル」は「書き付け」",
+    body:"【なぜ】ラテン語 bulla（丸い封印）から。封をした書き付けが、請求書・勘定書・紙幣・議会の法案など、いろいろな「書類」を表すようになりました。建物のビル（building）とは別の語です。\n【身近な日本語】ビルボード（はり紙をする大きな看板。ヒットチャートの名前にも）。\n【覚え方】ビルボード＝書き付けをはる板。bill は勘定書・請求書、〈米〉では紙幣も bill。"
+  },
+  "trade":{
+    title:"トレードは「踏み固めた道」",
+    body:"【なぜ】中世の低地ドイツ語 trade（通った跡・道すじ）から。tread（踏む）と同じ根です。何度も行き来する道すじが、品物のやりとり＝貿易・商売になりました。\n【身近な日本語】トレード（選手の交換）、トレードマーク（商標）。\n【覚え方】プロ野球の「トレード」＝選手の交換。trade は貿易・交換、trade A for B は A を B と交換する。"
+  },
+  "well":{
+    title:"ウェルビーイングの「ウェル」は「よく・満ち足りて」",
+    body:"【なぜ】英語本来の well（よく）や weal（満ち足りた状態）から。暮らしがよく満ち足りた状態に th が付いて wealth（富）になりました。\n【身近な日本語】ウェルビーイング（心身ともに満ち足りた状態）、ウェルダン（よく焼いた）。\n【覚え方】ウェルビーイング＝よい状態。wealth はよい状態＝富、welfare はうまく暮らせること＝福祉。"
+  },
+  "eco":{
+    title:"エコの「エコ」は「家」",
+    body:"【なぜ】ギリシャ語 oikos（家）から。家の中のお金をうまくやりくりすることが economy、生き物のすみかを調べることが ecology です。\n【身近な日本語】エコノミー（経済・節約）、エコロジー（生態学）、エコバッグ。\n【覚え方】エコノミークラス＝節約した席。economy は家のやりくり＝節約・経済。"
+  },
+  "nom":{
+    title:"「切り盛りする・決まり」の nom",
+    body:"【なぜ】ギリシャ語 nomos（決まり）や nemein（配分する・切り盛りする）から。economy は家の切り盛り、astronomy は星の決まりを調べる学問です。\n【身近な日本語】エコノミー（家の切り盛り＝経済）、アストロノミー（天文学）。\n【覚え方】economy＝家を切り盛りすること。astronomy は星の決まりを調べる学問＝天文学。"
+  },
+  "pan":{
+    title:"パンは「パン」",
+    body:"【なぜ】ラテン語 panis（パン）から。日本語の「パン」も、ポルトガル語を通って同じ語から来ています。\n【身近な日本語】パン、パントリー（食料をしまう部屋）、カンパニー（一緒にパンを食べる仲間）。\n【覚え方】company は一緒にパンを食べる仲間＝会社・仲間、companion は連れ、pantry は食料庫。"
+  },
+  "earn":{
+    title:"earn は「働いて報いを得る」",
+    body:"【なぜ】古英語 earnian（働いて報いを得る）から。ただ手に入れるのではなく、努力や働きの見返りとして得るのが earn です。\n【身近な日本語】カタカナではあまり使いませんが、earnings（収益）は経済ニュースでよく出てきます。\n【覚え方】earn money は働いて稼ぐ、earn respect は努力して尊敬を得る。earnings は稼いだお金＝収入。"
+  },
+  "hurt":{
+    title:"hurt は「ぶつける」",
+    body:"【なぜ】古フランス語 hurter（ぶつかる・打ちつける）から。体をぶつけて痛いことから、心が傷つくことにも使うようになりました。\n【身近な日本語】カタカナで「ハート」と書くと heart（心）と同じになってしまいます。hurt は口をあまり開けずに［ハ～ト］と読みます。\n【覚え方】hurt-hurt-hurt と形が変わらない。My back hurts. は「背中が痛い」、hurt someone's feelings は「気持ちを傷つける」。"
+  },
+  "contra":{
+    title:"コントラストの「コントラ」は「逆に・向かい合って」",
+    body:"【なぜ】ラテン語 contra（〜に逆らって・向かい合って）。二つのものを向かい合わせて比べる、反対する、というイメージです。\n【身近な日本語】コントラスト（向かい合わせた差）、コントラバス。\n【覚え方】コントラスト＝並べると違いがはっきりする。contradict は逆のことを言う＝矛盾する、control は写しと照らし合わせて確かめる＝管理する。"
+  },
+  "ics":{
+    title:"「〜ックス」は「〜学」",
+    body:"【なぜ】ギリシャ語 -ika（〜に関することがら）から。学問や活動の名前を作ります。形は複数形ですが、ふつう単数としてあつかいます。\n【身近な日本語】フィジックス（物理学）、エコノミクス（経済学）、グラフィックス、ロボティクス。\n【覚え方】「エコノミクス」＝経済学。physics は自然の学問＝物理学、politics は市民の事柄＝政治。"
+  },
+  "ar":{
+    title:"「〜ラー」は「〜の・〜に関する」",
+    body:"【なぜ】ラテン語 -aris から。-al と同じはたらきで、前に l がある語では -al の代わりに -ar になります（popul-al ではなく popular）。\n【身近な日本語】ポピュラー（人々の）、レギュラー（定規どおりの）、ソーラー（太陽の）。\n【覚え方】「ソーラーパネル」＝太陽の板。popular は人々に好かれる、regular は定規で測ったようにきちんとした。"
+  },
+  "jur":{
+    title:"ジャッジ・ジャスティスは「法・正しい」",
+    body:"【なぜ】ラテン語 jus（法・正しさ）の形 jur から。just・jud の形もあります。否定の in が付いて「正しくない・不当な」ことをするのが injure（傷つける）です。\n【身近な日本語】ジャッジ（判定する）、ジャスティス（正義）、ジャスト（ぴったり正しい）。\n【覚え方】審判の「ジャッジ」＝正しいかを判断する。injury は不当な害＝けが、jury は法のもとで誓う人々＝陪審。"
+  }
 };
 /* ============================================================
    語根コラム  ここまで
@@ -2195,11 +2843,15 @@ const BadgeSymbol={
 /* ============================================================
    CONSTANTS / DERIVED
    ============================================================ */
-/* Part は番号順に10語ずつで自動的に区切る。データ側の part より優先 */
+/* Part は番号順に10語ずつで自動的に区切る。データ側の part より優先。
+   No.102 からは本編のあとの「Part α」（試しの単語）にまとめる */
 const WORDS_PER_PART=10;
-[...RAW_WORDS].sort((a,b)=>a.id-b.id).forEach((w,i)=>{w.part=Math.floor(i/WORDS_PER_PART)+1;});
+const ALPHA_FROM=102;
+const ALPHA="α";
+[...RAW_WORDS].filter(w=>w.id<ALPHA_FROM).sort((a,b)=>a.id-b.id).forEach((w,i)=>{w.part=Math.floor(i/WORDS_PER_PART)+1;});
+RAW_WORDS.filter(w=>w.id>=ALPHA_FROM).forEach(w=>{w.part=ALPHA;});
 const TOTAL_WORDS = RAW_WORDS.length;
-const PART_LIST = [...new Set(RAW_WORDS.map(w=>w.part))].sort((a,b)=>a-b);
+const PART_LIST = [...new Set(RAW_WORDS.map(w=>w.part))].sort((a,b)=>(a===ALPHA)-(b===ALPHA)||a-b);
 const MAX_ID = RAW_WORDS.reduce((m,w)=>Math.max(m,w.id),1);
 const MIN_ID = RAW_WORDS.reduce((m,w)=>Math.min(m,w.id),1);
 
@@ -2266,6 +2918,26 @@ const KEY={words:"roots.words.v2",settings:"roots.settings.v2",stats:"roots.stat
   badges:"roots.badges.v2",session:"roots.session.v2",roots:"roots.rootsSeen.v2"};
 const LEGACY={words:"words_v7",settings:"settings_v7",stats:"stats_v7",badges:"badges_v7"};
 
+/* 単語の並び方の版。番号を付け直したら1つ上げる（途中まで解いた出題の続きは、版が違えば捨てる）
+   1: 〜2026-09-17  No.1〜88
+   2: 2026-09-18〜  旧 No.51〜70 を削除し、No.51〜101 に新しい語、旧 No.71〜88 を Part α（No.102〜119）へ */
+const WORDS_LAYOUT=2;
+const oldIdToNew=id=>id>=1&&id<=50?id:id>=71&&id<=88?id+31:null;
+/* 保存データから、その単語の記録を探す関数を作る。
+   今の保存データは見出し語（w）も持っているので、番号が変わっても見出し語で引き当てられる。
+   見出し語を持たない古いデータは、oldIdToNew で旧番号を新番号に読み替える */
+function savedLookup(saved){
+  const list=(Array.isArray(saved)?saved:[]).filter(x=>x&&typeof x==="object");
+  const key=x=>typeof x.w==="string"?x.w:typeof x.word==="string"?x.word:null;
+  if(list.some(x=>key(x)!==null)){
+    const byWord=new Map(list.filter(x=>key(x)!==null).map(x=>[key(x),x]));
+    return w=>byWord.get(w.word)||null;
+  }
+  const byId=new Map();
+  list.forEach(x=>{const n=oldIdToNew(x.id);if(n!=null)byId.set(n,x);});
+  return w=>byId.get(w.id)||null;
+}
+
 /* ============================================================
    HELPERS
    ============================================================ */
@@ -2298,7 +2970,7 @@ const Cloud={
     const owner=lsGet("roots.owner");
     if(owner&&owner!==user.id){
       Object.values(KEY).forEach(lsDel);Object.values(LEGACY).forEach(lsDel);
-      lsDel("roots.localAt");lsDel("roots.outbox.v1");lsDel("roots.listRecall");
+      lsDel("roots.localAt");lsDel("roots.outbox.v1");lsDel("roots.listRecall");lsDel("roots.listRecall.v2");
     }
     lsSet("roots.owner",user.id);
     try{
@@ -2544,7 +3216,17 @@ function processTail(word){
    表示はデータのまま（agree なら a＋gree のほうが字面に対応して分かりやすい）にしつつ、
    色と語根マップの集約だけは代表形にそろえる。 */
 const ROOT_ALIAS={posit:"pos",gree:"grat",grac:"grat",a:"ad",mend:"mand",gard:"ward",plane:"plain",
-  habil:"abil",hab:"abil",capt:"chief",cide:"cis",plaud:"plaus",her:"hes",circ:"search",ess:"sent"};
+  habil:"abil",hab:"abil",capt:"chief",cide:"cis",plaud:"plaus",her:"hes",circ:"search",ess:"sent",
+  /* Part 6〜11 で増えた別綴り */
+  dic:"dict",tion:"ion",med:"medic",stress:"strict",erce:"erc",phys:"physic",streng:"strong",
+  tast:"tax",task:"tax",rule:"reg",regul:"reg",role:"roll",rol:"roll",hibit:"abil",habit:"abil",it:"ite",
+  costume:"custom",tra:"trans",dit:"dat",data:"dat",don:"dat",soc:"soci",ety:"ity",law:"lay",
+  cest:"ced",cess:"ced",publ:"popul",pub:"popul",peopl:"popul",bread:"broad",loco:"loc",
+  sur:"super",vey:"vis",view:"vis",vid:"vis",ence:"ance",valu:"val",vail:"val",thesaur:"treas",
+  fash:"fic",fact:"fic",feat:"fic",vow:"vot",cyber:"govern",capit:"chief",chapt:"chief",cape:"chief",
+  st:"sta",stant:"sta",ble:"able",ical:"ic",polic:"polit",polis:"polit",price:"preci",prize:"preci",
+  summ:"sum",bulg:"budg",wel:"well",weal:"well",tread:"trade",bulletin:"bill",di:"dis",just:"jur",
+  ac:"ad",ap:"ad",as:"ad",ory:"oire",ique:"ic"};
 const canonRoot=m=>{const k=String(m||"").toLowerCase();return ROOT_ALIAS[k]||k;};
 
 function hashCode(s){let h=0;for(let i=0;i<s.length;i++){h=(h*31+s.charCodeAt(i))|0;}return Math.abs(h);}
@@ -2555,10 +3237,11 @@ const PREFIXES=new Set(["a","ab","abs","ac","ad","af","ag","al","an","ap","ar","
   "bene","bi","circum","co","col","com","con","contra","cor","counter","de","di","dia","dis","dif","dys","e","ef","em","en",
   "epi","ex","extra","fore","hyper","hypo","il","im","in","inter","intra","intro","ir","juxta","mal","mis","mono","multi",
   "non","ob","oc","of","op","out","over","para","per","peri","poly","post","pre","pro","pur","re","red","retro","se","semi",
-  "sub","suc","suf","sup","sur","sus","sym","syn","tele","trans","tri","un","under","uni","up","with"]);
+  "sub","suc","suf","sup","super","sur","sus","sym","syn","tele","tra","trans","tri","un","under","uni","up","with"]);
 const SUFFIXES=new Set(["ion","ation","tion","sion","ition","ment","ful","able","ible","ate","ry","ous","ive","ative",
   "al","ty","ity","ness","er","or","ist","ing","ed","ic","ical","y","ly","ure","age","ize","ise","ify","fy","ian","ique",
-  "ary","ory","ence","ance","ency","ancy","ent","ant","ism","ish","ee","ess","en","ile","oire","ite","ar","less","ward","hood","ship","dom","ic","ics","ial","ual","ular"]);
+  "ary","ory","ence","ance","ency","ancy","ent","ant","ism","ish","ee","ess","en","ile","oire","ite","ar","less","ward","hood","ship","dom","ic","ics","ial","ual","ular",
+  "th","et","ety","it"]);
 /* 語源パーツの種類を決める。データの並び順（先頭＝接頭辞候補、末尾＝接尾辞候補）も手がかりにする */
 function morphType(morph,index,count){
   const k=String(morph||"").toLowerCase();
@@ -2580,7 +3263,8 @@ function rootColor(morph,C,index,count){
 /* 文法的な接尾辞は「語根マップ」に出しても意味がないので外す */
 const SUFFIX_STOP=new Set(["ion","ation","tion","ment","ful","able","ible","ate","ry","ous","ive",
   "al","ty","ity","ness","er","or","ist","ing","ed","ic","y","t","s","ly",
-  "ure","age","ize","ise","ian","ique","cle","ary","ence","ance","ism","ish","ative","ee","ess"]);
+  "ure","age","ize","ise","ian","ique","cle","ary","ence","ance","ism","ish","ative","ee","ess",
+  "th","et","or","ics","less","ury","ine","ory","ar"]);
 
 /* 「pro（前へ）＋ pos（置く）→ …」形式の文字列を語根の配列に分解する共通処理 */
 function splitMorphs(text){
@@ -2621,7 +3305,9 @@ function buildRootIndex(words,{withAffixes=false}={}){
     .map(x=>{
       const t=x.tally;
       const type=t.prefix>=t.root&&t.prefix>=t.suffix?"prefix":t.suffix>t.root?"suffix":"root";
-      return {...x,type,gloss:x.glosses.slice(0,2).join("／"),count:x.words.length+x.related.length};
+      /* 関連語が、あとから見出し語としても出てきたときは二重に数えない */
+      const related=x.related.filter(r=>!x.words.some(w=>w.word===r.word));
+      return {...x,related,type,gloss:x.glosses.slice(0,2).join("／"),count:x.words.length+related.length};
     })
     .filter(x=>x.count>=2&&(withAffixes||!SUFFIX_STOP.has(x.morph)))
     .sort((a,b)=>b.count-a.count||a.morph.localeCompare(b.morph));
@@ -3144,7 +3830,6 @@ const G={
 };
 const PICTO_ROOT={
   pos:<><path d="M8 38h32"/><rect x="16" y="22" width="16" height="12" rx="1.5"/><path d="M24 6v10M19.5 11.5 24 16l4.5-4.5"/></>,
-  the:<><path d="M8 38h32"/><rect x="16" y="22" width="16" height="12" rx="1.5"/><path d="M24 6v10M19.5 11.5 24 16l4.5-4.5"/></>,
   fer:<><rect x="8" y="16" width="18" height="14" rx="1.5"/><path d="M30 23h12M37 18l5 5-5 5"/></>,
   gest:<><rect x="8" y="16" width="18" height="14" rx="1.5"/><path d="M30 23h12M37 18l5 5-5 5"/></>,
   press:<><path d="M40 8v32"/><path d="M6 24h16M17 19l5 5-5 5"/><path d="M28 14v20"/></>,
@@ -3154,7 +3839,6 @@ const PICTO_ROOT={
   ward:<><path d="M8 26s6-10 16-10 16 10 16 10-6 10-16 10S8 26 8 26z"/><circle cx="24" cy="26" r="4.5"/><path d="M6 14 14 8M42 14l-8-6M24 10V4"/></>,
   grat:<><circle cx="24" cy="24" r="17"/><path d="M17 28c2 4 12 4 14 0"/><path d="M17 20.5h3M28 20.5h3"/></>,
   log:<><path d="M6 18h14a4 4 0 0 1 4 4v18a4 4 0 0 0-4-4H6z"/><path d="M42 18H28a4 4 0 0 0-4 4v18a4 4 0 0 1 4-4h14z"/><path d="M16 4h16v9h-6l-4 4v-4h-6z"/></>,
-  phrase:<><path d="M8 12h32v20H22l-8 7v-7H8z"/><path d="M15 19h18M15 25h12"/></>,
   tip:<><path d="M24 6 12 40h24z"/></>,
   cuss:<><path d="M10 38l14-14"/><rect x="20" y="8" width="18" height="10" rx="1.5" transform="rotate(45 29 13)"/><path d="M40 30l4 2M36 36l2 4M42 38l2 2"/></>,
   bla:<><path d="M16 6v18M10 6h12v18H10z"/><path d="M22 8h12a3 3 0 0 1 3 4l-3 12a5 5 0 0 1-5 4h-5l1 6a4 4 0 0 1-7 3l-1-9"/></>,
@@ -3193,23 +3877,9 @@ const PICTO_ROOT={
   home:<><path d="M6 22 24 8l18 14"/><path d="M11 18v22h26V18"/><path d="M20 40V28h8v12"/></>,
   work:<><rect x="6" y="16" width="36" height="24" rx="2"/><path d="M18 16v-6h12v6M6 26h36"/></>,
   hand:G.hand,
-  loud:<><path d="M8 20v8h6l14 8V12l-14 8z"/><path d="M34 17l5-3M35 24h6M34 31l5 3"/></>,
-  sent:<><circle cx="24" cy="10" r="4"/><path d="M24 14v12M17 19h14M24 26l-5 8M24 26l5 8"/><path d="M8 40h32"/><circle cx="24" cy="40" r="3"/></>,
   sta:<><circle cx="24" cy="10" r="4"/><path d="M24 14v12M17 19h14M24 26l-5 8M24 26l5 8"/><path d="M8 40h32"/><circle cx="24" cy="40" r="3"/></>,
-  tend:<><path d="M10 14v20M38 14v20"/><path d="M16 24h16"/><path d="M10 24h6M32 24h6"/><path d="M4 24h6M9 20l-5 4 5 4M44 24h-6M39 20l5 4-5 4"/></>,
-  turn:<><path d="M36 20a13 13 0 1 0 1 10"/><path d="M37 11v9h-9"/></>,
   par:<><path d="M8 18h32M8 30h32"/></>,
-  row:<><circle cx="10" cy="24" r="4"/><circle cx="24" cy="24" r="4"/><circle cx="38" cy="24" r="4"/></>,
   line:<><path d="M6 24h36"/></>,
-  pass:<><path d="M16 8v32M32 8v32"/><path d="M4 24h36M33 17l7 7-7 7"/></>,
-  raise:<><path d="M24 40V10M16 18l8-8 8 8"/></>,
-  open:<><path d="M8 12h14v28H8z"/><path d="M22 12l16-4v36l-16-4"/></>,
-  du:<><circle cx="16" cy="28" r="10"/><path d="M12 24h8M12 32h8M16 20v16"/><circle cx="36" cy="14" r="8"/><path d="M36 9v5l4 3"/></>,
-  cheat:<><path d="M6 16h36v10a8 8 0 0 1-8 8h-4l-6-6-6 6h-4a8 8 0 0 1-8-8z"/><circle cx="16" cy="23" r="2"/><circle cx="32" cy="23" r="2"/></>,
-  ras:<><rect x="8" y="18" width="26" height="12" rx="2" transform="rotate(-20 21 24)"/><path d="M28 38c3-1 6 0 10-2"/></>,
-  grad:<><path d="M6 40h10V30h10V20h10V10h6"/></>,
-  chor:<><circle cx="12" cy="16" r="6"/><circle cx="24" cy="12" r="6"/><circle cx="36" cy="16" r="6"/><path d="M4 40c0-7 4-12 8-12s8 5 8 12M16 40c0-8 4-13 8-13s8 5 8 13M28 40c0-7 4-12 8-12s8 5 8 12"/></>,
-  lab:<><path d="M10 26V14a4 4 0 0 1 8 0v8M18 18a4 4 0 0 1 8 0v6M26 20a4 4 0 0 1 8 0v8c0 8-6 14-12 14s-12-6-12-16"/></>,
   tang:<><circle cx="20" cy="26" r="12"/><path d="M4 14h40"/><circle cx="20" cy="14" r="1.5"/></>,
   nu:<><path d="M14 34a8 8 0 0 1 0-16 11 11 0 0 1 21-2 9 9 0 0 1-1 18z"/></>,
   tin:<><rect x="16" y="10" width="16" height="16" rx="2"/><path d="M12 20v10a6 6 0 0 0 6 6M36 20v10a6 6 0 0 1-6 6"/><path d="M8 24h8M32 24h8"/></>,
@@ -3224,6 +3894,86 @@ const PICTO_ROOT={
   scaffold:<><path d="M10 42V6M38 42V6M10 16h28M10 28h28M10 16l28 12M10 28l28 12"/></>,
   cul:<><circle cx="15" cy="24" r="12"/><circle cx="36" cy="30" r="5"/></>,
   licit:<><path d="M22 10H8v28h14"/><circle cx="15" cy="24" r="3"/><path d="M19 24h23M35 17l7 7-7 7"/></>,
+  /* ---- Part 6〜11 で増えた語根 ---- */
+  dict:G.voice,
+  /* 治す：救急の十字 */
+  medic:<><path d="M19 6h10v13h13v10H29v13H19V29H6V19h13z"/></>,
+  /* 締めつける：両側から押しつぶす */
+  strict:<><rect x="18" y="12" width="12" height="24" rx="1.5"/><path d="M4 24h10M9 19l5 5-5 5M44 24H34M39 19l-5 5 5 5"/></>,
+  /* 囲い込む：柵から外へ */
+  erc:<><path d="M6 14v24M13 14v24M20 14v24M4 20h18M4 32h18"/><path d="M26 26h16M36 20l6 6-6 6"/></>,
+  /* 息：顔から出る風 */
+  breath:<><circle cx="14" cy="24" r="9"/><path d="M27 18c3-2 5 2 8 0s5-2 8 0M27 24c3-2 5 2 8 0s5-2 8 0M27 30c3-2 5 2 8 0s5-2 8 0"/></>,
+  /* 渇き：空のコップとしずく */
+  thirst:<><path d="M8 10h22l-3 30H11z"/><path d="M12 34h14"/><path d="M39 14s-5 6-5 10a5 5 0 0 0 10 0c0-4-5-10-5-10z"/></>,
+  physic:G.standing,
+  /* 熱：体温計 */
+  fever:<><rect x="19" y="4" width="10" height="28" rx="5"/><circle cx="24" cy="37" r="7"/><path d="M24 14v20"/><path d="M34 10h6M34 16h4M34 22h6"/></>,
+  /* 強い：ダンベル */
+  strong:<><path d="M8 18v12M14 13v22M34 13v22M40 18v12M14 24h20"/></>,
+  /* 涙：目からこぼれるしずく */
+  tear:<><path d="M6 18s7-10 18-10 18 10 18 10-7 10-18 10S6 18 6 18z"/><circle cx="24" cy="18" r="4"/><path d="M24 31s-4 5-4 8a4 4 0 0 0 8 0c0-3-4-8-4-8z"/></>,
+  /* 値ぶみ：値札 */
+  tax:<><path d="M26 6h16v16L22 42 6 26z"/><circle cx="35" cy="13" r="3"/></>,
+  /* まっすぐ：定規 */
+  reg:<><rect x="4" y="17" width="40" height="14" rx="1.5"/><path d="M10 17v6M16 17v4M22 17v6M28 17v4M34 17v6M40 17v4"/></>,
+  /* 巻いたもの：巻物 */
+  roll:<><rect x="12" y="8" width="24" height="32" rx="2"/><path d="M8 8h32M8 40h32"/><path d="M18 18h12M18 24h12M18 30h8"/></>,
+  /* 慣れ親しむ：毎日の印が並ぶカレンダー */
+  custom:<><rect x="7" y="9" width="34" height="32" rx="2"/><path d="M7 17h34M15 5v8M33 5v8"/><path d="M13 26l2.5 2.5L20 24M28 26l2.5 2.5L35 24M13 35l2.5 2.5L20 33M28 35l2.5 2.5L35 33"/></>,
+  /* 与える：箱を人に手渡す */
+  dat:<><rect x="5" y="18" width="12" height="12" rx="1.5"/><path d="M20 24h10M25 19l5 5-5 5"/><circle cx="38" cy="14" r="4"/><path d="M32 38c0-7 3-12 6-12s6 5 6 12"/></>,
+  soci:G.people,
+  /* 置く（pos と同じ絵） */
+  lay:<><path d="M8 38h32"/><rect x="16" y="22" width="16" height="12" rx="1.5"/><path d="M24 6v10M19.5 11.5 24 16l4.5-4.5"/></>,
+  /* 行く：足あとと進む向き */
+  ced:<><path d="M9 32c0-4 2-7 4-7s4 3 4 7-2 6-4 6-4-2-4-6z"/><path d="M21 20c0-4 2-7 4-7s4 3 4 7-2 6-4 6-4-2-4-6z"/><path d="M32 12h10M37 7l5 5-5 5"/></>,
+  /* 人々：大勢の人 */
+  popul:<><circle cx="12" cy="14" r="4"/><circle cx="24" cy="14" r="4"/><circle cx="36" cy="14" r="4"/><path d="M5 30c0-5 3-8 7-8s7 3 7 8M17 30c0-5 3-8 7-8s7 3 7 8M29 30c0-5 3-8 7-8s7 3 7 8"/><path d="M6 38h36"/></>,
+  /* 生まれる：芽が出る */
+  nat:<><path d="M24 40V22"/><path d="M24 26c-6 0-10-4-10-10 6 0 10 4 10 10z"/><path d="M24 22c0-6 4-10 10-10 0 6-4 10-10 10z"/><path d="M10 40h28"/></>,
+  /* 広い：左右に広がる */
+  broad:<><path d="M18 24H4M9 19l-5 5 5 5M30 24h14M39 19l5 5-5 5"/><path d="M8 12h32M8 36h32"/></>,
+  /* 場所：地図のピン */
+  loc:<><path d="M24 42s-12-12-12-22a12 12 0 0 1 24 0c0 10-12 22-12 22z"/><circle cx="24" cy="20" r="4"/></>,
+  /* 値打ち：宝石 */
+  val:<><path d="M14 8h20l8 10-18 22L6 18z"/><path d="M6 18h36M18 8l-4 10 10 22 10-22-4-10"/></>,
+  /* 宝の倉：宝箱 */
+  treas:<><rect x="8" y="20" width="32" height="20" rx="2"/><path d="M8 20c0-8 7-12 16-12s16 4 16 12"/><path d="M8 28h32"/><rect x="21" y="25" width="6" height="7" rx="1"/></>,
+  /* 誓い・願い：投票箱 */
+  vot:<><rect x="8" y="24" width="32" height="16" rx="2"/><path d="M17 24h14"/><rect x="19" y="6" width="10" height="14" rx="1"/><path d="M21.5 13l2 2 3-3.5"/></>,
+  /* 舵を取る：船の舵輪 */
+  govern:<><circle cx="24" cy="24" r="12"/><circle cx="24" cy="24" r="3"/><path d="M24 6v36M6 24h36M11 11l26 26M37 11 11 37"/></>,
+  /* 都市：ビルの並ぶ町 */
+  polit:<><path d="M6 40h36"/><rect x="8" y="20" width="10" height="20"/><rect x="20" y="10" width="10" height="30"/><rect x="32" y="24" width="8" height="16"/></>,
+  /* 値打ち：円の硬貨 */
+  preci:<><circle cx="24" cy="24" r="17"/><path d="M17 13l7 10 7-10M24 23v14M17 26h14M17 32h14"/></>,
+  /* いちばん上：山頂の旗 */
+  sum:<><path d="M4 40 20 14l7 11 5-7 12 22z"/><path d="M20 14V4l7 3-7 3"/></>,
+  /* 革袋 */
+  budg:<><path d="M10 20h28l-3 20H13z"/><path d="M18 20c0-6 3-10 6-10s6 4 6 10"/><path d="M20 30h8"/></>,
+  /* 家畜＝財産：牛 */
+  fee:<><path d="M13 14c-4 0-8-3-8-7M35 14c4 0 8-3 8-7"/><path d="M13 12h22v14a11 11 0 0 1-22 0z"/><circle cx="19" cy="20" r="1.5"/><circle cx="29" cy="20" r="1.5"/><ellipse cx="24" cy="31" rx="6" ry="4"/></>,
+  /* 旅をする：バス */
+  fare:<><rect x="8" y="8" width="32" height="26" rx="3"/><path d="M8 22h32M24 8v14"/><circle cx="16" cy="38" r="3"/><circle cx="32" cy="38" r="3"/></>,
+  /* 封をした書類 */
+  bill:<><path d="M12 6h17l9 9v27H12z"/><path d="M29 6v9h9"/><path d="M17 20h12M17 26h14"/><circle cx="30" cy="35" r="4"/></>,
+  /* 行き来する：やりとりの矢印 */
+  trade:<><path d="M8 17h30M32 11l6 6-6 6M40 31H10M16 25l-6 6 6 6"/></>,
+  /* よい状態：親指を立てる */
+  well:<><path d="M8 22h6v18H8z"/><path d="M14 22l7-13c3 0 5 2 4 6l-2 6h12a3 3 0 0 1 3 4l-4 13a3 3 0 0 1-3 2H14"/></>,
+  /* 家（home と同じ絵） */
+  eco:<><path d="M6 22 24 8l18 14"/><path d="M11 18v22h26V18"/><path d="M20 40V28h8v12"/></>,
+  /* 切り盛りする：きちんと並べる */
+  nom:<><path d="M6 38h36"/><rect x="9" y="26" width="8" height="12"/><rect x="20" y="20" width="8" height="18"/><rect x="31" y="14" width="8" height="24"/></>,
+  /* パン */
+  pan:<><path d="M8 32c-2-8 4-18 16-18s18 10 16 18z"/><path d="M8 32v6h32v-6"/><path d="M18 20l-2 6M25 18v7M32 20l2 6"/></>,
+  /* 働いて報いを得る：手に入るお金 */
+  earn:<><circle cx="26" cy="11" r="6"/><path d="M26 20v6M23 23l3 3 3-3"/><path d="M6 32h8l6 4h14l8-6"/><path d="M6 40h36"/></>,
+  /* ぶつける：ぶつかって火花 */
+  hurt:<><path d="M6 24h18M19 19l5 5-5 5"/><path d="M34 12l-2 8-7 1 6 4-2 8 6-5 6 5-2-8 6-4-7-1z"/></>,
+  /* 法・正しい：裁判の木づち */
+  jur:<><rect x="8" y="10" width="20" height="9" rx="2" transform="rotate(-40 18 14.5)"/><path d="M22 20l16 16"/><path d="M6 42h22"/></>,
 };
 const PRE_TO=<><path d="M6 24h26M25 17l7 7-7 7"/><circle cx="40" cy="24" r="3"/></>;
 const PRE_BEYOND=<><rect x="6" y="14" width="14" height="20" rx="2"/><path d="M27 8v32" strokeDasharray="4 4"/><path d="M12 24h30M35 17l7 7-7 7"/></>;
@@ -3233,6 +3983,10 @@ const PRE_AGAIN=<><path d="M36 20a13 13 0 1 0 1 10"/><path d="M37 11v9h-9"/></>;
 const PRE_WITH=G.people;
 const PRE_AWAY=<><path d="M20 10v28"/><path d="M26 24h16M35 17l7 7-7 7"/><circle cx="12" cy="24" r="4"/></>;
 const PRE_DOWN=<><path d="M24 6v28M17 27l7 7 7-7"/><path d="M8 42h32"/></>;
+const PRE_BEFORE=<><circle cx="10" cy="30" r="5"/><path d="M10 25V8"/><path d="M10 9h10l-3 4 3 4H10"/><circle cx="26" cy="30" r="5"/><circle cx="41" cy="30" r="5"/></>;
+/* 否定（in〜でない など）：禁止マーク */
+const PRE_NOT=<><circle cx="24" cy="24" r="16"/><path d="M12.7 12.7l22.6 22.6"/></>;
+const PRE_OVER=<><rect x="17" y="26" width="14" height="14" rx="1.5"/><path d="M6 16h32M33 11l5 5-5 5"/></>;
 const PICTO_PREFIX={
   ad:PRE_TO, of:PRE_TO,
   ex:PRE_OUT, out:PRE_OUT, ef:PRE_OUT, e:PRE_OUT, extra:PRE_BEYOND,
@@ -3249,7 +4003,8 @@ const PICTO_PREFIX={
   para:<><path d="M8 14v20"/><path d="M16 24h24M33 17l7 7-7 7"/></>,
   dia:<><path d="M8 10v28M40 10v28"/><path d="M4 24h36M33 17l7 7-7 7"/></>,
   per:<><circle cx="24" cy="24" r="16"/><path d="M16 24l6 6 10-12"/></>,
-  pre:<><circle cx="10" cy="30" r="5"/><path d="M10 25V8"/><path d="M10 9h10l-3 4 3 4H10"/><circle cx="26" cy="30" r="5"/><circle cx="41" cy="30" r="5"/></>,
+  pre:PRE_BEFORE, ante:PRE_BEFORE,
+  suf:PRE_DOWN, super:PRE_OVER, trans:PRE_BEYOND,
   juxta:<><rect x="8" y="16" width="14" height="16"/><rect x="26" y="16" width="14" height="16"/></>,
 };
 function Pictogram({C,word:w}){
@@ -3258,7 +4013,8 @@ function Pictogram({C,word:w}){
   const items=parts.map((p,i)=>{
     const k=canonRoot(p.morph), t=morphType(p.morph,i,n);
     /* 接尾語でも語根の絵があるものは出す（award の ward など） */
-    const g=PICTO_ROOT[k]||(t!=="suffix"?PICTO_PREFIX[k]:null);
+    /* 否定の意味の接頭語（injure の in など）は「中へ」の絵ではなく禁止マークにする */
+    const g=PICTO_ROOT[k]||(t==="suffix"?null:t==="prefix"&&/でない/.test(p.gloss||"")?PRE_NOT:PICTO_PREFIX[k]);
     return g?{g,morph:p.morph,gloss:p.gloss,type:t,isRoot:!!PICTO_ROOT[k]}:null;
   }).filter(Boolean);
   if(!items.some(x=>x.isRoot))return null;
@@ -4367,9 +5123,18 @@ function ListScreen({C,words,onTogglePass,onOpen,settings}){
     speakReveal(w,settings);
   };
   /* 意味を見たあとの○×の記録。{id:true(○)/false(×)}。○の単語は次から隠さない */
-  const [recall,setRecallState]=useState(()=>lsGet("roots.listRecall")||{});
-  const setRecall=(id,ok)=>setRecallState(p=>{const n={...p,[id]:ok};lsSet("roots.listRecall",n);return n;});
-  const resetRecall=()=>{setRecallState({});lsDel("roots.listRecall");setShown(new Set());};
+  const [recall,setRecallState]=useState(()=>{
+    const cur=lsGet("roots.listRecall.v2");
+    if(cur) return cur;
+    const old=lsGet("roots.listRecall");
+    if(!old||typeof old!=="object") return {};
+    const n={};
+    Object.entries(old).forEach(([id,v])=>{const k=oldIdToNew(+id);if(k!=null)n[k]=v;});
+    lsSet("roots.listRecall.v2",n);lsDel("roots.listRecall");
+    return n;
+  });
+  const setRecall=(id,ok)=>setRecallState(p=>{const n={...p,[id]:ok};lsSet("roots.listRecall.v2",n);return n;});
+  const resetRecall=()=>{setRecallState({});lsDel("roots.listRecall.v2");setShown(new Set());};
   const hasKnown=Object.values(recall).some(v=>v);
   const hidden=key=>hideMeaning&&!shown.has(key)&&!recall[key.split(":")[0]];
   const now=Date.now();
@@ -4419,12 +5184,13 @@ function ListScreen({C,words,onTogglePass,onOpen,settings}){
           const ids=RAW_WORDS.filter(w=>w.part===part).map(w=>w.id);
           return (
           <div style={{position:"relative",marginBottom:12}}>
-            <select value={part} onChange={e=>setPart(+e.target.value)} aria-label="Part を選ぶ"
+            <select value={part} onChange={e=>setPart(PART_LIST.find(p=>String(p)===e.target.value)??PART_LIST[0])} aria-label="Part を選ぶ"
               style={{width:"100%",height:46,borderRadius:4,border:"1px solid "+C.line,background:C.bg,
                 color:C.text,fontSize:15,fontWeight:700,padding:"0 40px 0 14px",appearance:"none",WebkitAppearance:"none",cursor:"pointer"}}>
               {PART_LIST.map(p=>{
                 const r=RAW_WORDS.filter(w=>w.part===p).map(w=>w.id);
-                return <option key={p} value={p}>Part {p}（{Math.min(...r)}〜{Math.max(...r)}）</option>;
+                const lo=Math.min(...r),hi=Math.max(...r);
+                return <option key={p} value={p}>Part {p}（{lo===hi?lo:lo+"〜"+hi}）</option>;
               })}
             </select>
             <span style={{position:"absolute",right:12,top:"50%",transform:"translateY(-50%)",color:C.sub,pointerEvents:"none",display:"flex"}}>
@@ -5155,8 +5921,9 @@ function App(){
     let legacy=false;
     if(!saved){ const old=lsGet(LEGACY.words); if(Array.isArray(old)){saved=old;legacy=true;} }
     if(Array.isArray(saved)){
+      const find=savedLookup(saved);
       setWords(INITIAL_WORDS.map(w=>{
-        const s=saved.find(x=>x.id===w.id);
+        const s=find(w);
         if(!s) return w;
         if(legacy){
           /* 旧データには間隔がない。正解回数から控えめに間隔を復元する */
@@ -5167,7 +5934,8 @@ function App(){
             due:iv?addDays(Date.now(),1):null,
             manualPass:s.manualPass===true,manualPassDate:s.manualPassDate??null};
         }
-        return {...w,...s,part:w.part,...(w.roots?{roots:w.roots}:{})};
+        const {id:_id,w:_w,word:_word,...st}=s;
+        return {...w,...st,part:w.part,...(w.roots?{roots:w.roots}:{})};
       }));
     }
     const st=lsGet(KEY.stats)||lsGet(LEGACY.stats);
@@ -5181,7 +5949,8 @@ function App(){
     }else setScreen("auth");
 
     const sv=lsGet(KEY.session);
-    if(sv&&Array.isArray(sv.queue)&&sv.queue.length){
+    if(sv&&sv.layout!==WORDS_LAYOUT) lsDel(KEY.session);
+    else if(sv&&Array.isArray(sv.queue)&&sv.queue.length){
       const mins=Math.round((Date.now()-(sv.at||Date.now()))/60000);
       setResumeInfo({left:sv.queue.length,ago:mins<1?"たった今":mins<60?mins+"分前":Math.round(mins/60)+"時間前",data:sv});
     }
@@ -5209,9 +5978,9 @@ function App(){
 
   /* ---------- 保存 ---------- */
   const persist=useCallback((w,s,st,b)=>{
-    const ok=lsSet(KEY.words,w.map(({id,ef,interval,reps,lapses,due,correctCount,incorrectCount,
+    const ok=lsSet(KEY.words,w.map(({id,word,ef,interval,reps,lapses,due,correctCount,incorrectCount,
       lastStudiedDate,lastGradedDay,manualPass,manualPassDate})=>
-      ({id,ef,interval,reps,lapses,due,correctCount,incorrectCount,lastStudiedDate,lastGradedDay,manualPass,manualPassDate})));
+      ({id,w:word,ef,interval,reps,lapses,due,correctCount,incorrectCount,lastStudiedDate,lastGradedDay,manualPass,manualPassDate})));
     lsSet(KEY.settings,s);lsSet(KEY.stats,st);lsSet(KEY.badges,b);
     Cloud.markDirty();
     if(!ok)setNotice({bad:true,text:"保存に失敗しました。ブラウザの空き容量を確認してください。"});
@@ -5340,7 +6109,7 @@ function App(){
 
   const saveSession=useCallback((q,l,at)=>{
     if(!q.length){lsDel(KEY.session);return;}
-    lsSet(KEY.session,{queue:q,log:l,at:at||Date.now(),total:sessionTotal});
+    lsSet(KEY.session,{queue:q,log:l,at:at||Date.now(),total:sessionTotal,layout:WORDS_LAYOUT});
   },[sessionTotal]);
 
   /* ---------- セッション終了 ---------- */
@@ -5514,8 +6283,9 @@ function App(){
           body:"いまの学習データは上書きされます。書き出し日時："+(d.exportedAt?new Date(d.exportedAt).toLocaleString("ja-JP"):"不明"),
           actions:[
             {label:"読み込む",variant:"primary",onClick:()=>{
+              const find=savedLookup(d.words);
               const nw=INITIAL_WORDS.map(w=>{
-                const s=d.words.find(x=>x.id===w.id);
+                const s=find(w);
                 return s?{...w,ef:s.ef??2.5,interval:s.interval??0,reps:s.reps??0,lapses:s.lapses??0,
                   due:s.due??null,correctCount:s.correctCount??0,incorrectCount:s.incorrectCount??0,
                   lastStudiedDate:s.lastStudiedDate??null,lastGradedDay:s.lastGradedDay??null,
