@@ -3058,9 +3058,28 @@ function ColoredWord({C,word,parts,colored=true}){
 }
 
 /* 枝分かれ図。等幅カラムの中央に縦線を立てる */
-function MorphTree({C,word,parts,hideSpelling=false,wordSize=17,partSize=17}){
+function MorphTree({C,word,parts,hideSpelling=false,wordSize=17,partSize=17,boxed=false}){
   if(!parts.length) return null;
   const n=parts.length;
+  if(boxed) return (
+    <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:6,flexWrap:"wrap"}}>
+      {parts.map((p,i)=>{
+        const t=morphType(p.morph,i,n);
+        return (
+          <React.Fragment key={i}>
+            {i>0&&<span style={{fontSize:20,color:C.faint}}>+</span>}
+            <div style={{background:C.sunken,borderRadius:12,padding:"9px 10px",display:"flex",
+              flexDirection:"column",alignItems:"center",gap:2,minWidth:0}}>
+              <span className="en" style={{fontSize:24,fontWeight:700,color:typeColor(t,C),lineHeight:1.1}}>
+                {hideSpelling?"・・・":p.morph}</span>
+              <span style={{fontSize:13,letterSpacing:"0.1em",color:C.faint}}>{TYPE_LABEL[t]}</span>
+              <span style={{fontSize:18,color:C.text,lineHeight:1.3}}>{p.gloss}</span>
+            </div>
+          </React.Fragment>
+        );
+      })}
+    </div>
+  );
   const width=Math.min(84*n,340);
   return (
     <div style={{display:"flex",flexDirection:"column",alignItems:"center",width:"100%"}}>
@@ -3145,7 +3164,7 @@ const PICTO_ROOT={
   sug:<><path d="M6 12h36"/><path d="M24 40V18M17 25l7-7 7 7"/><circle cx="24" cy="43" r="3"/></>,
   mand:<><path d="M6 28h12l6-4h8"/><rect x="30" y="14" width="12" height="10" rx="1.5"/><path d="M6 36h16l8-4"/></>,
   apo:<><circle cx="12" cy="24" r="5"/><circle cx="36" cy="24" r="5"/><path d="M19 24h10M22 20l-4 4 4 4M26 20l4 4-4 4"/></>,
-  cus:<><path d="M24 6v6"/><path d="M10 14h28"/><path d="M10 14 5 28h10zM38 14l-5 14h10z"/><path d="M24 12v28M16 40h16"/></>,
+  cus:<><path d="M24 8v28M16 40h16"/><path d="M10 14h28"/><path d="M10 14v4M38 14v4"/><path d="M5 18h10l-5 10zM33 18h10l-5 10z"/></>,
   celebr:G.people,
   mir:<><circle cx="24" cy="24" r="17"/><circle cx="18" cy="20" r="2"/><circle cx="30" cy="20" r="2"/><circle cx="24" cy="31" r="4"/></>,
   scrib:G.write, graph:G.write,
@@ -3242,17 +3261,16 @@ function Pictogram({C,word:w}){
   }).filter(Boolean);
   if(!items.some(x=>x.type==="root"))return null;
   return (
-    <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8,marginTop:20,flexWrap:"wrap"}}>
+    <div style={{display:"flex",alignItems:"flex-start",justifyContent:"center",gap:12,marginTop:18,flexWrap:"wrap"}}>
       {items.map((x,i)=>(
-        <React.Fragment key={i}>
-          {i>0&&<span style={{fontSize:22,color:C.faint}}>＋</span>}
-          <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:6,minWidth:92}}>
-            <div style={{color:C.text,border:"1px solid "+C.line,borderRadius:8,padding:12,display:"flex"}}>
-              <P size={x.type==="root"?72:56}>{x.g}</P>
-            </div>
-            <span style={{fontSize:14,color:C.sub}}><span className="en" style={{fontWeight:700,color:C.text}}>{x.morph}</span> {x.gloss}</span>
+        <div key={i} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:8,minWidth:0}}>
+          <div style={{height:124,minWidth:124,color:C.text,border:"1px solid "+C.line,borderRadius:14,
+            display:"flex",alignItems:"center",justifyContent:"center"}}>
+            <P size={88}>{x.g}</P>
           </div>
-        </React.Fragment>
+          <span style={{fontSize:18,color:C.sub}}>
+            <span className="en" style={{fontWeight:700,color:typeColor(x.type,C)}}>{x.morph}</span> {x.gloss}</span>
+        </div>
       ))}
     </div>
   );
@@ -3285,18 +3303,18 @@ function WordDetail({C,word:w,onTapRoot,speakOn=true,head=true,relatedLimit=3,on
     <div>
       {head&&show("head")&&(
         <div style={{display:"flex",alignItems:"baseline",gap:8,flexWrap:"wrap"}}>
-          <span className="num" style={{fontSize:12,color:C.sub}}>No. {w.id}</span>
+          <span className="num" style={{fontSize:fs(12,12,14),color:C.sub,fontVariantNumeric:"tabular-nums"}}>No. {w.id}</span>
           <Speak C={C} text={w.word} enabled={speakOn} style={{borderBottom:"none"}}>
-            <span className="en" style={{fontSize:28,fontWeight:700,color:C.text,lineHeight:1.05,letterSpacing:"-0.02em"}}>
+            <span className="en" style={{fontSize:fs(28,28,40),fontWeight:700,color:C.text,lineHeight:1.05,letterSpacing:"-0.02em"}}>
               <ColoredWord C={C} word={w.word} parts={parts}/></span>
           </Speak>
-          <span className="en" style={{fontSize:14,color:C.sub}}>{w.pronunciation}</span>
-          <span style={{fontSize:13,color:C.faint}}>{w.partOfSpeech}</span>
+          <span className="en" style={{fontSize:fs(14,14,15),color:C.sub}}>{w.pronunciation}</span>
+          <span style={{fontSize:fs(13,13,15),color:C.faint}}>{w.partOfSpeech}</span>
         </div>
       )}
-      {show("meaning")&&<div style={{fontSize:fs(17,22,26),fontWeight:700,color:C.text,margin:"8px 0 10px",lineHeight:1.4}}>{w.meaning}</div>}
+      {show("meaning")&&<div style={{fontSize:fs(17,22,40),fontWeight:700,color:C.text,margin:xl?"6px 0 12px":"8px 0 10px",lineHeight:1.25}}>{w.meaning}</div>}
 
-      {show("tree")&&parts.length>0&&<MorphTree C={C} word={w.word} parts={parts} partSize={xl?19:16}/>}
+      {show("tree")&&parts.length>0&&<MorphTree C={C} word={w.word} parts={parts} partSize={xl?19:16} boxed={xl}/>}
 
       {show("rootBtns")&&onTapRoot&&rootParts.length>0&&(
         <div style={{display:"flex",gap:8,flexWrap:"wrap",marginTop:10}}>
@@ -3314,7 +3332,12 @@ function WordDetail({C,word:w,onTapRoot,speakOn=true,head=true,relatedLimit=3,on
       {(show("imagery")||show("etymBody"))&&(
       <div style={{...sep,display:"flex",flexDirection:"column",gap:5}}>
         {show("etymBody")&&<div style={label}>語源の説明</div>}
-        {show("imagery")&&<div style={{fontSize:fs(14,16,19),fontWeight:700,color:C.text,lineHeight:1.5}}>{imageryOf(w)}</div>}
+        {show("imagery")&&(xl
+          ?<div style={{fontSize:17,fontWeight:500,color:C.text,lineHeight:1.65}}>
+             {imageryOf(w).split("＝")[0]}
+             {imageryOf(w).includes("＝")&&<span style={{fontSize:24,fontWeight:700}}>＝{imageryOf(w).split("＝").slice(1).join("＝")}</span>}
+           </div>
+          :<div style={{fontSize:fs(14,16,19),fontWeight:700,color:C.text,lineHeight:1.5}}>{imageryOf(w)}</div>)}
         {show("etymBody")&&<div style={{fontSize:fs(13,16,18),color:C.text,lineHeight:1.6}}>
           <HighlightParts C={C} text={String(w.etymologyConclusion||"").split("→")[0].trim()} parts={parts}/>
         </div>}
@@ -4089,8 +4112,8 @@ function RevealFace({C,item,onTapRoot,timedOut}){
         </div>
         <div style={{display:"flex",justifyContent:"center",gap:6,padding:"6px 0 8px",flexShrink:0}}>
           {pages.map((p,i)=>(
-            <button key={i} onClick={()=>goPage(i)} style={{minHeight:32,padding:"0 10px",borderRadius:16,cursor:"pointer",
-              fontSize:13,border:"1px solid "+(page===i?C.text:C.line),background:page===i?C.text:"transparent",
+            <button key={i} onClick={()=>goPage(i)} style={{padding:"9px 18px",borderRadius:999,cursor:"pointer",
+              fontSize:14,border:"1px solid "+(page===i?C.text:C.line),background:page===i?C.text:"transparent",
               color:page===i?C.bg:C.sub}}>{p.name}</button>
           ))}
         </div>
@@ -4117,15 +4140,15 @@ function StudyScreen({C,item,ui,settings,progress,handlers}){
           style={{width:40,height:40,marginLeft:-8,borderRadius:4,border:"none",background:"transparent",
             color:C.text,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}><Icon.back size={22}/></button>
         <div style={{flex:1}}><Bar C={C} pct={pct}/></div>
-        <span className="num" style={{fontSize:14,color:C.sub}}>{progress.done}/{progress.total}</span>
+        <span className="num" style={{fontSize:16,color:C.sub,fontVariantNumeric:"tabular-nums"}}>{progress.done}/{progress.total}</span>
         {handlers.canUndo&&(
           <button onClick={handlers.onUndo} aria-label="直前の採点を取り消す" className="fadeIn"
             style={{width:36,height:36,borderRadius:4,border:"1px solid "+C.border,background:"transparent",
               color:C.sub,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
             <Icon.undo size={17}/></button>
         )}
-        <span style={{fontSize:13,color:C.text,
-          border:"1px solid "+C.line,borderRadius:4,padding:"4px 8px",whiteSpace:"nowrap"}}>{fmt?fmt.short:""}</span>
+        <span style={{fontSize:15,color:C.text,
+          border:"1px solid "+C.line,borderRadius:8,padding:"6px 11px",whiteSpace:"nowrap"}}>{fmt?fmt.short:""}</span>
       </div>
 
       {phase==="ask"?(
@@ -4168,11 +4191,11 @@ function StudyScreen({C,item,ui,settings,progress,handlers}){
           style={{flex:1,display:"flex",flexDirection:"column",minHeight:0}}>
           <RevealFace C={C} item={item} onTapRoot={handlers.onTapRoot} timedOut={ui.timedOut}/>
           <div style={{display:"flex",gap:10,marginTop:10,flexShrink:0}}>
-            <Btn C={C} variant="ghost" style={{fontSize:16,borderColor:C.line}} onClick={()=>handlers.onGrade(0)}>
-              <Icon.repeat size={19}/>もう一度
+            <Btn C={C} variant="ghost" style={{fontSize:18,minHeight:58,gap:8,borderColor:C.line}} onClick={()=>handlers.onGrade(0)}>
+              <Icon.repeat size={20}/>もう一度
             </Btn>
-            <Btn C={C} variant="ok" style={{fontSize:16}} onClick={()=>handlers.onGrade(2)}>
-              <Icon.check size={19}/>覚えた
+            <Btn C={C} variant="ok" style={{fontSize:18,minHeight:58,gap:8}} onClick={()=>handlers.onGrade(2)}>
+              <Icon.check size={20}/>覚えた
             </Btn>
           </div>
         </div>
