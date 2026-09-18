@@ -2947,6 +2947,28 @@ const freshState=()=>({
   manualPass:false, manualPassDate:null,
   formatStats:{flip:[0,0],choice:[0,0],spell:[0,0],cloze:[0,0]}
 });
+
+/* ============================================================
+   TUTORIAL（はじめての人への吹き出し案内）
+   ・target … 光らせる部品の data-tour の名前
+   ・screen … その説明をどの画面で出すか（study は見た目だけのデモ。記録は変えない）
+   ・face   … study のとき、カードの問題の面（ask）か答えの面（reveal）か
+   ============================================================ */
+const TUTORIAL_KEY="roots.tutorialDone";
+const TUTORIAL_ACCENT="#534AB7";
+const TUTORIAL_STEPS=[
+  {target:"home-start",screen:"home",title:"毎日ここから",
+   body:"「学習をはじめる」を押すだけ。復習すべき単語と新しい単語を自動で選びます。"},
+  {target:"card",screen:"study",face:"ask",title:"タップでめくる",
+   body:"カードを押すと意味が出ます。まず自分で思い出してから押してみよう。"},
+  {target:"buttons",screen:"study",face:"reveal",title:"正直に選ぼう",
+   body:"「もう一度」を押すほど、その単語は早く戻ってきます。ごまかさないのが近道。"},
+  {target:"root-color",screen:"study",face:"reveal",title:"色には意味がある",
+   body:"青＝接頭辞、オレンジ＝語根、緑＝接尾辞。語根が同じ単語は、意味も似ています。"},
+  {target:"nav-list",screen:"home",title:"一覧で見直す",
+   body:"覚えた単語も、苦手な単語も、「単語帳」からいつでも確認できます。"},
+];
+
 const INITIAL_WORDS = RAW_WORDS.map(w=>({...w,...freshState()}));
 
 /* バッジ・レベルは総語数から自動で決まる。語数を増やしても破綻しない */
@@ -4195,7 +4217,7 @@ function WordDetail({C,word:w,onTapRoot,speakOn=true,head=true,relatedLimit=3,on
       )}
       {show("meaning")&&<div style={{fontSize:fs(17,22,40),fontWeight:700,color:C.text,margin:xl?"6px 0 12px":"8px 0 10px",lineHeight:1.25}}>{w.meaning}</div>}
 
-      {show("tree")&&parts.length>0&&<MorphTree C={C} word={w.word} parts={parts} partSize={xl?19:16} boxed={xl}/>}
+      {show("tree")&&parts.length>0&&<div data-tour={xl?"root-color":undefined}><MorphTree C={C} word={w.word} parts={parts} partSize={xl?19:16} boxed={xl}/></div>}
 
       {show("rootBtns")&&onTapRoot&&rootParts.length>0&&(
         <div style={{display:"flex",gap:8,flexWrap:"wrap",marginTop:10}}>
@@ -4586,6 +4608,154 @@ function RootSheet({C,entry,onClose,onOpenWord,speakOn=true}){
   );
 }
 
+/* ============================================================
+   TutorialOverlay：暗幕をかけて、data-tour の部品だけを切り抜いて見せる
+   ・切り抜きは「部品を囲む四角」に大きな影（box-shadow）をつけて、まわりを暗くする方式
+   ・部品が見つからないときは、暗幕だけ出して吹き出しを画面の真ん中に出す
+   ============================================================ */
+function TutorialOverlay({C,steps,index,onBack,onNext,onSkip,children}){
+  const step=steps[index]||steps[0];
+  const last=index>=steps.length-1;
+  const [rect,setRect]=useState(null);       /* 光らせる四角（見つからなければ null） */
+  const [pos,setPos]=useState(null);         /* 吹き出しの位置 */
+  const bubble=useRef(null);
+  const PAD=8,GAP=12,EDGE=16;
+
+  /* 部品の位置を測る。画面の切りかえ直後は部品がまだ無いことがあるので、少し待ちながら探す */
+  const measure=useCallback(()=>{
+    let el=null;
+    try{el=document.querySelector('[data-tour="'+step.target+'"]');}catch(e){}
+    if(!el){setRect(null);return false;}
+    const r=el.getBoundingClientRect();
+    if(!r.width&&!r.height){setRect(null);return false;}
+    setRect({top:r.top-PAD,left:r.left-PAD,width:r.width+PAD*2,height:r.height+PAD*2});
+    return true;
+  },[step.target]);
+
+  useLayoutEffect(()=>{
+    setRect(null);setPos(null);
+    let tries=0,timer=null,alive=true;
+    const find=()=>{
+      if(!alive)return;
+      let el=null;
+      try{el=document.querySelector('[data-tour="'+step.target+'"]');}catch(e){}
+      if(!el){
+        if(++tries<20){timer=setTimeout(find,50);return;}
+        setRect(null);setPos({center:true});return;
+      }
+      const r=el.getBoundingClientRect();
+      const out=r.top<0||r.bottom>window.innerHeight;
+      if(out){try{el.scrollIntoView({block:"center"});}catch(e){}}
+      timer=setTimeout(()=>{if(alive&&!measure())setPos({center:true});},out?120:0);
+    };
+    find();
+    return ()=>{alive=false;clearTimeout(timer);};
+  },[index,step.target,measure]);
+
+  /* 画面の大きさや向きが変わったら測り直す */
+  useEffect(()=>{
+    const on=()=>measure();
+    window.addEventListener("resize",on);window.addEventListener("orientationchange",on);
+    return ()=>{window.removeEventListener("resize",on);window.removeEventListener("orientationchange",on);};
+  },[measure]);
+
+  /* 吹き出しは部品の下に出す。下に入りきらなければ上に出す。左右ははみ出さないように */
+  useLayoutEffect(()=>{
+    if(!rect)return;
+    const vw=window.innerWidth,vh=window.innerHeight;
+    const bh=bubble.current?bubble.current.offsetHeight:180;
+    const bw=Math.min(360,vw-EDGE*2);
+    let top=rect.top+rect.height+GAP;
+    if(top+bh>vh-EDGE){
+      top=rect.top-GAP-bh;
+      /* 上にも入らない（部品がとても大きい）ときは、画面の下のほうに重ねて出す */
+      if(top<EDGE)top=vh-EDGE-bh;
+    }
+    top=Math.max(EDGE,Math.min(top,vh-EDGE-bh));
+    const left=Math.max(EDGE,Math.min(rect.left+rect.width/2-bw/2,vw-EDGE-bw));
+    setPos({top,left,width:bw});
+  },[rect]);
+
+  /* 案内のあいだは、うしろの画面がスクロールしないようにする */
+  useEffect(()=>{
+    const prev=document.body.style.overflow;
+    document.body.style.overflow="hidden";
+    return ()=>{document.body.style.overflow=prev;};
+  },[]);
+
+  const center=!rect||(pos&&pos.center);
+  const bw=Math.min(360,window.innerWidth-EDGE*2);
+  const bubbleStyle=center
+    ?{top:"50%",left:"50%",width:bw,transform:"translate(-50%,-50%)"}
+    :pos?{top:pos.top,left:pos.left,width:pos.width}:{top:-9999,left:0,width:bw};
+
+  return (
+    <div role="dialog" aria-modal="true" aria-label="使い方の案内" style={{position:"fixed",inset:0,zIndex:1000}}>
+      <style>{`@keyframes tourIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+        @keyframes tourInC{from{opacity:0;transform:translate(-50%,calc(-50% + 6px));}to{opacity:1;transform:translate(-50%,-50%);}}`}</style>
+      {/* 学習画面のデモなど、暗幕の下に見せたいもの */}
+      {children}
+      {/* 暗幕：押しても進まない（まちがって進まないように） */}
+      <div style={{position:"absolute",inset:0,background:rect?"transparent":"rgba(0,0,0,.72)"}}/>
+      {rect&&(()=>{
+        /* 切り抜きのまわりに暗い板を4枚（上・下・左・右）。大きな影の方式は、ブラウザによって薄く描かれるため */
+        const shade={position:"fixed",background:"rgba(0,0,0,.72)"};
+        const r=rect,bottom=r.top+r.height,right=r.left+r.width;
+        return (<>
+          <div style={{...shade,top:0,left:0,right:0,height:Math.max(0,r.top)}}/>
+          <div style={{...shade,top:bottom,left:0,right:0,bottom:0}}/>
+          <div style={{...shade,top:r.top,left:0,width:Math.max(0,r.left),height:r.height}}/>
+          <div style={{...shade,top:r.top,left:right,right:0,height:r.height}}/>
+          {/* 四角の四隅（角丸の外側）も暗くする */}
+          <div style={{position:"fixed",top:r.top,left:r.left,width:r.width,height:r.height,overflow:"hidden",pointerEvents:"none"}}>
+            <div style={{position:"absolute",inset:0,borderRadius:12,border:"2px solid "+TUTORIAL_ACCENT,
+              boxShadow:"0 0 0 12px rgba(0,0,0,.72)"}}/>
+          </div>
+        </>);
+      })()}
+      <div key={index} ref={bubble} style={{position:"fixed",...bubbleStyle,boxSizing:"border-box",
+        background:C.raise,color:C.text,border:"1px solid "+C.border,borderRadius:12,padding:"16px 16px 12px",
+        boxShadow:"0 8px 28px rgba(0,0,0,.28)",
+        animation:(center?"tourInC":"tourIn")+" .15s ease-out"}}>
+        <div className="num" style={{fontSize:12,color:C.sub,marginBottom:6,fontWeight:700,letterSpacing:".04em"}}>
+          {index+1} / {steps.length}</div>
+        <div style={{fontSize:16,fontWeight:700,marginBottom:6}}>{step.title}</div>
+        <div style={{fontSize:14,lineHeight:1.8,color:C.text}}>{step.body}</div>
+        <div style={{display:"flex",alignItems:"center",gap:8,marginTop:12}}>
+          <button onClick={onSkip} style={{minHeight:56,padding:"0 8px",marginLeft:-8,border:"none",background:"transparent",
+            color:C.sub,fontSize:14,cursor:"pointer",fontFamily:"inherit"}}>スキップ</button>
+          <div style={{flex:1}}/>
+          {index>0&&(
+            <button onClick={onBack} style={{minHeight:56,padding:"0 16px",borderRadius:8,border:"1px solid "+C.border,
+              background:"transparent",color:C.text,fontSize:16,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>戻る</button>
+          )}
+          <button onClick={onNext} style={{minHeight:56,padding:"0 20px",borderRadius:8,border:"none",
+            background:TUTORIAL_ACCENT,color:"#FFFFFF",fontSize:16,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>
+            {last?"はじめる":"次へ"}</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* 学習画面のステップ用：本物の学習画面の部品で、ダミーの1語を見せるだけ（記録は一切変えない） */
+function TutorialDemoStudy({C,settings,face}){
+  const item=useMemo(()=>{
+    const w=RAW_WORDS.find(x=>{try{return parseRoots(x).length>=2&&x.example;}catch(e){return false;}})||RAW_WORDS[0];
+    return {word:{...w,...freshState()},format:"w_en_ja",cloze:null,firstTry:true,lapse:false,seen:0};
+  },[]);
+  const noop=()=>{};
+  return (
+    <div style={{position:"fixed",top:0,bottom:0,left:0,right:0,margin:"0 auto",width:"100%",maxWidth:430,
+      zIndex:0,isolation:"isolate",background:C.bg,display:"flex",flexDirection:"column",paddingTop:"env(safe-area-inset-top)"}}>
+      <StudyScreen C={C} item={item} settings={settings}
+        ui={{key:"tour",phase:face==="reveal"?"reveal":"ask",hint:false,timedOut:false,timeLeft:null}}
+        progress={{done:0,total:1}}
+        handlers={{onFlip:noop,onHint:noop,onHideHint:noop,onGrade:noop,onExit:noop,onTapRoot:noop,canUndo:false,onUndo:noop}}/>
+    </div>
+  );
+}
+
 function BottomNav({C,screen,onNav}){
   /* 管理者は「記録」のかわりに「管理」を出す */
   const isAdmin=Cloud.profile&&Cloud.profile.role==="admin";
@@ -4597,7 +4767,7 @@ function BottomNav({C,screen,onNav}){
       {items.map(([id,label])=>{
         const on=screen===id;
         return (
-          <button key={id} onClick={()=>onNav(id)} aria-current={on?"page":undefined}
+          <button key={id} data-tour={"nav-"+id} onClick={()=>onNav(id)} aria-current={on?"page":undefined}
             style={{flex:1,padding:"14px 0 16px",background:"transparent",border:"none",cursor:"pointer",
               color:on?C.text:C.faint,fontSize:13,fontWeight:on?700:400}}>
             {label}
@@ -4806,7 +4976,7 @@ function HomeScreen({C,settings,stats,words,cfg,setCfg,pool,onStart,onNav,resume
           <Chip3 label="苦手" value={weak}/>
         </div>
 
-        <Btn C={C} onClick={onStart} disabled={!pool.length}
+        <Btn C={C} data-tour="home-start" onClick={onStart} disabled={!pool.length}
           variant={aheadOfSchedule?"ghost":"primary"}
           style={{opacity:pool.length?1:.45,cursor:pool.length?"pointer":"not-allowed"}}>
           {!pool.length?"いま出せる語がありません":aheadOfSchedule?"前倒しで復習する":"学習をはじめる"}
@@ -5084,7 +5254,7 @@ function StudyScreen({C,item,ui,settings,progress,handlers}){
       {phase==="ask"?(
         <div key={w.id+"-a"} className="riseIn" style={{flex:1,display:"flex",flexDirection:"column",minHeight:0}}>
           {/* カード全体が「答えを見る」 */}
-          <button onClick={handlers.onFlip} aria-label="答えを見る"
+          <button data-tour="card" onClick={handlers.onFlip} aria-label="答えを見る"
             style={{flex:1,minHeight:0,background:C.bg,border:"1px solid "+C.line,borderRadius:4,
               cursor:"pointer",color:"inherit",padding:0,display:"flex",textAlign:"inherit",
               font:"inherit",overflow:"hidden"}}>
@@ -5120,7 +5290,7 @@ function StudyScreen({C,item,ui,settings,progress,handlers}){
         <div key={w.id+"-b"} className="riseIn"
           style={{flex:1,display:"flex",flexDirection:"column",minHeight:0}}>
           <RevealFace C={C} item={item} onTapRoot={handlers.onTapRoot} timedOut={ui.timedOut}/>
-          <div style={{display:"flex",gap:10,marginTop:10,flexShrink:0}}>
+          <div data-tour="buttons" style={{display:"flex",gap:10,marginTop:10,flexShrink:0}}>
             <Btn C={C} variant="ghost" style={{fontSize:18,minHeight:58,gap:8,borderColor:C.line}} onClick={()=>handlers.onGrade(0)}>
               <Icon.repeat size={20}/>もう一度
             </Btn>
@@ -6257,7 +6427,7 @@ function StudentIdBox({C}){
   );
 }
 
-function SettingsScreen({C,settings,stats,words,earned,onChange,onReset,onTutorial,onExport,onImport,notice}){
+function SettingsScreen({C,settings,stats,words,earned,onChange,onReset,onTutorial,onReplayTour,onExport,onImport,notice}){
   const fileRef=useRef(null);
   const box={background:C.card,border:"1px solid "+C.border,borderRadius:4,padding:16,marginBottom:10};
   const label={fontSize:13.5,fontWeight:700,color:C.text,marginBottom:12};
@@ -6508,6 +6678,14 @@ function SettingsScreen({C,settings,stats,words,earned,onChange,onReset,onTutori
           <span style={{color:C.faint,display:"inline-flex",transform:"rotate(-90deg)",flexShrink:0}}><Icon.chevron size={20}/></span>
         </button>
       )):<Empty C={C} title="見つかりません" note="別の言葉で探してみてください"/>):(<>
+      <div style={{fontSize:12.5,fontWeight:700,color:C.sub,margin:"4px 2px 8px"}}>使い方</div>
+      <button onClick={onReplayTour} style={rowBtn}>
+        <div style={{minWidth:0}}>
+          <div style={{fontSize:15,fontWeight:700,color:C.text}}>チュートリアルをもう一度見る</div>
+          <div style={{fontSize:12,color:C.sub,marginTop:3}}>画面の上の吹き出しで、使い方を案内します</div>
+        </div>
+        <span style={{color:C.faint,display:"inline-flex",transform:"rotate(-90deg)",flexShrink:0}}><Icon.chevron size={20}/></span>
+      </button>
       <button onClick={onTutorial}
         style={{...box,width:"100%",textAlign:"left",cursor:"pointer",display:"flex",
           justifyContent:"space-between",alignItems:"center",gap:12,minHeight:64}}>
@@ -6536,6 +6714,7 @@ function SettingsScreen({C,settings,stats,words,earned,onChange,onReset,onTutori
    ============================================================ */
 function App(){
   const [screen,setScreen]=useState("loading");
+  const [tour,setTour]=useState(null);   /* 吹き出し案内の何番目か（null＝出していない） */
   const [words,setWords]=useState(INITIAL_WORDS);
   const [settings,setSettings]=useState(DEFAULT_SETTINGS);
   const [stats,setStats]=useState(DEFAULT_STATS);
@@ -6603,6 +6782,8 @@ function App(){
     if(se){
       setSettings({...DEFAULT_SETTINGS,...se,formats:{...DEFAULT_SETTINGS.formats,...(se.formats||{})}});
       setScreen("home");
+      /* すでに使っている人にも、まだ見ていなければ1回だけ出す */
+      if(lsGet(TUTORIAL_KEY)!==true)setTour(0);
     }else setScreen("auth");
 
     const sv=lsGet(KEY.session);
@@ -6886,6 +7067,7 @@ function App(){
     setSettings(s);persist(words,s,stats,earned);
     if(s.reminderEnabled)requestNotify();
     setScreen("home");
+    if(lsGet(TUTORIAL_KEY)!==true)setTour(0);
   },[words,stats,earned,persist]);
 
   /* ---------- 書き出し・読み込み ---------- */
@@ -7066,12 +7248,28 @@ function App(){
       {screen==="settings"&&(
         <SettingsScreen C={C} settings={settings} stats={stats} words={words} earned={earned}
           onChange={changeSettings} onReset={resetAll} onTutorial={()=>nav("tutorial")}
+          onReplayTour={()=>{lsSet(TUTORIAL_KEY,false);setScreen("home");window.scrollTo(0,0);setTour(0);}}
           onExport={doExport} onImport={doImport} notice={notice}/>
       )}
       {screen==="admin"&&<AdminScreen C={C}/>}
       {screen==="tutorial"&&<TutorialScreen C={C} onBack={()=>setScreen(prevScreen==="tutorial"?"settings":prevScreen)}/>}
 
       {withNav&&<BottomNav C={C} screen={screen} onNav={nav}/>}
+
+      {tour!=null&&(
+        <TutorialOverlay C={C} steps={TUTORIAL_STEPS} index={Math.min(tour,TUTORIAL_STEPS.length-1)}
+          onBack={()=>setTour(t=>Math.max(0,t-1))}
+          onNext={()=>{
+            if(tour>=TUTORIAL_STEPS.length-1){lsSet(TUTORIAL_KEY,true);setTour(null);return;}
+            const nx=TUTORIAL_STEPS[tour+1];
+            if(nx.screen==="home"&&screen!=="home")setScreen("home");
+            setTour(tour+1);
+          }}
+          onSkip={()=>{lsSet(TUTORIAL_KEY,true);setTour(null);}}>
+          {TUTORIAL_STEPS[tour]&&TUTORIAL_STEPS[tour].screen==="study"&&
+            <TutorialDemoStudy C={C} settings={settings} face={TUTORIAL_STEPS[tour].face}/>}
+        </TutorialOverlay>
+      )}
 
       {sheetWord&&(
         <WordSheet C={C} word={words.find(w=>w.id===sheetWord.id)||sheetWord} onClose={()=>setSheetWord(null)}
