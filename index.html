@@ -2957,16 +2957,26 @@ const freshState=()=>({
 const TUTORIAL_KEY="roots.tutorialDone";
 const TUTORIAL_ACCENT="#534AB7";
 const TUTORIAL_STEPS=[
-  {target:"home-start",screen:"home",title:"毎日ここから",
-   body:"「学習をはじめる」を押すだけ。復習すべき単語と新しい単語を自動で選びます。"},
-  {target:"card",screen:"study",face:"ask",title:"タップでめくる",
-   body:"カードを押すと意味が出ます。まず自分で思い出してから押してみよう。"},
-  {target:"buttons",screen:"study",face:"reveal",title:"正直に選ぼう",
-   body:"「もう一度」を押すほど、その単語は早く戻ってきます。ごまかさないのが近道。"},
-  {target:"root-color",screen:"study",face:"reveal",title:"色には意味がある",
-   body:"青＝接頭辞、オレンジ＝語根、緑＝接尾辞。語根が同じ単語は、意味も似ています。"},
-  {target:"nav-list",screen:"home",title:"一覧で見直す",
-   body:"覚えた単語も、苦手な単語も、「単語帳」からいつでも確認できます。"},
+  {target:"home-start",screen:"home",title:"1日10分を、毎日",
+   body:"まとめて1時間より、毎日10分のほうがずっと残ります。「おまかせ」なら、忘れかけた単語と新しい単語をちょうどよく選ぶので、迷ったらまずここを押そう。"},
+  {target:"card",screen:"study",face:"ask",title:"めくる前に、3秒考える",
+   body:"すぐめくらず、意味を頭の中で言ってみてから押そう。思い出そうとがんばる時間こそ、記憶を強くします。わからなくても、考えたこと自体がムダになりません。"},
+  {target:"hint",screen:"study",face:"ask",title:"詰まったら語源のヒント",
+   body:"意味は出さずに、単語のパーツだけを見せます。パーツから意味を推理して当てられたら、ただの暗記よりずっと忘れにくくなります。まず自力で考えてから使おう。"},
+  {target:"root-color",screen:"study",face:"reveal",title:"パーツで意味を組み立てる",
+   body:"青＝接頭辞、オレンジ＝語根、緑＝接尾辞。「a（〜へ）＋gree（心地よい）＝賛成する」のように、パーツの意味をつないで納得してから次へ進もう。"},
+  {target:"reveal-tabs",screen:"study",face:"reveal",title:"例文は声に出して",
+   body:"「語源」「例文」もめくれます。例文を1回声に出して読むと、意味と使い方がセットで残ります。長文やリスニングで出会ったときに気づけるようになります。"},
+  {target:"buttons",screen:"study",face:"reveal",title:"迷ったら「もう一度」",
+   body:"少しでも迷ったら「もう一度」が正解。すぐにまた出てきます。「覚えた」を押した単語は、1日後→3日後→1週間後…と、忘れかけたころに戻ってきます。ごまかすと、この仕組みがうまく働きません。"},
+  {target:"nav-roots",screen:"home",title:"語根で仲間ごと覚える",
+   body:"同じ語根の単語をまとめて見られます。語根を1つ覚えると、初めて見る単語の意味も予想できるようになります。これが語源で覚えるいちばんの強みです。"},
+  {target:"nav-list",screen:"home",title:"すき間時間は単語帳",
+   body:"意味を隠して、自分でテストできます。電車の中や授業の前に、覚えたはずの単語を見直そう。"},
+  {target:"nav-stats",screen:"home",title:"続いた日を見える化",
+   body:"学習した日と、覚えた単語の数が記録されます。1日休んでも大丈夫。次の日にまた再開すれば、ちゃんと取り戻せます。"},
+  {target:null,screen:"home",title:"続けるコツ",
+   body:"・毎日同じ時間に開く（寝る前や朝の電車など）\n・復習がたまったら、新しい単語より復習を先に\n・よくまちがえる単語は、ホームの「苦手だけ」でまとめて練習\nこのやり方で、今日から始めよう。"},
 ];
 
 const INITIAL_WORDS = RAW_WORDS.map(w=>({...w,...freshState()}));
@@ -4627,6 +4637,7 @@ function TutorialOverlay({C,steps,index,onBack,onNext,onSkip,children}){
     try{el=document.querySelector('[data-tour="'+step.target+'"]');}catch(e){}
     if(!el){setRect(null);return false;}
     const r=el.getBoundingClientRect();
+    if(!step.target)return false;
     if(!r.width&&!r.height){setRect(null);return false;}
     setRect({top:r.top-PAD,left:r.left-PAD,width:r.width+PAD*2,height:r.height+PAD*2});
     return true;
@@ -4637,6 +4648,7 @@ function TutorialOverlay({C,steps,index,onBack,onNext,onSkip,children}){
     let tries=0,timer=null,alive=true;
     const find=()=>{
       if(!alive)return;
+      if(!step.target){setRect(null);setPos({center:true});return;}
       let el=null;
       try{el=document.querySelector('[data-tour="'+step.target+'"]');}catch(e){}
       if(!el){
@@ -4720,7 +4732,7 @@ function TutorialOverlay({C,steps,index,onBack,onNext,onSkip,children}){
         <div className="num" style={{fontSize:12,color:C.sub,marginBottom:6,fontWeight:700,letterSpacing:".04em"}}>
           {index+1} / {steps.length}</div>
         <div style={{fontSize:16,fontWeight:700,marginBottom:6}}>{step.title}</div>
-        <div style={{fontSize:14,lineHeight:1.8,color:C.text}}>{step.body}</div>
+        <div style={{fontSize:14,lineHeight:1.8,color:C.text,whiteSpace:"pre-line"}}>{step.body}</div>
         <div style={{display:"flex",alignItems:"center",gap:8,marginTop:12}}>
           <button onClick={onSkip} style={{minHeight:56,padding:"0 8px",marginLeft:-8,border:"none",background:"transparent",
             color:C.sub,fontSize:14,cursor:"pointer",fontFamily:"inherit"}}>スキップ</button>
@@ -4741,7 +4753,9 @@ function TutorialOverlay({C,steps,index,onBack,onNext,onSkip,children}){
 /* 学習画面のステップ用：本物の学習画面の部品で、ダミーの1語を見せるだけ（記録は一切変えない） */
 function TutorialDemoStudy({C,settings,face}){
   const item=useMemo(()=>{
-    const w=RAW_WORDS.find(x=>{try{return parseRoots(x).length>=2&&x.example;}catch(e){return false;}})||RAW_WORDS[0];
+    /* 説明文の例（a＋gree）に合わせて agree を使う。無ければ語源のパーツが2つ以上ある語 */
+    const w=RAW_WORDS.find(x=>x.word==="agree")
+      ||RAW_WORDS.find(x=>{try{return parseRoots(x).length>=2&&x.example;}catch(e){return false;}})||RAW_WORDS[0];
     return {word:{...w,...freshState()},format:"w_en_ja",cloze:null,firstTry:true,lapse:false,seen:0};
   },[]);
   const noop=()=>{};
@@ -5210,7 +5224,7 @@ function RevealFace({C,item,onTapRoot,timedOut}){
             </div>
           ))}
         </div>
-        <div style={{display:"flex",justifyContent:"center",gap:6,padding:"6px 0 8px",flexShrink:0}}>
+        <div data-tour="reveal-tabs" style={{display:"flex",justifyContent:"center",gap:6,padding:"6px 0 8px",flexShrink:0}}>
           {pages.map((p,i)=>(
             <button key={i} onClick={()=>goPage(i)} style={{padding:"9px 18px",borderRadius:999,cursor:"pointer",
               fontSize:14,border:"1px solid "+(page===i?C.text:C.line),background:page===i?C.text:"transparent",
@@ -5278,7 +5292,7 @@ function StudyScreen({C,item,ui,settings,progress,handlers}){
               </div>
             </div>
           ):(
-            <button onClick={handlers.onHint} className="press"
+            <button data-tour="hint" onClick={handlers.onHint} className="press"
               style={{width:"100%",minHeight:56,marginTop:10,borderRadius:4,cursor:"pointer",flexShrink:0,
                 border:"1px solid "+C.line,background:"transparent",fontSize:16,color:C.sub,
                 display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
