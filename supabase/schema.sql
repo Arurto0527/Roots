@@ -157,3 +157,38 @@ grant select                 on public.profiles       to authenticated;
 grant select, insert, update on public.progress       to authenticated;
 grant select, insert         on public.study_logs     to authenticated;
 grant select, insert, update on public.study_sessions to authenticated;
+
+-- ============================================================
+-- だれでもログインできるようにする（名簿にない人は student として登録）
+-- ID番号（student_code）は生徒が設定画面で自分で入力する。重なってもよい
+-- ============================================================
+alter table public.profiles alter column student_code drop not null;
+alter table public.profiles drop constraint if exists profiles_student_code_key;
+alter table public.profiles add column if not exists email text;
+update public.profiles p set email = lower(u.email) from auth.users u where u.id = p.user_id and p.email is null;
+
+create or replace function public.handle_new_user()
+returns trigger
+language plpgsql security definer set search_path = public
+as $$
+declare r public.roster;
+begin
+  select * into r from public.roster where email = lower(new.email);
+  insert into public.profiles (user_id, student_code, role, email)
+  values (new.id, r.student_code, coalesce(r.role, 'student'), lower(new.email))
+  on conflict (user_id) do nothing;
+  return new;
+end;
+$$;
+
+-- 自分のID番号だけを変える（role は変えられない）
+create or replace function public.set_student_code(code text)
+returns void
+language sql security definer set search_path = public
+as $$
+  update public.profiles
+     set student_code = nullif(left(trim(code), 40), '')
+   where user_id = auth.uid();
+$$;
+revoke all on function public.set_student_code(text) from public, anon;
+grant execute on function public.set_student_code(text) to authenticated;

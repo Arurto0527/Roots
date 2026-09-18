@@ -5742,6 +5742,15 @@ async function sbFetchAll(make){
   }
 }
 
+/* IDの頭の部分でグループに分ける（UNIV-01 → UNIV、S012 → S）。未設定は "" */
+const idGroup=code=>{
+  if(!code)return "";
+  const m=code.match(/^(.+?)[-_\s.]/);
+  if(m)return m[1].toUpperCase();
+  const k=code.match(/^[^0-9]+/);
+  return (k?k[0]:code).toUpperCase();
+};
+
 function adminBuild(profiles,progress,logs,sessions){
   const now=Date.now();const today=startOfDay(now);
   const weekFrom=today-6*DAY;
@@ -5791,7 +5800,8 @@ function adminBuild(profiles,progress,logs,sessions){
     if(!studied.length&&!s.all)reasons.push("まだ始めていない");
     else if(away!=null&&away>=AWAY_DAYS)reasons.push(away+"日学習していない");
     if(weekRate!=null&&s.week>=10&&weekRate<LOW_RATE)reasons.push("今週の正答率が"+Math.round(weekRate*100)+"%");
-    return {id:p.user_id,code:p.student_code,lastAt,away,
+    const code=(p.student_code||"").trim();
+    return {id:p.user_id,code,label:code||"ID未設定",email:p.email||"",group:idGroup(code),lastAt,away,
       studied:studied.length,mastered:ws.filter(isMastered).length,
       due:ws.filter(w=>isDue(w,now)).length,
       week:s.week,weekRate,weekMin:Math.round(s.weekSec/60),
@@ -5836,8 +5846,10 @@ function DayBars({C,values,max,height=36,labels}){
 }
 
 function AdminScreen({C}){
-  const [data,setData]=useState(null);
+  const [raw,setRaw]=useState(null);
   const [err,setErr]=useState(null);
+  const [group,setGroup]=useState("all");   /* all / "" (ID未設定) / グループ名 */
+  const [query,setQuery]=useState("");
   const [tab,setTab]=useState("class");
   const [open,setOpen]=useState(null);
   const [sort,setSort]=useState("last");
@@ -5848,17 +5860,36 @@ function AdminScreen({C}){
     try{
       const since=new Date(startOfDay(Date.now())-ADMIN_DAYS*DAY).toISOString();
       const [p,g,l,s]=await withTimeout(Promise.all([
-        sbFetchAll(()=>sb.from("profiles").select("user_id,student_code,role").order("student_code")),
+        sbFetchAll(()=>sb.from("profiles").select("user_id,student_code,role,email").order("user_id")),
         sbFetchAll(()=>sb.from("progress").select("user_id,words,updated_at").order("user_id")),
         sbFetchAll(()=>sb.from("study_logs").select("user_id,word_id,correct,hint_used,answered_at")
           .gte("answered_at",since).order("answered_at").order("id")),
         sbFetchAll(()=>sb.from("study_sessions").select("user_id,started_at,active_seconds")
           .gte("started_at",since).order("started_at").order("id")),
       ]),30000);
-      setData(adminBuild(p,g,l,s));setLoadedAt(Date.now());
+      setRaw({p,g,l,s});setLoadedAt(Date.now());
     }catch(e){setErr((e&&e.message)||"読み込めませんでした");}
   },[]);
   useEffect(()=>{load();},[load]);
+
+  /* グループ一覧（人数つき）。管理者は数えない */
+  const groups=useMemo(()=>{
+    if(!raw)return [];
+    const m=new Map();
+    raw.p.filter(x=>x.role!=="admin").forEach(x=>{const g=idGroup((x.student_code||"").trim());m.set(g,(m.get(g)||0)+1);});
+    return [...m.entries()].sort((a,b)=>a[0]===""?1:b[0]===""?-1:a[0].localeCompare(b[0]));
+  },[raw]);
+  /* 絞り込んだ人だけで、クラス・生徒・単語のすべてを計算し直す */
+  const data=useMemo(()=>{
+    if(!raw)return null;
+    const q=query.trim().toLowerCase();
+    const ps=raw.p.filter(x=>{
+      const code=(x.student_code||"").trim();
+      if(group!=="all"&&idGroup(code)!==group)return false;
+      return !q||code.toLowerCase().includes(q)||(x.email||"").toLowerCase().includes(q);
+    });
+    return adminBuild(ps,raw.g,raw.l,raw.s);
+  },[raw,group,query]);
 
   const fmtLast=t=>{
     if(!t)return "記録なし";
@@ -5868,16 +5899,16 @@ function AdminScreen({C}){
   const pct=r=>r==null?"—":Math.round(r*100)+"%";
 
   const exportCsv=()=>{
-    const head=["生徒番号","最後の学習","今週の回答数","今週の正答率","今週の学習時間(分)","今週学習した日数",
+    const head=["ID","メール","最後の学習","今週の回答数","今週の正答率","今週の学習時間(分)","今週学習した日数",
       "学習した語数","習得した語数","復習待ちの語数","苦手な語数","苦手な単語(上位5)"];
     const q=v=>'"'+String(v).replace(/"/g,'""')+'"';
     const lines=[head.map(q).join(",")].concat(data.rows.map(r=>[
-      r.code,r.lastAt?new Date(r.lastAt).toLocaleDateString("ja-JP"):"",r.week,
+      r.code,r.email,r.lastAt?new Date(r.lastAt).toLocaleDateString("ja-JP"):"",r.week,
       r.weekRate==null?"":Math.round(r.weekRate*100),r.weekMin,r.activeDays,
       r.studied,r.mastered,r.due,r.weak.length,r.weak.slice(0,5).map(w=>w.word).join(" / ")].map(q).join(",")));
     const blob=new Blob(["﻿"+lines.join("\r\n")],{type:"text/csv"});
     const a=document.createElement("a");a.href=URL.createObjectURL(blob);
-    a.download="roots-"+todayKey()+".csv";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+    a.download="roots-"+(group==="all"?"":(group||"ID未設定")+"-")+todayKey()+".csv";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
   };
 
   const box={background:C.card,border:"1px solid "+C.border,borderRadius:4,padding:16,marginBottom:10};
@@ -5945,7 +5976,8 @@ function AdminScreen({C}){
             <div key={r.id} role="button" tabIndex={0} onClick={()=>goStudent(r.id)}
               style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10,minHeight:56,
                 borderTop:"1px solid "+C.line,cursor:"pointer"}}>
-              <b style={{fontSize:16,color:C.text}}>{r.code}</b>
+              <span style={{minWidth:0}}><b style={{fontSize:16,color:C.text}}>{r.label}</b>
+                <span style={{display:"block",fontSize:12,color:C.faint,wordBreak:"break-all"}}>{r.email}</span></span>
               <span style={{fontSize:14,color:C.sub,textAlign:"right"}}>{r.reasons.join("・")} ›</span>
             </div>
           ))}
@@ -5958,7 +5990,7 @@ function AdminScreen({C}){
       sort==="last"?(a.lastAt||0)-(b.lastAt||0):
       sort==="week"?b.week-a.week:
       sort==="studied"?b.studied-a.studied:
-      a.code.localeCompare(b.code));
+      (a.code||"\uffff").localeCompare(b.code||"\uffff",undefined,{numeric:true}));
     return (<>
       <div style={{display:"flex",gap:6,marginBottom:12}}>
         {[["last","ご無沙汰"],["week","今週"],["studied","語数"],["code","番号"]].map(([k,l])=>(
@@ -5973,9 +6005,10 @@ function AdminScreen({C}){
               <div style={{display:"flex",alignItems:"center",gap:12,minHeight:40}}>
                 <div style={{flex:1,minWidth:0}}>
                   <div style={{fontSize:17,fontWeight:700,color:C.text}}>
-                    {r.code}{r.reasons.length>0&&<span style={{marginLeft:8,fontSize:12,fontWeight:700,
+                    {r.label}{r.reasons.length>0&&<span style={{marginLeft:8,fontSize:12,fontWeight:700,
                       border:"1px solid "+C.text,borderRadius:3,padding:"1px 6px"}}>声かけ</span>}
                   </div>
+                  <div style={{fontSize:12,color:C.faint,wordBreak:"break-all"}}>{r.email}</div>
                   <div style={{fontSize:14,color:C.sub,marginTop:4}}>最後の学習：{fmtLast(r.lastAt)}</div>
                 </div>
                 <div style={{textAlign:"right"}}>
@@ -6027,6 +6060,15 @@ function AdminScreen({C}){
       {!data&&!err&&<div style={{color:C.sub,fontSize:16}}>読み込み中…</div>}
 
       {data&&(<>
+        <input value={query} onChange={e=>setQuery(e.target.value)} placeholder="IDやメールで検索"
+          type="search" autoCapitalize="off" autoCorrect="off" spellCheck={false}
+          style={{width:"100%",minHeight:56,padding:"0 14px",fontSize:16,borderRadius:4,marginBottom:8,
+            border:"1px solid "+C.border,background:C.bg,color:C.text,boxSizing:"border-box"}}/>
+        <div style={{display:"flex",gap:6,overflowX:"auto",marginBottom:12,paddingBottom:2}}>
+          {[["all","すべて",groups.reduce((a,g)=>a+g[1],0)]].concat(groups.map(([g,n])=>[g,g||"ID未設定",n])).map(([k,l,n])=>(
+            <button key={"g"+k} onClick={()=>setGroup(k)}
+              style={{...small(group===k),flex:"0 0 auto",padding:"0 14px",whiteSpace:"nowrap"}}>{l}（{n}）</button>))}
+        </div>
         <div role="tablist" style={{display:"flex",gap:8,marginBottom:12}}>
           {[["class","クラス"],["students","生徒"],["words","単語"]].map(([k,l])=>(
             <button key={k} role="tab" aria-selected={tab===k} style={pill(tab===k)} onClick={()=>setTab(k)}>{l}</button>))}
@@ -6103,6 +6145,42 @@ function TutorialScreen({C,onBack}){
 /* ============================================================
    SCREEN: SETTINGS
    ============================================================ */
+/* ID番号：先生や配った人から伝えられた番号を自分で入力する。管理画面ではこのIDで分けて見る */
+function StudentIdBox({C}){
+  const [val,setVal]=useState((Cloud.profile&&Cloud.profile.student_code)||"");
+  const [msg,setMsg]=useState(null);
+  const [busy,setBusy]=useState(false);
+  const saved=(Cloud.profile&&Cloud.profile.student_code)||"";
+  const save=async()=>{
+    const code=val.trim();
+    if(code.length>40){setMsg({bad:true,text:"40文字以内で入力してください"});return;}
+    setBusy(true);setMsg(null);
+    try{
+      const {error}=await withTimeout(sb.rpc("set_student_code",{code}),8000);
+      if(error)throw error;
+      Cloud.profile={...(Cloud.profile||{}),student_code:code||null};
+      setVal(code);setMsg({text:code?"IDを保存しました":"IDを消しました"});
+    }catch(e){setMsg({bad:true,text:"保存できませんでした。通信を確認してもう一度押してください"});}
+    setBusy(false);
+  };
+  return (
+    <div style={{marginTop:14}}>
+      <div style={{fontSize:13.5,fontWeight:700,color:C.text,marginBottom:4}}>ID番号</div>
+      <div style={{fontSize:12,color:C.sub,lineHeight:1.7,marginBottom:8}}>伝えられたID（例：UNIV-01）を入力してください</div>
+      <div style={{display:"flex",gap:8}}>
+        <input value={val} onChange={e=>setVal(e.target.value)} placeholder="未設定" maxLength={40}
+          autoCapitalize="characters" autoCorrect="off" spellCheck={false}
+          style={{flex:1,minWidth:0,minHeight:56,padding:"0 14px",fontSize:16,borderRadius:4,
+            border:"1px solid "+C.border,background:C.bg,color:C.text}}/>
+        <button onClick={save} disabled={busy||val.trim()===saved}
+          style={{minHeight:56,padding:"0 18px",borderRadius:4,border:"none",fontSize:16,fontWeight:700,
+            background:C.text,color:C.bg,cursor:"pointer",opacity:busy||val.trim()===saved?.4:1}}>保存</button>
+      </div>
+      {msg&&<div style={{fontSize:12.5,color:msg.bad?C.bad:C.sub,marginTop:8}}>{msg.text}</div>}
+    </div>
+  );
+}
+
 function SettingsScreen({C,settings,stats,words,earned,onChange,onReset,onTutorial,onExport,onImport,notice}){
   const fileRef=useRef(null);
   const box={background:C.card,border:"1px solid "+C.border,borderRadius:4,padding:16,marginBottom:10};
@@ -6318,9 +6396,9 @@ function SettingsScreen({C,settings,stats,words,earned,onChange,onReset,onTutori
 
       <div style={{...box,paddingTop:14,paddingBottom:14,marginTop:12}}>
         <div style={{fontSize:13,color:C.sub,lineHeight:1.9}}>
-          ログイン中：<b style={{color:C.text}}>{(Cloud.profile&&Cloud.profile.student_code)||"—"}</b>
-          <br/><span style={{fontSize:12,color:C.faint,wordBreak:"break-all"}}>{Cloud.user&&Cloud.user.email}</span>
+          ログイン中：<span style={{color:C.text,wordBreak:"break-all"}}>{Cloud.user&&Cloud.user.email}</span>
         </div>
+        <StudentIdBox C={C}/>
         <Btn C={C} variant="ghost" style={{marginTop:10}} onClick={()=>Cloud.signOut()}>ログアウト</Btn>
       </div>
 
@@ -6958,7 +7036,7 @@ function LoginScreen({C,onSignedIn}){
     if(error){
       const t=String(error.message||"");
       setMsg({bad:true,text:/database error|saving new user|名簿/i.test(t)
-        ?"このメールアドレスは登録されていません。先生に確認してください。"
+        ?"ログインできませんでした。時間をおいてもう一度試してください。"
         :/rate|seconds|too many/i.test(t)
         ?"少し時間をおいてから、もう一度送ってください。"
         :"コードを送れませんでした。インターネットの接続を確認してください。"});
