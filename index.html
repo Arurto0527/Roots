@@ -3709,7 +3709,7 @@ function Stepper({C,value,onChange,min=MIN_ID,max=MAX_ID,label}){
 /* 英検の級バッジ（34px の正方形・左に級カラーの帯）。デザイン案「04 左サイドバー」 */
 const EIKEN_COLORS={"5級":["#4a9d5f","#7fd196"],"4級":["#3f9199","#6fc5cd"],"3級":["#3b7ec4","#79b2ee"],
   "準2級":["#6b5fc4","#a49af0"],"2級":["#8a55b8","#c188ea"],"準1級":["#c2683a","#eb9c6d"],"1級":["#b8474f","#ef8188"]};
-function EikenTag({C,level,size=26,style}){
+function EikenTag({C,level,size=20,style}){
   const k=size/34;
   if(!level||!(level in EIKEN_COLORS))return null;
   const col=EIKEN_COLORS[level][C.isDark?1:0];
@@ -3720,7 +3720,7 @@ function EikenTag({C,level,size=26,style}){
       border:"1px solid "+(C.isDark?C.border:"#e0ddd8"),boxSizing:"border-box",verticalAlign:"middle",...style}}>
       <span aria-hidden="true" style={{width:Math.max(3,Math.round(5*k)),background:col,flexShrink:0}}/>
       <span aria-hidden="true" style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",color:col}}>
-        <span style={{fontSize:Math.max(6,6.5*k),fontWeight:700,lineHeight:1,opacity:.7,whiteSpace:"nowrap"}}>英検</span>
+        <span style={{fontSize:Math.max(5,6.5*k),fontWeight:700,lineHeight:1,opacity:.7,whiteSpace:"nowrap"}}>英検</span>
         <span style={{fontSize:(g.length>1?12:17)*k,fontWeight:900,lineHeight:1.05,whiteSpace:"nowrap"}}>{g}</span>
       </span>
     </span>
@@ -4187,7 +4187,7 @@ function WordDetail({C,word:w,onTapRoot,speakOn=true,head=true,relatedLimit=3,on
           </Speak>
           <span className="en" style={{fontSize:fs(14,14,15),color:C.sub}}>{w.pronunciation}</span>
           <span style={{fontSize:fs(13,13,15),color:C.faint}}>{w.partOfSpeech}</span>
-          <EikenTag C={C} level={w.eikenLevel} size={xl?32:28} style={{alignSelf:"center"}}/>
+          <EikenTag C={C} level={w.eikenLevel} size={xl?28:24} style={{alignSelf:"center"}}/>
         </div>
       )}
       {show("meaning")&&<div style={{fontSize:fs(17,22,40),fontWeight:700,color:C.text,margin:xl?"6px 0 12px":"8px 0 10px",lineHeight:1.25}}>{w.meaning}</div>}
@@ -4961,7 +4961,7 @@ function AskFace({C,item,timeLeft}){
         <div style={{textAlign:"center"}}>
           <div className="en" style={{fontSize:"clamp(34px, min(13vw, 7.5vh), 52px)",fontWeight:700,color:C.text,lineHeight:1.05,letterSpacing:"-0.02em",wordBreak:"break-word"}}>{w.word}</div>
           <div className="en" style={{fontSize:16,color:C.sub,marginTop:14}}>{w.pronunciation}</div>
-          <div style={{marginTop:10}}><EikenTag C={C} level={w.eikenLevel} size={30}/></div>
+          <div style={{marginTop:10}}><EikenTag C={C} level={w.eikenLevel} size={26}/></div>
           <div className="askgap" style={{marginTop:20,display:"flex",justifyContent:"center"}}><SpeakDot C={C} text={w.word} size={56}/></div>
         </div>
       )}
