@@ -4086,7 +4086,7 @@ const PICTO_PREFIX={
   suf:PRE_DOWN, super:PRE_OVER, trans:PRE_BEYOND,
   juxta:<><rect x="8" y="16" width="14" height="16"/><rect x="26" y="16" width="14" height="16"/></>,
 };
-function Pictogram({C,word:w}){
+function Pictogram({C,word:w,onTapRoot}){
   const parts=parseRoots(w);
   const n=parts.length;
   const items=parts.map((p,i)=>{
@@ -4099,16 +4099,23 @@ function Pictogram({C,word:w}){
   if(!items.some(x=>x.isRoot))return null;
   return (
     <div style={{display:"flex",alignItems:"flex-start",justifyContent:"center",gap:12,marginTop:18,flexWrap:"wrap"}}>
-      {items.map((x,i)=>(
-        <div key={i} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:8,minWidth:0}}>
+      {items.map((x,i)=>{
+        /* 絵を押すと、そのパーツの語源コラムを開く（コラムがあるときだけ） */
+        const tap=onTapRoot&&rootNote(x.morph)?e=>{e.stopPropagation();onTapRoot({morph:x.morph,gloss:x.gloss,type:x.type});}:null;
+        return (
+        <button key={i} type="button" onClick={tap||undefined} disabled={!tap} className={tap?"press":undefined}
+          aria-label={tap?x.morph+" のコラムを開く":x.morph+" "+x.gloss}
+          style={{display:"flex",flexDirection:"column",alignItems:"center",gap:8,minWidth:0,padding:0,margin:0,
+            border:"none",background:"transparent",font:"inherit",cursor:tap?"pointer":"default",color:"inherit"}}>
           <div style={{height:124,minWidth:124,color:C.text,border:"1px solid "+C.line,borderRadius:14,
             display:"flex",alignItems:"center",justifyContent:"center"}}>
             <P size={88}>{x.g}</P>
           </div>
-          <span style={{fontSize:18,color:C.sub}}>
-            <span className="en" style={{fontWeight:700,color:typeColor(x.type,C)}}>{x.morph}</span> {x.gloss}</span>
-        </div>
-      ))}
+          <span style={{fontSize:18,color:C.sub,display:"flex",alignItems:"center",gap:5}}>
+            {tap&&<Icon.book size={15}/>}
+            <span><span className="en" style={{fontWeight:700,color:typeColor(x.type,C)}}>{x.morph}</span> {x.gloss}</span></span>
+        </button>);
+      })}
     </div>
   );
 }
@@ -4985,7 +4992,7 @@ function RevealFace({C,item,onTapRoot,timedOut}){
             <div key={i} style={{flex:"0 0 100%",scrollSnapAlign:"start",overflowY:"auto",padding:16,boxSizing:"border-box"}}>
               {i>0&&<div style={{fontSize:15,color:C.sub,marginBottom:4}}>{p.name}</div>}
               <WordDetail C={C} word={w} onTapRoot={onTapRoot} only={p.only} head={i===0} big xl/>
-              {i===0&&<Pictogram C={C} word={w}/>}
+              {i===0&&<Pictogram C={C} word={w} onTapRoot={onTapRoot}/>}
             </div>
           ))}
         </div>
