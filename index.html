@@ -3378,7 +3378,13 @@ const ROOT_ALIAS={posit:"pos",gree:"grat",grac:"grat",a:"ad",mend:"mand",gard:"w
   fash:"fic",fact:"fic",feat:"fic",vow:"vot",cyber:"govern",capit:"chief",chapt:"chief",cape:"chief",
   st:"sta",stant:"sta",ble:"able",ical:"ic",polic:"polit",polis:"polit",price:"preci",prize:"preci",
   summ:"sum",bulg:"budg",wel:"well",weal:"well",tread:"trade",bulletin:"bill",di:"dis",just:"jur",
-  ac:"ad",ap:"ad",as:"ad",ory:"oire",ique:"ic"};
+  ac:"ad",ap:"ad",as:"ad",ory:"oire",ique:"ic",
+  /* No.101〜150 で増えた別綴り */
+  stroy:"struct",demn:"dam",audit:"aud",auct:"auth",cleric:"clerk",clerg:"clerk",femin:"fem",old:"eld",
+  wind:"wand",went:"wand",travail:"travel",vac:"void",solu:"solve",turb:"troub",cern:"cert",
+  prove:"prob",proof:"prob",faci:"face",cord:"cour",
+  ny:"neg",ni:"neg",ceed:"ced",fals:"fail",fault:"fail",chess:"check",ven:"vent",
+  junct:"join",thread:"throw",opera:"oper",pare:"pair",rise:"raise",rear:"raise",sert:"serv",drag:"draw",seam:"sew"};
 const canonRoot=m=>{const k=String(m||"").toLowerCase();return ROOT_ALIAS[k]||k;};
 
 function hashCode(s){let h=0;for(let i=0;i<s.length;i++){h=(h*31+s.charCodeAt(i))|0;}return Math.abs(h);}
