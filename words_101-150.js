@@ -180,7 +180,7 @@
    etymologyConclusion:"pass（通り抜ける）＋ age（名詞）＋ er（人）→ 乗り物に乗って町から町へ通り抜けていく人＝乗客",
    relatedWords:[
      {word:"pass",meaning:"通り過ぎる",breakdown:"pass（通り抜ける）→ 立ち止まらずにそばを抜けていく"},
-     {word:"passport",meaning:"パスポート",breakdown:"pass（通り抜ける）＋ port（港）→ 港を通り抜けるための許可証"},
+     {word:"past",meaning:"過去の；過ぎ去った",breakdown:"past（通り抜ける）→ passed（通り過ぎた）が変わった形"},
      {word:"passage",meaning:"通路；（文章の）一節",breakdown:"pass（通り抜ける）＋ age（名詞）→ 人が通り抜ける道"},
      {synonym:true,word:"traveler",meaning:"旅行者",breakdown:"旅をしている人全般。passenger は乗り物に乗っている人"}]},
 
@@ -290,7 +290,7 @@
    etymologyConclusion:"pass（通り抜ける）→ 立ち止まらずに、そばをすっと抜けていく＝通り過ぎる",
    etymologyMore:["前の人や車の横を抜ける→～を抜く","試験という関門を通り抜ける→（試験）に受かる","手から手へ通す→（人）に（A を）渡す","時間がそばを通っていく→（時が）過ぎる","通り抜けてよい証明→通行証"],
    relatedWords:[
-     {word:"passport",meaning:"パスポート",breakdown:"pass（通り抜ける）＋ port（港）→ 港を通り抜けるための許可証"},
+     {word:"past",meaning:"過去の；過ぎ去った",breakdown:"past（通り抜ける）→ passed（通り過ぎた）が変わった形"},
      {word:"passage",meaning:"通路；（文章の）一節",breakdown:"pass（通り抜ける）＋ age（名詞）→ 人が通り抜ける道"},
      {word:"passenger",meaning:"乗客",breakdown:"pass（通り抜ける）＋ age（名詞）＋ er（人）→ 町を通り抜ける人"},
      {word:"surpass",meaning:"上回る",breakdown:"sur（上を越えて）＋ pass（通り抜ける）→ 相手の上を越えていく"}]},
