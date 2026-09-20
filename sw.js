@@ -1,15 +1,34 @@
 /* Roots の保存係（Service Worker）
    ・音声ファイル：一度聞いたらスマホに保存 → 次からは一瞬で再生、オフラインでもOK
    ・アプリ本体：ネットにつながるときは最新版を取りに行き、つながらないときは保存版を使う
-   アプリを更新して音声を作り直したときは、下の VERSION の数字を1つ上げる */
-const VERSION = "v6";
-const AUDIO_CACHE = "roots-audio-" + VERSION;
+   アプリを更新したときは、下の VERSION の数字を1つ上げる（アプリ本体の保存だけ入れ替わる）
+
+   音声の保存（AUDIO_CACHE）は VERSION を付けない。
+   音声のファイル名は英文から計算した名前なので、英文を変えれば別の名前になる。
+   つまり古い音声が残っていても、まちがった音が鳴ることはない。
+   VERSION に付けてしまうと、番号を上げるたびに保存済みの音声が全部消えて、
+   もう一度ダウンロードすることになるので、切り離しておく。 */
+const VERSION = "v7";
+const AUDIO_CACHE = "roots-audio";
 const APP_CACHE = "roots-app-" + VERSION;
 
 self.addEventListener("install", () => self.skipWaiting());
 self.addEventListener("activate", (e) => {
   e.waitUntil((async () => {
-    for (const k of await caches.keys())
+    const keys = await caches.keys();
+    /* 古い版で作った音声の保存（roots-audio-v6 など）が残っていれば、
+       中身を新しい保存場所へ引き継いでから消す（もう一度ダウンロードしなくてよくする） */
+    const audio = await caches.open(AUDIO_CACHE);
+    for (const k of keys) {
+      if (k === AUDIO_CACHE || !k.startsWith("roots-audio-")) continue;
+      const old = await caches.open(k);
+      for (const req of await old.keys()) {
+        if (await audio.match(req)) continue;
+        const res = await old.match(req);
+        if (res) await audio.put(req, res);
+      }
+    }
+    for (const k of keys)
       if (k !== AUDIO_CACHE && k !== APP_CACHE) await caches.delete(k);
     await self.clients.claim();
   })());
