@@ -7924,6 +7924,17 @@ function App(){
       if(lsGet(TUTORIAL_KEY)!==true)setTour(0);
     }else setScreen("auth");
 
+    /* 保存係（Service Worker）が新しい版を見つけたら知らせる。
+       画面はいま開いているものを壊さず、押したときだけ開き直す */
+    try{
+      if(navigator.serviceWorker&&navigator.serviceWorker.addEventListener){
+        navigator.serviceWorker.addEventListener("message",ev=>{
+          if(ev&&ev.data&&ev.data.type==="update-ready")
+            setSnack({text:"新しい版があります",action:"更新",onAction:()=>location.reload()});
+        });
+      }
+    }catch(e){}
+
     const sv=lsGet(KEY.session);
     if(sv&&sv.layout!==WORDS_LAYOUT) lsDel(KEY.session);
     else if(sv&&Array.isArray(sv.queue)&&sv.queue.length){
@@ -8414,7 +8425,7 @@ function App(){
       {modal&&<Modal C={C} title={modal.title} body={modal.body} actions={modal.actions} onClose={()=>setModal(null)}/>}
       {snack&&(
         <Snackbar C={C} text={snack.text} actionLabel={snack.action}
-          onAction={doUndo} onClose={()=>setSnack(null)}
+          onAction={snack.onAction||doUndo} onClose={()=>setSnack(null)}
           place={screen==="study"?"top":"bottom"} bottom={withNav?76:16}/>
       )}
     </div>

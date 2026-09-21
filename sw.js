@@ -8,7 +8,7 @@
    つまり古い音声が残っていても、まちがった音が鳴ることはない。
    VERSION に付けてしまうと、番号を上げるたびに保存済みの音声が全部消えて、
    もう一度ダウンロードすることになるので、切り離しておく。 */
-const VERSION = "v8";
+const VERSION = "v9";
 const AUDIO_CACHE = "roots-audio";
 const APP_CACHE = "roots-app-" + VERSION;
 
@@ -55,18 +55,37 @@ self.addEventListener("fetch", (e) => {
     return;
   }
 
-  // アプリ本体と React などの部品：まずネット、だめなら保存版
+  // アプリ本体と React などの部品：保存版があればすぐ返し、新しい版は裏で取っておく。
+  // こうすると、アプリが大きくなっても起動を待たされない（次に開いたときに新しい版になる）。
   e.respondWith((async () => {
     const cache = await caches.open(APP_CACHE);
-    try {
-      // ページを開き直すときは HTTP キャッシュを使わず最新版を取得する。
-      const res = await fetch(req, req.mode === "navigate" ? { cache: "no-store" } : undefined);
-      if (res.ok || res.type === "opaque") cache.put(req, res.clone());
-      return res;
-    } catch (err) {
-      const hit = await cache.match(req, { ignoreSearch: true });
-      if (hit) return hit;
-      throw err;
-    }
+    const hit = await cache.match(req, { ignoreSearch: true });
+
+    // 裏で最新版を取りに行って保存する
+    const update = (async () => {
+      try {
+        // ページ本体は HTTP キャッシュを使わずに取得する
+        const res = await fetch(req, req.mode === "navigate" ? { cache: "no-store" } : undefined);
+        if (res.ok || res.type === "opaque") {
+          // 中身が変わっていたら、開いている画面に「新しい版がある」と知らせる
+          if (hit && req.mode === "navigate") {
+            const [before, after] = await Promise.all([hit.clone().text(), res.clone().text()]);
+            if (before !== after) {
+              const list = await self.clients.matchAll({ type: "window" });
+              for (const c of list) c.postMessage({ type: "update-ready" });
+            }
+          }
+          await cache.put(req, res.clone());
+        }
+        return res;
+      } catch (err) {
+        return null;
+      }
+    })();
+
+    if (hit) { e.waitUntil(update); return hit; }   // 保存版があれば待たせない
+    const res = await update;                       // 初回だけネットを待つ
+    if (res) return res;
+    throw new Error("offline");
   })());
 });
