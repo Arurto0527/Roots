@@ -144,6 +144,19 @@ add("ALPHA_FROM / WORDS_LAYOUT",ALPHA_FROM+" / "+LAYOUT,0);
 add("○×の保存キー / sw.js VERSION",(RECALL_KEY||"?")+" / "+(SW?SW[1]:"?"),0);
 add("本編の語数 / 全体",(ids.filter(i=>i<ALPHA_FROM).length)+" / "+RAW.length,0);
 
+/* ---------- 7. 次に追加するときの値 ---------- */
+const alphaN=alphaIds.length;
+const bump=v=>String(v).replace(/(\d+)$/,(m)=>String(Number(m)+1));
+const nextHint=[
+  "次に N 語を足すときの値（N は足す語数）",
+  "  本編の続き番号       : No."+ALPHA_FROM+" 〜 No."+(ALPHA_FROM+0)+"+N-1（LEAP の同じ番号の語）",
+  "  Part α の移動先      : No."+ALPHA_FROM+"〜"+(ALPHA_FROM+alphaN-1)+" → No."+(ALPHA_FROM)+"+N 〜 "+(ALPHA_FROM+alphaN-1)+"+N",
+  "  ALPHA_FROM           : "+ALPHA_FROM+" → "+ALPHA_FROM+"+N",
+  "  WORDS_LAYOUT         : "+LAYOUT+" → "+(Number(LAYOUT)+1),
+  "  ○×の保存キー        : "+(RECALL_KEY||"?")+" → "+(RECALL_KEY?bump(RECALL_KEY):"?"),
+  "  sw.js の VERSION     : "+(SW?SW[1]:"?")+" → "+(SW?bump(SW[1]):"?"),
+].join("\n");
+
 /* ---------- 出力 ---------- */
 const pad=(s,n)=>{let w=0;for(const c of String(s))w+=/[\x00-\xff]/.test(c)?1:2;return String(s)+" ".repeat(Math.max(0,n-w));};
 console.log("\n=== Roots 仕上げチェック ===\n");
@@ -151,5 +164,6 @@ for(const [k,v,ng] of rows) console.log("  "+(ng?"NG ":"ok ")+pad(k,34)+v);
 if(detail.length) console.log("\n"+detail.join("\n\n"));
 const ngCount=rows.filter(r=>r[2]).length;
 console.log("\n"+(ngCount?"NG が "+ngCount+" 件あります。直してから完了と報告してください。":"すべて問題ありません。")+"\n");
+console.log(nextHint+"\n");
 console.log("※ ピクトグラムの「絵が何に見えるか」は機械では分かりません。必ず目で見て確認すること。\n");
 process.exit(ngCount?1:0);
