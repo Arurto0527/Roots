@@ -9115,6 +9115,7 @@ const RAW_WORDS=[
    exampleJa:"6時以降、この公園に乗り物が入ることは許されていない。",
    example2:"A strange vehicle with six wheels stopped in front of school.",
    exampleJa2:"車輪が6つある変わった車両が、学校の前に止まった。",
+   hook:"veh はラテン語の「運ぶ」。同じ語根の身近な英単語がほとんどない語。",
    etymologyProcess:"veh（運ぶ）＋ icle（小さいもの）→ 人や荷を載せて運ぶ物は…？",
    etymologyConclusion:"veh（運ぶ）＋ icle（小さいもの）→ 人や荷物を載せて地上を運ぶ道具＝車両",
    relatedWords:[
@@ -9298,11 +9299,11 @@ const RAW_WORDS=[
    exampleJa:"近年の医学の前進は、多くの若い命を救ってきた。",
    example2:"Our army advanced slowly through the thick forest at night.",
    exampleJa2:"わが軍は夜、深い森の中をゆっくりと前へ進んだ。",
-   etymologyProcess:"van（前へ）→ 今いる所より前のほうへ出ていくと…？",
-   etymologyConclusion:"van（前へ）→ 今いる所より前のほうへ、一歩ずつ出ていくこと＝前進",
+   etymologyProcess:"ad（〜へ）＋ van（前へ）→ 今より前のほうへ出ていくと…？",
+   etymologyConclusion:"ad（〜へ）＋ van（前へ）→ 今いる所より前のほうへ一歩ずつ出ていくこと＝前進",
    relatedWords:[
-     {word:"advantage",meaning:"有利な点",breakdown:"van（前へ）＋ age（名詞）→ 人より前に出ていることの有利さ"},
-     {word:"advanced",meaning:"上級の，進んだ",breakdown:"van（前へ）＋ ed（〜された）→ 人より前へ進んだ段階にある"},
+     {word:"advantage",meaning:"有利な点",breakdown:"ad（〜へ）＋ van（前へ）＋ age（名詞）→ 人より前に出ている有利さ"},
+     {word:"advanced",meaning:"上級の，進んだ",breakdown:"ad（〜へ）＋ van（前へ）＋ ed（〜された）→ 人より前へ進んだ段階の"},
      {synonym:true,word:"progress",meaning:"進歩",breakdown:"先へ進んだ度合い。advance は一歩前へ出る動きが中心"},
      {synonym:true,word:"improve",meaning:"改善する",breakdown:"質をよくする。advance は位置や段階が前へ動く"}]},
 
@@ -10016,8 +10017,8 @@ const RAW_WORDS=[
    etymologyConclusion:"per（すっかり）＋ form（形）→ 決められた形を最後まですっかり作り上げる＝遂行する",
    relatedWords:[
      {word:"performance",meaning:"演技；成績",breakdown:"per（すっかり）＋ form（形）＋ ance（名詞）→ 形にしてみせた出来ばえ"},
-     {synonym:true,word:"reform",meaning:"改革する",breakdown:"form（形）を作り直す語。perform の form は別系統だが形は同じ"},
-     {synonym:true,word:"carry out",meaning:"（任務を）やりとげる",breakdown:"最後までやりきる言い方。perform は硬い場面で使う"},
+     {word:"reform",meaning:"改革する",breakdown:"re（再び）＋ form（形）→ 古い形をこわして作り直す"},
+     {word:"uniform",meaning:"制服",breakdown:"uni（1つの）＋ form（形）→ みんなが同じ一つの形になる服"},
      {synonym:true,word:"achieve",meaning:"成しとげる",breakdown:"目標に届く。perform は決まった内容をやりきる"}]},
 
   {id:638,word:"adopt",partOfSpeech:"他動詞",meaning:"（案・方法を）採用する",
@@ -13037,7 +13038,9 @@ const Cloud={
     const owner=lsGet("roots.owner");
     if(owner&&owner!==user.id){
       Object.values(KEY).forEach(lsDel);Object.values(LEGACY).forEach(lsDel);
-      lsDel("roots.localAt");lsDel("roots.outbox.v1");lsDel("roots.listRecall");lsDel("roots.listRecall.v2");lsDel("roots.listRecall.v3");
+      lsDel("roots.localAt");lsDel("roots.outbox.v1");lsDel("roots.listRecall");
+      /* ○×の記録は版ごとにキーが分かれているので、古い版もまとめて消す */
+      for(let v=2;v<=9;v++) lsDel("roots.listRecall.v"+v);
     }
     lsSet("roots.owner",user.id);
     try{
@@ -13942,6 +13945,37 @@ const G={
   standing:<><circle cx="24" cy="9" r="4"/><path d="M24 13v17M16 20h16M24 30l-6 10M24 30l6 10"/></>,
 };
 const PICTO_ROOT={
+  /* 語根マップで絵が出ていなかった語根の補い（2026-09-22 に追加） */
+  pli:<><path d="M8 38h32"/><path d="M8 38V16M16 38V12M24 38V16M32 38V12M40 38V16"/><path d="M8 16l8-4 8 4 8-4 8 4"/></>,
+  pend:<><circle cx="24" cy="6" r="2"/><path d="M24 8v30"/><path d="M10 14h28"/><path d="M10 14l-5 11a6 6 0 0 0 10 0z"/><path d="M38 14l5 11a6 6 0 0 1-10 0z"/><path d="M16 40h16"/></>,
+  sens:<><path d="M16 40V24l-4-6"/><path d="M16 24V12M22 22V9M28 22V10M34 24V14"/><path d="M16 40h18V24"/><path d="M40 16c3 4 3 10 0 14"/></>,
+  gener:<><path d="M24 42V22"/><path d="M24 28c-9 0-11-7-11-12 7 0 11 5 11 12zM24 26c9 0 11-7 11-12-7 0-11 5-11 12z"/><path d="M14 42h20"/></>,
+  vers:<><path d="M39 24a15 15 0 1 1-6-12"/><path d="M39 6v9h-9"/></>,
+  cart:<><path d="M12 6h24v36H12z"/><path d="M17 15h14M17 23h14M17 31h9"/></>,
+  comput:<><rect x="10" y="5" width="28" height="38" rx="3"/><path d="M16 13h16"/><circle cx="18" cy="25" r="2"/><circle cx="24" cy="25" r="2"/><circle cx="30" cy="25" r="2"/><circle cx="18" cy="34" r="2"/><circle cx="24" cy="34" r="2"/><circle cx="30" cy="34" r="2"/></>,
+  nota:<><path d="M5 22L21 6h14a3 3 0 0 1 3 3v14L22 39z"/><circle cx="31" cy="14" r="2.5"/></>,
+  peri:<><path d="M18 5h12"/><path d="M20 5v15L10 37a3 3 0 0 0 3 5h22a3 3 0 0 0 3-5L28 20V5"/><path d="M15 29h18"/></>,
+  portus:<><circle cx="24" cy="7" r="3"/><path d="M24 10v30"/><path d="M15 18h18"/><path d="M9 27c0 9 7 14 15 14s15-5 15-14"/><path d="M5 27h8M35 27h8"/></>,
+  speci:<><circle cx="14" cy="14" r="6"/><rect x="28" y="8" width="12" height="12"/><path d="M14 28l7 12H7z"/><rect x="28" y="28" width="12" height="12" rx="6"/></>,
+  vari:<><circle cx="12" cy="24" r="8"/><path d="M24 24h8M29 19l5 5-5 5"/><rect x="36" y="16" width="8" height="16"/></>,
+  voc:<><path d="M8 19h8l12-9v28l-12-9H8z"/><path d="M34 16c4 5 4 11 0 16M40 11c6 7 6 19 0 26"/></>,
+  awe:<><path d="M4 42h40"/><path d="M11 42V17L22 6l11 11v25"/><path d="M18 42V30h8v12"/><circle cx="40" cy="32" r="3"/><path d="M36 42c0-4 2-6 4-6s4 2 4 6"/></>,
+  cult:<><path d="M4 42h40"/><path d="M36 6L20 30"/><path d="M12 28h14v5l-11 4z"/></>,
+  nov:<><path d="M22 6l4 13 13 4-13 4-4 13-4-13-13-4 13-4z"/><path d="M40 6l1.5 4.5L46 12l-4.5 1.5L40 18l-1.5-4.5L34 12l4.5-1.5z"/></>,
+  ord:<><path d="M20 11h22M20 24h22M20 37h22"/><circle cx="10" cy="11" r="3.5"/><circle cx="10" cy="24" r="3.5"/><circle cx="10" cy="37" r="3.5"/></>,
+  simil:<><rect x="4" y="13" width="16" height="22" rx="2"/><rect x="28" y="13" width="16" height="22" rx="2"/><path d="M22 20h4M22 28h4"/></>,
+  weigh:<><path d="M8 20h32l4 22H4z"/><path d="M24 20V8"/><path d="M17 14h14"/></>,
+  articul:<><path d="M6 42l12-12"/><circle cx="24" cy="24" r="6"/><path d="M30 18l12-12"/><path d="M4 44l3-3M41 7l3-3"/></>,
+  bed:<><path d="M5 34V17"/><path d="M5 25h30a7 7 0 0 1 7 7v2"/><path d="M5 34h37"/><circle cx="14" cy="20" r="4"/><path d="M6 40v-6M41 40v-6"/></>,
+  friger:<><path d="M24 5v38M9 15l30 18M39 15L9 33"/><path d="M19 9l5 5 5-5M19 39l5-5 5 5"/></>,
+  table:<><path d="M5 17h38v8H5z"/><path d="M10 25v17M38 25v17"/></>,
+  air:<><path d="M4 15h21a5 5 0 1 0-5-5"/><path d="M4 26h29a5 5 0 1 1-5 5"/><path d="M4 37h15"/></>,
+  book:<><path d="M24 13v28"/><path d="M24 13c-4-4-12-5-19-3v26c7-2 15-1 19 3"/><path d="M24 13c4-4 12-5 19-3v26c-7-2-15-1-19 3"/></>,
+  foot:<><ellipse cx="19" cy="31" rx="9" ry="12"/><circle cx="11" cy="15" r="3"/><circle cx="18" cy="11" r="3"/><circle cx="25" cy="12" r="2.6"/><circle cx="31" cy="16" r="2.3"/><circle cx="36" cy="22" r="2"/></>,
+  sea:<><path d="M9 28h30l-4 9H13z"/><path d="M24 28V9l11 9-11 5"/><path d="M4 42c4-3 8-3 12 0s8 3 12 0 8-3 12 0"/></>,
+  tact:<><path d="M19 42V24l-4-5"/><path d="M19 24V11a2.5 2.5 0 0 1 5 0v11"/><path d="M24 19a2.5 2.5 0 0 1 5 0v5M29 23a2.5 2.5 0 0 1 5 0v10c0 6-4 9-9 9h-6"/></>,
+  tract:<><rect x="30" y="17" width="13" height="14"/><path d="M30 24H14"/><path d="M14 17v14"/><path d="M5 24h9"/><path d="M11 19l-6 5 6 5"/></>,
+  wid:<><path d="M8 13v22M40 13v22"/><path d="M8 24h32"/><path d="M15 18l-7 6 7 6M33 18l7 6-7 6"/></>,
   /* No.551〜650 で増えた語根の絵（2026-09-22 に追加） */
   tach:<><path d="M14 8h20"/><path d="M24 8v34"/><path d="M8 24h32v9H8z"/></>,
   nect:<><circle cx="16" cy="24" r="10"/><circle cx="32" cy="24" r="10"/></>,
@@ -14519,17 +14553,24 @@ const PICTO_BY_GLOSS={
   "age|生きてきた時間":<><path d="M12 8h24M12 40h24"/><path d="M14 8c0 10 10 12 10 16s-10 6-10 16M34 8c0 10-10 12-10 16s10 6 10 16"/></>,
   "mis|誤って":<><rect x="9" y="9" width="30" height="30" rx="3"/><path d="M18 18l12 12M30 18l-12 12"/></>,
 };
+/* 語根・接頭語・接尾語1つぶんの絵を引く。見つからなければ null
+   接尾語でも語根の絵があるものは出す（award の ward など）
+   否定の意味の接頭語（injure の in など）は「中へ」の絵ではなく禁止マークにする
+   同じ綴りでも意味が違う語根（mistake の mis と promise の mis など）は、意味でも引き分ける */
+function pictoFor(morph,gloss,type){
+  const k=canonRoot(morph);
+  const byGloss=PICTO_BY_GLOSS[k+"|"+(gloss||"")];
+  const g=byGloss||PICTO_ROOT[k]||(type==="suffix"?null:type==="prefix"&&/でない/.test(gloss||"")?PRE_NOT:PICTO_PREFIX[k]);
+  return g?{g,isRoot:!!(byGloss||PICTO_ROOT[k])}:null;
+}
+
 function Pictogram({C,word:w,onTapRoot,compact=false}){
   const parts=parseRoots(w);
   const n=parts.length;
   const items=parts.map((p,i)=>{
-    const k=canonRoot(p.morph), t=morphType(p.morph,i,n,parts);
-    /* 接尾語でも語根の絵があるものは出す（award の ward など） */
-    /* 否定の意味の接頭語（injure の in など）は「中へ」の絵ではなく禁止マークにする */
-    /* 同じ綴りでも意味が違う語根（mistake の mis と promise の mis など）は、意味でも引き分ける */
-    const byGloss=PICTO_BY_GLOSS[k+"|"+(p.gloss||"")];
-    const g=byGloss||PICTO_ROOT[k]||(t==="suffix"?null:t==="prefix"&&/でない/.test(p.gloss||"")?PRE_NOT:PICTO_PREFIX[k]);
-    return g?{g,morph:p.morph,gloss:p.gloss,type:t,isRoot:!!(byGloss||PICTO_ROOT[k])}:null;
+    const t=morphType(p.morph,i,n,parts);
+    const hit=pictoFor(p.morph,p.gloss,t);
+    return hit?{g:hit.g,morph:p.morph,gloss:p.gloss,type:t,isRoot:hit.isRoot}:null;
   }).filter(Boolean);
   if(!items.some(x=>x.isRoot))return null;
   return (
@@ -14924,6 +14965,16 @@ function RootSheet({C,entry,onClose,onOpenWord,speakOn=true}){
   if(!entry)return null;
   const col=entry.type?{fg:typeColor(entry.type,C),bg:"transparent"}:rootColor(entry.morph,C);
   const kind={prefix:"接頭語",suffix:"接尾語"}[entry.type]||"語根";
+  /* 語根マップからこのシートを開いたときに、その語根の絵も見られるようにする */
+  const pic=pictoFor(entry.morph,entry.gloss,entry.type);
+  const PicBox=()=>(
+    <div style={{display:"flex",justifyContent:"center",marginBottom:12}}>
+      <div style={{height:124,minWidth:124,color:C.text,border:"1px solid "+C.line,borderRadius:14,
+        display:"flex",alignItems:"center",justifyContent:"center"}}>
+        <P size={88}>{pic.g}</P>
+      </div>
+    </div>
+  );
   return (
     <Overlay C={C} onClose={onClose} z={120}>
       <div className="slideUp" style={{background:C.card,borderRadius:4,width:"100vw",maxWidth:430,
@@ -14939,9 +14990,13 @@ function RootSheet({C,entry,onClose,onOpenWord,speakOn=true}){
             <div className="num" style={{fontSize:11.5,color:C.faint,marginTop:2}}>この{kind}を持つ語 {entry.count}</div>
           </div>
         </div>
+        {pic&&!rootNote(entry.morph)&&(
+          <div className="riseIn" style={{marginTop:16}}><PicBox/></div>
+        )}
         {rootNote(entry.morph)&&(
           <div className="riseIn" style={{marginTop:16,background:C.warnSoft,borderRadius:4,
             padding:"13px 15px",border:"1px solid "+(C.isDark?"#3A2E1C":"#F0DFC6")}}>
+            {pic&&<PicBox/>}
             <div style={{display:"flex",alignItems:"center",gap:7,marginBottom:8}}>
               <span style={{color:C.warn,display:"inline-flex"}}><Icon.book size={15}/></span>
               <span style={{fontSize:12,fontWeight:700,color:C.warn}}>{kind}コラム</span>
