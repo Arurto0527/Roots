@@ -12842,103 +12842,104 @@ const freshState=()=>({
    ・pass   … true ならタップが本物のボタンにも届く（画面の移動など）。false なら説明だけして進む
    ・face   … study のとき、はじめに見せる面（ask＝問題、reveal＝答え）
    ・tap    … 吹き出しに出す「どこを押すか」
+   ・mood   … ルーツくん（先生役）の表情。normal＝笑顔／teach＝説明する／think＝考える／cheer＝応援する
    ============================================================ */
 const TUTORIAL_KEY="roots.tutorialDone";
 const TUTORIAL_ACCENT="#534AB7";
 const TUTORIAL_STEPS=[
   /* --- ホーム：まず1回やってみる --- */
-  {target:"home-start",screen:"home",pass:false,tap:"「学習をはじめる」をタップ",
+  {target:"home-start",screen:"home",pass:false,mood:"cheer",tap:"「学習をはじめる」をタップ",
    title:"まず1回やってみよう",
-   body:"1時間まとめてより、毎日10分のほうが残ります。ここを押すと、今日やるべき単語がじどうで選ばれます。\nこれから練習してみよう。練習のぶんは記録に残りません。"},
+   body:"やあ、ハルト！ さっそく1回やってみよう。\n1時間まとめてより、毎日10分のほうが残るんだ。ここを押すと、今日やるべき単語をぼくが選ぶよ。\n練習だから、記録には残らない。"},
 
   /* --- 学習デモ：問題の面 --- */
-  {target:"hint",screen:"study",face:"ask",pass:true,tap:"「語源のヒント」をタップ",
+  {target:"hint",screen:"study",face:"ask",pass:true,mood:"teach",tap:"「語源のヒント」をタップ",
    title:"すぐに答えを見ない",
-   body:"まず3秒、「意味なんだっけ」と思い出そうとしてみる。この“がんばって思い出す時間”が、記憶をいちばん強くします。\n出てこなければ、ヒントを開こう。"},
-  {target:"hint-panel",screen:"study",face:"ask",pass:false,tap:"読んだらここをタップ",
+   body:"まず3秒、「意味なんだっけ」と考えてみて。\nこの“思い出そうとする時間”が、記憶をいちばん強くするんだ。\n出てこなければ、ヒントを開こう。"},
+  {target:"hint-panel",screen:"study",face:"ask",pass:false,mood:"teach",tap:"読んだらここをタップ",
    title:"パーツから意味を当てる",
-   body:"答えは出ません。出るのは単語を分けたパーツだけ。\nad（〜へ）＋ grat（心地よい）→ 気持ちが近づく →「賛成する」。\n自分で当てた単語は、そのまま覚えた単語より忘れにくくなります。"},
-  {target:"card",screen:"study",face:"ask",pass:true,tap:"カードをタップ",
-   title:"答えを確かめる",
-   body:"当てられても、はずれても、カードを押して答えを見よう。\n大事なのは「自分の予想と合っていたか」を確かめること。ここで差がつきます。"},
+   body:"出るのは答えじゃなく、単語を分けたパーツだけ。\nad（〜へ）＋ grat（心地よい）→ 気持ちが近づく →「賛成する」。\n自分で当てた単語は、忘れにくいんだ。"},
+  {target:"card",screen:"study",face:"ask",pass:true,mood:"normal",tap:"カードをタップ",
+   title:"答えを確かめよう",
+   body:"当たっても、はずれてもいい。カードを押して答えを見よう。\n「予想と合っていたか」を確かめる。ここで差がつくよ。"},
 
   /* --- 学習デモ：答えの面 --- */
-  {target:"root-color",screen:"study",face:"reveal",pass:true,tap:"色分けの図をタップ",
+  {target:"root-color",screen:"study",face:"reveal",pass:true,mood:"teach",tap:"色分けの図をタップ",
    title:"色は3つの役わり",
-   body:"青＝接頭語（前について向きを変える）\nオレンジ＝語根（意味の中心）\n緑＝接尾語（名詞・動詞などを決める）\nまん中のオレンジさえ覚えれば、はじめて見る単語でも意味を予想できます。"},
-  {target:"reveal-tab-1",screen:"study",face:"reveal",pass:true,tap:"「語源」をタップ",
+   body:"青＝接頭語（向きを変える）\nオレンジ＝語根（意味の中心）\n緑＝接尾語（品詞を決める）\nオレンジさえ覚えれば、初めて見る単語も予想できるよ。"},
+  {target:"reveal-tab-1",screen:"study",face:"reveal",pass:true,mood:"teach",tap:"「語源」をタップ",
    title:"“なぜその意味か”を読む",
-   body:"語源のページには、その単語がどうしてこの意味になったのかが書いてあります。\n理由がわかった単語は、丸暗記した単語よりずっと長く残ります。"},
-  {target:"reveal-tab-2",screen:"study",face:"reveal",pass:true,tap:"「例文」をタップ",
+   body:"語源のページには、どうしてこの意味になったかが書いてある。\n理由がわかった単語は、丸暗記よりずっと長く残るんだ。"},
+  {target:"reveal-tab-2",screen:"study",face:"reveal",pass:true,mood:"normal",tap:"「例文」をタップ",
    title:"例文は1回、声に出す",
-   body:"声に出すと、意味と使い方がセットで残ります。\n単語だけ覚えた状態だと長文やリスニングで気づけませんが、例文ごと入れておくと反応できます。"},
-  {target:"buttons",screen:"study",face:"reveal",pass:true,tap:"どちらかをタップ",
+   body:"声に出すと、意味と使い方がセットで残る。\n長文やリスニングで出てきたとき、気づけるようになるよ。"},
+  {target:"buttons",screen:"study",face:"reveal",pass:true,mood:"think",tap:"どちらかをタップ",
    title:"ここは正直に押す",
-   body:"少しでも迷ったら「もう一度」。すぐにまた出てきます。\n「覚えた」を押した単語は、1日後 → 3日後 → 1週間後と、忘れそうなころに戻ってきます。\nごまかして押すと、このしくみが働かなくなります。"},
+   body:"少しでも迷ったら「もう一度」。すぐまた出てくるよ。\n「覚えた」の単語は、1日後 → 3日後 → 1週間後と、忘れそうなころに戻ってくる。\nごまかすと、このしくみが働かないんだ。"},
 
-  /* --- ホーム：条件を変える（開く → 中身を見る） --- */
-  {target:"home-mode",screen:"home",pass:true,tap:"「条件を変える」をタップ",
+  /* --- ホーム：条件を変える --- */
+  {target:"home-mode",screen:"home",pass:true,mood:"normal",tap:"「条件を変える」をタップ",
    title:"練習はここまで",
-   body:"今のぶんは記録に残っていません。\n最後に、テスト前に使えるボタンを開いてみよう。"},
-  {target:"home-modeseg",screen:"home",pass:false,tap:"見たらここをタップ",
+   body:"今のぶんは記録に残っていないよ。\n最後に、テスト前に使えるボタンを開いてみよう。"},
+  {target:"home-modeseg",screen:"home",pass:false,mood:"teach",tap:"見たらここをタップ",
    title:"3つから選べる",
-   body:"おまかせ … 今日やるべき単語をじどうで選ぶ（ふだんはこれ）\n範囲から … 「1〜50番」のようにテスト範囲だけ\n苦手だけ … まちがえた単語だけを集中して練習"},
+   body:"おまかせ … 今日やるべき単語をぼくが選ぶ（ふだんはこれ）\n範囲から … テスト範囲だけ\n苦手だけ … まちがえた単語だけ"},
 
-  /* --- 語根：開く → 中身を見る → 閉じる --- */
-  {target:"nav-roots",screen:"home",pass:true,tap:"下の「語根」をタップ",
-   title:"次は、このアプリの本体",
-   body:"語源で覚えるいちばんの強みが「語根」の画面です。"},
-  {target:"roots-item",screen:"roots",pass:true,tap:"語根をひとつタップ",
+  /* --- 語根 --- */
+  {target:"nav-roots",screen:"home",pass:true,mood:"cheer",tap:"下の「語根」をタップ",
+   title:"次は、ぼくの得意分野",
+   body:"語源で覚えるいちばんの強みが「語根」の画面だよ。"},
+  {target:"roots-item",screen:"roots",pass:true,mood:"normal",tap:"語根をひとつタップ",
    title:"ひとつ開いてみよう",
-   body:"パーツが使われている数の多い順に並んでいます。どれでもいいので押してみよう。"},
-  {target:"rootsheet-words",screen:"roots",pass:false,tap:"見たらここをタップ",
+   body:"よく使われる順に並んでいるよ。どれでもいいので押してみて。"},
+  {target:"rootsheet-words",screen:"roots",pass:false,mood:"teach",tap:"見たらここをタップ",
    title:"これが全部、仲間の単語",
-   body:"今ひらいたパーツを使う単語が、ここに全部出ています。\nこのパーツ1つ覚えるだけで、ここに並んだ単語がまとめて読めるようになります。\n上には、そのパーツの絵と語源コラムも出ます。"},
-  {target:"rootsheet-close",screen:"roots",pass:true,tap:"×をタップして閉じる",
+   body:"このパーツを使う単語が、ここに全部出ているよ。\nパーツを1つ覚えるだけで、これだけまとめて読めるようになる。"},
+  {target:"rootsheet-close",screen:"roots",pass:true,mood:"normal",tap:"×をタップして閉じる",
    title:"閉じて次へ",
-   body:"右上の × で閉じられます。"},
+   body:"右上の × で閉じられるよ。"},
 
-  /* --- 単語帳：開く → 中身を見る → 閉じる --- */
-  {target:"nav-list",screen:"roots",pass:true,tap:"下の「単語帳」をタップ",
+  /* --- 単語帳 --- */
+  {target:"nav-list",screen:"roots",pass:true,mood:"normal",tap:"下の「単語帳」をタップ",
    title:"次は単語帳",
-   body:"全部の単語が番号順に並んでいる画面です。"},
-  {target:"list-row",screen:"list",pass:true,tap:"単語をひとつタップ",
+   body:"全部の単語が番号順に並んでいる画面だよ。"},
+  {target:"list-row",screen:"list",pass:true,mood:"normal",tap:"単語をひとつタップ",
    title:"ひとつ開いてみよう",
-   body:"気になる単語を押してみよう。"},
-  {target:"wordsheet-body",screen:"list",pass:false,tap:"見たらここをタップ",
+   body:"気になる単語を押してみて。"},
+  {target:"wordsheet-body",screen:"list",pass:false,mood:"teach",tap:"見たらここをタップ",
    title:"1語ぶんが1画面に",
-   body:"意味・発音・パーツの色分け・絵・例文が、この1画面にまとまっています。\n電車の中や授業が始まる前に、覚えたはずの単語をここでさっと見直そう。見直すだけでも記憶は戻ります。"},
-  {target:"wordsheet-close",screen:"list",pass:true,tap:"×をタップして閉じる",
+   body:"意味・発音・色分け・絵・例文が、この1画面にまとまっているよ。\n授業の前や電車の中で、さっと見直そう。それだけでも記憶は戻る。"},
+  {target:"wordsheet-close",screen:"list",pass:true,mood:"normal",tap:"×をタップして閉じる",
    title:"閉じて次へ",
-   body:"右上の × で閉じられます。"},
+   body:"右上の × で閉じられるよ。"},
 
   /* --- 記録 --- */
-  {target:["nav-stats","nav-admin"],screen:"list",pass:true,tap:"下の「記録」をタップ",
+  {target:["nav-stats","nav-admin"],screen:"list",pass:true,mood:"cheer",tap:"下の「記録」をタップ",
    title:"次は記録",
-   body:"がんばりが目に見えると、続けやすくなります。"},
-  {target:"stats-top",screen:"stats",pass:false,tap:"見たらここをタップ",
+   body:"がんばりが目に見えると、続けやすくなるよ。"},
+  {target:"stats-top",screen:"stats",pass:false,mood:"cheer",tap:"見たらここをタップ",
    title:"1日休んでも大丈夫",
-   body:"連続日数・のべ学習日・一発正解率が出ます。下にはカレンダーと、これからの復習予定もあります。\n連続が切れてもやめる理由にはなりません。次の日に再開すれば、また伸びていきます。"},
+   body:"連続日数や正解率、カレンダーが出るよ。\n連続が切れても、やめる理由にはならない。次の日に再開すれば、また伸びていく。"},
 
-  /* --- 設定：開く → 中身を見る --- */
-  {target:"nav-settings",screen:"stats",pass:true,tap:"下の「設定」をタップ",
+  /* --- 設定 --- */
+  {target:"nav-settings",screen:"stats",pass:true,mood:"normal",tap:"下の「設定」をタップ",
    title:"最後に設定",
-   body:"自分に合わせて調整できます。"},
-  {target:"settings-study",screen:"settings",pass:true,tap:"「学習」をタップ",
+   body:"自分に合わせて調整できるよ。"},
+  {target:"settings-study",screen:"settings",pass:true,mood:"normal",tap:"「学習」をタップ",
    title:"開いてみよう",
-   body:"まずは「学習」。ここがいちばん大事な設定です。"},
-  {target:"settings-goal",screen:"settings",pass:false,tap:"見たらここをタップ",
+   body:"まずは「学習」。ここがいちばん大事な設定だよ。"},
+  {target:"settings-goal",screen:"settings",pass:false,mood:"teach",tap:"見たらここをタップ",
    title:"続けられる量にする",
-   body:"このつまみで1回の語数を5〜50語に変えられます。\n毎日続けられる量がいちばん効果的です。つらければ5語まで減らし、慣れてきたら増やそう。多すぎてやめてしまうのがいちばんもったいない。\n下には「出題の向き」と「制限時間」もあります。"},
+   body:"このつまみで、1回の語数を5〜50語に変えられる。\n毎日続けられる量がいちばん強いんだ。つらければ5語まで減らそう。多すぎてやめてしまうのが、いちばんもったいない。"},
 
   /* --- ホームへ --- */
-  {target:"nav-home",screen:"settings",pass:true,tap:"下の「ホーム」をタップ",
+  {target:"nav-home",screen:"settings",pass:true,mood:"normal",tap:"下の「ホーム」をタップ",
    title:"ホームにもどろう",
-   body:"毎日ここから始めます。"},
+   body:"毎日ここから始めるよ。"},
 
   /* --- しめくくり --- */
-  {target:null,screen:"home",title:"続けるコツは3つ",
-   body:"・毎日同じ時間に開く（寝る前、朝の電車など）\n・復習がたまったら、新しい単語より復習を先に\n・まちがえた単語は「条件を変える → 苦手だけ」でまとめて練習\n\n先生からID番号をもらっている人は、設定の「データ」で入力してください。\nこの案内は、設定の「チュートリアルをもう一度見る」からいつでも見られます。"},
+  {target:null,screen:"home",mood:"cheer",title:"続けるコツは3つ",
+   body:"・毎日同じ時間に開く（寝る前や朝の電車）\n・復習がたまったら、新しい単語より復習を先に\n・まちがえた単語は「条件を変える → 苦手だけ」\n\nいっしょにがんばろう！\n先生からID番号をもらった人は、設定の「データ」で入力してね。この案内は「チュートリアルをもう一度見る」からいつでも見られるよ。"},
 ];
 
 const INITIAL_WORDS = RAW_WORDS.map(w=>({...w,...freshState()}));
@@ -13067,8 +13068,10 @@ const withTimeout=(p,ms)=>Promise.race([p,new Promise((_,rej)=>setTimeout(()=>re
 const Cloud={
   user:null,profile:null,pushTimer:null,visibleSince:null,active:0,sessionId:null,sessionStart:null,
 
-  /* ログイン直後：クラウドのデータがこの端末より新しければ、localStorage に書き込む */
-  async pull(user){
+  /* ログイン直後の準備のうち、ネットを使わない部分だけ。すぐ終わるので画面を出す前に呼ぶ。
+     前に別の人が使った端末なら、ここでその人のデータを消してしまう
+     （消す前に画面を出すと、前の人の記録が一瞬見えてしまうため） */
+  begin(user){
     Cloud.user=user;
     const owner=lsGet("roots.owner");
     if(owner&&owner!==user.id){
@@ -13078,22 +13081,32 @@ const Cloud={
       for(let v=2;v<=9;v++) lsDel("roots.listRecall.v"+v);
     }
     lsSet("roots.owner",user.id);
+  },
+
+  /* クラウドのデータがこの端末より新しければ、localStorage に書き込む。
+     通信をするので、画面を出したあと裏で走らせる。
+     画面を作り直す必要があるとき（クラウドの記録を取り込んだ・管理者だった）だけ true を返す */
+  async pull(user){
+    Cloud.user=user;
     try{
       const [{data:prof},{data:row,error}]=await withTimeout(Promise.all([
         sb.from("profiles").select("student_code,role").eq("user_id",user.id).maybeSingle(),
         sb.from("progress").select("*").eq("user_id",user.id).maybeSingle(),
       ]),8000);
       Cloud.profile=prof||null;
-      if(error)return;
+      /* 管理者だけに出るタブは、画面を作り直さないと現れない */
+      const isAdmin=!!(prof&&prof.role==="admin");
+      if(error)return isAdmin;
       const localAt=lsGet("roots.localAt")||0;
       const remoteAt=row?Date.parse(row.updated_at):0;
       if(row&&remoteAt>localAt){
         Object.entries(SYNC_KEYS).forEach(([col,k])=>{if(row[col]!=null)lsSet(k,row[col]);else lsDel(k);});
         lsSet("roots.localAt",remoteAt);
-      }else if(localAt>remoteAt||(!row&&lsGet(KEY.settings))){
-        Cloud.push();
+        return true;
       }
-    }catch(e){/* オフライン：この端末のデータで続ける */}
+      if(localAt>remoteAt||(!row&&lsGet(KEY.settings))) Cloud.push();
+      return isAdmin;
+    }catch(e){/* オフライン：この端末のデータで続ける */return false;}
   },
 
   /* 保存したら少し待ってからクラウドへ送る */
@@ -15223,9 +15236,17 @@ function TutorialOverlay({C,steps,index,onNext,onSkip,children}){
         background:C.raise,color:C.text,border:"1px solid "+C.border,borderRadius:12,padding:"16px 16px 8px",
         boxShadow:"0 8px 28px rgba(0,0,0,.28)",
         animation:(center?"tourInC":"tourIn")+" .15s ease-out"}}>
-        <div className="num" style={{fontSize:12,color:C.sub,marginBottom:6,fontWeight:700,letterSpacing:".04em"}}>
-          {index+1} / {steps.length}</div>
-        <div style={{fontSize:16,fontWeight:700,marginBottom:6}}>{step.title}</div>
+        {/* ルーツくん（先生役）。話の内容に合わせて表情が変わる */}
+        <div style={{display:"flex",alignItems:"flex-start",gap:10,marginBottom:6}}>
+          <img src={"chara/"+(step.mood||"normal")+".png"} alt="ルーツくん" width="52" height="44"
+            onError={e=>{e.currentTarget.style.display="none";}}
+            style={{width:52,height:"auto",flexShrink:0,marginTop:-2}}/>
+          <div style={{minWidth:0,flex:1}}>
+            <div className="num" style={{fontSize:12,color:C.sub,marginBottom:2,fontWeight:700,letterSpacing:".04em"}}>
+              {index+1} / {steps.length}</div>
+            <div style={{fontSize:16,fontWeight:700}}>{step.title}</div>
+          </div>
+        </div>
         <div style={{fontSize:14,lineHeight:1.8,color:C.text,whiteSpace:"pre-line"}}>{step.body}</div>
         <div style={{display:"flex",alignItems:"center",gap:8,marginTop:8}}>
           <button onClick={onSkip} style={{minHeight:56,padding:"0 8px",marginLeft:-8,border:"none",background:"transparent",
@@ -17947,13 +17968,22 @@ function LoginScreen({C,onSignedIn}){
 function Gate(){
   const [state,setState]=useState("loading");
   const [uid,setUid]=useState(null);
+  /* クラウドの記録を取り込んだときだけ 1 つ増やして、画面を作り直す目印にする */
+  const [rev,setRev]=useState(0);
   const theme=(lsGet(KEY.settings)||{}).theme;
   const sysDark=!!(window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches);
   const C=(theme==="dark"||(theme!=="light"&&sysDark))?DARK:LIGHT;
 
-  const enter=async user=>{
-    await Cloud.pull(user);
-    setUid(user.id);setState("app");
+  /* ログインが確認できたら、まずこの端末に残っている記録で画面を出す。
+     クラウドとの同期は裏で進めるので、起動でネットを待たされない。
+     この端末にまだ記録がないとき（新しいスマホ・機種変更の直後）だけ、
+     出すものが何もないので同期を待つ */
+  const enter=user=>{
+    Cloud.begin(user);
+    const hasLocal=!!(lsGet(KEY.words)||lsGet(KEY.settings)||lsGet(LEGACY.words)||lsGet(LEGACY.settings));
+    const sync=Cloud.pull(user).then(changed=>{if(changed)setRev(r=>r+1);});
+    if(hasLocal){setUid(user.id);setState("app");return Promise.resolve();}
+    return sync.then(()=>{setUid(user.id);setState("app");});
   };
   useEffect(()=>{
     if(!sb){
@@ -17970,7 +18000,7 @@ function Gate(){
     if(state!=="loading"){const b=document.getElementById("boot");if(b)b.style.display="none";}
   },[state]);
 
-  if(state==="app")return <App key={uid}/>;
+  if(state==="app")return <App key={uid+":"+rev}/>;
   if(state==="login")return (
     <div style={{width:"100%",maxWidth:430,margin:"0 auto",minHeight:"100vh",display:"flex",flexDirection:"column",
       background:C.bg,color:C.text}}>
@@ -17982,8 +18012,7 @@ function Gate(){
 
 const rootEl=document.getElementById("root");
 ReactDOM.createRoot(rootEl).render(<Gate/>);
-const bootEl=document.getElementById("boot");
-if(bootEl)bootEl.style.display="none";
+/* 「読み込んでいます…」は Gate が画面を出せたときに消す（ここで消すと真っ白になる） */
 </script>
 <script>
   /* 一度聞いた音声やアプリ本体をスマホに保存しておく係（Service Worker）を呼ぶ */
