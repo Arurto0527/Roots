@@ -59,8 +59,9 @@ const addFile=opt("--add");
 if(addFile){
   const text=fs.readFileSync(path.resolve(addFile),"utf8");
   const added=vm.runInNewContext("["+text+"]");
-  const addedWords=new Set(added.map(w=>w.word));
-  const main=ALL.filter(w=>w.id<ALPHA_FROM&&!addedWords.has(w.word));
+  // 同じ見出し語が別番号にもある場合は、既存の番号を消さない。
+  const addedIds=new Set(added.map(w=>w.id));
+  const main=ALL.filter(w=>w.id<ALPHA_FROM&&!addedIds.has(w.id));
   const alpha=ALL.filter(w=>w.id>=ALPHA_FROM).sort((a,b)=>a.id-b.id);
   const merged=[...main,...added].sort((a,b)=>a.id-b.id);
   const lastMain=merged.reduce((m,w)=>Math.max(m,w.id),0);
@@ -177,7 +178,8 @@ TARGET.forEach(w=>{
   if(!POS_OK.includes(w.partOfSpeech)) bad(w,"品詞","許可された8種類から選ぶ",w.partOfSpeech);
   if(!/^\/.+\/$/.test(String(w.pronunciation||""))) bad(w,"発音","/ で始まり / で終える",w.pronunciation);
   if(w.hook&&len(w.hook)>60) bad(w,"hook：長さ","60字以内（今 "+len(w.hook)+" 字）",w.hook);
-  if(w.hook&&chips.length>=2) warn(w,"hook","語源で分解できる語に hook がある（仕様では分解できない語だけ）",w.hook);
+  const isExistingReprint=baseWords.some(x=>x.word===w.word);
+  if(w.hook&&chips.length>=2&&!isExistingReprint) warn(w,"hook","語源で分解できる語に hook がある（仕様では分解できない語だけ）",w.hook);
   /* 語源の結論の＝の後ろと meaning */
   const eq=String(w.etymologyConclusion||"").split("＝").pop();
   const core=s=>String(s||"").split("；")[0].replace(/[～〜（）()]/g,"").replace(/[をにがとへで]/g,"");
@@ -223,7 +225,8 @@ const byMeaning=new Map();
 ALL.filter(w=>!isAlpha(w)).forEach(w=>{const k=headMeaning(w);(byMeaning.get(k)||byMeaning.set(k,[]).get(k)).push(w);});
 TARGET.forEach(w=>{
   if(isAlpha(w)) return;
-  const others=(byMeaning.get(headMeaning(w))||[]).filter(x=>x!==w);
+  // 同じ単語の再掲は紛らわしい別解にならない（例: vocabulary の No.42 / 348）。
+  const others=(byMeaning.get(headMeaning(w))||[]).filter(x=>x!==w&&x.word!==w.word);
   if(others.length) bad(w,"meaning：重複","先頭語義が "+others.map(x=>x.id+" "+x.word).join("、")+" と同じ",w.meaning);
 });
 
