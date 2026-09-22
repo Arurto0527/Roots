@@ -46,7 +46,7 @@ function topKeys(name){
    コラムも絵も作らなくてよいので、抜けチェックから外す。
    新しくこの手の語尾が出たら、ここに足すのではなく、
    まず「本当に語根ではないか」を確かめること */
-const SUFFIX_EXTRA=new Set(["ior","ature","tude","istic","ture","ella","ledge","izen","il","is","ue","den","an","eer"]);
+const SUFFIX_EXTRA=new Set(["ior","ature","tude","istic","ture","ella","ledge","izen","il","is","ue","den","an","eer","ient","itive"]);
 const PICTO=topKeys("PICTO_ROOT");
 const NOTES=topKeys("ROOT_NOTES");
 const BY_GLOSS=new Set([...slice(h,"const PICTO_BY_GLOSS={","\n};").matchAll(/"([^"]+)"\s*:/g)].map(m=>m[1]));
