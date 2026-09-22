@@ -136,6 +136,20 @@ add("使われていない音声",orphan.length+"件",0);   /* 残っていて�
 if(missAudio.length) detail.push("【音声の欠け】\n  "+missAudio.slice(0,40).join("\n  "));
 if(orphan.length) detail.push("【使われていない音声（消してよい）】\n  "+orphan.length+"件。先頭: "+orphan.slice(0,6).join(" / "));
 
+/* ---------- 5-b. 「なぜこの意味？」コラム ---------- */
+/* 語根から意味が離れている語に書く why の進み具合を見る（無くても NG にはしない）。
+   形がくずれている（【なぜ】で始まらない・短すぎる）ものだけを挙げる。 */
+const whyBad=[];
+for(const w of RAW){
+  if(!w.why) continue;
+  if(!/^【なぜ】/.test(w.why)) whyBad.push(w.id+" "+w.word+" : 【なぜ】で始まっていない");
+  else if(w.why.length<60) whyBad.push(w.id+" "+w.word+" : 短すぎる（"+w.why.length+"字）");
+}
+const whyN=RAW.filter(w=>w.why).length;
+add("なぜコラム（why）の書式",whyBad.length+"件",whyBad.length);
+add("なぜコラムが付いた語",whyN+" / "+RAW.length,0);
+if(whyBad.length) detail.push("【なぜコラムの書式くずれ】\n  "+whyBad.join("\n  "));
+
 /* ---------- 6. 番号まわり ---------- */
 const alphaIds=RAW.filter(w=>w.id>=ALPHA_FROM).map(w=>w.id);
 const alphaLast=alphaIds.length&&Math.max(...alphaIds)===Math.max(...ids);
