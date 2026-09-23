@@ -667,7 +667,7 @@
    relatedWords:[
      {word:"picture",meaning:"絵，写真",breakdown:"pict（描く）＋ ure（名詞）→ 描かれたもの"},
      {word:"paint",meaning:"（絵の具で）描く",breakdown:"pict（描く）→ 絵の具で色をつけて描く"},
-     {word:"picturesque",meaning:"絵のように美しい",breakdown:"pict（描く）＋ ure（名詞）→ 絵に描きたくなるほどの"},
+     {word:"picturesque",meaning:"絵のように美しい",breakdown:"pict（描く）＋ esque（～のような）→ 絵に描いたような"},
      {synonym:true,word:"portray",meaning:"描き出す",breakdown:"人物の姿を描き出す。depict は場面や様子を細かく描く"}]},
 
   {id:1942,word:"landmark",partOfSpeech:"名詞",meaning:"目印（となる建物），名所；画期的な出来事",
@@ -755,16 +755,16 @@
      {synonym:true,word:"terror",meaning:"恐怖",breakdown:"身がすくむほどの激しい恐怖"},
      {synonym:true,word:"worry",meaning:"心配する",breakdown:"気にかかって不安になる。dread はもっと強い"}]},
 
-  {id:1947,word:"attribute",partOfSpeech:"他動詞",meaning:"（結果を～の）せいにする，～に帰する",
-   meanings:["他|（to ～の）せいにする，～に帰する","名|特性，属性"],
+  {id:1947,word:"attribute",partOfSpeech:"他動詞",meaning:"（結果を～の）おかげ［せい］だと考える，～に帰する",
+   meanings:["他|（to ～の）おかげ［せい］だと考える，～に帰する","名|特性，属性"],
    pronunciation:"/əˈtrɪbjuːt/",part:195,
    example:"She attributes her success to hard work and good luck.",
    exampleJa:"彼女は自分の成功を、努力と幸運のおかげだとしている。",
    example2:"Patience is an important attribute of a good teacher.",
    exampleJa2:"忍耐強さは、よい教師の大切な特性だ。",
-   usage:["attribute A to B（AをBのせいにする，Bのおかげとする）"],
+   usage:["attribute A to B（AをBのせい・おかげとする）"],
    etymologyProcess:"ad（～へ）＋ tribut（割り当てる）→ 結果をある原因へ割り当てると…？",
-   etymologyConclusion:"ad（～へ）＋ tribut（割り当てる）→ 起きた結果をある原因へ割り当てる＝（結果を～の）せいにする",
+   etymologyConclusion:"ad（～へ）＋ tribut（割り当てる）→ 起きた結果をある原因へ割り当てる＝（結果を～の）おかげ［せい］だと考える",
    spelling:"ad→at（後ろの t に合わせて変化）",
    etymologyMore:["その人や物に割り当てられた性質→特性，属性"],
    relatedWords:[

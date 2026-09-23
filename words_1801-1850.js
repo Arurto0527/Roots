@@ -639,7 +639,7 @@
    meanings:["形|（計画なしに）自然にわき起こる，自発的な","形|（人が）その場の思いつきで動く"],
    pronunciation:"/spɑːnˈteɪniəs/",part:184,
    example:"The audience broke into spontaneous applause after her speech.",
-   exampleJa:"彼女のスピーチのあと、聴衆から自然にわき起こる拍手が起きた。",
+   exampleJa:"彼女のスピーチのあと、聴衆から自然にわき起こる拍手が鳴り響いた。",
    example2:"Let's be spontaneous and go to the beach today!",
    exampleJa2:"今日は思いつきで海に行こうよ！",
    etymologyProcess:"spont（自分の意志で）＋ ous（形容詞）→ 誰にも言われずに起こると…？",

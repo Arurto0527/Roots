@@ -117,7 +117,7 @@
    exampleJa:"かぜの予防策として、こまめに手を洗いなさい。",
    example2:"The school took extra precautions before the typhoon arrived.",
    exampleJa2:"台風が来る前に、学校は追加の予防策を講じた。",
-   usage:["as a precaution against 事（事への予防策として）","take precautions（予防策を講じる）"],
+   usage:["as a precaution against 事（事の予防に）","take precautions（予防策を講じる）"],
    etymologyProcess:"pre（先に）＋ caut（用心する）→ 何か起きる前に用心すると…？",
    etymologyConclusion:"pre（先に）＋ caut（用心する）＋ ion（名詞）→ 何か起きる前に先に用心しておくこと＝（万一に備えた）予防策，用心",
    relatedWords:[
@@ -164,7 +164,7 @@
    meanings:["名|（見下した）軽蔑，あざけり","他|軽蔑する，はねつける"],
    pronunciation:"/skɔːrn/",part:222,
    example:"She looked at the cheaters with scorn and walked away.",
-   exampleJa:"彼女はずるをした人たちを軽蔑して見て、立ち去った。",
+   exampleJa:"彼女はずるをした人たちを軽蔑のまなざしで見て、立ち去った。",
    example2:"He scorned our advice and made the same mistake again.",
    exampleJa2:"彼は私たちの忠告をはねつけ、また同じ失敗をした。",
    etymologyProcess:"scorn（あざける）→ 相手を笑いものにすると…？",
@@ -545,7 +545,7 @@
    exampleJa2:"弟の宿題についての絶え間ない文句には、うんざりしている。",
    etymologyProcess:"per（通して）＋ pet（求める）→ 最後まで通して向かい続けると…？",
    etymologyConclusion:"per（通して）＋ pet（求める）＋ ual（～の）→ 途切れずに最後まで向かい続ける＝絶え間ない，永続する",
-   why:"【なぜ】ラテン語 petere は「目指して向かう，求める」。per（通して）がつくと「最後まで通して向かっていく」となり、perpetuus は途中で途切れない「ずっと続く」という意味になりました。そこから英語でも、終わりなく続くこと＝絶え間ない・永続するを表します。\n【つながり】compete（競う）は共に同じ目標へ向かうこと。「ペペチュアルカレンダー（万年暦）」にも使われます。",
+   why:"【なぜ】ラテン語 petere は「目指して向かう，求める」。per（通して）がつくと「最後まで通して向かっていく」となり、perpetuus は途中で途切れない「ずっと続く」という意味になりました。そこから英語でも、終わりなく続くこと＝絶え間ない・永続するを表します。\n【つながり】compete（競う）は共に同じ目標へ向かうこと。「パーペチュアルカレンダー（万年暦）」にも使われます。",
    relatedWords:[
      {word:"compete",meaning:"競争する",breakdown:"com（共に）＋ pet（求める）→ 同じものを一緒に求めて争う"},
      {word:"repeat",meaning:"くり返す",breakdown:"re（再び）＋ pet（求める）→ もう一度求めて同じことをする"},

@@ -437,7 +437,7 @@
    exampleJa:"隣から聞こえる大音量の音楽は、本当に迷惑だ。",
    example2:"Stop making a nuisance of yourself during the lesson.",
    exampleJa2:"授業中に周りの迷惑になるのはやめなさい。",
-   usage:["make a nuisance of oneself（人に迷惑をかける）"],
+   usage:["make a nuisance of oneself（迷惑をかける）"],
    etymologyProcess:"noc（傷つける）＋ ance（名詞）→ 周りに害を与えるものは…？",
    etymologyConclusion:"noc（傷つける）＋ ance（名詞）→ 周りの人に害を与えて困らせるもの＝迷惑",
    why:"【なぜ】ラテン語 nocere は「害を与える」。フランス語を通った nuisance も、はじめは「損害・害」という重い意味でした。それがしだいに軽くなり、今では「うるさい・困る」程度の迷惑を表すようになりました。\n【つながり】innocent（無罪の）は in（否定）＋「傷つける」で「害を与えない」。同じ家族の語です。",

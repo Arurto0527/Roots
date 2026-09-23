@@ -52,8 +52,8 @@
   {id:2054,word:"enlighten",partOfSpeech:"他動詞",meaning:"（人を）啓発する，教え導く",
    meanings:["他|（人を）啓発する，教え導く","他|（about ～について）（人に）はっきり教える"],
    pronunciation:"/ɪnˈlaɪtn/",part:206,
-   example:"The museum tour enlightened us about daily life in ancient Egypt.",
-   exampleJa:"博物館の見学で、私たちは古代エジプトの日々の暮らしについて啓発された。",
+   example:"Her lecture enlightened many students who had never thought about poverty.",
+   exampleJa:"彼女の講義は、貧困について考えたことのなかった多くの生徒を啓発した。",
    example2:"Reading good books can enlighten young people in many ways.",
    exampleJa2:"良い本を読むことは、さまざまな面で若者を啓発しうる。",
    etymologyProcess:"en（～にする）＋ lighten（照らす）→ 心の中を照らすと…？",
@@ -152,7 +152,7 @@
    usage:["exert influence on 人（人に影響を及ぼす）","exert oneself（懸命に努力する）"],
    etymologyProcess:"ex（外へ）＋ ser（つなぐ）→ 内につないでいたものを外へ出すと…？",
    etymologyConclusion:"ex（外へ）＋ ser（つなぐ）→ 内にためた力を外へ押し出して相手に届かせる＝（力・影響力を）及ぼす",
-   spelling:"ser→ert（x のあとで s が消えた）",
+   spelling:"ser→ert（過去分詞 exsertus の形。x のあとの s が消えた）",
    why:"【なぜ】ラテン語 exserere は、もとは「つながれていたものを外へ出す」、つまり腕などを突き出すことでした。体の内にある力を外へ押し出すイメージから、力や影響力を「働かせる・及ぼす」意味になりました。自分の力を出し切ることから exert oneself（懸命に努力する）も生まれました。\n【つながり】series（つながり）や insert（差しこむ）が同じ「つなぐ」の仲間です。",
    relatedWords:[
      {word:"series",meaning:"連続，シリーズ",breakdown:"ser（つなぐ）＋ ies（名詞）→ 次々につながって並ぶもの"},
@@ -172,7 +172,7 @@
    etymologyConclusion:"sub（下で）＋ mon（思い出させる）→ そっと知らせて、その人を自分のもとへ来させる＝（人を）呼び出す",
    spelling:"sub→sum（b が m に変わった）",
    why:"【なぜ】ラテン語 summonere は sub（下で）＋ monere（思い出させる・注意する）で、「そっと注意をうながす」という意味でした。中世には、裁判所が人に「出頭せよ」と知らせることを指すようになり、そこから人を呼び出す・召喚する意味が中心になりました。\n【つながり】monitor（注意して見張る）や monument（思い出させる記念碑）が同じ仲間です。",
-   etymologyMore:["心の奥から力を呼び出す→（勇気・力を）奮い起こす"],
+   etymologyMore:["心の奥から力を呼び出す→（summon up）（勇気・力を）奮い起こす"],
    relatedWords:[
      {word:"monitor",meaning:"監視する；モニター",breakdown:"mon（思い出させる）＋ or（もの）→ 注意をうながし見張る装置"},
      {word:"monument",meaning:"記念碑",breakdown:"mon（思い出させる）＋ ment（名詞）→ 出来事を思い出させる石碑"},
@@ -189,7 +189,7 @@
    etymologyProcess:"thrust（ぐいと押す）→ 力をこめて相手のほうへ押し出すと…？",
    etymologyConclusion:"thrust（ぐいと押す）→ 力をこめて物を相手や中へぐいと押し出す＝（ぐいと）強く押しつける",
    hook:"ロケットの「推力（スラスト）」も thrust。過去形・過去分詞も thrust のまま。",
-   etymologyMore:["話をぐいと前へ押し出す中心→要点，核心","機体を前へ押し出す力→推進力"],
+   etymologyMore:["話をぐいと前へ押し出す中心→（the ～）要点，核心","機体を前へ押し出す力→推進力"],
    relatedWords:[
      {synonym:true,word:"push",meaning:"押す",breakdown:"ふつうの「押す」。thrust は急に強く突き出す"},
      {synonym:true,word:"press",meaning:"押しつける",breakdown:"じわっと力をかけ続ける。thrust は一気に突く"},
@@ -285,7 +285,7 @@
    etymologyProcess:"ad（～へ）＋ simil（似ている）→ 取り入れたものを自分に似せると…？",
    etymologyConclusion:"ad（～へ）＋ simil（似ている）＋ ate（動詞）→ 取り入れたものを自分と似た一部に変える＝（知識・情報を）吸収して身につける",
    spelling:"ad→as（後ろの s に合わせて変化）",
-   etymologyMore:["自分のほうが周りと似た存在になる→同化する，溶けこむ"],
+   etymologyMore:["自分のほうが周りと似た存在になる→（into ～に）同化する，溶けこむ"],
    relatedWords:[
      {word:"similar",meaning:"似ている",breakdown:"simil（似ている）＋ ar（形容詞）→ 形や性質が近い"},
      {word:"similarity",meaning:"類似点",breakdown:"simil（似ている）＋ ity（名詞）→ 似ているところ"},
@@ -374,14 +374,14 @@
      {synonym:true,word:"think",meaning:"考える",breakdown:"考える全般。contemplate は静かにじっくり"}]},
 
   {id:2074,word:"conjecture",partOfSpeech:"他動詞・自動詞",meaning:"（不十分な根拠で）推測する；推測",
-   meanings:["他|（不十分な根拠で）推測する","名|推測，憶測"],
+   meanings:["他|（不十分な根拠で）推測する","自|（about ～について）推測する","名|推測，憶測"],
    pronunciation:"/kənˈdʒektʃər/",part:208,
    example:"Scientists can only conjecture about what the planet's surface is like.",
    exampleJa:"科学者たちは、その惑星の表面がどうなっているかを推測するしかない。",
    example2:"His story about the accident is pure conjecture.",
    exampleJa2:"事故についての彼の話は、まったくの憶測だ。",
    etymologyProcess:"con（共に）＋ ject（投げる）→ 手がかりを一か所に投げ集めると…？",
-   etymologyConclusion:"con（共に）＋ ject（投げる）＋ ure（名詞）→ 手がかりを寄せ集めて答えを組み立てる＝（不十分な根拠で）推測する",
+   etymologyConclusion:"con（共に）＋ ject（投げる）→ 手がかりを寄せ集めて答えを組み立てる＝（不十分な根拠で）推測する",
    why:"【なぜ】ラテン語 conicere は「一か所に投げ集める」こと。集めた断片をつなぎ合わせて答えを組み立てる様子から、夢や占いを解く、つまり「推測する」ことを指すようになりました。確かな証拠ではなく、寄せ集めから出した答えという響きが今も残っています。\n【つながり】project（前に投げる＝計画）や subject、object も ject（投げる）の仲間です。",
    relatedWords:[
      {word:"project",meaning:"計画",breakdown:"pro（前へ）＋ ject（投げる）→ 考えを先へ投げ出したもの"},

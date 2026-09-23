@@ -161,7 +161,7 @@
    relatedWords:[
      {word:"mammary",meaning:"乳房の",breakdown:"mamm（乳房）＋ ary（形容詞）→ 乳を出すところの"},
      {synonym:true,word:"animal",meaning:"動物",breakdown:"動物全般。mammal は乳で子を育てる仲間"},
-     {synonym:true,word:"reptile",meaning:"爬虫類",breakdown:"卵で生まれるヘビやトカゲ。mammal と並ぶ動物の分類"},
+     {synonym:true,word:"reptile",meaning:"爬虫類",breakdown:"ヘビやトカゲの仲間（多くは卵から）。mammal と並ぶ分類"},
      {synonym:true,word:"creature",meaning:"生き物",breakdown:"生きているもの全般。mammal はその中の一群"}]},
 
   {id:1761,word:"predator",partOfSpeech:"名詞",meaning:"捕食動物；（弱い者を）食い物にする人",
@@ -490,7 +490,7 @@
    usage:["be inclined to do（～する傾向がある）","feel inclined to do（～したい気がする）"],
    etymologyProcess:"in（中へ）＋ clin（傾き）→ 心がある方向へ傾いていると…？",
    etymologyConclusion:"in（中へ）＋ clin（傾き）＋ ed（～された）→ 心がある方向へ傾いている＝（～する）傾向がある",
-   etymologyMore:["気持ちがそちらへ傾く→～したい気がする"],
+   etymologyMore:["気持ちがそちらへ傾く→（to do）～したい気がする"],
    relatedWords:[
      {word:"decline",meaning:"断る；減少する",breakdown:"de（下へ）＋ clin（傾き）→ 下へ傾いて落ちていく"},
      {word:"recline",meaning:"もたれる",breakdown:"re（後ろへ）＋ clin（傾き）→ 背もたれを後ろへ傾ける"},
@@ -641,7 +641,7 @@
    exampleJa:"多くの学生にとって、スマートフォンはなくてはならないものになった。",
    example2:"Clean water is indispensable to all living things.",
    exampleJa2:"きれいな水は、すべての生き物になくてはならない。",
-   usage:["be indispensable to/for A（A になくてはならない）"],
+   usage:["be indispensable to/for A（A に不可欠だ）"],
    etymologyProcess:"in（否定）＋ dis（離れて）＋ pens（重さを量る）→ 手放せないものは…？",
    etymologyConclusion:"in（否定）＋ dis（離れて）＋ pens（重さを量る）＋ able（できる）→ 量り分けて手放すことができない＝（…に）なくてはならない",
    why:"【なぜ】dispense は「量って分け与える」。そこから dispense with ～「～を手放す，なしで済ます」の意味が生まれました。それを in（否定）と able（できる）で打ち消して、「なしでは済ませられない」＝なくてはならない、になりました。\n【つながり】液体を量って出す dispenser（ディスペンサー）や expense（出費）も同じ仲間です。",
@@ -731,7 +731,7 @@
    why:"【なぜ】ラテン語 integer は「触れられていない」＝欠けたところのない、まるごとの、という意味。integral はその「まるごとの全体」をつくっている部分のことで、欠けたら全体でなくなるので「欠かせない」になりました。\n【つながり】integrate（まとめる）や entire（全体の）も同じ仲間。数学の「整数」は英語で integer です。",
    spelling:"teg→tegr（ラテン語 integer の形）",
    relatedWords:[
-     {word:"entire",meaning:"全体の",breakdown:"in（否定）＋ tact（触れる）→ 手つかずでまるごとの"},
+     {word:"entire",meaning:"全体の",breakdown:"in（否定）＋ teg（触れる）→ 手つかずでまるごとの"},
      {word:"integrate",meaning:"まとめる，統合する",breakdown:"in（否定）＋ teg（触れる）＋ ate（動詞）→ まるごとの全体にする"},
      {word:"intact",meaning:"無傷の",breakdown:"in（否定）＋ tact（触れる）→ だれにも触れられていない"},
      {synonym:true,word:"essential",meaning:"不可欠な",breakdown:"なくてはならない。integral は全体の一部として欠かせない"}]},

@@ -193,7 +193,7 @@
    meanings:["形|（差し引く前の）総計の，全体の","形|（間違い・不正が）ひどい，はなはだしい","形|（口語で）気持ち悪い"],
    pronunciation:"/ɡroʊs/",part:187,
    example:"The company's gross income this year was over ten billion yen.",
-   exampleJa:"その会社の今年の総計の収入は、100億円を超えた。",
+   exampleJa:"その会社の今年の収入は、総計で100億円を超えた。",
    example2:"Forgetting your passport before a school trip is a gross mistake.",
    exampleJa2:"修学旅行の前にパスポートを忘れるのは、ひどい間違いだ。",
    etymologyProcess:"gross（大量の）→ 細かく分けずに大きな丸ごとで見ると…？",
@@ -274,7 +274,7 @@
    meanings:["形|同時の，同時に起こる"],
    pronunciation:"/ˌsaɪməlˈteɪniəs/",part:187,
    example:"There were simultaneous power outages in several towns last night.",
-   exampleJa:"昨夜、いくつかの町で同時の停電が起きた。",
+   exampleJa:"昨夜、いくつかの町で同時に停電が起きた。",
    example2:"The concert will be shown simultaneously on TV and online.",
    exampleJa2:"そのコンサートはテレビとネットで同時に放送される。",
    etymologyProcess:"simul（一緒に）＋ ous（形容詞）→ 時間の上で一緒に並ぶと…？",
@@ -347,7 +347,7 @@
    relatedWords:[
      {word:"adult",meaning:"大人",breakdown:"ad（～へ）＋ ol（育つ）→ すっかり育ち終えた人"},
      {word:"adolescence",meaning:"思春期，青年期",breakdown:"ad（～へ）＋ ol（育つ）＋ ence（名詞）→ 大人へ育っていく時期"},
-     {synonym:true,word:"teenager",meaning:"10代の若者",breakdown:"13〜19歳（-teen が付く年齢）の人"},
+     {synonym:true,word:"teenager",meaning:"10代の若者",breakdown:"13～19歳（-teen が付く年齢）の人"},
      {synonym:true,word:"youth",meaning:"若者；青春時代",breakdown:"若い人や若い時期全般。adolescent は子どもから大人への途中"}]},
 
   {id:1873,word:"millennium",partOfSpeech:"名詞",meaning:"千年，千年間；千年紀",
@@ -437,7 +437,7 @@
    example:"Her new book takes readers into the realm of fantasy.",
    exampleJa:"彼女の新しい本は、読者をファンタジーの世界へ連れていく。",
    example2:"Space travel for ordinary people is now within the realm of possibility.",
-   exampleJa2:"一般の人の宇宙旅行は、今や可能性の世界に入っている。",
+   exampleJa2:"一般の人の宇宙旅行は、今や十分ありえる世界の話になっている。",
    etymologyProcess:"reg（治める）→ 王が治める土地のような広がりは…？",
    etymologyConclusion:"reg（治める）→ 王が治める土地のように、一つの物事が支配する広がり＝（活動・関心の）世界，分野",
    spelling:"reg→re（フランス語を通って g が消えた）",
@@ -543,8 +543,8 @@
    spelling:"dos→dow（フランス語を通って変化）",
    etymologyMore:["財産を贈り物として与える→（学校などに）基金を寄付する"],
    relatedWords:[
-     {synonym:true,word:"dose",meaning:"（薬の）1回分",breakdown:"ギリシャ語の「与える」から。endow とは系統が別の遠い親戚"},
-     {word:"add",meaning:"加える",breakdown:"ad（～へ）＋ dat（与える）→ そこへさらに与える"},
+     {synonym:true,word:"bestow",meaning:"授ける，贈る",breakdown:"目上の人が贈り物や名誉を与える。endow は才能や資金を授ける"},
+     {word:"donate",meaning:"寄付する",breakdown:"don（与える）＋ ate（～する）→ お金や物を与えて贈る"},
      {word:"encourage",meaning:"励ます",breakdown:"en（中へ）＋ cour（心）→ 心の中へ勇気を入れる"},
      {synonym:true,word:"give",meaning:"与える",breakdown:"与えること全般。endow は才能やお金を授ける"}]},
 
@@ -578,7 +578,7 @@
    relatedWords:[
      {word:"retriever",meaning:"レトリーバー（犬）",breakdown:"re（再び）＋ triev（見つける）＋ er（道具・人）→ 獲物を探して持ち帰る犬"},
      {word:"return",meaning:"戻る，返す",breakdown:"re（後ろへ）＋ turn（回る）→ くるりと回って戻る"},
-     {word:"recover",meaning:"取り戻す；回復する",breakdown:"re（再び）＋ cover（覆う）→ 失ったものを再び手に入れる"},
+     {synonym:true,word:"recover",meaning:"取り戻す；回復する",breakdown:"失ったものや健康を取り戻す。cover（覆う）とは別の語"},
      {synonym:true,word:"regain",meaning:"取り戻す",breakdown:"失ったものを再び得る。retrieve は探して持ってくる"}]},
 
   {id:1887,word:"displace",partOfSpeech:"他動詞",meaning:"（本来の場所から）追い出す，立ち退かせる",
@@ -771,7 +771,7 @@
      {word:"pedal",meaning:"ペダル",breakdown:"pedi（足）＋ al（～の）→ 足でふむ部分"},
      {word:"expedition",meaning:"遠征，探検",breakdown:"ex（外へ）＋ pedi（足）→ 足を外へ踏み出す長い旅"},
      {synonym:true,word:"walker",meaning:"歩く人",breakdown:"walk（歩く）する人。pedestrian は交通の場面の硬い語"},
-     {synonym:true,word:"driver",meaning:"運転手",breakdown:"車を運転する人。pedestrian と対になる立場"}]},
+     {synonym:true,word:"passer-by",meaning:"通行人",breakdown:"たまたま通る人。pedestrian は車でなく歩く人"}]},
 
   {id:1899,word:"excursion",partOfSpeech:"名詞",meaning:"（団体の）小旅行，遠足",
    meanings:["名|（団体の）小旅行，遠足"],
@@ -794,7 +794,7 @@
    pronunciation:"/ˈʃɪpɪŋ/",part:190,
    example:"Shipping is free if you spend more than 3,000 yen.",
    exampleJa:"3,000円より多く買えば、発送は無料になる。",
-   example2:"Most shipping between Asia and Europe passes through the Suez Canal.",
+   example2:"A lot of shipping between Asia and Europe passes through the Suez Canal.",
    exampleJa2:"アジアとヨーロッパの間の海運の多くは、スエズ運河を通る。",
    etymologyProcess:"scip（船）＋ ing（名詞）→ 荷物を船に積んで送り出すことは…？",
    etymologyConclusion:"scip（船）＋ ing（名詞）→ 荷物を船に積んで送り出すこと＝（荷物の）発送",

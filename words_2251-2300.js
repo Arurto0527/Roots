@@ -37,7 +37,7 @@
    example:"The old man lived a solitary life in the mountains.",
    exampleJa:"その老人は山の中でひとりきりの生活を送っていた。",
    example2:"Unlike lions, tigers are solitary animals that usually hunt alone.",
-   exampleJa2:"ライオンと違って、トラはふつう単独で狩りをするひとりきりの動物だ。",
+   exampleJa2:"ライオンと違って、トラはふつう単独で狩りをする、ひとりきりで暮らす動物だ。",
    etymologyProcess:"solus（ただひとり）＋ ary（形容詞）→ 仲間から離れて過ごすさまは…？",
    etymologyConclusion:"solus（ただひとり）＋ ary（形容詞）→ 仲間と離れて、ただひとりで過ごす＝ひとりきりの",
    spelling:"solus→solit（ラテン語 solitarius を通った形）",
@@ -113,7 +113,7 @@
    relatedWords:[
      {word:"obsession",meaning:"執着，強い思い込み",breakdown:"ob（向かい合って）＋ sess（座る）＋ ion（名詞）→ 頭の前に居すわる考え"},
      {word:"session",meaning:"会期；（活動の）時間",breakdown:"sess（座る）＋ ion（名詞）→ 皆が座って集まる会"},
-     {synonym:true,word:"sit",meaning:"座る",breakdown:"英語本来の語で sess と遠い親戚。考えがどっかり座りこむ"},
+     {synonym:true,word:"fixated",meaning:"（on ～に）執着した",breakdown:"一つのことに気持ちが固定されている。obsessed はとりつかれた感じ"},
      {synonym:true,word:"addicted",meaning:"（to ～に）中毒の",breakdown:"やめられない状態。obsessed は頭から離れない状態"}]},
 
   {id:2258,word:"preoccupied",partOfSpeech:"形容詞",meaning:"（with ～で）頭がいっぱいの，気を取られた",
@@ -189,7 +189,7 @@
    pronunciation:"/səˈseptəbəl/",part:227,
    usage:["be susceptible to 名詞（～の影響を受けやすい）"],
    example:"Older people are more susceptible to the flu than young people.",
-   exampleJa:"高齢者は若者よりもインフルエンザの影響を受けやすい。",
+   exampleJa:"高齢者は若者よりもインフルエンザにかかりやすい。",
    example2:"Teenagers can be susceptible to pressure from their friends.",
    exampleJa2:"10代は友人からの圧力の影響を受けやすいことがある。",
    etymologyProcess:"sub（下で）＋ cept（取る）＋ ible（できる）→ 下で受け止めてしまうと…？",
@@ -747,8 +747,8 @@
    pronunciation:"/ˈspeɪʃəl/",part:230,
    example:"Playing with blocks helps children develop their spatial sense.",
    exampleJa:"積み木遊びは、子どもの空間の感覚を育てる助けになる。",
-   example2:"Some students find it hard to imagine spatial figures in math class.",
-   exampleJa2:"数学の授業で、空間の図形を思い描くのが苦手な生徒もいる。",
+   example2:"Some students find it hard to imagine 3D shapes because they lack spatial skills.",
+   exampleJa2:"空間の能力が弱いため、立体図形を思い描くのが苦手な生徒もいる。",
    etymologyProcess:"spati（空間）＋ al（～の）→ 広がりや位置にかかわると…？",
    etymologyConclusion:"spati（空間）＋ al（～の）→ 物の広がりや位置の関係にかかわる＝空間の",
    relatedWords:[
