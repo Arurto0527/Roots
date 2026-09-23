@@ -103,7 +103,6 @@
    relatedWords:[
      {synonym:true,word:"meat",meaning:"食用の肉",breakdown:"食べ物としての肉。flesh は体についている生の身"},
      {synonym:true,word:"tissue",meaning:"（体の）組織",breakdown:"体をつくる細胞のまとまり。flesh は目に見える身の部分"},
-     {synonym:true,word:"muscle",meaning:"筋肉",breakdown:"力を出す筋。flesh は皮と骨の間の部分全体を指す"},
      {synonym:true,word:"pulp",meaning:"果肉，どろどろしたもの",breakdown:"果物のやわらかい中身。flesh も果肉の意味で使える"}]},
 
   {id:1458,word:"limb",partOfSpeech:"名詞",meaning:"（腕や脚の）手足；大枝",
@@ -179,10 +178,9 @@
    etymologyConclusion:"shrug（肩を上げる）→ さあねという気持ちで肩をひょいと上げる＝肩をすくめる",
    hook:"中英語からの語で語源ははっきりしない。shrug off（～を軽く受け流す）も覚える。",
    relatedWords:[
-     {synonym:true,word:"shoulder",meaning:"肩",breakdown:"上げる部分そのもの。shrug はその肩を上げる動作を表す"},
-     {synonym:true,word:"nod",meaning:"うなずく",breakdown:"首で「はい」を示す。shrug は肩で「さあね」を示す"},
+     {synonym:true,word:"hunch",meaning:"（肩を）丸める",breakdown:"背や肩を丸めること。shrug はひょいと上げてすぐ下ろす"},
      {synonym:true,word:"gesture",meaning:"身ぶり",breakdown:"体で気持ちを伝える動き。shrug はその代表的な一つ"},
-     {synonym:true,word:"frown",meaning:"顔をしかめる",breakdown:"眉を寄せて不満を示す。shrug は肩で「さあね」を示す"}]},
+     {synonym:true,word:"dismiss",meaning:"退ける，軽くあしらう",breakdown:"取り合わないこと。shrug off とほぼ同じ意味"}]},
 
   {id:1463,word:"compensate",partOfSpeech:"他動詞・自動詞",meaning:"補償する；埋め合わせる",
    meanings:["他|（損害）を補償する","自|（for ～で）～を埋め合わせる"],
@@ -611,10 +609,10 @@
    hook:"形容詞では「明らかな」。だれの目にも開かれて見えている、という同じ絵から。",
    why:"【なぜ】ラテン語 patere（開いている）から。中世の王は、だれでも読めるよう封をせずに開いた公文書 letters patent で特別な権利を与えました。発明者の独占権もこの文書で与えられたので、patent＝特許になりました。\n【つながり】今も「発明の中身を公開する代わりに守ってもらう」仕組みで、「開かれた」の意味が生きています。",
    relatedWords:[
-     {synonym:true,word:"invention",meaning:"発明",breakdown:"新しく考え出したもの。patent はそれを守る権利"},
-     {synonym:true,word:"copyright",meaning:"著作権",breakdown:"作品を守る権利。patent は発明を守る権利"},
+     {synonym:true,word:"exclusive right",meaning:"独占権",breakdown:"自分だけが使える権利。patent は発明についての独占権"},
+     {synonym:true,word:"monopoly",meaning:"独占",breakdown:"一社だけが持つこと。patent は法が認める一時的な独占"},
      {synonym:true,word:"right",meaning:"権利",breakdown:"何かをしてよい資格。patent は発明を独り占めできる権利"},
-     {synonym:true,word:"trademark",meaning:"商標",breakdown:"会社の名前やマークを守る権利。patent は技術を守る"}]},
+     {synonym:true,word:"license",meaning:"許可，使用権",breakdown:"使ってよいという権利。patent の持ち主が他社に与える"}]},
 
   {id:1491,word:"primitive",partOfSpeech:"形容詞",meaning:"原始的な，初期の",
    meanings:["形|原始的な，初期の","形|（道具などが）素朴な，粗末な"],
@@ -715,7 +713,7 @@
    exampleJa:"私たちのクラスは、古本を図書館に寄付することにした。",
    example2:"Over a thousand people donated blood after the earthquake.",
    exampleJa2:"地震のあと、千人以上の人が献血した。",
-   etymologyProcess:"don（与える）＋ ate（動詞）→ 見返りなしに与えると…？",
+   etymologyProcess:"don（与える）＋ ate（動詞）→ 自分のものを人のために差し出すと…？",
    etymologyConclusion:"don（与える）＋ ate（動詞）→ 見返りを求めずにお金や物を与える＝寄付する",
    relatedWords:[
      {word:"donor",meaning:"寄付者；提供者",breakdown:"don（与える）＋ or（人）→ 与える人"},
@@ -930,8 +928,8 @@
    exampleJa:"今年は3人の候補者が市長選に立候補している。",
    example2:"She is a strong candidate for the team captain.",
    exampleJa2:"彼女はチームのキャプテンの有力な候補者だ。",
-   etymologyProcess:"cand（白く輝く）＋ ate（～にする）→ 真っ白な服を着て人前に立つ人は…？",
-   etymologyConclusion:"cand（白く輝く）＋ ate（～にする）→ 真っ白な服で身を包み、選ばれるのを待つ人＝（選挙などの）候補者",
+   etymologyProcess:"cand（白く輝く）＋ ate（形容詞）→ 真っ白な服を着て人前に立つ人は…？",
+   etymologyConclusion:"cand（白く輝く）＋ ate（形容詞）→ 真っ白な服で身を包み、選ばれるのを待つ人＝（選挙などの）候補者",
    why:"【なぜ】ラテン語 candidus は「白く輝く」。古代ローマで役職に立候補する人は、けがれのなさを示すため白く光るトーガ（上着）を着て広場を歩きました。その人たちを candidatus（白い服を着た人）と呼んだのが始まりです。\n【つながり】candle（ろうそく）、candid（率直な＝白くて隠しごとがない）も同じ家族です。",
    relatedWords:[
      {word:"candle",meaning:"ろうそく",breakdown:"cand（白く輝く）＋ le（もの）→ 白く光る灯り"},
@@ -1045,7 +1043,7 @@
      {word:"federation",meaning:"連邦；連盟",breakdown:"fed（盟約）＋ ation（名詞）→ 約束で結ばれたまとまり"},
      {word:"confederate",meaning:"同盟の",breakdown:"con（共に）＋ fed（盟約）＋ ate（形容詞）→ 共に盟約を結んだ"},
      {synonym:true,word:"national",meaning:"国の",breakdown:"国全体の。federal は州の集まりである国の中央に使う"},
-     {synonym:true,word:"union",meaning:"連合",breakdown:"一つにまとまったもの全般。federal は州が集まった連邦に使う"}]},
+     {synonym:true,word:"central",meaning:"中央の",breakdown:"真ん中の。federal は州に対する国の中央政府について使う"}]},
 
   {id:1519,word:"communist",partOfSpeech:"形容詞",meaning:"共産主義の",
    meanings:["形|共産主義の","名|共産主義者"],
@@ -1137,7 +1135,7 @@
    why:"【なぜ】ラテン語 deficit は「足りない」という動詞そのもので、de（離れて）＋ facere（作る・する）の deficere（欠ける）から来ています。昔の会計帳簿で「〇〇が足りない」と書きこむ語だったので、名詞として「不足額」＝赤字になりました。\n【つながり】deficient（不足した）、defect（欠点）が同じ家族。日本語の「赤字」は赤いインクで書いたことから。",
    relatedWords:[
      {word:"defect",meaning:"欠点，欠陥",breakdown:"de（離して）＋ fect（作る）→ 作りそこなって欠けたところ"},
-     {word:"efficient",meaning:"効率のよい",breakdown:"ef（外へ）＋ fic（作る）→ むだなく成果を外へ作り出す"},
+     {word:"efficient",meaning:"効率のよい",breakdown:"ex（外へ）＋ fic（作る）→ むだなく成果を外へ作り出す"},
      {word:"deficient",meaning:"不足した",breakdown:"de（離して）＋ fic（作る）＋ ent（～している）→ 足りないままの"},
      {synonym:true,word:"shortage",meaning:"不足",breakdown:"物が足りないこと。deficit はお金の足りない額"}]},
 
