@@ -126,6 +126,7 @@
      etymologyProcess   : 語源の途中まで（末尾を「…？」で止める）
      etymologyConclusion: 語源の結論（「a（～へ）＋ gree（心地よい）→ …＝賛成する」の形。＝の後ろは meaning と同じ1つの意味だけ）
      etymologyMore      : 語源ページに出す「意味の広がり」。「由来の一言」や「～→ほかの意味」の形（任意）
+     spelling           : 語源チップの語根が単語のつづりにそのまま無いとき、どう変わったか（ad→a、grat→gree など。任意）
      why                : 「なぜこの意味になったか」のコラム（任意）。語源から意味が離れている語だけに書く。
                           【なぜ】【つながり】の見出しで、行は \n で区切る
      roots              : [{morph:"pos", gloss:"置く"}] 形式（任意）
@@ -145,6 +146,7 @@ const RAW_WORDS=[
    exampleJa2:"私は友達の宿題を手伝うと約束した。",
    etymologyProcess:"ad（～へ）＋ grat（心地よい）→ 心地よいほうへ…？",
    etymologyConclusion:"ad（～へ）＋ grat（心地よい）→ 相手の言うことが心地よく感じられてそちらへ寄っていく＝賛成する",
+   spelling:"ad→a（d が消えた）、grat→gree（フランス語を通って変化）",
    etymologyMore:["お互いの心地よさがそろう→（主語の中で）意見が一致する","体に心地よくなじむ→（気候，食べ物が）合う"],
    relatedWords:[
      {word:"gracious",meaning:"親切な；優雅な",breakdown:"grat（心地よい）＋ ious（形容詞）→ 相手を心地よくさせるふるまい"},
@@ -450,6 +452,7 @@ const RAW_WORDS=[
    exampleJa2:"彼女は文化祭でのスピーチで賞をもらった。",
    etymologyProcess:"ex（すっかり）＋ ward（見張る）→ すみずみまで見て判定した先には…？",
    etymologyConclusion:"ex（すっかり）＋ ward（見張る）→ すみずみまで見て判定し、その人に与えるもの＝賞",
+   spelling:"ex→a（フランス語で es- になり、さらに a に変わった）",
    why:"【なぜ】古ノルマン語 eswarder は「よく見て判定する」で、裁判で判決を下すことを指しました。判定したうえで与えるものが award＝賞です。\n【つながり】ward は「見張る」。guard（守る）も reward（報い）も同じ家族です。",
    etymologyMore:["見て判定して与える→～を授与する"],
    relatedWords:[
@@ -770,6 +773,7 @@ const RAW_WORDS=[
    exampleJa2:"毎日少しずつ勉強すれば多くのことを成し遂げられる。",
    etymologyProcess:"ad（～へ）＋ chief（頭）→ 頂上まで登りつめると…？",
    etymologyConclusion:"ad（～へ）＋ chief（頭）→ ものごとの頂上まで登りつめて手に入れる＝達成する",
+   spelling:"ad→a、chief→chieve（フランス語で形が変わった）",
    why:"【なぜ】古フランス語 achever は a（～へ）＋ chief（頭・頂上）で「頭のところまで持っていく」＝やり切る、という言い方でした。\n【つながり】chief（長）、chef（料理長）、captain（隊長）も同じ「頭」。どれも一番上に立つ人です。",
    relatedWords:[
      {word:"chief",meaning:"長，かしら；主要な",breakdown:"chief（頭）→ 集団のいちばん上に立つ人"},
@@ -852,6 +856,7 @@ const RAW_WORDS=[
    exampleJa2:"この会社は100年以上前に設立された。",
    etymologyProcess:"sta（立つ）＋ able（できる）→ ぐらつかず立てるように…？",
    etymologyConclusion:"sta（立つ）＋ able（できる）→ ぐらつかないようしっかり立たせる＝確立する",
+   spelling:"able→abl（ラテン語 stabilis の形）",
    etymologyMore:["組織をしっかり立ち上げる→～を設立する"],
    why:"【なぜ】ラテン語 stabilire は「ぐらつかないように固定する」。stable（安定した）と同じ語です。建物を土台に据えるように、制度や会社をしっかり据えるのが establish。\n【つながり】stand（立つ）、statue（像）、stable（安定した）も同じ sta（立つ）です。",
    relatedWords:[
@@ -934,6 +939,7 @@ const RAW_WORDS=[
    exampleJa2:"その工場の労働条件は昨年改善された。",
    etymologyProcess:"con（共に）＋ dic（言う）＋ tion（名詞）→ お互いに言い合って決めたものは…？",
    etymologyConclusion:"con（共に）＋ dic（言う）＋ tion（名詞）→ お互いに言い合って決めた取り決めのもとでの有り様＝状態",
+   spelling:"dic→dit（のちのラテン語で c が t と書かれるようになった）",
    why:"【なぜ】con（共に）＋ dic（言う）で、もとは「取り決め・約束ごと」。「この条件でなら」と互いに言い合って決めたものを指しました。その取り決めのもとで今どうなっているか、が「状態」です。\n【つながり】だから condition には今も「条件」と「状態」の両方がある。dictionary（辞書）、predict（予言する）も同じ dic。",
    etymologyMore:["言い合って決めた取り決め→（―s）条件，（周囲の）状況"],
    hook:"in good condition（よい状態で）。「状況・条件」の意味ではふつう複数形 conditions にする。",
@@ -1265,6 +1271,7 @@ const RAW_WORDS=[
    exampleJa2:"科学者によると、オオカミは犬の祖先だ。",
    etymologyProcess:"ante（前に）＋ cest（行く）＋ or（人）→ 自分より前を行った人は…？",
    etymologyConclusion:"ante（前に）＋ cest（行く）＋ or（人）→ 自分たちより前を歩いていった人＝祖先",
+   spelling:"ante→an（antecessor が縮まった）",
    hook:"反対は descendant（子孫）。",
    relatedWords:[
      {word:"precede",meaning:"先に起こる",breakdown:"pre（先に）＋ ced（行く）→ 先に行く"},
@@ -1713,6 +1720,7 @@ const RAW_WORDS=[
    exampleJa2:"一つの不注意なミスで、私たちのチームは試合を落とした。",
    etymologyProcess:"con（すっかり）＋ st（立つ）→ 品物がある値段のところにしっかり立つと…？",
    etymologyConclusion:"con（すっかり）＋ st（立つ）→ 品物がその値段のところにしっかり立って成り立つ＝（費用が）かかる",
+   spelling:"con→co（フランス語 coster で n が消えた）",
    why:"【なぜ】ラテン語 constare は con（すっかり）＋ stare（立つ）で「ぐらつかずに定まっている」。値段が定まっていることを指し、そこから「（いくら）かかる」になりました。\n【つながり】stand（立つ）、constant（変わらない）も同じ sta。値段がその高さに「立っている」イメージです。",
    etymologyMore:["ラテン語 constare（～の値でしっかり立つ）が縮まった語。","代わりに何かを失わせる→～を犠牲にする","名詞では「費用，犠牲」"],
    hook:"cost-cost-cost と形が変わらない。It costs ～ to do（…するのに～かかる）。",
@@ -1993,6 +2001,7 @@ const RAW_WORDS=[
    exampleJa2:"バスはスタジアムへ向かう乗客でいっぱいだった。",
    etymologyProcess:"pass（通り抜ける）＋ age（名詞）＋ er（人）→ 乗り物で町から町へ…？",
    etymologyConclusion:"pass（通り抜ける）＋ age（名詞）＋ er（人）→ 乗り物に乗って町から町へ通り抜けていく人＝乗客",
+   spelling:"age→eng（passager に n が入り、a が e に変わった）",
    relatedWords:[
      {word:"pass",meaning:"通り過ぎる",breakdown:"pass（通り抜ける）→ 立ち止まらずにそばを抜けていく"},
      {word:"past",meaning:"過去の；過ぎ去った",breakdown:"past（通り抜ける）→ passed（通り過ぎた）が変わった形"},
@@ -2137,6 +2146,7 @@ const RAW_WORDS=[
    exampleJa2:"このシャンプーは自然の原料だけで作られている。",
    etymologyProcess:"nat（生まれる）＋ ure（名詞）＋ al（形容詞）→ 生まれ持った性質のままで…？",
    etymologyConclusion:"nat（生まれる）＋ ure（名詞）＋ al（形容詞）→ 生まれ持った性質どおりで、そうなって当たり前の＝当然の",
+   spelling:"ure→ur（ラテン語 natura の形。e は付かない）",
    etymologyMore:["生まれたままの姿の→自然の","生まれたときから備わった→生まれながらの"],
    relatedWords:[
      {word:"nature",meaning:"自然；性質",breakdown:"nat（生まれる）＋ ure（名詞）→ 生まれたままの姿"},
@@ -2201,6 +2211,7 @@ const RAW_WORDS=[
    exampleJa2:"泳ぐ前に食べすぎるのは避けたほうがいい。",
    etymologyProcess:"ex（外へ）＋ void（空の）→ その場所を空けて外へ…？",
    etymologyConclusion:"ex（外へ）＋ void（空の）→ その場を空っぽにして外へ離れ、関わらない＝避ける",
+   spelling:"ex→a（フランス語で es- になり、さらに a に変わった）",
    relatedWords:[
      {word:"void",meaning:"空の；無効の",breakdown:"void（空の）→ 中身が何もない"},
      {word:"vacation",meaning:"休暇",breakdown:"vac（空の）＋ ation（名詞）→ 仕事を空にしている期間"},
@@ -2247,6 +2258,7 @@ const RAW_WORDS=[
    exampleJa2:"学校は来週、新しい学生証を発行する。",
    etymologyProcess:"ex（外へ）＋ it（行く）→ 人々の前に出てきて…？",
    etymologyConclusion:"ex（外へ）＋ it（行く）→ 人々の前に出てきて、話し合うべき事柄になる＝問題",
+   spelling:"ex→iss、it→ue（フランス語 issue を通って変化）",
    why:"【なぜ】ex（外へ）＋ it（行く）で、もとは「外へ出ていくこと」。そこから、世に出される雑誌の「号」や、人々の前に出てきて話し合うべき「論点・問題」へ広がりました。\n【つながり】exit（出口）と同じ it。issue a passport（発行する）にも「外へ出す」が生きています。",
    etymologyMore:["次々に世に出される1冊→（雑誌の）号","世に出す→（切手など）を発行する"],
    relatedWords:[
@@ -2699,6 +2711,7 @@ const RAW_WORDS=[
    exampleJa2:"彼女は昨日その会議に現れなかった。",
    etymologyProcess:"ad（～へ）＋ pear（見えてくる）→ こちらの目の前に姿が…？",
    etymologyConclusion:"ad（～へ）＋ pear（見えてくる）→ こちらの目の前に姿が出てきて見える＝現れる",
+   spelling:"ad→ap（p の前で d が p に変わった）",
    etymologyMore:["目に映る姿がそう見える→（to be ～）～のように思える"],
    relatedWords:[
      {word:"appearance",meaning:"外見；出現",breakdown:"ad（～へ）＋ pear（見えてくる）＋ ance（名詞）→ 目に見えてくる姿"},
@@ -2809,6 +2822,7 @@ const RAW_WORDS=[
    exampleJa2:"その飲み物は砂糖をまったく含んでいない。",
    etymologyProcess:"con（共に）＋ tin（保つ）→ 中身をまとめてしっかり…？",
    etymologyConclusion:"con（共に）＋ tin（保つ）→ 中身をひとまとめにして、こぼさず保つ＝含んでいる",
+   spelling:"tin→tain（フランス語を通って形が変わった）",
    etymologyMore:["あふれそうな気持ちを内に保つ→（主に否定で）～を抑える"],
    relatedWords:[
      {word:"continue",meaning:"続ける",breakdown:"con（共に）＋ tin（保つ）→ 切れないようにつなぎ保ち続ける"},
@@ -3018,6 +3032,7 @@ const RAW_WORDS=[
    exampleJa2:"彼女は文化祭の日程を決定した。",
    etymologyProcess:"de（離れて）＋ cis（切る）→ ほかの案を切り落とすと…？",
    etymologyConclusion:"de（離れて）＋ cis（切る）→ ほかの案をすっぱり切り落として一つに絞る＝決定する",
+   spelling:"cis→cid（もとの動詞 decidere の形）",
    relatedWords:[
      {word:"decision",meaning:"決定",breakdown:"de（離れて）＋ cis（切る）＋ ion（名詞）→ 切り落として決めたこと"},
      {word:"scissors",meaning:"はさみ",breakdown:"cis（切る）＋ ors（もの）→ 二枚の刃で物を切る道具"},
@@ -3033,6 +3048,7 @@ const RAW_WORDS=[
    exampleJa2:"最初の一言で人を判断すべきではない。",
    etymologyProcess:"jur（正しい・法）＋ dict（言う）→ 何が正しいかを言い渡すのは…？",
    etymologyConclusion:"jur（正しい・法）＋ dict（言う）→ 何が正しいかを見きわめて言い渡す＝判断する",
+   spelling:"jur→ju、dict→dge（jus＋dicere が縮まった）",
    etymologyMore:["法廷で正しさを言い渡す人→裁判官，審判（員）"],
    relatedWords:[
      {word:"justice",meaning:"正義",breakdown:"jur（正しい・法）＋ ice（名詞）→ 正しさが世の中に通ること"},
@@ -3079,6 +3095,7 @@ const RAW_WORDS=[
    exampleJa2:"新作映画についての彼女の批評はとても好意的だった。",
    etymologyProcess:"re（再び）＋ vis（見る）→ もう一度ていねいに見直すのは…？",
    etymologyConclusion:"re（再び）＋ vis（見る）→ 一度通ったものをもう一度ていねいに見直すこと＝再検討",
+   spelling:"vis→view（フランス語 veue を通って変化）",
    etymologyMore:["作品を見直して評を書く→（新聞などの）批評","習ったことを見直す→復習"],
    relatedWords:[
      {word:"view",meaning:"眺め；見方",breakdown:"vis（見る）→ 目に入ってくる眺めそのもの"},
@@ -3143,6 +3160,7 @@ const RAW_WORDS=[
    exampleJa2:"彼女は昔からの友人の手紙を心待ちにしていた。",
    etymologyProcess:"ex（外へ）＋ spect（見る）→ 外をじっと見ながら待つのは…？",
    etymologyConclusion:"ex（外へ）＋ spect（見る）→ 外をじっと見ながら来るはずのものを待つ＝予期する",
+   spelling:"spect→pect（x の音に s が含まれ、s が落ちた）",
    etymologyMore:["相手にこうあってほしいと見込む→（B にA）を期待する"],
    relatedWords:[
      {word:"respect",meaning:"尊敬する",breakdown:"re（再び）＋ spect（見る）→ 何度も見直すほど価値を認める"},
@@ -3174,6 +3192,7 @@ const RAW_WORDS=[
    exampleJa2:"あの古い歌の名前を覚えていますか。",
    etymologyProcess:"re（再び）＋ memor（心にとどめる）→ 心にもう一度上らせるのは…？",
    etymologyConclusion:"re（再び）＋ memor（心にとどめる）→ 一度しまったことを心にもう一度上らせる＝覚えている",
+   spelling:"memor→member（フランス語で o が消えて b が入った）",
    etymologyMore:["相手の心に自分を上らせてもらう→（me to ～）（～に）よろしく伝える"],
    relatedWords:[
      {word:"memory",meaning:"記憶，思い出",breakdown:"memor（心にとどめる）＋ y（名詞）→ 心にとどめてある中身"},
@@ -3222,6 +3241,7 @@ const RAW_WORDS=[
    exampleJa2:"宿題を手伝ってくれて本当に感謝しています。",
    etymologyProcess:"ad（～へ）＋ preci（値打ち）→ そのものの値打ちをきちんと…？",
    etymologyConclusion:"ad（～へ）＋ preci（値打ち）→ そのものの値打ちをきちんと見積もる＝よさがわかる",
+   spelling:"ad→ap（p の前で d が p に変わった）",
    why:"【なぜ】ad（～へ）＋ preci（値打ち）で、もとは「値段をきちんとつける」。正しく値踏みすることが「よさがわかる・ありがたく思う」になりました。\n【つながり】price（価格）、precious（貴重な）も同じ preci。今も「値上がりする」の意味があり、反対は depreciate（値下がりする）です。",
    etymologyMore:["相手の行いの値打ちを認める→～に感謝する"],
    relatedWords:[
@@ -3239,6 +3259,7 @@ const RAW_WORDS=[
    exampleJa2:"この学校は毎年4月に20人の新入生を受け入れる。",
    etymologyProcess:"ad（～へ）＋ cept（取る）→ 差し出されたものを自分のほうへ…？",
    etymologyConclusion:"ad（～へ）＋ cept（取る）→ 差し出されたものを自分のほうへ取り込む＝受け入れる",
+   spelling:"ad→ac（c の前で d が c に変わった）",
    relatedWords:[
      {word:"except",meaning:"～を除いて",breakdown:"ex（外へ）＋ cept（取る）→ そこだけ外へ取り出しておく"},
      {word:"exception",meaning:"例外",breakdown:"ex（外へ）＋ cept（取る）＋ ion（名詞）→ 外へ取り出された例"},
@@ -3368,6 +3389,7 @@ const RAW_WORDS=[
    exampleJa2:"このレストランではどこでも喫煙は許可されていない。",
    etymologyProcess:"ad（～へ）＋ loc（場所）→ 相手のために場所を空けると…？",
    etymologyConclusion:"ad（～へ）＋ loc（場所）→ 相手のために場所を空けて、そこへ入れてやる＝許可する",
+   spelling:"ad→al（l の前で d が l に）、loc→low（フランス語で変化）",
    etymologyMore:["場所を空けて入れてやる→（物が）～を可能にする"],
    why:"【なぜ】allow には二つの語が溶け合っています。一つは allaudare（ほめて認める）、もう一つは allocare（場所を置く）。「よいと認める」と「場所を空けてやる」が重なって、今の「許可する」になりました。\n【つながり】allocate（割り当てる）は後のほうの仲間、laud（ほめたたえる）は前のほうの仲間です。",
    relatedWords:[
@@ -3433,6 +3455,7 @@ const RAW_WORDS=[
    exampleJa2:"彼女は何年も前の事故で視力を失った。",
    etymologyProcess:"see（見る）＋ t（名詞）→ 目に飛び込んでくる眺めは…？",
    etymologyConclusion:"see（見る）＋ t（名詞）→ 目に飛び込んでくる眺めのひとこま＝光景",
+   spelling:"see→sigh",
    etymologyMore:["目が見えるはたらきそのもの→視力"],
    relatedWords:[
      {word:"see",meaning:"見る，見える",breakdown:"see（見る）→ 目に入れてそれをとらえる"},
@@ -3449,6 +3472,7 @@ const RAW_WORDS=[
    exampleJa2:"私たちは山頂からの眺めを楽しんだ。",
    etymologyProcess:"vis（見る）→ 目の前いっぱいに広がって入ってくるのは…？",
    etymologyConclusion:"vis（見る）→ 目の前いっぱいに広がって入ってくるもの＝眺め",
+   spelling:"vis→view（フランス語 veue を通って変化）",
    etymologyMore:["物事をどう見ているか→見解，見方"],
    relatedWords:[
      {word:"visible",meaning:"目に見える",breakdown:"vis（見る）＋ ible（できる）→ 目で見ることができる"},
@@ -3612,6 +3636,7 @@ const RAW_WORDS=[
    exampleJa2:"この三角形の角はちょうど90度だ。",
    etymologyProcess:"de（下へ）＋ grad（歩み・段）→ 一段ずつ刻んだ目盛りの一つは…？",
    etymologyConclusion:"de（下へ）＋ grad（歩み・段）→ 上から一段ずつ下りながら刻んだ目盛りの一つ＝度",
+   spelling:"grad→gree（フランス語を通って d が消えた）",
    why:"【なぜ】de（下へ）＋ grad（段）で「階段の一段」。目盛りを階段の段に見立てたことから温度や角度の「度」になり、学問の階段をどこまで上ったかを示すのが「学位」になりました。\n【つながり】grade（学年）、gradual（少しずつの）も同じ grad。degree には今も「段階」の意味があります。",
    etymologyMore:["目盛りのどこまで進んだか→程度","学問の段を上りきった印→学位"],
    relatedWords:[
@@ -3770,6 +3795,7 @@ const RAW_WORDS=[
    exampleJa2:"彼女は難しい質問に知的な答えを返した。",
    etymologyProcess:"inter（間の）＋ lect（拾う）＋ ent（形容詞）→ 多くの中から要点を…？",
    etymologyConclusion:"inter（間の）＋ lect（拾う）＋ ent（形容詞）→ 多くの中から要点を拾い分けられる＝知的な",
+   spelling:"inter→intel（l の前で r が l に）、lect→lig（e が i に変わった）",
    why:"【なぜ】inter（間から）＋ leg（拾う）で「いくつもある中から選び拾う」。ごちゃ混ぜの中から要点だけをつまみ出せる力が intelligence です。\n【つながり】collect（集める）、select（選ぶ）、lecture（拾い読み＝講義）も同じ leg。「拾う」が芯です。",
    relatedWords:[
      {word:"collect",meaning:"集める",breakdown:"col（共に）＋ lect（拾う）→ ばらばらの物を一か所へ拾い寄せる"},
@@ -3836,6 +3862,7 @@ const RAW_WORDS=[
    exampleJa2:"私は大都市で1人で暮らしたくない。",
    etymologyProcess:"all（すっかり）＋ one（1つ）→ ほかに誰もいない状態は…？",
    etymologyConclusion:"all（すっかり）＋ one（1つ）→ ほかに誰もおらず、まったく一人きり＝1人で",
+   spelling:"all→al（l が1つ消えた）",
    etymologyMore:["ほかは何もなく一つきり→（名詞＋alone）～だけ"],
    relatedWords:[
      {word:"lonely",meaning:"孤独な",breakdown:"lone（ひとりの）＋ ly（形容詞）→ ひとりきりで心細い"},
@@ -3852,6 +3879,7 @@ const RAW_WORDS=[
    exampleJa2:"先生は授業での彼女の前向きな態度をほめた。",
    etymologyProcess:"apt（ぴったり合う）＋ tude（名詞）→ 相手に合わせて取る身構えは…？",
    etymologyConclusion:"apt（ぴったり合う）＋ tude（名詞）→ 相手や物事に合わせて取る心と体の身構え＝態度",
+   spelling:"apt→att（イタリア語で pt が tt になった）",
    why:"【なぜ】ラテン語 aptus は「ぴったり合う」。イタリアで絵や彫刻の「人物が取っている姿勢」を attitudine と呼んだことから、体の「姿勢」、さらに心の「態度」になりました。\n【つながり】apt（ふさわしい）、aptitude（素質）も同じ apt。体の構えと心の構えを、同じ語で表しています。",
    relatedWords:[
      {word:"apt",meaning:"～しがちな；適切な",breakdown:"apt（ぴったり合う）→ その場にぴったりはまりやすい"},
@@ -3900,6 +3928,7 @@ const RAW_WORDS=[
    exampleJa2:"深い雪はここの冬によくある特徴だ。",
    etymologyProcess:"fact（作る）＋ ure（名詞）→ 作られたときからある目立つ形は…？",
    etymologyConclusion:"fact（作る）＋ ure（名詞）→ 作られたときからそなわっている、目立つ形＝特徴",
+   spelling:"fact→feat（フランス語を通って変化）",
    why:"【なぜ】ラテン語 facere（作る）から。もとは「作り・こしらえ」で、まず顔の作り＝顔立ちを指しました。そこから広く「目立つ特徴」になり、機械や商品の「機能」にも使われます。\n【つながり】factory（工場）、fact（事実）も同じ fac。feature film（長編映画）は「目玉となる作品」のことです。",
    etymologyMore:["紙面の目玉として作られた記事→特集記事"],
    relatedWords:[
@@ -3948,6 +3977,7 @@ const RAW_WORDS=[
    exampleJa2:"私たちが最終バスに乗り遅れたのは私の責任だった。",
    etymologyProcess:"fail（期待を裏切る）→ 期待どおりでなく足りないところは…？",
    etymologyConclusion:"fail（期待を裏切る）→ 期待どおりにいかず、足りていないところ＝欠点",
+   spelling:"fail→fau（同じラテン語 fallere から、フランス語で変化）",
    etymologyMore:["誰のせいで足りなかったかを指す→（one's ―）責任","地層が裂けてずれた所→断層"],
    relatedWords:[
      {word:"fail",meaning:"失敗する",breakdown:"fail（期待を裏切る）→ 期待どおりにできず終わる"},
@@ -3980,6 +4010,7 @@ const RAW_WORDS=[
    exampleJa2:"この用紙に正しい日付を書いてください。",
    etymologyProcess:"com（すっかり）＋ rect（まっすぐ）→ 曲がりをすっかり直すと…？",
    etymologyConclusion:"com（すっかり）＋ rect（まっすぐ）→ 曲がったところをすっかりまっすぐに直した＝正しい",
+   spelling:"com→cor（r の前で m が r に変わった）",
    etymologyMore:["曲がりをまっすぐ直す→～を訂正する，矯正する"],
    relatedWords:[
      {word:"direct",meaning:"直接の",breakdown:"di（離れて）＋ rect（まっすぐ）→ よそへ寄らずまっすぐ向かう"},
@@ -4028,6 +4059,7 @@ const RAW_WORDS=[
    exampleJa2:"下のそれぞれの空所に適切な語を選びなさい。",
    etymologyProcess:"ad（～へ）＋ propri（自分のもの）→ その場にしっくりはまるのは…？",
    etymologyConclusion:"ad（～へ）＋ propri（自分のもの）→ その場にしっくりはまり、自分のものになじむ＝適切な",
+   spelling:"ad→ap（p の前で d が p に変わった）",
    why:"【なぜ】ad（～へ）＋ propri（自分のもの）で、もとは「自分のものにする」。その場にぴたりとなじんで自分のものになる、という見方から「適切な」になりました。\n【つながり】property（財産）、proper（ふさわしい）も同じ propri。動詞の appropriate は今も「勝手に自分のものにする」で、発音も変わります。",
    relatedWords:[
      {word:"proper",meaning:"適切な，ふさわしい",breakdown:"propri（自分のもの）→ そのものに本来そなわっている"},
@@ -4186,6 +4218,7 @@ const RAW_WORDS=[
    exampleJa2:"このアプリは電車の時刻を調べるのに都合がよい。",
    etymologyProcess:"con（共に）＋ vent（来る）→ 必要なものが一緒に来てそろうと…？",
    etymologyConclusion:"con（共に）＋ vent（来る）→ 必要なものや時間が一緒に来てそろう＝都合がよい",
+   spelling:"vent→ven（もとの動詞 venire の形）",
    relatedWords:[
      {word:"event",meaning:"出来事，行事",breakdown:"e（外へ）＋ vent（来る）→ 外に現れ出てくることがら"},
      {word:"invent",meaning:"発明する",breakdown:"in（上に）＋ vent（来る）→ 考えにばったり出くわす"},
@@ -4201,6 +4234,7 @@ const RAW_WORDS=[
    exampleJa2:"誤った文にはそれぞれ赤ペンで印をつけなさい。",
    etymologyProcess:"fail（期待を裏切る）→ 本当であるはずを裏切っているのは…？",
    etymologyConclusion:"fail（期待を裏切る）→ 本当であるはずの期待を裏切っている＝誤った",
+   spelling:"fail→fal（どちらもラテン語 fallere から）",
    etymologyMore:["本物のふりをして裏切る→偽の"],
    hook:"fault（欠点）と同じ仲間。true の反対で「事実を裏切る」。",
    relatedWords:[
@@ -4234,6 +4268,7 @@ const RAW_WORDS=[
    exampleJa2:"給食はひどく不快な味だったので、私は少し残した。",
    etymologyProcess:"awe（畏れ）＋ ful（満ちた）→ 畏れでいっぱいになると…？",
    etymologyConclusion:"awe（畏れ）＋ ful（満ちた）→ 畏れを起こすほどひどいものから＝ひどく不快な",
+   spelling:"awe→aw（ful が付いて e が落ちた）",
    why:"【なぜ】awe（畏れ）＋ ful で、もとは「畏れ多い＝おごそかな」というほめ言葉でした。畏れが「こわい」に寄っていき、さらに「ひどい」まで落ちていきます。\n【つながり】同じ awe から出た awesome は「すごい」というほめ言葉のまま残りました。一つの語根から、正反対の二語が生まれています。",
    relatedWords:[
      {word:"awe",meaning:"畏敬の念",breakdown:"awe（畏れ）→ 大きな存在を前に息をのむ"},
@@ -4399,6 +4434,7 @@ const RAW_WORDS=[
    exampleJa2:"親しい友人同士でも、大事な校則について意見が異なることがある。",
    etymologyProcess:"dis（離れて）＋ fer（運ぶ）→ 別々の方向へ運ばれたら…？",
    etymologyConclusion:"dis（離れて）＋ fer（運ぶ）→ 別の方向へ運ばれ、同じでなくなる＝異なる",
+   spelling:"dis→dif（f の前で s が f に変わった）",
    relatedWords:[
      {word:"different",meaning:"異なった",breakdown:"dis（離れて）＋ fer（運ぶ）→ 別の方向へ離れた"},
      {word:"difference",meaning:"違い",breakdown:"dis（離れて）＋ fer（運ぶ）→ 二つが離れている点"},
@@ -4414,6 +4450,7 @@ const RAW_WORDS=[
    exampleJa2:"夏休み中は、私たちの練習時間がさまざまに変わるかもしれない。",
    etymologyProcess:"vari（変わる）→ 一つの形にとどまらなければ…？",
    etymologyConclusion:"vari（変わる）→ ラテン語の「変える」から、一定でなくなる＝さまざまに変わる",
+   spelling:"vari→vary（語の終わりで i が y に変わった）",
    hook:"形が変わる仲間は various（さまざまな）や variety（多様さ）。",
    relatedWords:[
      {word:"various",meaning:"さまざまな",breakdown:"vari（変わる）＋ ous（形容詞）→ 一つの形に収まらない"},
@@ -4446,6 +4483,7 @@ const RAW_WORDS=[
    exampleJa2:"生徒が新しい英単語を学ぶとき、つづりの間違いはよく見られる。",
    etymologyProcess:"com（共に）＋ mun（分け合う）→ みんなで分け持つものなら…？",
    etymologyConclusion:"com（共に）＋ mun（分け合う）→ みんなが分け持つことから、広く行き渡った＝よく見られる",
+   spelling:"mun→mon（フランス語を通って u が o に変わった）",
    etymologyMore:["みんなが分け持つ→共通の"],
    relatedWords:[
      {word:"community",meaning:"地域社会",breakdown:"com（共に）＋ mun（分け合う）→ 暮らしを分け合う集まり"},
@@ -4462,6 +4500,7 @@ const RAW_WORDS=[
    exampleJa2:"私たちの先生が遅れて来るのは、いつもと違うことだ。",
    etymologyProcess:"un（否定）＋ use（使う）＋ ual（形容詞）→ いつものやり方ではなかったら…？",
    etymologyConclusion:"un（否定）＋ use（使う）＋ ual（形容詞）→ 日ごろ使い慣れた状態ではない＝いつもと違う",
+   spelling:"use→us（ラテン語 usus の形）",
    etymologyMore:["いつもと違うことはめったにない→珍しい"],
    relatedWords:[
      {word:"usual",meaning:"いつもの",breakdown:"use（使う）＋ ual（形容詞）→ 普段から使い慣れた"},
@@ -4478,6 +4517,7 @@ const RAW_WORDS=[
    exampleJa2:"昼休みに、自分の作文に例を2つ付け加えた。",
    etymologyProcess:"ad（～へ）＋ dat（与える）→ 今あるものへさらに与えると…？",
    etymologyConclusion:"ad（～へ）＋ dat（与える）→ 「与える」が形を変え、もとへさらに加える＝付け加える",
+   spelling:"dat→d（ad＋dare が縮まって d だけ残った）",
    relatedWords:[
      {word:"addition",meaning:"追加",breakdown:"ad（～へ）＋ dat（与える）→ 今あるものへ足すこと"},
      {word:"additional",meaning:"追加の",breakdown:"ad（～へ）＋ dat（与える）→ さらに足して与える"},
@@ -4540,6 +4580,7 @@ const RAW_WORDS=[
    exampleJa2:"校外学習で、私たちは20種類の鳥を数えた。",
    etymologyProcess:"comput（計算する）→ 一つずつまとめて計算すると…？",
    etymologyConclusion:"comput（計算する）→ 一つずつ計算して全体の数を出す＝数える",
+   spelling:"comput→count（フランス語を通って縮まった）",
    hook:"count は数を順に数えること。computer と同じラテン語から。",
    relatedWords:[
      {word:"computer",meaning:"コンピューター",breakdown:"comput（計算する）→ 計算をまとめて行う道具"},
@@ -4722,6 +4763,7 @@ const RAW_WORDS=[
    exampleJa2:"私は、新しい学校での生活に少しずつ慣れた。",
    etymologyProcess:"ad（～へ）＋ juxta（すぐそばに）→ 相手にぴったり寄せていくと…？",
    etymologyConclusion:"ad（～へ）＋ juxta（すぐそばに）→ 状況のすぐそばへ自分を合わせる＝慣れる",
+   spelling:"juxta→just（「正しい」の just と混ざった）",
    relatedWords:[
      {word:"adjustment",meaning:"調整",breakdown:"ad（～へ）＋ juxta（すぐそばに）→ ぴったり合うように寄せる"},
      {word:"adjustable",meaning:"調整できる",breakdown:"ad（～へ）＋ juxta（すぐそばに）→ 合う位置へ動かせる"},
@@ -4737,6 +4779,7 @@ const RAW_WORDS=[
    exampleJa2:"この助言は、君の大学進学の計画にも当てはまるかもしれない。",
    etymologyProcess:"ad（～へ）＋ pli（折る）→ 相手のほうへ折り合わせると…？",
    etymologyConclusion:"ad（～へ）＋ pli（折る）→ 対象のほうへ折り合わせ、ぴったり合う＝当てはまる",
+   spelling:"ad→ap（p の前で d が p に）、pli→ply（語の終わりで i が y に）",
    etymologyMore:["自分を相手のほうへ向けて差し出す→申し込む"],
    why:"【なぜ】ad（～へ）＋ plicare（折る）で「相手にぴたりと折り重ねる」。重ねてぴったり合えば「当てはまる」、願書を相手に差し出して重ねれば「申し込む」になります。\n【つながり】simple（一重の）、complicated（折り重なった）、employ（中へ折り込む＝雇う）も同じ pli です。",
    relatedWords:[
@@ -4771,6 +4814,7 @@ const RAW_WORDS=[
    exampleJa2:"最初のペンが壊れる場合に備えて、予備のペンを持っておこう。",
    etymologyProcess:"cad（落ちる）→ 出来事が降りかかってきたら…？",
    etymologyConclusion:"cad（落ちる）→ ラテン語の「起こったこと」から、一つの状況へ＝場合",
+   spelling:"cad→cas（ラテン語 casus の形）",
    etymologyMore:["実際に起こった一つの出来事→事例"],
    why:"【なぜ】ラテン語 cadere は「落ちる」。身に降りかかって落ちてきた出来事を指し、そこから「場合・事例」になりました。\n【つながり】accident（偶然落ちてきたこと＝事故）、occasion（機会）も同じ cad。入れ物の case は別の語です。",
    hook:"箱の case は別の由来。こちらは起こった出来事を表す。",
@@ -4807,6 +4851,7 @@ const RAW_WORDS=[
    exampleJa2:"君には、その試験を受ける機会がもう一度ある。",
    etymologyProcess:"cad（落ちる）→ 思いがけず目の前に落ちてきたら…？",
    etymologyConclusion:"cad（落ちる）→ さいころの落ち方のような巡り合わせから＝機会",
+   spelling:"cad→chanc（cadentia がフランス語で縮まった）",
    etymologyMore:["起こりそうな巡り合わせの度合い→見込み"],
    why:"【なぜ】ラテン語 cadere（落ちる）から。さいころがどう落ちるか分からない、その巡り合わせが chance です。\n【つながり】case（場合）、accident（事故）も同じ cad。「落ちてくるもの」なので、よい機会にも悪い偶然にも使えます。",
    hook:"by chance は「偶然に」。巡ってきた機会というイメージ。",
@@ -4986,6 +5031,7 @@ const RAW_WORDS=[
    exampleJa2:"早く終われば、授業後にバスケットボールができる。",
    etymologyProcess:"ere（前に）＋ ly（～のように）→ いつもの時より前だったら…？",
    etymologyConclusion:"ere（前に）＋ ly（～のように）→ 予定した時より前、または始まりに近い時に＝早く",
+   spelling:"ere→ear（古い英語の形から）",
    etymologyMore:["物事の始まりに近いころ→初期に"],
    relatedWords:[
      {word:"earlier",meaning:"より早く",breakdown:"ere（前に）＋ ly（～のように）＋ er（より）→ さらに前の時に"},
@@ -5002,6 +5048,7 @@ const RAW_WORDS=[
    exampleJa2:"私の最初の英語のスピーチは、学校の庭についてだった。",
    etymologyProcess:"fore（前に）＋ est（最も）→ いちばん前にあるものなら…？",
    etymologyConclusion:"fore（前に）＋ est（最も）→ 前である度合いが最も大きい＝最初の",
+   spelling:"fore→fir、est→st（古い英語で縮まった）",
    relatedWords:[
      {word:"foremost",meaning:"最も重要な",breakdown:"fore（前に）＋ most（最も）→ 一番前（後の読み替え）"},
      {word:"forehead",meaning:"額",breakdown:"fore（前に）＋ head（頭）→ 頭の前側"},
@@ -5048,6 +5095,7 @@ const RAW_WORDS=[
    exampleJa2:"来月、私たちの歴史の授業で古代の都市を学ぶ予定だ。",
    etymologyProcess:"ante（前に）→ 今よりはるか前の時代なら…？",
    etymologyConclusion:"ante（前に）→ ラテン語の「前に」から、ずっと昔のことへ＝古代の",
+   spelling:"ante→an（フランス語 ancien を通って縮まった）",
    hook:"ただ古い old より、はるか昔の時代を強く感じさせる。",
    relatedWords:[
      {word:"ancestor",meaning:"祖先",breakdown:"ante（前に）＋ ced（行く）→ 自分より前を歩んだ人"},
@@ -5147,6 +5195,7 @@ const RAW_WORDS=[
    exampleJa2:"学校は、新しい理科の授業のためにコンピューターを供給する予定だ。",
    etymologyProcess:"pro（前へ）＋ vis（見る）→ 先に見て必要をそろえると…？",
    etymologyConclusion:"pro（前へ）＋ vis（見る）→ 先を見越して、必要なものをそろえて渡す＝供給する",
+   spelling:"vis→vid（もとの動詞 videre の形）",
    relatedWords:[
      {word:"provision",meaning:"供給・備え",breakdown:"pro（前へ）＋ vis（見る）→ 先を見て用意するもの"},
      {word:"provider",meaning:"提供者",breakdown:"pro（前へ）＋ vis（見る）→ 必要を見越して渡す人"},
@@ -5312,6 +5361,7 @@ const RAW_WORDS=[
    exampleJa2:"宿題を終えた後の自由時間に、漫画を読んで過ごす。",
    etymologyProcess:"lic（許される）→ 自由にしてよいと許された時間なら…？",
    etymologyConclusion:"lic（許される）→ ラテン語の「許される」から、自分で使える時間へ＝自由時間",
+   spelling:"lic→leis（フランス語 leisir を通って変化）",
    why:"【なぜ】ラテン語 licere は「許されている」。やらなければならないことから解かれて、好きに使うことを許された時間が leisure です。\n【つながり】license（許可証）も同じ lic。at your leisure は「あなたに許される範囲で＝都合のよいときに」です。",
    hook:"仕事や義務から離れて、自分の好きに使える時間。",
    relatedWords:[
@@ -5410,6 +5460,7 @@ const RAW_WORDS=[
    exampleJa2:"昨日、私は校外学習の費用を支払った。",
    etymologyProcess:"pac（穏やかにする）→ 代金を渡して相手を満足させると…？",
    etymologyConclusion:"pac（穏やかにする）→ ラテン語の「なだめる」から、債務を清算する動きへ＝支払う",
+   spelling:"pac→pa（フランス語 paier で c が消えた）",
    why:"【なぜ】ラテン語 pacare は「なだめる・穏やかにする」。借りのある相手をなだめて静めることが、そのまま「支払う」になりました。\n【つながり】peace（平和）、pacific（穏やかな）も同じ pac。お金を払うのは、もめごとを鎮める行いだったのです。",
    hook:"pay for＋買うもの。pay＋金額で支払う額を示す。",
    relatedWords:[
@@ -5459,6 +5510,7 @@ const RAW_WORDS=[
    exampleJa2:"姉は、私たちが以前通った学校の先生と結婚した。",
    etymologyProcess:"marit（結婚した）→ 夫婦として結ばれた状態なら…？",
    etymologyConclusion:"marit（結婚した）→ ラテン語の「結婚させる」につながる語から＝結婚する",
+   spelling:"marit→mar（フランス語 marier を通って it が消えた）",
    hook:"marry＋人で「人と結婚する」。marry with 人とはしない。",
    relatedWords:[
      {word:"marriage",meaning:"結婚",breakdown:"marit（結婚した）＋ age（名詞）→ 夫婦として結ばれること"},
@@ -5721,6 +5773,7 @@ const RAW_WORDS=[
    exampleJa2:"学校のバンドでは、どの楽器を演奏したいですか。",
    etymologyProcess:"in（中へ）＋ struct（積み上げる）＋ ment（名詞）→ 使うための装備を整えると…？",
    etymologyConclusion:"in（中へ）＋ struct（積み上げる）＋ ment（名詞）→ 中に必要なものを備えることから、演奏などに使う道具へ＝楽器",
+   spelling:"struct→stru（もとの動詞 struere の形）",
    etymologyMore:["仕事のために備える道具→器具"],
    why:"【なぜ】ラテン語 instruere は in（中へ）＋ struere（積み上げる）で「中に組み立てて備える」。組み立てて備えつけたものが「道具」で、音を出すための道具が「楽器」です。\n【つながり】structure（構造）、construct（建てる）、instruct（中に積み上げる＝教える）も同じ struct です。",
    relatedWords:[
@@ -5738,6 +5791,7 @@ const RAW_WORDS=[
    exampleJa2:"なめらかに弾けるようになるまで、同じ曲を練習した。",
    etymologyProcess:"ton（音の調子）→ 張った弦が音を出すと…？",
    etymologyConclusion:"ton（音の調子）→ ギリシャ語の「張り」から、音の高さやそのつながりへ＝曲",
+   spelling:"ton→tun（tone が変化した形）",
    hook:"鼻歌でなぞれる旋律。in tune は音程が合っていること。",
    relatedWords:[
      {word:"tone",meaning:"音色・調子",breakdown:"ton（音の調子）→ 張った弦が出す音の性質"},
@@ -5754,6 +5808,7 @@ const RAW_WORDS=[
    exampleJa2:"今日の授業の新しい単語をそれぞれ使って、文を書こう。",
    etymologyProcess:"sens（感じる）＋ ence（名詞）→ 感じた考えを言葉にまとめると…？",
    etymologyConclusion:"sens（感じる）＋ ence（名詞）→ ラテン語の「意見・判断」から、意味のまとまった言葉へ＝文",
+   spelling:"sens→sent（もとの動詞 sentire の形）",
    etymologyMore:["裁判で下された判断→判決"],
    why:"【なぜ】ラテン語 sentire は「感じる・思う」。そこから「思ったこと＝意見」になり、裁判官が述べる意見が「判決」、意味のまとまった言葉が「文」になりました。\n【つながり】sense（感覚）、consent（共に思う＝同意）も同じ sent。だから sentence には今も「文」と「判決」の両方があります。",
    relatedWords:[
@@ -5918,6 +5973,7 @@ const RAW_WORDS=[
    exampleJa2:"私たちのクラスは、学校の廊下に作品を展示した。",
    etymologyProcess:"dis（バラバラに）＋ pli（折る）→ たたんだものを開いて見せると…？",
    etymologyConclusion:"dis（バラバラに）＋ pli（折る）→ たたんだ布を広げて人の目にさらす＝展示する",
+   spelling:"pli→play（フランス語 desploier を通って変化）",
    etymologyMore:["心の中を広げて見せる→（感情など）を表に出す"],
    why:"【なぜ】dis（バラバラに）＋ plicare（折る）で「たたんであるものを広げる」。旗や布を広げて見せることから、「人目にさらす・展示する」になりました。\n【つながり】deploy（部隊を展開する）は同じ語から出た兄弟。apply（折り重ねる）、simple（一重の）も同じ pli です。",
    relatedWords:[
@@ -5966,6 +6022,7 @@ const RAW_WORDS=[
    exampleJa2:"私は難しい数学のテストの間、自分のノートに頼った。",
    etymologyProcess:"re（後ろへ）＋ lig（結ぶ）→ 相手に自分をしっかり結びつけると…？",
    etymologyConclusion:"re（後ろへ）＋ lig（結ぶ）→ 相手に自分を結びつけて身を預ける＝頼る",
+   spelling:"lig→ly（フランス語 relier を通って g が消えた）",
    why:"【なぜ】re（しっかり）＋ ligare（結ぶ）で、もとは「固く結びつける」。自分を相手に結びつけて身を預けることが「頼る」になりました。\n【つながり】ligament（骨を結ぶ靭帯）も同じ lig。religion も「神と結び直すもの」と説明されることがありますが、別の語源説もあり、はっきりしていません。",
    relatedWords:[
      {word:"reliable",meaning:"信頼できる",breakdown:"re（後ろへ）＋ lig（結ぶ）→ 結びついても切れず、頼りになる"},
@@ -5982,6 +6039,7 @@ const RAW_WORDS=[
    exampleJa2:"彼女は毎朝、学校へ出かける前に祈る。",
    etymologyProcess:"prec（願う）→ 神に向かって心から願いを差し出すと…？",
    etymologyConclusion:"prec（願う）→ 神に向かって心から願いを差し出す＝祈る",
+   spelling:"prec→pra（フランス語 preier を通って変化）",
    why:"【なぜ】ラテン語 precari は「願い求める」。自分の力ではどうにもできないことを、相手に差し出して願う行いです。\n【つながり】precarious（不安定な）は同じ語から。「祈るしかない状態」という意味だったのが、「危なっかしい」になりました。",
    relatedWords:[
      {word:"prayer",meaning:"祈り",breakdown:"prec（願う）→ 神に願いを言葉にして捧げたもの"},
@@ -6077,6 +6135,7 @@ const RAW_WORDS=[
    exampleJa2:"心配している親たちが、試験会場の外で何時間も待っていた。",
    etymologyProcess:"ang（締めつける）＋ ous（形容詞）→ 胸が締めつけられて落ち着かないと…？",
    etymologyConclusion:"ang（締めつける）＋ ous（形容詞）→ 胸が締めつけられて落ち着かない＝心配して",
+   spelling:"ang→anx（g と s が合わさって x になった）",
    etymologyMore:["締めつけられるほど待ちきれない→（for ～ / to do）～を切望して"],
    why:"【なぜ】ラテン語 angere は「締めつける・苦しめる」。胸が締めつけられて落ち着かない状態が anxious です。\n【つながり】anger（怒り）、anguish（苦悩）も同じ ang。胸が狭く締めつけられる感じが、どの語にも残っています。",
    relatedWords:[
@@ -6094,6 +6153,7 @@ const RAW_WORDS=[
    exampleJa2:"その質素な食事は、キャンプ場の全員を満足させた。",
    etymologyProcess:"satis（十分に）＋ fact（作る）→ 十分だと思える状態を作ってやると…？",
    etymologyConclusion:"satis（十分に）＋ fact（作る）→ 十分だと思える状態を相手に作ってやる＝満足させる",
+   spelling:"fact→fy（フランス語 -fier を通って縮まった）",
    etymologyMore:["求められる量を十分に満たしてやる→（条件など）を満たす"],
    relatedWords:[
      {word:"satisfaction",meaning:"満足",breakdown:"satis（十分に）＋ fact（作る）→ 十分な状態を作ること"},
@@ -6110,6 +6170,7 @@ const RAW_WORDS=[
    exampleJa2:"私は隣の教室からの物音にいらいらさせられた。",
    etymologyProcess:"in（中へ）＋ od（憎しみ）→ 相手の心に嫌な気持ちを植えつけると…？",
    etymologyConclusion:"in（中へ）＋ od（憎しみ）→ 相手の心に嫌な気持ちを植えつける＝いらいらさせる",
+   spelling:"in→an、od→oy（フランス語 anoier を通って変化）",
    why:"【なぜ】ラテン語の in odio（憎しみの中に）という言い回しから。「～が嫌でたまらない」という決まり文句が縮まって一語になり、「いらいらさせる」になりました。\n【つながり】フランス語の ennui（退屈）も、同じ言い回しから生まれた語です。",
    relatedWords:[
      {word:"annoying",meaning:"いらだたしい",breakdown:"in（中へ）＋ od（憎しみ）＋ ing（形容詞）→ 嫌な気持ちを起こさせる"},
@@ -6207,6 +6268,7 @@ const RAW_WORDS=[
    exampleJa2:"科学への私の関心は、あの夏の合宿のあとで大きくなった。",
    etymologyProcess:"inter（間の）＋ esse（ある）→ 自分と物事の間に入り込んでくるものは…？",
    etymologyConclusion:"inter（間の）＋ esse（ある）→ 自分と物事の間に入り込んでくる心の動き＝関心",
+   spelling:"esse→est（ラテン語で「～がある」の est の形）",
    why:"【なぜ】inter（間に）＋ esse（ある）で「自分と物事の間にある」。自分に関わりがあること、つまり「利害」を指しました。お金では貸し借りの間に生まれるもの＝「利息」、心では引きつけられること＝「関心」になります。\n【つながり】だから interest には今も「関心」と「利息」の両方がある。どちらも「自分との間にあるもの」です。",
    relatedWords:[
      {word:"interesting",meaning:"興味深い",breakdown:"inter（間の）＋ esse（ある）＋ ing（形容詞）→ 心の間に入り込む"},
@@ -6256,6 +6318,7 @@ const RAW_WORDS=[
    exampleJa2:"今、計画を変える良い理由はない。",
    etymologyProcess:"rat（計算する）→ 筋道を数え上げて示せるものは…？",
    etymologyConclusion:"rat（計算する）→ 筋道を数え上げて相手に示せるもの＝理由",
+   spelling:"rat→reas（フランス語 raison を通って変化）",
    etymologyMore:["筋道を数えて考える心の力→理性"],
    relatedWords:[
      {word:"rate",meaning:"割合",breakdown:"rat（計算する）→ 数え上げて出した比の値"},
@@ -6335,6 +6398,7 @@ const RAW_WORDS=[
    exampleJa2:"喫煙は、のちの人生で多くの種類の病気を引き起こす。",
    etymologyProcess:"cus（原因）→ ものごとの始まりとなってあとを動かすと…？",
    etymologyConclusion:"cus（原因）→ ものごとの始まりとなって、あとを動かす＝引き起こす",
+   spelling:"cus→caus（ラテン語 causa の形）",
    relatedWords:[
      {word:"accuse",meaning:"非難する",breakdown:"ad（～へ）＋ cus（原因）→ 責めの原因を相手に向ける"},
      {word:"excuse",meaning:"言い訳",breakdown:"ex（外へ）＋ cus（原因）→ 責めの原因を外へ取り除く"},
@@ -6350,6 +6414,7 @@ const RAW_WORDS=[
    exampleJa2:"睡眠不足は、記憶と気分に影響を与える。",
    etymologyProcess:"ad（～へ）＋ fect（作る）→ 相手に働きかけて変化を作り出すと…？",
    etymologyConclusion:"ad（～へ）＋ fect（作る）→ 相手に働きかけて、変化を作り出す＝影響を与える",
+   spelling:"ad→af（f の前で d が f に変わった）",
    etymologyMore:["病気が体に働きかけて害する→（病気が）～を冒す"],
    relatedWords:[
      {word:"effect",meaning:"効果",breakdown:"ef（外へ）＋ fect（作る）→ 外にはっきり現れた結果"},
@@ -6477,6 +6542,7 @@ const RAW_WORDS=[
    exampleJa2:"私たちは空港へ出発する準備がほとんどできている。",
    etymologyProcess:"all（すっかり）＋ most（最も）→ 全部に最も近いところまで来ていると…？",
    etymologyConclusion:"all（すっかり）＋ most（最も）→ 全部に最も近いところまで来ている＝ほとんど",
+   spelling:"all→al（l が1つ消えた）",
    relatedWords:[
      {word:"always",meaning:"いつも",breakdown:"all（すっかり）＋ way（道）→ どの道のりもずっと続けて"},
      {word:"already",meaning:"すでに",breakdown:"all（すっかり）＋ ready（整った）→ すっかり用意が整って"},
@@ -6599,6 +6665,7 @@ const RAW_WORDS=[
    exampleJa2:"図書館は平日の夕方、8時まで開いている。",
    etymologyProcess:"till（～まで）→ ある時点に行き着くまでずっと続くと…？",
    etymologyConclusion:"till（～まで）→ ある時点に行き着くまでずっと続く＝～まで",
+   spelling:"till→til（l が1つ消えた）",
    hook:"till はほぼ同じ意味。until の un- は古い語 und（～に至るまで）で、打ち消しではない。",
    relatedWords:[
      {word:"till",meaning:"～まで",breakdown:"till（～まで）→ until とほぼ同じ意味で使う短い語"},
@@ -6679,6 +6746,7 @@ const RAW_WORDS=[
    exampleJa2:"彼女は友人の宿題を写したとして告発された。",
    etymologyProcess:"ad（～へ）＋ cus（原因）→ 責めの原因を相手に向けて突きつけると…？",
    etymologyConclusion:"ad（～へ）＋ cus（原因）→ 責めの原因を相手に向けて突きつける＝告発する",
+   spelling:"ad→ac（c の前で d が c に変わった）",
    relatedWords:[
      {word:"cause",meaning:"引き起こす",breakdown:"cus（原因）→ ものごとの始まりとなってあとを動かす"},
      {word:"excuse",meaning:"言い訳",breakdown:"ex（外へ）＋ cus（原因）→ 責めの原因を外へ取り除く"},
@@ -6742,6 +6810,7 @@ const RAW_WORDS=[
    exampleJa2:"彼女は制服について、論争を招く記事を書いた。",
    etymologyProcess:"contra（逆に）＋ vers（回る）→ 意見が逆を向いて回り出すと…？",
    etymologyConclusion:"contra（逆に）＋ vers（回る）→ 意見が逆を向いて回り、ぶつかり合う＝論争を招く",
+   spelling:"contra→contro（ラテン語でも contro- の形があった）",
    relatedWords:[
      {word:"controversy",meaning:"論争",breakdown:"contra（逆に）＋ vers（回る）→ 意見が逆を向いてぶつかること"},
      {word:"reverse",meaning:"逆にする",breakdown:"re（後ろへ）＋ vers（回る）→ 向きを反対に回す"},
@@ -6806,6 +6875,7 @@ const RAW_WORDS=[
    exampleJa2:"名声への彼の願望は、彼を別人に変えた。",
    etymologyProcess:"de（離れて）＋ sider（星）→ 星を見上げて届かぬものを求めると…？",
    etymologyConclusion:"de（離れて）＋ sider（星）→ 星を見上げ、手の届かぬものを求める気持ち＝願望",
+   spelling:"sider→sire（フランス語を通って縮まった）",
    why:"【なぜ】ラテン語 desiderare は「強く求める・なくて寂しく思う」。de（離れて）＋ sidus（星）から「星から離れて、星の知らせを待ちわびる」と説明されることが多いのですが、これは一つの説で、はっきりとは分かっていません。\n【つながり】consider（よく考える）も sidus（星）から来たと言われる語。星を見つめて考える姿が、どちらの語にも重ねられています。",
    relatedWords:[
      {word:"consider",meaning:"熟考する",breakdown:"com（共に）＋ sider（星）→ 星をよく見比べて先を占う"},
@@ -6822,6 +6892,7 @@ const RAW_WORDS=[
    exampleJa2:"先生は、級友を助ける生徒をよく褒める。",
    etymologyProcess:"preci（値打ち）→ 相手の値打ちを高く言い表すと…？",
    etymologyConclusion:"preci（値打ち）→ 相手の値打ちを高く見て言い表す＝褒める",
+   spelling:"preci→prais（フランス語を通って形が変わった）",
    why:"【なぜ】ラテン語 pretium は「値打ち・値段」。相手の値打ちを高く言うことが praise です。同じ語から price（価格）と prize（賞）も生まれました。\n【つながり】praise・price・prize は三つ子の語。appreciate（値打ちを見積もる＝よさがわかる）も同じ family です。",
    relatedWords:[
      {word:"price",meaning:"値段",breakdown:"preci（値打ち）→ ものに付けられた値打ちの数字"},
@@ -6885,6 +6956,7 @@ const RAW_WORDS=[
    exampleJa2:"今この村では、だれもその古い話に言及しない。",
    etymologyProcess:"mens（心）＋ ion（名詞）→ 心にあることを短く口に出すと…？",
    etymologyConclusion:"mens（心）＋ ion（名詞）→ 心にあることを短く口に出す＝（ついでに）述べる",
+   spelling:"mens→ment（ラテン語の変化形 mentis の形から）",
    why:"【なぜ】ラテン語 mens は「心」。心に浮かんでいることを短く外へ出すのが mention で、「心に上らせる」が芯です。\n【つながり】mental（心の）、mind（心）も同じ family。Don't mention it.（どういたしまして）は「口に出すほどのことではない」という意味です。",
    relatedWords:[
      {word:"mental",meaning:"精神の",breakdown:"mens（心）＋ al（～の）→ 心のはたらきにかかわる"},
@@ -6901,6 +6973,7 @@ const RAW_WORDS=[
    exampleJa2:"その手紙は、彼女の本当の気持ちを古い友人に伝えた。",
    etymologyProcess:"com（共に）＋ via（道）→ 道を通って相手のもとまで運んでいくと…？",
    etymologyConclusion:"com（共に）＋ via（道）→ 道を通って相手のもとまで運んでいく＝伝える",
+   spelling:"com→con（v の前で m が n に）、via→vey（フランス語を通って変化）",
    etymologyMore:["物をある所から別の所へ運ぶ→～を運ぶ"],
    relatedWords:[
      {word:"convoy",meaning:"護送隊",breakdown:"com（共に）＋ via（道）→ 同じ道を連れ立って行く一団"},
@@ -6934,6 +7007,7 @@ const RAW_WORDS=[
    exampleJa2:"彼女はいつも、正直さが速さより大切だと強調する。",
    etymologyProcess:"en（中へ）＋ phas（見せる）→ 中身をくっきり見せて目立たせると…？",
    etymologyConclusion:"en（中へ）＋ phas（見せる）→ 中身をくっきり見せて目立たせる＝強調する",
+   spelling:"en→em（p の前で n が m に変わった）",
    relatedWords:[
      {word:"emphasis",meaning:"強調",breakdown:"en（中へ）＋ phas（見せる）→ とくに目立たせている部分"},
      {word:"phase",meaning:"段階",breakdown:"phas（見せる）→ 月が見せる形の移り変わり"},
@@ -6964,6 +7038,7 @@ const RAW_WORDS=[
    exampleJa2:"彼女は数分以内に、私のメールに返事をした。",
    etymologyProcess:"re（後ろへ）＋ pli（折る）→ 相手の言葉を折り返して戻すと…？",
    etymologyConclusion:"re（後ろへ）＋ pli（折る）→ 相手の言葉を折り返して戻す＝返事をする",
+   spelling:"pli→ply（フランス語を通って i が y に）",
    relatedWords:[
      {word:"display",meaning:"展示する",breakdown:"dis（バラバラに）＋ pli（折る）→ たたんだ布を広げて見せる"},
      {word:"apply",meaning:"申し込む",breakdown:"ad（～へ）＋ pli（折る）→ 願いを折りたたんで差し出す"},
@@ -7091,6 +7166,7 @@ const RAW_WORDS=[
    exampleJa2:"携帯用の装置は、私たちが英語を学ぶ方法を変えた。",
    etymologyProcess:"divis（分ける）→ 仕事を切り分けて工夫した仕掛けは…？",
    etymologyConclusion:"divis（分ける）→ 仕事を切り分け、工夫して作り出した仕掛け＝装置",
+   spelling:"divis→devic（フランス語 devis を通って形が変わった）",
    etymologyMore:["うまく分けて考え出す知恵→工夫"],
    why:"【なぜ】ラテン語 dividere は「分ける」。仕組みを細かく分けて工夫することが devise（考案する）で、そうして生まれた品物が device です。\n【つながり】divide（分ける）、division（分割）も同じ divis。スマホなどの「デバイス」も、もとは「工夫したもの」です。",
    relatedWords:[
@@ -7139,6 +7215,7 @@ const RAW_WORDS=[
    exampleJa2:"昔この村では、木が主な燃料だった。",
    etymologyProcess:"focus（いろり・火）→ いろりにくべて燃やすものは…？",
    etymologyConclusion:"focus（いろり・火）→ いろりにくべて火を保たせるもの＝燃料",
+   spelling:"focus→fu（フランス語を通って縮まった）",
    etymologyMore:["火に燃料をくべるように強める→～をあおる"],
    relatedWords:[
      {word:"focus",meaning:"焦点",breakdown:"focus（いろり・火）→ 光が集まって燃え立つ一点"},
@@ -7203,6 +7280,7 @@ const RAW_WORDS=[
    exampleJa2:"みんなの助けなしには、私たちはこの仕事をやり遂げられない。",
    etymologyProcess:"ad（～へ）＋ com（すっかり）＋ ple（満たす）→ 最後まで満たしきると…？",
    etymologyConclusion:"ad（～へ）＋ com（すっかり）＋ ple（満たす）→ 最後まで満たしきる＝やり遂げる",
+   spelling:"ad→ac（c の前で d が c に変わった）、ple→pl（フランス語を通って変化）",
    relatedWords:[
      {word:"complete",meaning:"完全な",breakdown:"com（すっかり）＋ ple（満たす）→ 欠けなくすっかり満たされる"},
      {word:"accomplishment",meaning:"業績",breakdown:"ad（～へ）＋ com（すっかり）＋ ple（満たす）→ やり遂げた中身"},
@@ -7348,6 +7426,7 @@ const RAW_WORDS=[
    exampleJa2:"彼は暑い夏の日々の間、食欲を失った。",
    etymologyProcess:"ad（～へ）＋ pet（求める）→ 食べ物へ向かって強く求めると…？",
    etymologyConclusion:"ad（～へ）＋ pet（求める）→ 食べ物へ向かって強く求める気持ち＝食欲",
+   spelling:"ad→ap（p の前で d が p に変わった）",
    etymologyMore:["食べ物以外にも向かう強い求め→（for ～）（～への）強い欲求"],
    relatedWords:[
      {word:"compete",meaning:"競争する",breakdown:"com（共に）＋ pet（求める）→ 同じものを互いに求め合う"},
@@ -7381,6 +7460,7 @@ const RAW_WORDS=[
    exampleJa2:"監督は試合の前に、精神の強さについて話した。",
    etymologyProcess:"mens（心）＋ al（～の）→ 体ではなく心のはたらきにかかわると…？",
    etymologyConclusion:"mens（心）＋ al（～の）→ 体ではなく心のはたらきにかかわる＝精神の",
+   spelling:"mens→ment（ラテン語の変化形 mentis の形から）",
    relatedWords:[
      {word:"mention",meaning:"（ついでに）述べる",breakdown:"mens（心）＋ ion（名詞）→ 心にあることを短く口に出す"},
      {word:"comment",meaning:"論評",breakdown:"com（共に）＋ mens（心）→ 心に浮かんだことを言い添える"},
@@ -7507,6 +7587,7 @@ const RAW_WORDS=[
    exampleJa2:"彼女は早く回復し、月曜には部活の練習に戻っていた。",
    etymologyProcess:"re（再び）＋ cuper（つかむ）→ 手からこぼれたものをもう一度…？",
    etymologyConclusion:"re（再び）＋ cuper（つかむ）→ 失った体調や物をもう一度自分の手につかみ直す＝回復する",
+   spelling:"cuper→cover（フランス語を通って形が変わった）",
    etymologyMore:["失った物をもう一度手に取る→～を取り戻す"],
    relatedWords:[
      {word:"recovery",meaning:"回復",breakdown:"re（再び）＋ cuper（つかむ）→ 元の状態を取り戻していくこと"},
@@ -7573,6 +7654,7 @@ const RAW_WORDS=[
    exampleJa2:"出血が止まるまで、切り傷を清潔な布で押さえなさい。",
    etymologyProcess:"blood（血）→ 体の中の赤い液が外へ出てくると…？",
    etymologyConclusion:"blood（血）→ 体の中をめぐる赤い液が傷口から外へ流れ出る＝出血する",
+   spelling:"blood→bleed（母音が変わって動詞になった）",
    etymologyMore:["傷を付けて血を外へ流させる→～から血を抜く"],
    relatedWords:[
      {word:"blood",meaning:"血",breakdown:"blood（血）→ 体じゅうをめぐって酸素を運ぶ赤い液"},
@@ -7590,6 +7672,7 @@ const RAW_WORDS=[
    hook:"「かすかな」と「気を失う」は同じ絵。力が抜けて存在が薄くなること。",
    etymologyProcess:"feint（ふりをする）→ 中身がなく頼りないと…？",
    etymologyConclusion:"feint（ふりをする）→ 見せかけだけで中身がなく、あるかないか分からないほど薄い＝かすかな",
+   spelling:"feint→faint（英語でつづりが変わった）",
    relatedWords:[
      {word:"faintly",meaning:"かすかに",breakdown:"feint（ふりをする）＋ ly（副詞）→ 中身がなくぼんやりと"},
      {word:"feign",meaning:"～のふりをする",breakdown:"feint（ふりをする）→ 中身がないまま、そういうふりだけをする"},
@@ -7734,6 +7817,7 @@ const RAW_WORDS=[
    exampleJa2:"私たちのクラスは、日本の家庭での性別の役割について1時間話し合った。",
    etymologyProcess:"gener（生み出す）→ 生まれつきで分けられる種類は…？",
    etymologyConclusion:"gener（生み出す）→ 生まれによって分けられる人の種類＝性，性別",
+   spelling:"gener→gender（フランス語を通って d が入った）",
    why:"【なぜ】ラテン語 genus は「生まれ・種類」。もとは文法で名詞を分ける「性」を指す言葉で、そこから人を生まれで分ける「性別」を指すようになりました。\n【つながり】generate（生み出す）、genre（ジャンル＝種類）、general（全体に共通する）も同じ gen です。",
    relatedWords:[
      {word:"generation",meaning:"世代",breakdown:"gener（生み出す）＋ ation（名詞）→ 同じころに生み出された人々"},
@@ -7766,6 +7850,7 @@ const RAW_WORDS=[
    exampleJa2:"彼女はここに10年住んだあと、日本の市民になった。",
    etymologyProcess:"civ（市民）＋ izen（人）→ 都市に暮らし権利を持つ人は…？",
    etymologyConclusion:"civ（市民）＋ izen（人）→ 都市に暮らし、その一員としての権利を持つ人＝市民",
+   spelling:"civ→cit（フランス語を通って形が変わった）",
    etymologyMore:["都市の一員から国の一員へ広がった→国民"],
    relatedWords:[
      {word:"city",meaning:"都市",breakdown:"civ（市民）→ 市民たちが集まって暮らす大きなまち"},
@@ -7890,6 +7975,7 @@ const RAW_WORDS=[
    exampleJa2:"彼女はチーム全体の重荷を自分の肩に背負っていた。",
    etymologyProcess:"bear（運ぶ）＋ den（名詞）→ 背負って運ばされるものは…？",
    etymologyConclusion:"bear（運ぶ）＋ den（名詞）→ 背負って運ばなければならない重いもの＝重荷",
+   spelling:"bear→bur（古い英語で母音が変わった）",
    etymologyMore:["重い荷を背負わせる→～に負担をかける"],
    relatedWords:[
      {word:"bear",meaning:"～に耐える",breakdown:"bear（運ぶ）→ 重いものを背負って持ちこたえる"},
@@ -8126,6 +8212,7 @@ const RAW_WORDS=[
    exampleJa2:"私たちのクラスは学園祭で慈善のためにクッキーを売った。",
    etymologyProcess:"car（いとしい）＋ ity（名詞）→ 人をいとしく思う心が形になると…？",
    etymologyConclusion:"car（いとしい）＋ ity（名詞）→ 人をいとしく思う心が施しの形になったもの＝慈善",
+   spelling:"car→char（フランス語で c が ch に変わった）",
    why:"【なぜ】ラテン語 carus は「いとしい・大切な」。キリスト教で「人への愛」を表す語として使われ、その愛が形になった行い、つまり「施し・慈善」になりました。\n【つながり】cherish（大切にする）も同じ car。今の「チャリティー」の根には、いとしく思う心があります。",
    relatedWords:[
      {word:"charitable",meaning:"慈善の",breakdown:"car（いとしい）＋ able（～の性質の）→ 人をいとしく思う心の"},
@@ -8142,6 +8229,7 @@ const RAW_WORDS=[
    exampleJa2:"新しいバス路線は、村の人々に本当の恩恵をもたらした。",
    etymologyProcess:"bene（良い）＋ fic（作る）→ 相手に良いものを作って渡すと…？",
    etymologyConclusion:"bene（良い）＋ fic（作る）→ 相手のために良いことを作り出して渡すもの＝恩恵",
+   spelling:"fic→fit（フランス語を通って形が変わった）",
    relatedWords:[
      {word:"beneficial",meaning:"有益な",breakdown:"bene（良い）＋ fic（作る）＋ ial（形容詞）→ 良い結果を作り出す"},
      {word:"perfect",meaning:"完全な",breakdown:"per（すっかり）＋ fic（作る）→ すっかり作り終えて欠けがない"},
@@ -8157,6 +8245,7 @@ const RAW_WORDS=[
    exampleJa2:"動物の福祉が、私たちの英語スピーチ大会の題目だった。",
    etymologyProcess:"well（うまく）＋ fare（やっていく）→ 皆がうまくやっていける仕組みは…？",
    etymologyConclusion:"well（うまく）＋ fare（やっていく）→ 皆がうまくやっていけるよう支える仕組み＝福祉",
+   spelling:"well→wel（くっつくとき l が1つに）",
    etymologyMore:["うまくやっている状態そのもの→（人の）幸福"],
    relatedWords:[
      {word:"farewell",meaning:"別れのあいさつ",breakdown:"fare（やっていく）＋ well（うまく）→ うまくやっていってね、の言葉"},
@@ -8331,6 +8420,7 @@ const RAW_WORDS=[
    exampleJa2:"教室の掃除は、私たちのクラス全体の毎日の義務だ。",
    etymologyProcess:"deb（負う）＋ ty（名詞）→ 当然返さねばならないものは…？",
    etymologyConclusion:"deb（負う）＋ ty（名詞）→ 当然果たして返さなければならない借りのようなもの＝義務",
+   spelling:"deb→du（フランス語 deu「負った」を通って縮まった）",
    etymologyMore:["国に果たすべき支払いの務め→関税"],
    relatedWords:[
      {word:"due",meaning:"支払われるべき",breakdown:"deb（負う）→ 当然返さなければならない状態にある"},
@@ -8347,6 +8437,7 @@ const RAW_WORDS=[
    exampleJa2:"昨夜、体育館の扉を施錠することに責任があったのは誰ですか。",
    etymologyProcess:"re（後ろへ）＋ spond（誓う）→ 問われたら答えを返すと約束すると…？",
    etymologyConclusion:"re（後ろへ）＋ spond（誓う）＋ ible（できる）→ 問われたら答えを返すと誓える＝責任がある",
+   spelling:"spond→spons（ラテン語 sponsus の形から）",
    etymologyMore:["任されたら答えを返してくれる→信頼できる"],
    relatedWords:[
      {word:"respond",meaning:"返答する",breakdown:"re（後ろへ）＋ spond（誓う）→ 相手の問いかけに言葉を返す"},
@@ -8364,6 +8455,7 @@ const RAW_WORDS=[
    hook:"「保険証券」の policy は語源が別の同音語。ここでは扱わない。",
    etymologyProcess:"polit（都市）＋ y（名詞）→ 都市をどう治めるか決めた筋道は…？",
    etymologyConclusion:"polit（都市）＋ y（名詞）→ 都市をどう治めるかを決めておく筋道＝政策，方針",
+   spelling:"polit→polic（フランス語を通って t が c に）",
    relatedWords:[
      {word:"politics",meaning:"政治",breakdown:"polit（都市）＋ ics（学問・活動）→ 都市をどう治めるかを決める営み"},
      {word:"police",meaning:"警察",breakdown:"polit（都市）→ 都市の秩序を保つために置かれた組織"},
@@ -8394,6 +8486,7 @@ const RAW_WORDS=[
    exampleJa2:"私たちのクラスは、地元の製紙工業を学ぶため工場を見学した。",
    etymologyProcess:"indu（中で）＋ stru（積み上げる）→ 内側でこつこつ積み上げる働きは…？",
    etymologyConclusion:"indu（中で）＋ stru（積み上げる）→ 休まず内側で物を積み上げ続ける働き＝工業，産業",
+   spelling:"stru→stry",
    why:"【なぜ】industry のもとの意味は「勤勉さ・たゆまぬ働き」。休まず働き続けることを指しました。産業革命のころ、その働きが工場という形になり、「工業・産業」を指すようになります。\n【つながり】だから industrious は今も「勤勉な」、industrial が「産業の」。形が似ていて意味が分かれるので注意します。",
    relatedWords:[
      {word:"structure",meaning:"構造",breakdown:"stru（積み上げる）＋ ure（名詞）→ 積み上げてできた組み立て"},
@@ -8425,6 +8518,7 @@ const RAW_WORDS=[
    exampleJa2:"私たちの学校の売店の利益はすべて、運動部へ回される。",
    etymologyProcess:"pro（前へ）＋ fic（作る）→ かけた元手より前へ作り出せた分は…？",
    etymologyConclusion:"pro（前へ）＋ fic（作る）→ かけた元手より前へ多く作り出せた余りの分＝利益",
+   spelling:"fic→fit（フランス語を通って形が変わった）",
    relatedWords:[
      {word:"profitable",meaning:"もうかる",breakdown:"pro（前へ）＋ fic（作る）＋ able（できる）→ 元手より多く作り出せる"},
      {word:"perfect",meaning:"完全な",breakdown:"per（すっかり）＋ fic（作る）→ すっかり作り終えて欠けがない"},
@@ -8502,6 +8596,7 @@ const RAW_WORDS=[
    exampleJa2:"修理店は、新しい電池のぶんの少額の料金を加えた。",
    etymologyProcess:"carr（荷車）→ 荷車に重い荷を積み込むように負わせると…？",
    etymologyConclusion:"carr（荷車）→ 荷車に荷を積むように相手へ負わせる支払い＝料金",
+   spelling:"carr→charg（フランス語で c が ch に変わった）",
    why:"【なぜ】ラテン語 carrus は「荷車」。荷車に荷を積むことが charge で、そこから「積んで負わせる」意味が広がりました。お金を負わせれば「料金」、電気を積めば「充電」、務めを負わせれば「責任」です。\n【つながり】car（車）、cargo（積み荷）、carry（運ぶ）も同じ car。in charge of（～を任されて）にも「背負う」が生きています。",
    relatedWords:[
      {word:"carry",meaning:"～を運ぶ",breakdown:"carr（荷車）→ 荷車に載せるようにして物を運んでいく"},
@@ -8693,6 +8788,7 @@ const RAW_WORDS=[
    exampleJa2:"毎週金曜、2人の生徒が理科室の掃除に割り当てられる。",
    etymologyProcess:"ad（～へ）＋ sign（しるし）→ 相手ごとにしるしをつけて分けると…？",
    etymologyConclusion:"ad（～へ）＋ sign（しるし）→ 相手ごとにしるしをつけて取り分を決める＝割り当てる",
+   spelling:"ad→as（s の前で d が s に変わった）",
    etymologyMore:["人にしるしをつけて役目を割り振る→（人）を任命する"],
    relatedWords:[
      {word:"assignment",meaning:"課題，宿題",breakdown:"ad（～へ）＋ sign（しるし）＋ ment（名詞）→ 割り当てられた仕事"},
@@ -8725,6 +8821,7 @@ const RAW_WORDS=[
    exampleJa2:"よい教師は、若い生徒の経歴を変えることができる。",
    etymologyProcess:"carr（荷車）→ 荷車が通ってできた一本の道は…？",
    etymologyConclusion:"carr（荷車）→ 荷車が通ってできた道のように、歩んできた一本の道＝経歴",
+   spelling:"carr→car（フランス語を通って r が1つに）",
    etymologyMore:["走り抜けて上を目指す道→出世コース"],
    why:"【なぜ】ラテン語 carrus は「荷車」で、carraria は「荷車の通る道」。そこから競走路を指すようになり、人が走り抜けていく一本の道＝「経歴」になりました。\n【つながり】car（車）、cargo（積み荷）、charge（積んで負わせる）も同じ car。career には今も「全速力で走る」という動詞の意味があります。",
    relatedWords:[
@@ -8839,6 +8936,7 @@ const RAW_WORDS=[
    exampleJa2:"彼女の同僚たちは、職場での最後の日に花を贈った。",
    etymologyProcess:"col（共に）＋ leg（任じる）→ 同じ役目を任された相手は…？",
    etymologyConclusion:"col（共に）＋ leg（任じる）＋ ue（もの）→ 同じ役目を共に任されている相手＝同僚",
+   spelling:"leg→leag",
    relatedWords:[
      {word:"college",meaning:"大学",breakdown:"col（共に）＋ leg（任じる）→ 同じ学びを共に任された仲間の集まる場"},
      {word:"delegate",meaning:"代表者",breakdown:"de（離れて）＋ leg（任じる）＋ ate（動詞）→ 役目を託して送り出す人"},
@@ -8854,6 +8952,7 @@ const RAW_WORDS=[
    exampleJa2:"二つの町を結ぶため、新しいバスの路線網が導入された。",
    etymologyProcess:"sym（共に）＋ stem（立てる）→ ばらばらの物を共に組み立てると…？",
    etymologyConclusion:"sym（共に）＋ stem（立てる）→ ばらばらの物を共に組み立てて作った全体＝制度，体系",
+   spelling:"sym→sy（s の前で m が落ちた）",
    etymologyMore:["部品を共に組み立てた一式→（機械の）装置一式"],
    relatedWords:[
      {word:"symptom",meaning:"症状",breakdown:"sym（共に）＋ ptom（落ちる）→ 病気と一緒に体へ降りかかる目印"},
@@ -8949,6 +9048,7 @@ const RAW_WORDS=[
    exampleJa2:"学校生活のこっけいな側面が、彼の演説には欠けていた。",
    etymologyProcess:"ad（～へ）＋ spect（見る）→ ある向きから見たときの姿は…？",
    etymologyConclusion:"ad（～へ）＋ spect（見る）→ ある向きへ目を向けたときに見えてくる姿＝側面",
+   spelling:"ad→a（s の前で d が消えた）",
    etymologyMore:["目を向けたとき見える姿そのもの→外観"],
    relatedWords:[
      {word:"respect",meaning:"～を尊敬する",breakdown:"re（すっかり）＋ spect（見る）→ 何度も振り返って見るほど敬う"},
@@ -9029,6 +9129,7 @@ const RAW_WORDS=[
    exampleJa2:"彼女は友達へのプレゼントに短いメモをくっつけた。",
    etymologyProcess:"ad（～へ）＋ tach（杭で留める）→ 相手のほうへ杭で留めると…？",
    etymologyConclusion:"ad（～へ）＋ tach（杭で留める）→ 相手のほうへ杭を打ち込んでぴたりと留める＝くっつける",
+   spelling:"ad→at（t の前で d が t に変わった）",
    etymologyMore:["ファイルをメールに留めつける→（メールに）添付する"],
    relatedWords:[
      {word:"detach",meaning:"取り外す",breakdown:"de（離れて）＋ tach（杭で留める）→ 打った杭を抜いて切り離す"},
@@ -9077,6 +9178,7 @@ const RAW_WORDS=[
    exampleJa2:"私はいつもその歌から中学の最後の日を連想していた。",
    etymologyProcess:"ad（～へ）＋ soci（仲間）＋ ate（動詞）→ 仲間のほうへ引き寄せると…？",
    etymologyConclusion:"ad（～へ）＋ soci（仲間）＋ ate（動詞）→ あるものを仲間のほうへ引き寄せて結ぶ＝連想する",
+   spelling:"ad→as（s の前で d が s に変わった）",
    etymologyMore:["人を仲間のほうへ寄せる→仲間として付き合う"],
    relatedWords:[
      {word:"social",meaning:"社会の；社交的な",breakdown:"soci（仲間）＋ al（～の）→ 人が仲間として集まっているようす"},
@@ -9250,6 +9352,7 @@ const RAW_WORDS=[
    exampleJa2:"小さな国でも、よい計画があれば大国を打ち負かすことがある。",
    etymologyProcess:"dis（否定）＋ feat（作る）→ 相手が作り上げた物を崩すと…？",
    etymologyConclusion:"dis（否定）＋ feat（作る）→ 相手が作り上げた構えを逆に崩して倒す＝打ち負かす",
+   spelling:"dis→de（フランス語を通って s が消えた）",
    relatedWords:[
      {word:"feat",meaning:"偉業，離れ業",breakdown:"feat（作る）→ ふつうの人には作り出せない大仕事"},
      {word:"factory",meaning:"工場",breakdown:"feat（作る）＋ ory（場所）→ 物を作り出す場所"},
@@ -9594,6 +9697,7 @@ const RAW_WORDS=[
    exampleJa2:"日曜の朝、父親が彼女に付き添って病院へ行った。",
    etymologyProcess:"ad（～へ）＋ com（共に）＋ pan（パン）→ パンを分け合う仲は…？",
    etymologyConclusion:"ad（～へ）＋ com（共に）＋ pan（パン）→ パンを分け合う仲間としてそばを歩く＝一緒に行く",
+   spelling:"ad→ac（c の前で d が c に変わった）",
    etymologyMore:["歌う人のそばに音でついていく→（音楽で）伴奏する"],
    relatedWords:[
      {word:"company",meaning:"会社；同席の人",breakdown:"com（共に）＋ pan（パン）＋ y（名詞）→ パンを分け合う仲間の集まり"},
@@ -10630,6 +10734,7 @@ const RAW_WORDS=[
    exampleJa2:"私は明日の放課後、部活のミーティングに出席するつもりだ。",
    etymologyProcess:"ad（～へ）＋ tend（伸ばす）→ 心をその場へ伸ばしていくと…？",
    etymologyConclusion:"ad（～へ）＋ tend（伸ばす）→ 心と体をその場へ伸ばして、そこに身を置く＝出席する",
+   spelling:"ad→at（t の前で d が t に変わった）",
    why:"【なぜ】ad（～へ）＋ tendere（伸ばす）で「心をそちらへ伸ばす」。心を向けてその場に身を置くことが「出席する」、心を向けて手をかけることが「世話をする」です。\n【つながり】attention（注意）、tend（～しがちである）、extend（伸ばす）も同じ tend。Attention! は「心をこちらへ伸ばせ」ということです。",
    relatedWords:[
      {word:"tend",meaning:"～しがちである",breakdown:"tend（伸ばす）→ 気持ちがある方向へ自然に伸びていく"},
@@ -10739,6 +10844,7 @@ const RAW_WORDS=[
    exampleJa2:"この難しい問いに、完璧な答えは存在するのだろうか。",
    etymologyProcess:"ex（外へ）＋ sist（立つ）→ 外に姿を現して立っていると…？",
    etymologyConclusion:"ex（外へ）＋ sist（立つ）→ 外に姿を現して、そこに立っている＝存在する",
+   spelling:"sist→ist（x に s の音がふくまれ、s が落ちた）",
    relatedWords:[
      {word:"existence",meaning:"存在",breakdown:"ex（外へ）＋ sist（立つ）＋ ence（名詞）→ 外に立って在ること"},
      {word:"insist",meaning:"主張する",breakdown:"in（上に）＋ sist（立つ）→ 一点の上に立ち続けて譲らない"},
@@ -10769,6 +10875,7 @@ const RAW_WORDS=[
    exampleJa2:"彼がうそをついているとは、私には少しも思い浮かばなかった。",
    etymologyProcess:"oc（～に向かって）＋ curr（走る）→ 出来事が目の前へ走り寄ると…？",
    etymologyConclusion:"oc（～に向かって）＋ curr（走る）→ 出来事が向こうから目の前へ走り寄ってくる＝起こる",
+   spelling:"curr→cur（英語では r が1つになった）",
    etymologyMore:["考えが心に走り寄ってくる→（it occurs to A で）ふと思い浮かぶ"],
    relatedWords:[
      {word:"current",meaning:"現在の；流れ",breakdown:"curr（走る）＋ ent（～している）→ 今まさに走って流れているもの"},
@@ -10847,6 +10954,7 @@ const RAW_WORDS=[
    exampleJa2:"長い試験の間、よい調子を維持するのは難しい。",
    etymologyProcess:"man（手）＋ tain（保つ）→ 手でしっかり支えて持ち続けると…？",
    etymologyConclusion:"man（手）＋ tain（保つ）→ 手でしっかり支えて、同じ状態のまま持ち続ける＝維持する",
+   spelling:"man→main（フランス語を通って形が変わった）",
    etymologyMore:["意見を手放さず保ち続ける→（意見を）主張し続ける"],
    relatedWords:[
      {word:"contain",meaning:"含む",breakdown:"con（共に）＋ tain（保つ）→ 中にまとめて保っている"},
@@ -10944,6 +11052,7 @@ const RAW_WORDS=[
    exampleJa2:"彼女は何年ものダンスからよいリズム感を習得した。",
    etymologyProcess:"ad（～へ）＋ quire（求める）→ 自分のほうへ少しずつ求め寄せると…？",
    etymologyConclusion:"ad（～へ）＋ quire（求める）→ 自分のほうへ少しずつ求め寄せて、身につける＝習得する",
+   spelling:"ad→ac（q の前で d が c に変わった）",
    etymologyMore:["求め寄せた物が自分の持ち物になる→（財産などを）取得する"],
    relatedWords:[
      {word:"require",meaning:"必要とする",breakdown:"re（すっかり）＋ quire（求める）→ 欠けているものを強く求める"},
@@ -11135,6 +11244,7 @@ const RAW_WORDS=[
    exampleJa2:"この学校では制服を着ることになっている。",
    etymologyProcess:"sub（下で）＋ pos（置く）→ 話の土台を下にそっと置くと…？",
    etymologyConclusion:"sub（下で）＋ pos（置く）→ 話の土台になる考えを、下にそっと置いておく＝～だと思う",
+   spelling:"sub→sup（p の前で b が p に変わった）",
    etymologyMore:["そうなるはずと皆が前提に置いている→（be supposed to で）～することになっている"],
    relatedWords:[
      {word:"propose",meaning:"提案する",breakdown:"pro（前へ）＋ pos（置く）→ みんなの前へ考えを置いて見せる"},
@@ -11151,6 +11261,7 @@ const RAW_WORDS=[
    exampleJa2:"彼女はその手紙が大阪の祖母からのものだと思い込んだ。",
    etymologyProcess:"ad（～へ）＋ sume（取る）→ 確かめずに自分のほうへ取り込むと…？",
    etymologyConclusion:"ad（～へ）＋ sume（取る）→ 確かめないまま、そうだと自分の中へ取り込む＝思い込む",
+   spelling:"ad→as（s の前で d が s に変わった）",
    etymologyMore:["責任や役目を自分の身に取り込む→（責任や役目を）引き受ける"],
    relatedWords:[
      {word:"consume",meaning:"消費する",breakdown:"con（すっかり）＋ sume（取る）→ すっかり取り尽くして使い切る"},
@@ -11183,6 +11294,7 @@ const RAW_WORDS=[
    exampleJa2:"両親は9時以降に外にいることを認めない。",
    etymologyProcess:"ad（～へ）＋ prove（試す）→ 試してよいものだと太鼓判を押すと…？",
    etymologyConclusion:"ad（～へ）＋ prove（試す）→ 試したうえで、よいものだと太鼓判を押す＝認める",
+   spelling:"ad→ap（p の前で d が p に変わった）",
    relatedWords:[
      {word:"prove",meaning:"証明する",breakdown:"prove（試す）→ 試して本当だと示す"},
      {word:"disapprove",meaning:"認めない，反対する",breakdown:"dis（否定）＋ ad（～へ）＋ prove（試す）→ 試してよくないと判断する"},
@@ -11290,6 +11402,7 @@ const RAW_WORDS=[
    exampleJa2:"その古い写真が出てくるまで、誰も彼女の話を疑わなかった。",
    etymologyProcess:"dub（二つ）→ 心が二つに分かれて決めきれないと…？",
    etymologyConclusion:"dub（二つ）→ 心が二つに分かれ、どちらが本当なのか決めきれない＝疑う",
+   spelling:"dub→doub（フランス語で ou に。b は後でラテン語に合わせて戻した）",
    why:"【なぜ】ラテン語 dubitare は「二つのあいだで迷う」。心が二つに分かれて、どちらが本当か決められない状態が doubt です。\n【つながり】double（二重の）、dubious（怪しい）も同じ dub。発音しない b は、ラテン語の綴りに似せて後から書き足されたものです。",
    relatedWords:[
      {word:"double",meaning:"2倍の",breakdown:"dub（二つ）＋ pli（折る）→ 二つに折り重ねて2倍にする"},
@@ -11400,6 +11513,7 @@ const RAW_WORDS=[
    exampleJa2:"誰かに笑われたというだけで、夢を見捨ててはいけない。",
    etymologyProcess:"ad（～へ）＋ ban（公に言い渡す）→ 好きにしてよいと言い放つと…？",
    etymologyConclusion:"ad（～へ）＋ ban（公に言い渡す）→ 好きにしてよいと公に言い放ち、手を放す＝見捨てる",
+   spelling:"ad→a（フランス語 à bandon「言いなりに」から）",
    relatedWords:[
      {word:"ban",meaning:"禁止する；禁止",breakdown:"ban（公に言い渡す）→ 公の場でだめだと言い渡す"},
      {word:"banish",meaning:"追放する",breakdown:"ban（公に言い渡す）＋ ish（～にする）→ 出て行けと公に言い渡して追い出す"},
@@ -11820,6 +11934,7 @@ const RAW_WORDS=[
    exampleJa2:"この火山は約2千年の間、火が絶えたままだ。",
    etymologyProcess:"ex（外へ）＋ stingu（突き刺す）→ ともし火を突いて消してしまうと…？",
    etymologyConclusion:"ex（外へ）＋ stingu（突き刺す）→ ともし火を突いて消すように、種が絶えてしまった＝絶滅した",
+   spelling:"stingu→tinct（x の後ろで s が落ち、ラテン語 exstinctus の形から）",
    etymologyMore:["ともし火が消えて、もう燃えなくなった→（火山が）活動を止めた"],
    relatedWords:[
      {word:"extinguish",meaning:"（火を）消す",breakdown:"ex（外へ）＋ stingu（突き刺す）→ 火を突いて外へ追い出し、消す"},
@@ -11913,6 +12028,7 @@ const RAW_WORDS=[
    exampleJa2:"チェスは2人で行う、非常に知的なゲームだ。",
    etymologyProcess:"inter（間の）＋ lect（拾う）＋ ual（～の）→ 物事の間から選び拾うと…？",
    etymologyConclusion:"inter（間の）＋ lect（拾う）＋ ual（～の）→ 物事の間から大事なものを選び拾う頭の働きの＝知的な",
+   spelling:"inter→intel（l の前で r が l に変わった）",
    relatedWords:[
      {word:"collect",meaning:"集める",breakdown:"com（共に）＋ lect（拾う）→ あちこちから拾って一つに集める"},
      {word:"select",meaning:"選ぶ",breakdown:"se（離れて）＋ lect（拾う）→ より分けて拾い上げる"},
@@ -12006,6 +12122,7 @@ const RAW_WORDS=[
    exampleJa2:"鳥の中には、巣を守るときに攻撃的になるものもいる。",
    etymologyProcess:"ad（～へ）＋ gress（歩む）＋ ive（形容詞）→ 相手のほうへ踏み込むと…？",
    etymologyConclusion:"ad（～へ）＋ gress（歩む）＋ ive（形容詞）→ 相手のほうへずかずか踏み込んでいく＝攻撃的な",
+   spelling:"ad→ag（g の前で d が g に変わった）",
    relatedWords:[
      {word:"progress",meaning:"進歩；進む",breakdown:"pro（前へ）＋ gress（歩む）→ 前へ歩みを進めていく"},
      {word:"congress",meaning:"議会，会議",breakdown:"com（共に）＋ gress（歩む）→ みんなが歩み寄って集まる場"},
@@ -12163,6 +12280,7 @@ const RAW_WORDS=[
    exampleJa2:"クラスメートが助けを必要としているとき、無関心でいてはいけない。",
    etymologyProcess:"in（否定）＋ dis（離れて）＋ fer（運ぶ）→ 違いを感じないとしたら…？",
    etymologyConclusion:"in（否定）＋ dis（離れて）＋ fer（運ぶ）→ どちらへも心が動かず違いを感じない＝無関心で",
+   spelling:"dis→dif（f の前で s が f に変わった）",
    relatedWords:[
      {word:"different",meaning:"異なった",breakdown:"dis（離れて）＋ fer（運ぶ）→ 別の方向へ離れた"},
      {word:"difference",meaning:"違い",breakdown:"dis（離れて）＋ fer（運ぶ）→ 二つが離れている点"},
@@ -12193,6 +12311,7 @@ const RAW_WORDS=[
    exampleJa2:"臆病者になってはいけない。先生に本当のことを言いなさい。",
    etymologyProcess:"cou（尾）→ 危ないときに尻尾を巻いてしまうのは…？",
    etymologyConclusion:"cou（尾）→ 危険を前にして尻尾を巻き、逃げ出してしまう人＝臆病者",
+   spelling:"cou→cow（フランス語 couard を通って形が変わった）",
    why:"【なぜ】ラテン語 cauda は「尾」。危険を前にして尻尾を巻いて逃げる姿から、「臆病者」になりました。\n【つながり】cowboy（牛飼い）の cow とは無関係です。行列を表す queue も、同じ「尻尾」から来ています。",
    relatedWords:[
      {word:"queue",meaning:"列；順番待ち",breakdown:"cou（尾）→ 長く伸びた尻尾のように続く人の列"},
@@ -12239,6 +12358,7 @@ const RAW_WORDS=[
    exampleJa2:"その辞書を、棚の本来あるべき場所に戻しなさい。",
    etymologyProcess:"propri（自分のもの）→ そのもの本来のあり方に合うと…？",
    etymologyConclusion:"propri（自分のもの）→ そのものが本来持っているあり方にかなっている＝本来あるべき",
+   spelling:"propri→proper（フランス語 propre を通って形が変わった）",
    relatedWords:[
      {word:"property",meaning:"財産",breakdown:"propri（自分のもの）＋ ty（名詞）→ 自分のものとして持っているもの"},
      {word:"appropriate",meaning:"適切な",breakdown:"ad（～へ）＋ propri（自分のもの）→ その場に自分のものとしてぴたり合う"},
@@ -12285,6 +12405,7 @@ const RAW_WORDS=[
    exampleJa2:"あの店は、よいランニングシューズを納得できる値段で売っている。",
    etymologyProcess:"rat（計算する）＋ able（できる）→ 頭で筋道を計算できるなら…？",
    etymologyConclusion:"rat（計算する）＋ able（できる）→ reason（筋道）を頭で計算して受け入れられる＝納得できる",
+   spelling:"rat→reas（フランス語 raison を通って形が変わった）",
    relatedWords:[
      {word:"reason",meaning:"理由",breakdown:"rat（計算する）→ 頭の中で筋道を数え上げたもの"},
      {word:"rate",meaning:"割合",breakdown:"rat（計算する）→ 数えて出した、全体に対する割合"},
@@ -12465,6 +12586,7 @@ const RAW_WORDS=[
    exampleJa2:"その答えはあまりに明白だったので、みんなが一斉に叫んだ。",
    etymologyProcess:"ob（～に向かって）＋ via（道）＋ ous（形容詞）→ 道の真ん中にあれば…？",
    etymologyConclusion:"ob（～に向かって）＋ via（道）＋ ous（形容詞）→ 通る道の真ん中にあって、いやでも目に入る＝明白な",
+   spelling:"via→vi（ラテン語 obvius の形から）",
    why:"【なぜ】ob（～に向かって）＋ via（道）で、もとは「道の真ん中に立ちはだかっている」。通ろうとすればいやでも目に入るので、「明白な」になりました。\n【つながり】via（～を経由して）、previous（前の道を行く＝以前の）も同じ via です。",
    relatedWords:[
      {word:"via",meaning:"～を経由して",breakdown:"via（道）→ その道を通って行く"},
@@ -12557,6 +12679,7 @@ const RAW_WORDS=[
    exampleJa2:"山頂からの眺めは、ただただ驚くほどすばらしかった。",
    etymologyProcess:"mir（驚く）＋ ous（形容詞）→ 目を見張るほどの出来ばえなら…？",
    etymologyConclusion:"mir（驚く）＋ ous（形容詞）→ 目を見張って声も出ないほどの出来ばえ＝驚くほどすばらしい",
+   spelling:"mir→mar（フランス語 merveille を通って形が変わった）",
    relatedWords:[
      {word:"miracle",meaning:"奇跡",breakdown:"mir（驚く）＋ cle（もの）→ 目を見張るような出来事"},
      {word:"mirror",meaning:"鏡",breakdown:"mir（驚く）→ 自分の姿を映して見せる道具"},
@@ -12757,6 +12880,7 @@ const RAW_WORDS=[
    exampleJa2:"動画を見ることは、夜の過ごし方としては受動的だ。",
    etymologyProcess:"pat（耐える）＋ ive（形容詞）→ されるままに耐えるだけなら…？",
    etymologyConclusion:"pat（耐える）＋ ive（形容詞）→ 自分からは動かず、されるままに耐えている＝受動的な",
+   spelling:"pat→pass（ラテン語 passus の形から）",
    relatedWords:[
      {word:"patient",meaning:"我慢強い；患者",breakdown:"pat（耐える）＋ ient（～な）→ 痛みにじっと耐えている"},
      {word:"passion",meaning:"情熱",breakdown:"pat（耐える）＋ ion（名詞）→ 耐えがたいほど胸に迫る思い"},
@@ -12836,6 +12960,7 @@ const RAW_WORDS=[
    exampleJa2:"私たちは海外からの知らせについて、無知のままでいるべきではない。",
    etymologyProcess:"in（否定）＋ gn（知る）＋ ant（～な）→ 知っていて当然のことを知らないと…？",
    etymologyConclusion:"in（否定）＋ gn（知る）＋ ant（～な）→ 知っていて当然のことを何も知らない＝無知の",
+   spelling:"in→i（g の前で n が消えた）",
    relatedWords:[
      {word:"ignore",meaning:"～を無視する",breakdown:"in（否定）＋ gn（知る）→ 知らないことにして放っておく"},
      {word:"know",meaning:"知る",breakdown:"know（知る）→ 頭の中にしっかり入れておく"},
@@ -12911,6 +13036,7 @@ const RAW_WORDS=[
    exampleJa2:"その本が手に入るなら、私のために借りてきてください。",
    etymologyProcess:"ad（～へ）＋ vail（役に立つ）＋ able（できる）→ 手もとに届いてすぐ使えるなら…？",
    etymologyConclusion:"ad（～へ）＋ vail（役に立つ）＋ able（できる）→ 手もとまで届いて、すぐ使える＝手に入る",
+   spelling:"ad→a（フランス語を通って d が消えた）",
    relatedWords:[
      {word:"avail",meaning:"役に立つ",breakdown:"ad（～へ）＋ vail（役に立つ）→ 相手のほうへ力を差し出す"},
      {word:"value",meaning:"価値",breakdown:"valu（価値）→ 力があると認められた度合い"},
@@ -12972,6 +13098,7 @@ const RAW_WORDS=[
    exampleJa2:"私の教科書のほとんどは中古だが、それでもとてもきれいだ。",
    etymologyProcess:"sequ（ついて行く）＋ hand（手）→ 二番目の持ち主の手に渡ると…？",
    etymologyConclusion:"sequ（ついて行く）＋ hand（手）→ 最初の持ち主に続く、二番目の手に渡った＝中古の",
+   spelling:"sequ→sec（ラテン語 secundus「次の」の形から）",
    relatedWords:[
      {word:"second",meaning:"2番目の",breakdown:"sequ（ついて行く）→ 一番のあとについて来るもの"},
      {word:"sequence",meaning:"連続",breakdown:"sequ（ついて行く）＋ ence（名詞）→ 次々とついて行く並び"},
@@ -13095,6 +13222,7 @@ const RAW_WORDS=[
    exampleJa2:"決勝戦が始まる前、彼の肩は張り詰めていた。",
    etymologyProcess:"tend（伸ばす）→ ぴんと引き伸ばされて切れそうなら…？",
    etymologyConclusion:"tend（伸ばす）→ ぴんと引き伸ばされて、今にも切れそうになっている＝張り詰めた",
+   spelling:"tend→tens（ラテン語 tensus「張られた」の形から）",
    relatedWords:[
      {word:"extend",meaning:"（期間・長さを）延長する",breakdown:"ex（外へ）＋ tend（伸ばす）→ 外へ向けて長く伸ばす"},
      {word:"tension",meaning:"緊張",breakdown:"tend（伸ばす）＋ ion（名詞）→ ぴんと張っている状態"},
@@ -13325,6 +13453,7 @@ const RAW_WORDS=[
    exampleJa2:"彼はある特定の雨の日を、今もとてもはっきり覚えている。",
    etymologyProcess:"part（分ける）＋ icle（小さいもの）＋ ar（形容詞）→ 全体から小さく切り分けると…？",
    etymologyConclusion:"part（分ける）＋ icle（小さいもの）＋ ar（形容詞）→ 全体から小さく切り分けて取り上げた＝ある特定の",
+   spelling:"icle→icul（ラテン語の -iculus の形から）",
    relatedWords:[
      {word:"particle",meaning:"粒子",breakdown:"part（分ける）＋ icle（小さいもの）→ 細かく分けた小さな粒"},
      {word:"partly",meaning:"部分的に",breakdown:"part（分ける）＋ ly（副詞）→ 全体のうちの一部だけ"},
@@ -13386,6 +13515,7 @@ const RAW_WORDS=[
    exampleJa2:"運動部が、学校の全部活の半分を占める。",
    etymologyProcess:"ad（～へ）＋ count（数える）→ 全体のうち何割を数え上げるか…？",
    etymologyConclusion:"ad（～へ）＋ count（数える）→ 全体を数え上げたとき、そのうちのどれだけに当たるか＝占める",
+   spelling:"ad→ac（c の前で d が c に変わった）",
    relatedWords:[
      {word:"count",meaning:"数える",breakdown:"count（数える）→ 一つずつ数を数え上げる"},
      {word:"discount",meaning:"割引",breakdown:"dis（否定）＋ count（数える）→ 数え戻して値段を引く"},
@@ -13462,6 +13592,7 @@ const RAW_WORDS=[
    exampleJa2:"私たちはタンクに残った水の容積を測った。",
    etymologyProcess:"volve（回す）→ 巻物を巻いた太さで量ると…？",
    etymologyConclusion:"volve（回す）→ 巻物を巻いた太さのように、中に入る大きさ＝容積",
+   spelling:"volve→vol（ラテン語 volumen「巻物」の形から）",
    relatedWords:[
      {word:"involve",meaning:"巻き込む",breakdown:"in（中へ）＋ volve（回す）→ 中へ巻き込んでしまう"},
      {word:"revolve",meaning:"回転する",breakdown:"re（再び）＋ volve（回す）→ 同じ所をぐるぐる回る"},
@@ -13492,6 +13623,7 @@ const RAW_WORDS=[
    exampleJa2:"クラス全体で、2ダースの鉛筆が必要だ。",
    etymologyProcess:"du（2）＋ dec（10）→ 2と10を合わせた数でまとめると…？",
    etymologyConclusion:"du（2）＋ dec（10）→ 2と10を合わせた12を、ひとまとまりで数える＝ダース",
+   spelling:"du→do、dec→zen（フランス語 douzaine を通って縮まった）",
    relatedWords:[
      {word:"December",meaning:"12月",breakdown:"dec（10）→ 古いこよみで10番目だった月"},
      {word:"decade",meaning:"10年",breakdown:"dec（10）→ 10年をひとまとまりにした期間"},
@@ -13507,6 +13639,7 @@ const RAW_WORDS=[
    exampleJa2:"宿題の量は、夏休みのあとに増えた。",
    etymologyProcess:"ad（～へ）＋ mount（山）→ 積み上げて山にした大きさなら…？",
    etymologyConclusion:"ad（～へ）＋ mount（山）→ 積み上げて山にしたときの、全体の大きさ＝量",
+   spelling:"ad→a（d が消えた）",
    why:"【なぜ】ad（～へ）＋ mons（山）で、もとは「山のほうへ上っていく」。積み上げていった先の高さが、全体の「量」になりました。\n【つながり】mountain（山）、mount（登る・据える）、surmount（乗り越える）も同じ mount。amount to は「積み上がって～に達する」です。",
    relatedWords:[
      {word:"mountain",meaning:"山",breakdown:"mount（山）→ 高く盛り上がった土地"},
@@ -13584,6 +13717,7 @@ const RAW_WORDS=[
    exampleJa2:"彼は修学旅行のすべてを、自分ひとりで手配した。",
    etymologyProcess:"ad（～へ）＋ rang（列に並べる）→ 順序よく並べて段取りを整えると…？",
    etymologyConclusion:"ad（～へ）＋ rang（列に並べる）→ 必要なものを順序よく並べて、段取りを整える＝手配する",
+   spelling:"ad→ar（次の r に合わせて d が r に）",
    relatedWords:[
      {word:"range",meaning:"範囲",breakdown:"rang（列に並べる）→ 並べた端から端までの広がり"},
      {word:"rank",meaning:"階級",breakdown:"rang（列に並べる）→ 並んだ列の中での位置"},
@@ -13675,6 +13809,7 @@ const RAW_WORDS=[
    exampleJa2:"駅での彼らの出会いは、まったくの偶然のものだった。",
    etymologyProcess:"ac（～へ）＋ cad（落ちる）＋ al（形容詞）→ ねらわずふいに降りかかると…？",
    etymologyConclusion:"ac（～へ）＋ cad（落ちる）＋ al（形容詞）→ ねらったわけでなく、ふいに降りかかってきた＝偶然の",
+   spelling:"cad→cid（音が弱まって a が i に）",
    relatedWords:[
      {word:"accident",meaning:"事故",breakdown:"ac（～へ）＋ cad（落ちる）→ ふいに降りかかってきた出来事"},
      {word:"case",meaning:"場合",breakdown:"cas（落ちる）→ その身にたまたま降りかかった出来事"},
@@ -13767,6 +13902,7 @@ const RAW_WORDS=[
    exampleJa2:"私たちの部活は毎年、文化祭で現代のダンスを踊る。",
    etymologyProcess:"com（共に）＋ tempor（時）→ 同じ時を分け合っているなら…？",
    etymologyConclusion:"com（共に）＋ tempor（時）＋ ary（形容詞）→ 同じ時代を共に生きている＝同時代の",
+   spelling:"com→con（t の前で m が n に）",
    etymologyMore:["今の私たちと同じ時代の→現代の"],
    relatedWords:[
      {word:"temporary",meaning:"一時的な",breakdown:"tempor（時）＋ ary（形容詞）→ 区切られた時の間だけ続く"},
@@ -13845,6 +13981,7 @@ const RAW_WORDS=[
    exampleJa2:"新しいノートが1年生全員に供給された。",
    etymologyProcess:"sup（下から）＋ ple（満たす）→ 足りないところを下から満たすと…？",
    etymologyConclusion:"sup（下から）＋ ple（満たす）→ 足りないところを下から補って満たす＝供給する",
+   spelling:"ple→ply（フランス語を通って変化）",
    relatedWords:[
      {word:"complete",meaning:"完全な",breakdown:"com（すっかり）＋ ple（満たす）→ すみずみまで満たされている"},
      {word:"plenty",meaning:"たくさん",breakdown:"ple（満たす）＋ ty（名詞）→ 満ち足りているほどの量"},
@@ -13937,6 +14074,7 @@ const RAW_WORDS=[
    exampleJa2:"その荷物は、私が部活の練習中に配達された。",
    etymologyProcess:"de（離れて）＋ liber（自由な）→ 手元から解き放って渡すと…？",
    etymologyConclusion:"de（離れて）＋ liber（自由な）→ 手元から解き放って相手の手に渡す＝配達する",
+   spelling:"liber→liver（フランス語を通って b が v に）",
    etymologyMore:["言葉を解き放って聞き手に渡す→（演説など）を述べる"],
    relatedWords:[
      {word:"liberty",meaning:"自由",breakdown:"liber（自由な）＋ ty（名詞）→ 何にも縛られていない状態"},
@@ -14266,6 +14404,7 @@ const RAW_WORDS=[
    exampleJa2:"私たちは食料品の重い袋を、長い階段の上まで運んだ。",
    etymologyProcess:"gross（大量の）＋ ry（もの）→ まとめて仕入れて売る店は…？",
    etymologyConclusion:"gross（大量の）＋ ry（もの）→ 食べ物や日用品をまとめ買いして並べる店＝食料雑貨店",
+   spelling:"gross→groc",
    etymologyMore:["食料雑貨店で売っている品→（groceries で）食料品"],
    relatedWords:[
      {word:"grocer",meaning:"食料雑貨商",breakdown:"gross（大量の）＋ er（人）→ まとめ買いして売る人"},
@@ -14314,6 +14453,7 @@ const RAW_WORDS=[
    exampleJa2:"彼女は市役所で新しい自転車を登録した。",
    etymologyProcess:"re（後ろへ）＋ gest（運ぶ）→ 後で見返せるよう帳簿へ運び戻すと…？",
    etymologyConclusion:"re（後ろへ）＋ gest（運ぶ）→ 後で見返せるよう帳簿へ運び戻して書き留める＝登録する",
+   spelling:"gest→gist",
    etymologyMore:["書き留めておくための帳面→登録簿","売り上げを書き留める機械→レジ"],
    relatedWords:[
      {word:"suggest",meaning:"提案する",breakdown:"sug（下から）＋ gest（運ぶ）→ 下からそっと考えを差し出す"},
@@ -14362,6 +14502,7 @@ const RAW_WORDS=[
    exampleJa2:"努力だけが必ずしもよい結果を保証するわけではない。",
    etymologyProcess:"garant（請け合う）→ 間違いないと請け合って引き受けると…？",
    etymologyConclusion:"garant（請け合う）→ 間違いないと請け合って責任まで引き受ける＝保証する",
+   spelling:"garant→guarant",
    relatedWords:[
      {word:"warranty",meaning:"保証書",breakdown:"garant（請け合う）＋ ty（名詞）→ 請け合った内容を書いた紙"},
      {word:"warrant",meaning:"令状；保証する",breakdown:"garant（請け合う）→ 請け合った証しとして出す書き付け"},
@@ -14535,6 +14676,7 @@ const RAW_WORDS=[
    exampleJa2:"客室乗務員は狭い通路をゆっくり歩いていった。",
    etymologyProcess:"ala（翼）→ 建物の横に翼のようにのびた道は…？",
    etymologyConclusion:"ala（翼）→ 建物の翼のように本体の横へのびた細い通り道＝通路",
+   spelling:"ala→ai（あとで isle と混ざってつづりが変わった）",
    hook:"発音は /aɪl/ で s を読まない。island と同じく後から s が入った綴り。",
    relatedWords:[
      {synonym:true,word:"corridor",meaning:"廊下",breakdown:"建物の中の細長い通り道。aisle は座席や棚の間の通路"},
@@ -14599,6 +14741,7 @@ const RAW_WORDS=[
    exampleJa2:"その飛行機はゆっくり1万メートルの高さに達した。",
    etymologyProcess:"high（高い）＋ th（名詞）→ どれだけ高いかを表すと…？",
    etymologyConclusion:"high（高い）＋ th（名詞）→ どれだけ高いかを数で表したもの＝高さ",
+   spelling:"high→heigh、th→t（昔の heighth が縮まった）",
    relatedWords:[
      {word:"high",meaning:"高い",breakdown:"high（高い）→ 地面から上へ大きく離れている"},
      {word:"highly",meaning:"大いに",breakdown:"high（高い）＋ ly（副詞）→ 程度の高いところまで"},
@@ -14646,6 +14789,7 @@ const RAW_WORDS=[
    exampleJa2:"試験勉強が彼女の自由な時間をすべて占めた。",
    etymologyProcess:"oc（～に向かって）＋ cupa（取る）→ 場所をつかみ取ってふさぐと…？",
    etymologyConclusion:"oc（～に向かって）＋ cupa（取る）→ 場所や時間をつかみ取ってふさいでしまう＝占める",
+   spelling:"cupa→cupy（フランス語を通って変化）",
    etymologyMore:["土地をつかみ取って自分のものにする→占領する"],
    relatedWords:[
      {word:"occupation",meaning:"職業；占領",breakdown:"oc（～に向かって）＋ cupa（取る）＋ ion（名詞）→ 時間を取って打ち込むこと"},
@@ -14989,6 +15133,7 @@ const RAW_WORDS=[
    exampleJa2:"彼らは家族の夕食の席で、結婚の日取りを発表した。",
    etymologyProcess:"ad（～へ）＋ nounce（告げる）→ 多くの人へ正式に告げ知らせると…？",
    etymologyConclusion:"ad（～へ）＋ nounce（告げる）→ 多くの人へ向けて正式に告げ知らせる＝発表する",
+   spelling:"ad→an（n の前で d が n に）",
    relatedWords:[
      {word:"pronounce",meaning:"発音する；宣言する",breakdown:"pro（人前で）＋ nounce（告げる）→ 人前ではっきり口に出す"},
      {word:"announcement",meaning:"発表，お知らせ",breakdown:"ad（～へ）＋ nounce（告げる）＋ ment（名詞）→ 告げ知らせる中身"},
@@ -15082,6 +15227,7 @@ const RAW_WORDS=[
    exampleJa2:"よい音楽は、あらゆる年齢の人を楽しませることができる。",
    etymologyProcess:"inter（間の）＋ tain（保つ）→ 相手をそばに引き止めておくと…？",
    etymologyConclusion:"inter（間の）＋ tain（保つ）→ 相手を自分のそばに引き止めて飽きさせない＝楽しませる",
+   spelling:"inter→enter（フランス語を通って変化）",
    why:"【なぜ】フランス語 entretenir は「間に保つ＝そばに引き止めておく」。客を引き止めてもてなすことから「もてなす」、さらに「楽しませる」へ広がりました。\n【つながり】contain（中に保つ）、obtain（手に保つ）も tain の家族。エンターテインメントは「人を引き止めておく力」のことです。",
    relatedWords:[
      {word:"entertainment",meaning:"娯楽",breakdown:"inter（間の）＋ tain（保つ）＋ ment（名詞）→ 人を引き止めておく楽しみ"},
@@ -15113,6 +15259,7 @@ const RAW_WORDS=[
    exampleJa2:"新しい博物館は先月、何千人もの訪問者を引きつけた。",
    etymologyProcess:"ad（～へ）＋ tract（引く）→ 自分のほうへぐっと引き寄せると…？",
    etymologyConclusion:"ad（～へ）＋ tract（引く）→ 自分のほうへぐっと引き寄せてしまう＝引きつける",
+   spelling:"ad→at（t の前で d が t に）",
    relatedWords:[
      {word:"tractor",meaning:"トラクター",breakdown:"tract（引く）＋ or（もの）→ 重い機械を引っぱる車"},
      {word:"attractive",meaning:"魅力的な",breakdown:"ad（～へ）＋ tract（引く）＋ ive（形容詞）→ 人の心を引き寄せる"},
@@ -15455,6 +15602,7 @@ const RAW_WORDS=[
    exampleJa2:"私はいとこの長い夏休みをうらやましく思った。",
    etymologyProcess:"in（～に）＋ vid（見る）→ 相手の持ち物をじっと見つめると…？",
    etymologyConclusion:"in（～に）＋ vid（見る）→ 相手の持ち物をじっと見つめてほしくなる＝うらやましく思う",
+   spelling:"in→en、vid→vy（フランス語を通って縮まった）",
    relatedWords:[
      {word:"video",meaning:"動画，ビデオ",breakdown:"vid（見る）→ 目で見るためのもの"},
      {word:"provide",meaning:"供給する",breakdown:"pro（前もって）＋ vid（見る）→ 先を見越して用意しておく"},
@@ -15502,6 +15650,7 @@ const RAW_WORDS=[
    exampleJa2:"絶望の中で、彼女は冷たい固い地面に座り込んだ。",
    etymologyProcess:"de（離れて）＋ sper（希望）→ 希望から引き離されてしまうと…？",
    etymologyConclusion:"de（離れて）＋ sper（希望）→ 希望から完全に引き離されてしまった状態＝絶望",
+   spelling:"sper→spair（フランス語を通って変化）",
    relatedWords:[
      {word:"desperate",meaning:"必死の；絶望的な",breakdown:"de（離れて）＋ sper（希望）＋ ate（形容詞）→ 希望を失って後がない"},
      {word:"desperation",meaning:"必死さ，絶望",breakdown:"de（離れて）＋ sper（希望）＋ ation（名詞）→ 希望を失って追いつめられること"},
@@ -15626,6 +15775,7 @@ const RAW_WORDS=[
    exampleJa2:"彼は丸3日間、私のメッセージを無視した。",
    etymologyProcess:"in（否定）＋ gnor（知る）→ 知らないふりをして取り合わないと…？",
    etymologyConclusion:"in（否定）＋ gnor（知る）→ 知らないことにして、わざと取り合わない＝無視する",
+   spelling:"in→i（gn の前で n が消えた）",
    relatedWords:[
      {synonym:true,word:"know",meaning:"知る",breakdown:"ラテン語の gnor とは遠い親戚。もとは同じ「知る」だった"},
      {word:"recognize",meaning:"見分ける，認める",breakdown:"re（再び）＋ co（共に）＋ gn（知る）→ 前に知ったものだと分かる"},
@@ -15707,6 +15857,7 @@ const RAW_WORDS=[
    exampleJa2:"科学者たちは、海水をきれいにする新しい方法を試した。",
    etymologyProcess:"meta（後を追って）＋ hod（道）→ 目的まで順に追っていく道すじは…？",
    etymologyConclusion:"meta（後を追って）＋ hod（道）→ 目的まで順に追っていく決まった道すじ＝方法",
+   spelling:"meta→met（a が落ちて hod とくっついた）",
    relatedWords:[
      {word:"methodical",meaning:"きちんと順序立った",breakdown:"meta（後を追って）＋ hod（道）＋ al（形容詞）→ 決まった道すじをたどる"},
      {synonym:true,word:"way",meaning:"やり方，方法",breakdown:"ふつうの言い方。method は順序立った決まったやり方を指す"},
@@ -15738,6 +15889,7 @@ const RAW_WORDS=[
    exampleJa2:"彼らはプラスチックごみを減らす新しい手段を見つけた。",
    etymologyProcess:"medi（中間）→ 目的と自分の間に立つものは…？",
    etymologyConclusion:"medi（中間）→ 目的と自分の中間に立って橋渡ししてくれるもの＝手段",
+   spelling:"medi→mean（フランス語を通って変化）",
    etymologyMore:["目的への橋渡しに使えるお金→（複数扱いで）財力"],
    hook:"by means of ～（～によって）で覚える。単数でも複数でも s が付く。",
    why:"【なぜ】この means は「意味する mean」ではなく、「中ほどの」という別の mean から来ています。目的と自分のあいだ（なかほど）に立つものが「手段」です。\n【つながり】medium（媒体）や middle（真ん中）と発想が同じ。meantime（そのあいだ）、meanwhile（その一方で）も「中ほど」の mean です。",
@@ -15756,6 +15908,7 @@ const RAW_WORDS=[
    exampleJa2:"誰も、その嵐の被害の全体の程度を知らなかった。",
    etymologyProcess:"ex（外へ）＋ tend（伸ばす）→ どこまで伸び広がっているかを測ると…？",
    etymologyConclusion:"ex（外へ）＋ tend（伸ばす）→ 外へどこまで伸び広がっているかという幅＝程度",
+   spelling:"tend→tent（ラテン語 extentus の形から）",
    relatedWords:[
      {word:"extend",meaning:"伸ばす，広げる",breakdown:"ex（外へ）＋ tend（伸ばす）→ 外へ向けて伸ばしていく"},
      {word:"tend",meaning:"傾向がある",breakdown:"tend（伸ばす）→ 心がそちらへ伸びていく"},
@@ -15848,6 +16001,7 @@ const RAW_WORDS=[
    exampleJa2:"彼女は、彼の静かな声のかすかな変化に気づいた。",
    etymologyProcess:"sub（下で）＋ til（織り糸）→ 細かく織られて目で追いにくいと…？",
    etymologyConclusion:"sub（下で）＋ til（織り糸）→ 細かく織られていて目で追いにくい＝かすかな",
+   spelling:"til→tle（フランス語を通って変化）",
    etymologyMore:["細かく織るように考えがこまやか→（考えが）巧みな"],
    why:"【なぜ】ラテン語 subtilis は「細く織られた」。sub（下で）＋ tela（織り糸）で、織り目が細かすぎて目で追えない布のことでした。そこから「見分けがつかないほど細やかな」＝かすかな・微妙な、になりました。\n【つながり】発音は b を読まずに /ˈsʌtl/。tela はもとをたどれば texere（織る）から。textile（織物）と大もとが同じです。",
    relatedWords:[
@@ -16005,6 +16159,7 @@ const RAW_WORDS=[
    exampleJa2:"先生によれば、この本は読む価値がある。",
    etymologyProcess:"ad（～へ）＋ cord（心）→ 相手の言うことに心を合わせると…？",
    etymologyConclusion:"ad（～へ）＋ cord（心）→ 相手の言うことに心を合わせて述べると＝～によれば",
+   spelling:"ad→ac（c の前で d が c に）",
    etymologyMore:["心を合わせて、そのとおりに動く→～に従って"],
    relatedWords:[
      {word:"accord",meaning:"一致；一致する",breakdown:"ad（～へ）＋ cord（心）→ 互いの心がぴたりと合う"},
@@ -16101,6 +16256,7 @@ const RAW_WORDS=[
    exampleJa2:"彼の褒め言葉が、内気な生徒をとても明るい笑顔にした。",
    etymologyProcess:"com（すっかり）＋ ple（満たす）→ 礼儀をすっかり満たす言葉は…？",
    etymologyConclusion:"com（すっかり）＋ ple（満たす）→ 礼儀をすっかり満たすために贈る言葉＝褒め言葉",
+   spelling:"ple→pli（スペイン語・フランス語を通って変化）",
    why:"【なぜ】スペイン語の cumplimiento は「礼儀を果たすこと」。あいさつで相手を立てる決まり文句が、そのまま「褒め言葉」になりました。\n【つながり】complete（すっかり満たす）、supplement（下から補う）も同じ ple の家族。つづりの似た complement（補うもの）は別の語なので注意です。",
    relatedWords:[
      {word:"complete",meaning:"完全な",breakdown:"com（すっかり）＋ ple（満たす）→ すみずみまで満たされている"},
@@ -16117,6 +16273,7 @@ const RAW_WORDS=[
    exampleJa2:"うちの家族の宴会は、毎年正月に何時間も続く。",
    etymologyProcess:"fest（祭り）→ ごちそうを並べて囲む集まりは…？",
    etymologyConclusion:"fest（祭り）→ 祭りの日にごちそうを並べて囲む集まり＝宴会",
+   spelling:"fest→feast（フランス語を通って変化）",
    relatedWords:[
      {word:"festival",meaning:"祭り",breakdown:"fest（祭り）＋ al（形容詞）→ 祭りの日に開かれる催し"},
      {word:"festive",meaning:"お祝いの，浮き立つ",breakdown:"fest（祭り）＋ ive（形容詞）→ 祭りのようににぎやかな"},
@@ -16164,6 +16321,7 @@ const RAW_WORDS=[
    exampleJa2:"彼女のとても短い返事は、かなり怒っていることをほのめかしていた。",
    etymologyProcess:"im（中へ）＋ pli（折る）→ 言葉の中に意味を折り込むと…？",
    etymologyConclusion:"im（中へ）＋ pli（折る）→ 言葉の中に意味をそっと折り込んでおく＝ほのめかす",
+   spelling:"pli→ply（フランス語を通って変化）",
    relatedWords:[
      {word:"apply",meaning:"申し込む；当てはめる",breakdown:"ad（～へ）＋ pli（折る）→ そこへぴたりと折り重ねる"},
      {word:"reply",meaning:"返事する",breakdown:"re（後ろへ）＋ pli（折る）→ 相手のほうへ言葉を折り返す"},
@@ -16194,6 +16352,7 @@ const RAW_WORDS=[
    exampleJa2:"ここでは正午ごろ、太陽の光線がとても強く感じられる。",
    etymologyProcess:"radi（放射する）→ 中心からまっすぐ外へ細く伸びていくものは…？",
    etymologyConclusion:"radi（放射する）→ 中心からまっすぐ外へ伸びていく一筋の光＝光線",
+   spelling:"radi→ray（フランス語を通って縮まった）",
    relatedWords:[
      {word:"radio",meaning:"ラジオ",breakdown:"radi（放射する）→ 電波を四方へ放って伝える仕組み"},
      {word:"radius",meaning:"半径",breakdown:"radi（放射する）→ 中心から外へまっすぐ伸びた長さ"},
@@ -16270,6 +16429,7 @@ const RAW_WORDS=[
    exampleJa2:"この新しい化合物は、あの重い病気の治療に役立つかもしれない。",
    etymologyProcess:"com（共に）＋ pon（置く）→ いくつかを共に置いて組み合わせると…？",
    etymologyConclusion:"com（共に）＋ pon（置く）→ いくつかの元素を共に置いて組み合わせたもの＝化合物",
+   spelling:"pon→pound（フランス語を通って変化）",
    etymologyMore:["いくつかの語を共に置いて組み合わせる→複合語"],
    relatedWords:[
      {word:"compose",meaning:"構成する；作曲する",breakdown:"com（共に）＋ pos（置く）→ 部品を共に置いて組み立てる"},
@@ -16398,6 +16558,7 @@ const RAW_WORDS=[
    exampleJa2:"その会社は先週、新しいスマートフォンを売り出した。",
    etymologyProcess:"lanc（槍）→ 槍を投げるように勢いよく空へ放つと…？",
    etymologyConclusion:"lanc（槍）→ 槍を投げるように、勢いよく空へ放つ＝打ち上げる",
+   spelling:"lanc→launch（フランス語を通って変化）",
    etymologyMore:["勢いよく世の中へ送り出す→（新商品・事業）を売り出す，始める"],
    relatedWords:[
      {word:"lance",meaning:"槍",breakdown:"lanc（槍）→ 騎士が構えて突く長い槍"},
@@ -16414,6 +16575,7 @@ const RAW_WORDS=[
    exampleJa2:"彼女は明日の朝、もう一度その難しい登はんを試みる。",
    etymologyProcess:"ad（～へ）＋ tempt（試す）→ できるかどうか手を伸ばして試すと…？",
    etymologyConclusion:"ad（～へ）＋ tempt（試す）→ できるかどうか、そちらへ手を伸ばして試すこと＝難しいことへの試み",
+   spelling:"ad→at（t の前で d が t に）",
    relatedWords:[
      {word:"tempt",meaning:"誘惑する",breakdown:"tempt（試す）→ 心が動くかどうか試しにさそう"},
      {word:"temptation",meaning:"誘惑",breakdown:"tempt（試す）＋ ation（名詞）→ 心を試しにさそってくるもの"},
@@ -16460,6 +16622,7 @@ const RAW_WORDS=[
    exampleJa2:"このテストでそれほど高い点数を達成する生徒は、ほとんどいない。",
    etymologyProcess:"ad（～へ）＋ tang（触れる）→ 目指したところまで手が届くと…？",
    etymologyConclusion:"ad（～へ）＋ tang（触れる）→ 目指したところまで手が届いて触れる＝達成する",
+   spelling:"ad→at（t の前で d が t に）、tang→tain（フランス語を通って変化）",
    why:"【なぜ】attain の tain は「保つ」の tain ではなく、ラテン語 tangere「触れる」です。ad（～へ）＋ tangere で「そこまで手が届いて触れる」。そこから「到達する・達成する」になりました。\n【つながり】contact（共に触れる＝接触）、tangible（触れられる）も同じ家族。maintain や contain の tain とは別の語です。",
    relatedWords:[
      {word:"contact",meaning:"接触；連絡する",breakdown:"con（共に）＋ tact（触れる）→ 互いに触れ合う"},
@@ -16604,6 +16767,7 @@ const RAW_WORDS=[
    exampleJa2:"妊娠した女性は、とても重い物を持ち上げるのを避けるべきだ。",
    etymologyProcess:"pre（先に）＋ nat（生まれる）→ 生まれる前の子をおなかに宿すと…？",
    etymologyConclusion:"pre（先に）＋ nat（生まれる）→ 生まれる前の子をおなかに宿している＝妊娠した",
+   spelling:"nat→gn（昔の形 gnatus の g が残った）",
    relatedWords:[
      {word:"nature",meaning:"自然；性質",breakdown:"nat（生まれる）＋ ure（名詞）→ 生まれつき備わっているもの"},
      {word:"native",meaning:"生まれつきの，その土地の",breakdown:"nat（生まれる）＋ ive（形容詞）→ そこで生まれた"},
@@ -17076,6 +17240,7 @@ const RAW_WORDS=[
    exampleJa2:"その保証書は、水によるどんな損傷も補償しない。",
    etymologyProcess:"garant（請け合う）＋ ty（名詞）→ 不具合があれば直すと請け合う紙は…？",
    etymologyConclusion:"garant（請け合う）＋ ty（名詞）→ 不具合があれば直すと請け合った書きつけ＝保証書",
+   spelling:"garant→warrant（北フランスの形で g が w に）",
    relatedWords:[
      {word:"guarantee",meaning:"保証する",breakdown:"garant（請け合う）→ 間違いないと請け合って責任を引き受ける"},
      {word:"warrant",meaning:"令状；保証する",breakdown:"garant（請け合う）→ 請け合った証しとして出す書き付け"},
@@ -17186,6 +17351,7 @@ const RAW_WORDS=[
    exampleJa2:"スマートフォンは、私たちの日常の連絡に本当の革命をもたらした。",
    etymologyProcess:"re（再び）＋ volve（回す）→ 世の中をぐるりと回してしまうと…？",
    etymologyConclusion:"re（再び）＋ volve（回す）→ 世の中をぐるりと回してひっくり返すこと＝革命",
+   spelling:"volve→volu（ラテン語 revolutus の形から）",
    etymologyMore:["もとは星がぐるりと回ること→回転，公転"],
    relatedWords:[
      {word:"revolve",meaning:"回転する",breakdown:"re（再び）＋ volve（回す）→ 同じところをぐるぐると回る"},
@@ -17263,6 +17429,7 @@ const RAW_WORDS=[
    exampleJa2:"ぐっすり眠ったことが、彼の元気を完全に回復させた。",
    etymologyProcess:"re（後ろへ）＋ staur（立てる）→ 崩れたものを元どおり立て直すと…？",
    etymologyConclusion:"re（後ろへ）＋ staur（立てる）→ 崩れたものを元どおりに立て直す＝修復する",
+   spelling:"staur→stor（フランス語を通って au が o に）",
    etymologyMore:["崩れた体や世の中を立て直す→（健康・秩序）を回復させる"],
    relatedWords:[
      {word:"restaurant",meaning:"レストラン",breakdown:"re（後ろへ）＋ staur（立てる）→ 食べて元気を立て直すための店"},
@@ -17311,6 +17478,7 @@ const RAW_WORDS=[
    exampleJa2:"時事の情勢は、この週刊誌でよく取り上げられている。",
    etymologyProcess:"ad（～へ）＋ fac（作る）→ これからしなければならないことは…？",
    etymologyConclusion:"ad（～へ）＋ fac（作る）→ これからしなければならない、ひとまとまりのこと＝事柄",
+   spelling:"ad→af（f の前で d が f に）、fac→fai（フランス語 faire から）",
    etymologyMore:["すべき事柄が積み重なった全体→（複数で）情勢，事情"],
    relatedWords:[
      {word:"fact",meaning:"事実",breakdown:"fact（作る）→ 実際に作り出されて起きたこと"},
@@ -17343,6 +17511,7 @@ const RAW_WORDS=[
    exampleJa2:"私たちの生徒会は、毎週月曜の放課後に集まる。",
    etymologyProcess:"con（共に）＋ cil（呼ぶ）→ 人々を共に呼び集めて話し合うと…？",
    etymologyConclusion:"con（共に）＋ cil（呼ぶ）→ 人々を共に呼び集めて話し合う会＝議会",
+   spelling:"con→coun（フランス語を通って変化）",
    etymologyMore:["生徒を呼び集めて話し合う会→（生徒会などの）委員会"],
    why:"【なぜ】ラテン語 concilium は con（共に）＋ calare（呼ぶ）で、「人々を呼び集めること」。そこから呼び集めて話し合う「会議・議会」になりました。\n【つながり】つづりの似た counsel（助言）は consulere（相談する）から出た別の語です。council は「呼び集めた会」、counsel は「助言」と覚えます。",
    relatedWords:[
@@ -17377,6 +17546,7 @@ const RAW_WORDS=[
    exampleJa2:"その新しい共和国は、最初の自由な選挙を行った。",
    etymologyProcess:"res（物事）＋ publ（人々）→ 国を人々みんなの物事として治めると…？",
    etymologyConclusion:"res（物事）＋ publ（人々）→ 国を人々みんなの物事として治める仕組みの国＝共和国",
+   spelling:"res→re（res publica が縮まった）",
    why:"【なぜ】ラテン語 res publica は「公のもの・みんなの物事」。国を王ひとりのものではなく、市民みんなのものとして治める仕組みを指しました。そこから「共和国」になりました。\n【つながり】public（公の）、publish（世に出す）も同じ家族。国名にある Republic はこの語です。",
    relatedWords:[
      {word:"public",meaning:"公の，公共の",breakdown:"publ（人々）→ 人々みんなに関わる"},
@@ -17393,6 +17563,7 @@ const RAW_WORDS=[
    exampleJa2:"その古い帝国は、かつて世界の半分を支配した。",
    etymologyProcess:"imper（命じる）→ 一人が命じて広く治める大きな国は…？",
    etymologyConclusion:"imper（命じる）→ 一人の皇帝が命じて広く治める大きな国＝帝国",
+   spelling:"imper→empir（フランス語を通って変化）",
    relatedWords:[
      {word:"emperor",meaning:"皇帝",breakdown:"imper（命じる）＋ or（人）→ 命じて国ぜんたいを治める人"},
      {word:"imperial",meaning:"帝国の",breakdown:"imper（命じる）＋ al（形容詞）→ 帝国に関わる"},
@@ -17520,6 +17691,7 @@ const RAW_WORDS=[
    exampleJa2:"水は、多くの物質を溶かすという性質を持っている。",
    etymologyProcess:"propri（自分のもの）＋ ty（名詞）→ 自分のものとして持っているものは…？",
    etymologyConclusion:"propri（自分のもの）＋ ty（名詞）→ 自分のものとして持っている物＝財産",
+   spelling:"propri→proper（フランス語を通って変化）",
    why:"【なぜ】ラテン語 proprius は「そのもの自身の」。人が自分のものとして持てば「財産」、物が自分自身として備えていれば「性質」。同じ「自分のもの」から二つの方向へ広がりました。\n【つながり】proper（固有の）、appropriate（その場に自分のものとしてぴたり合う）も同じ家族です。",
    relatedWords:[
      {word:"proper",meaning:"適切な；固有の",breakdown:"propri（自分のもの）→ そのものにふさわしい"},
@@ -17678,6 +17850,7 @@ const RAW_WORDS=[
    exampleJa2:"私たちの会社は、他のアジアの国々に多くの顧客を持っている。",
    etymologyProcess:"clin（傾き）＋ ent（人）→ 有力者に身を寄せて助けを頼む人は…？",
    etymologyConclusion:"clin（傾き）＋ ent（人）→ 有力者のほうへ身を寄せて助けを頼む人＝依頼人",
+   spelling:"clin→cli",
    relatedWords:[
      {word:"clinic",meaning:"診療所",breakdown:"clin（傾き）＋ ic（名詞）→ 病床のそばで患者を診る場所"},
      {word:"incline",meaning:"傾く，傾ける",breakdown:"in（中へ）＋ clin（傾き）→ 内側へ傾いていく"},
@@ -17847,6 +18020,7 @@ const RAW_WORDS=[
    exampleJa2:"彼は正式な免許なしで運転して逮捕された。",
    etymologyProcess:"ad（～へ）＋ rest（立ち止まる）→ 相手をその場に立ち止まらせると…？",
    etymologyConclusion:"ad（～へ）＋ rest（立ち止まる）→ 相手をその場に立ち止まらせ、身柄を押さえる＝逮捕する",
+   spelling:"ad→ar（r の前で d が r に）",
    why:"【なぜ】ラテン語 arrestare は ad（～へ）＋ restare（立ち止まる）で、「その場に立ち止まらせる」。動きを止めて身柄を押さえることから「逮捕する」になりました。\n【つながり】この rest は「立ち止まる」で、the rest（残り＝その場に残っているぶん）と同じ家族。「休む」の rest は同じつづりの別の語です。",
    relatedWords:[
      {word:"station",meaning:"駅；持ち場",breakdown:"sta（立つ）＋ ion（名詞）→ 人や車が立ち止まる場所"},
@@ -17878,6 +18052,7 @@ const RAW_WORDS=[
    exampleJa2:"その市は、犯罪と悪徳に対して懸命に戦った。",
    etymologyProcess:"vit（欠点）→ 人の性格に付いた直しがたい欠点は…？",
    etymologyConclusion:"vit（欠点）→ 人の性格に付いてしまった、直しがたい欠点＝悪徳",
+   spelling:"vit→vic（フランス語を通って変化）",
    hook:"vice president（副社長）の vice は「代わりに」で、まったく別の語。",
    relatedWords:[
      {word:"vicious",meaning:"悪意のある，ひどい",breakdown:"vit（欠点）＋ ous（形容詞）→ 欠点だらけでたちが悪い"},
@@ -17987,6 +18162,7 @@ const RAW_WORDS=[
    exampleJa2:"よい勉強の戦略は、あなたの時間を大きく節約してくれる。",
    etymologyProcess:"strat（軍隊）＋ ag（行う）→ 軍隊を動かして勝ちへ導く筋道は…？",
    etymologyConclusion:"strat（軍隊）＋ ag（行う）→ 軍隊を動かして勝ちに導く、大きな筋道＝戦略",
+   spelling:"ag→eg（strat と ag がくっついて音が変わった）",
    relatedWords:[
      {word:"strategic",meaning:"戦略的な",breakdown:"strat（軍隊）＋ ag（行う）＋ ic（形容詞）→ 大きな筋道で動く"},
      {word:"agent",meaning:"代理人",breakdown:"ag（行う）＋ ent（人）→ 動いて事を行う人（strategy とは親戚）"},
@@ -18066,6 +18242,7 @@ const RAW_WORDS=[
    exampleJa2:"騒音は、あなたからよい夜の眠りを奪うことがある。",
    etymologyProcess:"de（離れて）＋ privi（個人の）→ その人だけのものを引き離して取ると…？",
    etymologyConclusion:"de（離れて）＋ privi（個人の）→ その人だけのものを引き離して取り上げる＝奪う",
+   spelling:"privi→priv",
    relatedWords:[
      {word:"private",meaning:"私的な，個人の",breakdown:"privi（個人の）＋ ate（形容詞）→ その人だけのものである"},
      {word:"privilege",meaning:"特権",breakdown:"privi（個人の）＋ leg（法）→ その人だけに認められた決まり"},
@@ -18177,6 +18354,7 @@ const RAW_WORDS=[
    exampleJa2:"私は駅で、昔の知人に会った。",
    etymologyProcess:"ad（～へ）＋ co（共に）＋ gn（知る）→ 顔と名前を知っている程度の相手は…？",
    etymologyConclusion:"ad（～へ）＋ co（共に）＋ gn（知る）→ 顔と名前を知っている程度の相手＝知人",
+   spelling:"ad→ac（q の前で d が c に）、co＋gn→quaint（フランス語を通って変化）",
    etymologyMore:["もとは物事を知っていること→（ある分野の）知識"],
    relatedWords:[
      {word:"acquaint",meaning:"知らせる，慣れさせる",breakdown:"ad（～へ）＋ gn（知る）→ 知っている状態にしてやる"},
@@ -18487,6 +18665,7 @@ const RAW_WORDS=[
    exampleJa2:"校長は今朝早く、全校に向けて演説した。",
    etymologyProcess:"ad（～へ）＋ rect（まっすぐ）→ 問題のほうへまっすぐ向き合うと…？",
    etymologyConclusion:"ad（～へ）＋ rect（まっすぐ）→ 問題のほうへまっすぐ向き合って手をつける＝取り組む",
+   spelling:"rect→ress（フランス語を通って変化）",
    why:"【なぜ】俗ラテン語 *directiare は「まっすぐにする」。相手のほうへまっすぐ向けることから、「宛先を書く（住所）」「まっすぐ語りかける（演説する）」「問題に正面から向き合う（取り組む）」へ広がりました。\n【つながり】direct（まっすぐ向ける）、correct（ゆがみをまっすぐ直す）も同じ rect の家族です。",
    relatedWords:[
      {word:"direct",meaning:"まっすぐな；指示する",breakdown:"di（離れて）＋ rect（まっすぐ）→ まっすぐそちらへ向ける"},
@@ -18503,6 +18682,7 @@ const RAW_WORDS=[
    exampleJa2:"私たちは、嵐のゆっくりした接近を静かに見守った。",
    etymologyProcess:"ap（～へ）＋ proch（近い）→ 問題に近づいていくときの近づき方は…？",
    etymologyConclusion:"ap（～へ）＋ proch（近い）→ 問題に近づいていくときの近づき方＝取り組み方",
+   spelling:"proch→proach（フランス語を通って変化）",
    etymologyMore:["問題でなく物に近づくこと→接近"],
    relatedWords:[
      {word:"reproach",meaning:"非難する",breakdown:"re（後ろへ）＋ proch（近い）→ 相手に詰め寄って責める"},
@@ -18581,6 +18761,7 @@ const RAW_WORDS=[
    exampleJa2:"誰も、あなたに自分の意見を変えるよう強いることはできない。",
    etymologyProcess:"fort（力）→ 力ずくで相手にやらせてしまうと…？",
    etymologyConclusion:"fort（力）→ 力ずくで、相手にそうせざるを得なくさせる＝強いる",
+   spelling:"fort→forc（フランス語を通って変化）",
    etymologyMore:["相手を動かす力そのもの→力，勢い"],
    relatedWords:[
      {word:"effort",meaning:"努力",breakdown:"ef（外へ）＋ fort（力）→ 力を外へ出しきること"},
@@ -18597,6 +18778,7 @@ const RAW_WORDS=[
    exampleJa2:"彼女の正直なスピーチは、多くの若い聴衆の心に響いた。",
    etymologyProcess:"ap（～へ）＋ pel（押しやる）→ 相手の心へ押しやるように呼びかけると…？",
    etymologyConclusion:"ap（～へ）＋ pel（押しやる）→ 相手の心のほうへ押しやるように強く呼びかける＝訴える",
+   spelling:"pel→peal（フランス語を通って変化）",
    etymologyMore:["心のほうへ押しやられて届く→（to ～）（～の）心に響く"],
    relatedWords:[
      {word:"expel",meaning:"追い出す",breakdown:"ex（外へ）＋ pel（押しやる）→ 外へ押し出してしまう"},
@@ -18692,6 +18874,7 @@ const RAW_WORDS=[
    exampleJa2:"その突然の知らせは、静かな教室のみんなを呆然とさせた。",
    etymologyProcess:"ex（外へ）＋ tonar（雷が鳴る）→ 一瞬、何も分からなくさせてしまうと…？",
    etymologyConclusion:"ex（外へ）＋ tonar（雷が鳴る）→ 雷に打たれたように一瞬何も分からなくさせる＝気絶させる",
+   spelling:"ex→s（e が落ちた）、tonar→tun（フランス語を通って縮まった）",
    why:"【なぜ】古フランス語 estoner は ex（外へ）＋ tonare（雷が鳴る）で、「雷のような衝撃を与える」こと。そこから「気絶させる」「呆然とさせる」になりました。\n【つながり】astonish（ひどく驚かせる）も同じ語から。tone（音の調子）、thunder（雷）も遠い親戚です。",
    relatedWords:[
      {word:"astonish",meaning:"ひどく驚かせる",breakdown:"ex（外へ）＋ tonar（雷が鳴る）→ 雷に打たれたように強く驚かせる"},
@@ -18818,6 +19001,7 @@ const RAW_WORDS=[
    exampleJa2:"刑事は、番号標によって車をたどって捜し出すことができる。",
    etymologyProcess:"tract（引く）→ 残された跡を引くようにたどっていくと…？",
    etymologyConclusion:"tract（引く）→ 残された跡を引くようにたどって見つけ出す＝たどって捜し出す",
+   spelling:"tract→trac（フランス語を通って縮まった）",
    etymologyMore:["引いた線のように残るもの→跡，形跡"],
    relatedWords:[
      {word:"attract",meaning:"引きつける",breakdown:"ad（～へ）＋ tract（引く）→ 自分のほうへぐっと引き寄せる"},
@@ -19178,6 +19362,7 @@ const RAW_WORDS=[
    exampleJa2:"理学部は、新しいキャンパスへ移った。",
    etymologyProcess:"facil（しやすい）＋ ty（名詞）→ 物事をたやすくこなせる力なら…？",
    etymologyConclusion:"facil（しやすい）＋ ty（名詞）→ 物事をたやすくこなせる生まれつきの力＝能力",
+   spelling:"facil→facul",
    why:"【なぜ】もとは「たやすくこなせる力」。中世の大学で「教える力を持つ人の集まり」を faculty と呼んだことから、「学部・教員団」の意味が生まれました。\n【つながり】facility（物事をしやすくする設備）、facilitate（たやすくする）も同じ家族です。",
    relatedWords:[
      {word:"facility",meaning:"施設，設備",breakdown:"facil（しやすい）＋ ity（名詞）→ 物事をしやすくする設備"},
@@ -19364,6 +19549,7 @@ const RAW_WORDS=[
    exampleJa2:"警察は、壊れた窓の近くに立っていた男を怪しいと思った。",
    etymologyProcess:"sub（下で）＋ spect（見る）→ 下から探るように見て怪しむと…？",
    etymologyConclusion:"sub（下で）＋ spect（見る）→ 下から探るように見て、そうではないかと疑う＝～ではないかと思う",
+   spelling:"sub→sus（s の前で b が s に）",
    etymologyMore:["下から探るように人を見る→（人）を怪しいと思う"],
    relatedWords:[
      {word:"respect",meaning:"尊敬する",breakdown:"re（再び）＋ spect（見る）→ 何度も見返すほど価値を認める"},
@@ -19428,6 +19614,7 @@ const RAW_WORDS=[
    exampleJa2:"彼女は、彼の静かな声の小さな変化を感じ取った。",
    etymologyProcess:"per（すっかり）＋ cept（取る）→ 五感ですっかり取り込んで気づくと…？",
    etymologyConclusion:"per（すっかり）＋ cept（取る）→ 五感ですっかり取り込んで、それと気づく＝認識する",
+   spelling:"cept→ceive（フランス語を通って変化）",
    relatedWords:[
      {word:"accept",meaning:"受け入れる",breakdown:"ac（～へ）＋ cept（取る）→ 差し出されたほうへ手を出して取る"},
      {word:"concept",meaning:"概念",breakdown:"con（すっかり）＋ cept（取る）→ 頭の中にすっかり取り込んだ形"},
@@ -19668,6 +19855,7 @@ const RAW_WORDS=[
    exampleJa2:"多くの温泉が、この眠っている火山の近くにある。",
    etymologyProcess:"vulcan（火の神）→ 神が地下で働く仕事場と考えられた山は…？",
    etymologyConclusion:"vulcan（火の神）→ 火の神が働く仕事場と考えられた、火を噴く山＝火山",
+   spelling:"vulcan→volcan（イタリア語を通って u が o に）",
    why:"【なぜ】ローマ神話の火と鍛冶の神ウルカーヌス（Vulcan）から。シチリア島の近くにある火を噴く島を、神が地下で鉄を打つ仕事場だと考えて Vulcano と呼び、そこから volcano になりました。\n【つながり】ゴムを固くする加硫（vulcanize）も、同じ神の名から来ています。",
    relatedWords:[
      {synonym:true,word:"mountain",meaning:"山",breakdown:"高くそびえる山。volcano は火を噴く山だけを指す"},
@@ -19748,6 +19936,7 @@ const RAW_WORDS=[
    exampleJa2:"ウシたちが、緑の春の野原で静かに草を食べている。",
    etymologyProcess:"capit（頭）→ 昔、財産を頭数で数えた代表の家畜は…？",
    etymologyConclusion:"capit（頭）→ 昔は財産を頭数で数えた、その代表となる家畜＝ウシ",
+   spelling:"capit→catt（フランス語を通って縮まった）",
    why:"【なぜ】ラテン語 capitale は「頭数で数える財産」。中世では家畜が最大の財産で、なかでもウシを指すようになりました。\n【つながり】capital（資本・首都）、chapter（章）も caput（頭）の家族。日本語でも牛を「1頭」と数えます。",
    relatedWords:[
      {word:"capital",meaning:"首都；資本",breakdown:"capit（頭）＋ al（形容詞）→ 国の頭にあたる町、元手となる頭金"},
@@ -19810,6 +19999,7 @@ const RAW_WORDS=[
    exampleJa2:"その古い物語は、野獣と王女について語っている。",
    etymologyProcess:"besti（けもの）→ 人と違って理性を持たない荒々しい獣は…？",
    etymologyConclusion:"besti（けもの）→ 人と違って理性を持たない、荒々しい獣＝野獣",
+   spelling:"besti→beast（フランス語を通って形が変わった）",
    relatedWords:[
      {word:"bestial",meaning:"けもののような",breakdown:"besti（けもの）＋ al（形容詞）→ けもののように荒々しい"},
      {synonym:true,word:"animal",meaning:"動物",breakdown:"動物ぜんたい。beast は大きく荒々しい獣を指す"},
@@ -19999,6 +20189,7 @@ const RAW_WORDS=[
    exampleJa2:"彼女の音楽の才能は、とても幼いころに明白になった。",
    etymologyProcess:"ex（外へ）＋ vid（見る）→ 外から見てすぐそれと分かると…？",
    etymologyConclusion:"ex（外へ）＋ vid（見る）→ 外から見ただけですぐそれと分かる＝明白な",
+   spelling:"ex→e（x が消えた）",
    relatedWords:[
      {word:"evidence",meaning:"証拠",breakdown:"ex（外へ）＋ vid（見る）＋ ence（名詞）→ 外から見て分かる証し"},
      {word:"video",meaning:"動画，ビデオ",breakdown:"vid（見る）→ 目で見るためのもの"},
@@ -20045,6 +20236,7 @@ const RAW_WORDS=[
    exampleJa2:"その若いダンサーの優美さは、観客全体を驚かせた。",
    etymologyProcess:"grat（心地よい）→ 見る人を心地よくさせる美しさなら…？",
    etymologyConclusion:"grat（心地よい）→ 見る人を心地よくさせる、しなやかな美しさ＝優美さ",
+   spelling:"grat→grac（フランス語を通って t が c に）",
    etymologyMore:["神が人に与える心地よい贈り物→（神の）恵み"],
    relatedWords:[
      {word:"grateful",meaning:"感謝している",breakdown:"grat（心地よい）＋ ful（満ちた）→ ありがたい気持ちで満ちている"},
@@ -20061,6 +20253,7 @@ const RAW_WORDS=[
    exampleJa2:"彼女の温かい笑顔は、誕生日会のみんなを魅了した。",
    etymologyProcess:"carm（呪文）→ 呪文をかけたように人の心を引きつけると…？",
    etymologyConclusion:"carm（呪文）→ 呪文をかけたように、人の心を引きつける力＝魅力",
+   spelling:"carm→charm（フランス語で c が ch に）",
    why:"【なぜ】ラテン語 carmen は「歌・呪文」。呪文で人の心を操るという考えから、「人の心を引きつける力」＝魅力になりました。お守りの「チャーム」には、呪文の意味が今も残っています。\n【つながり】fascinate（まじないをかけたように魅了する）も、同じ発想から生まれた語です。",
    relatedWords:[
      {synonym:true,word:"fascinate",meaning:"魅了する",breakdown:"まじないのように心を奪うこと。charm は引きつける力そのもの"},
@@ -20140,6 +20333,7 @@ const RAW_WORDS=[
    exampleJa2:"その老犬は、優しい飼い主に忠実であり続けた。",
    etymologyProcess:"leg（法）＋ al（形容詞）→ 決まりにかなって相手を裏切らないと…？",
    etymologyConclusion:"leg（法）＋ al（形容詞）→ 決まりにかなって相手を裏切らない＝忠実な",
+   spelling:"leg→loy（フランス語を通って形が変わった。legal と同じ語）",
    why:"【なぜ】ラテン語 legalis は「法にかなった」。約束や決まりを守って裏切らないことから「忠実な」になりました。同じ語がまっすぐ英語に入ったのが legal（法律の）です。\n【つながり】legal（法律の）、privilege（その人だけに認められた決まり）も同じ leg の家族です。",
    relatedWords:[
      {word:"legal",meaning:"法律の，合法の",breakdown:"leg（法）＋ al（形容詞）→ 法にかなっている"},
@@ -20299,6 +20493,7 @@ const RAW_WORDS=[
    exampleJa2:"彼の小さな部屋は、いつも完全に散らかっていた。",
    etymologyProcess:"mis（送る）→ 食卓へ送られた料理が寄せ集まって乱れると…？",
    etymologyConclusion:"mis（送る）→ 食卓へ送られた料理の寄せ集め。そこから散らかった状態＝乱雑",
+   spelling:"mis→mess（フランス語を通って形が変わった）",
    etymologyMore:["散らかったように物事がこじれる→困った状態"],
    why:"【なぜ】もとは「食卓へ運ばれる一皿の料理」。兵士が大皿から取り分けて食べる食事（mess）の乱れた様子から、「ごちゃごちゃ・散らかり」の意味になりました。\n【つながり】mission（送り出される任務）、submit（下へ差し出す）も同じ「送る」の家族です。",
    relatedWords:[
@@ -20395,6 +20590,7 @@ const RAW_WORDS=[
    exampleJa2:"大きな漁船が、静かな小さな港に入ってきた。",
    etymologyProcess:"vas（器）＋ el（小さい）→ 中に液を入れて運ぶ小さな器なら…？",
    etymologyConclusion:"vas（器）＋ el（小さい）→ 中に液を入れて運ぶ小さな器や管＝体の管",
+   spelling:"vas→vess（フランス語を通って形が変わった）",
    etymologyMore:["人や荷を中に入れて運ぶ大きな器→（大きな）船","もとの「器」そのもの→容器"],
    relatedWords:[
      {word:"vase",meaning:"花びん",breakdown:"vas（器）→ 花を生けるための器"},
@@ -20459,6 +20655,7 @@ const RAW_WORDS=[
    exampleJa2:"彼女はピアノの決勝大会の前に、強烈な重圧を感じた。",
    etymologyProcess:"in（中へ）＋ tend（伸ばす）→ 中でぴんと張りつめて力がこもると…？",
    etymologyConclusion:"in（中へ）＋ tend（伸ばす）→ 中でぴんと張りつめて力がこもっている＝強烈な",
+   spelling:"tend→tens（「張られた」の形 tensus から）",
    relatedWords:[
      {word:"tend",meaning:"傾向がある",breakdown:"tend（伸ばす）→ 心がそちらへ伸びていく"},
      {word:"extend",meaning:"伸ばす，広げる",breakdown:"ex（外へ）＋ tend（伸ばす）→ 外へ向けて伸ばしていく"},
@@ -20489,6 +20686,7 @@ const RAW_WORDS=[
    exampleJa2:"裁判官は、どの事件でも中立でいなければならない。",
    etymologyProcess:"ne（否定）＋ uter（二つのうちどちらか）→ どちら側にもつかないと…？",
    etymologyConclusion:"ne（否定）＋ uter（二つのうちどちらか）→ 二つのどちら側にもつかない＝中立の",
+   spelling:"uter→utr（e が落ちた）",
    relatedWords:[
      {word:"neutralize",meaning:"中和する，無効にする",breakdown:"ne（否定）＋ uter（二つのうちどちらか）→ どちらでもない状態にする"},
      {word:"neutron",meaning:"中性子",breakdown:"ne（否定）＋ uter（二つのうちどちらか）→ プラスにもマイナスにも寄らない粒"},
@@ -20504,6 +20702,7 @@ const RAW_WORDS=[
    exampleJa2:"この長い記事の手短な要約を書いてください。",
    etymologyProcess:"brev（短い）→ 時間や言葉が短く切り詰められていると…？",
    etymologyConclusion:"brev（短い）→ 時間や言葉が短く切り詰められている＝手短な",
+   spelling:"brev→brief（フランス語で v が f に）",
    relatedWords:[
      {word:"briefly",meaning:"手短に",breakdown:"brev（短い）＋ ly（副詞）→ 短く切り詰めて"},
      {word:"abbreviate",meaning:"省略する",breakdown:"ad（～へ）＋ brev（短い）→ 短くなるほうへ縮める"},
@@ -20611,6 +20810,7 @@ const RAW_WORDS=[
    exampleJa2:"この町は、私が育った町に似ている。",
    etymologyProcess:"re（再び）＋ simil（似ている）→ もう一人の自分を見るようだと…？",
    etymologyConclusion:"re（再び）＋ simil（似ている）→ もう一人の自分を見るようによく似ている＝似ている",
+   spelling:"simil→sembl（フランス語を通って形が変わった）",
    relatedWords:[
      {word:"similar",meaning:"似ている",breakdown:"simil（似ている）＋ ar（形容詞）→ 形やようすが近い"},
      {word:"simulate",meaning:"まねる，模擬する",breakdown:"simil（似ている）＋ ate（動詞）→ 似せて作ってみせる"},
@@ -20642,6 +20842,7 @@ const RAW_WORDS=[
    exampleJa2:"私たちは昨日、それぞれの品目を別々の部類に入れた。",
    etymologyProcess:"cata（下へ）＋ agor（広場）→ 広場で公に言い分けたひとまとまりは…？",
    etymologyConclusion:"cata（下へ）＋ agor（広場）→ 広場で公に言い分けたひとまとまり＝部類",
+   spelling:"cata→cat（a が消えた）、agor→egor",
    why:"【なぜ】ギリシャ語 katēgoria は、もともと「広場で公に言い立てること（告発）」。アリストテレスがこの語を「物事を言い分ける枠組み」の意味で使ったことから、「範疇・部類」になりました。\n【つながり】cata（下へ）は catalog（下へ書き連ねた一覧）にも出てきます。",
    relatedWords:[
      {word:"catalog",meaning:"カタログ，目録",breakdown:"cata（下へ）＋ log（言葉）→ 下へ書き連ねた一覧"},
@@ -21022,6 +21223,7 @@ const RAW_WORDS=[
    exampleJa2:"毎日の決まった日課があると、生活はとても安心できるものになる。",
    etymologyProcess:"rupt（破る）＋ ine（もの）→ 通り慣れて踏み固められた道のようなら…？",
    etymologyConclusion:"rupt（破る）＋ ine（もの）→ 踏み破られた道のように決まりきった手順＝決まりきった仕事",
+   spelling:"rupt→rout（フランス語 route を通って縮まった）",
    why:"【なぜ】route（道）から出た語で、もとは「踏み破られてできた道」。毎日同じ道を通るように、いつも同じ手順でする仕事を routine と呼ぶようになりました。\n【つながり】route（道）、interrupt（間に割って入る）も同じ rupt（破る）の家族です。",
    relatedWords:[
      {word:"route",meaning:"道すじ",breakdown:"rupt（破る）→ 踏み破られてできた通り道"},
@@ -21038,6 +21240,7 @@ const RAW_WORDS=[
    exampleJa2:"この古い貝殻は、あの夏からの記念の品だ。",
    etymologyProcess:"sub（下で）＋ ven（来る）→ 心の底から思い出がよみがえる品なら…？",
    etymologyConclusion:"sub（下で）＋ ven（来る）→ 心の底から思い出がよみがえってくる品＝土産",
+   spelling:"sub→sou（フランス語で形が変わった）",
    why:"【なぜ】フランス語の souvenir は「思い出す」という動詞。見るたびに旅の記憶がよみがえる品ということで、「記念の品・土産」になりました。\n【つながり】convenient（都合よく来る）、event（外へ出てくる）も同じ ven（来る）の家族です。",
    relatedWords:[
      {word:"convenient",meaning:"便利な",breakdown:"con（共に）＋ ven（来る）→ 都合よく共に来てくれる"},
@@ -21070,6 +21273,7 @@ const RAW_WORDS=[
    exampleJa2:"ペンギンは一年中、南極の近くに住んでいる。",
    etymologyProcess:"pal（杭）→ 地面に打ち込む長い杭のようなものは…？",
    etymologyConclusion:"pal（杭）→ 地面に打ち込む、長い杭のようなもの＝棒",
+   spelling:"pal→pol（英語の中で a が o に変わった）",
    hook:"「棒」と「極」は別語源の同音語。North Pole の pole は「軸の先」。",
    relatedWords:[
      {synonym:true,word:"stick",meaning:"棒，枝",breakdown:"細い棒。pole はもっと長くて太い棒を指す"},
@@ -21102,6 +21306,7 @@ const RAW_WORDS=[
    exampleJa2:"それは、黒猫についての古い迷信にすぎない。",
    etymologyProcess:"super（上から）＋ sta（立つ）→ 理屈の上に居座り続ける信じ込みなら…？",
    etymologyConclusion:"super（上から）＋ sta（立つ）→ 理屈の上に居座り続ける、根拠のない信じ込み＝迷信",
+   spelling:"sta→stit（ラテン語で a が i に弱まった）",
    why:"【なぜ】ラテン語 superstitio は super（上に）＋ stare（立つ）ですが、そこから「迷信」へどう移ったかは諸説あり、はっきりしていません。「理屈を越えて居座り続ける思い込み」と結びつけると覚えやすくなります。\n【つながり】superior（上に立つ）、substance（下で支える中身）も同じ sta の家族です。",
    relatedWords:[
      {word:"stand",meaning:"立つ",breakdown:"sta（立つ）→ ラテン語 stare と同じ祖先の英語本来の語"},
@@ -21118,6 +21323,7 @@ const RAW_WORDS=[
    exampleJa2:"学校のデータはすべて、クラウドの保管場所に置かれている。",
    etymologyProcess:"staur（立てる）＋ age（名詞）→ 後のために積み立ててしまっておくと…？",
    etymologyConclusion:"staur（立てる）＋ age（名詞）→ 後のために積み立ててしまっておくこと＝貯蔵",
+   spelling:"staur→stor（フランス語を通って縮まった）",
    etymologyMore:["しまっておくための場所→保管場所"],
    relatedWords:[
      {word:"store",meaning:"蓄える；店",breakdown:"staur（立てる）→ 蓄えを積み立てておくところ"},
@@ -21150,6 +21356,7 @@ const RAW_WORDS=[
    exampleJa2:"彼女はそれぞれの衣類をたたんで、注意深くしまった。",
    etymologyProcess:"garn（備える）＋ ment（名詞）→ 身に備えつけて着るものなら…？",
    etymologyConclusion:"garn（備える）＋ ment（名詞）→ 身に備えつけて着るもの＝衣類",
+   spelling:"garn→garm（フランス語 garnement が縮まった）",
    relatedWords:[
      {word:"garnish",meaning:"飾りをそえる",breakdown:"garn（備える）＋ ish（～にする）→ 料理に飾りを備えつける"},
      {synonym:true,word:"outfit",meaning:"ひとそろいの服",breakdown:"上下そろいの服装。garment は一点一点の衣類を指す"},
@@ -21414,6 +21621,7 @@ const RAW_WORDS=[
    exampleJa2:"若い神父が、静かな早朝の礼拝を導いた。",
    etymologyProcess:"presb（年長の）→ 年長者として人々を導く役目の人は…？",
    etymologyConclusion:"presb（年長の）→ 年長者として人々を導く役目を持つ人＝神父",
+   spelling:"presb→pr（presbyter が縮まって priest に）",
    hook:"長老派教会（Presbyterian）の presb と同じ語。もとは「年長者」。",
    why:"【なぜ】ギリシャ語 presbyteros は「より年長の者」。初期の教会では年長者が信者を導いたため、その役目を指す語がなまって priest になりました。\n【つながり】もとの presbys は「年老いた」。presbyteros という長い語が、話し言葉の中で priest まで縮まった、めずらしい例です。",
    relatedWords:[
@@ -21431,6 +21639,7 @@ const RAW_WORDS=[
    exampleJa2:"私はいちばん古い友人に、完全な信頼を置いている。",
    etymologyProcess:"fid（信じる）→ 疑わずにまっすぐ心を寄せていくと…？",
    etymologyConclusion:"fid（信じる）→ 疑うことなく、まっすぐ寄せていく心＝信仰",
+   spelling:"fid→faith（フランス語を通って d が th に）",
    etymologyMore:["神でなく人や物をまっすぐ信じる→（in ～への）信頼"],
    relatedWords:[
      {word:"confidence",meaning:"自信；信頼",breakdown:"con（すっかり）＋ fid（信じる）→ すっかり信じきっている気持ち"},
@@ -21477,6 +21686,7 @@ const RAW_WORDS=[
    exampleJa2:"私のイスラム教徒の同級生は、毎日5回祈る。",
    etymologyProcess:"slm（身をゆだねる）→ 神に身をすっかりゆだねる人は…？",
    etymologyConclusion:"slm（身をゆだねる）→ 神に身をすっかりゆだねている人＝イスラム教徒",
+   spelling:"slm→slim（アラビア語の子音だけの語根に母音が入った）",
    relatedWords:[
      {word:"Islam",meaning:"イスラム教",breakdown:"islam（身をゆだねる）→ 神に身をゆだねるという教え"},
      {synonym:true,word:"Christian",meaning:"キリスト教徒",breakdown:"別の宗教の信者。Muslim はイスラム教を信じる人を指す"},
@@ -21587,6 +21797,7 @@ const RAW_WORDS=[
    exampleJa2:"日本語は、5つの基本的な母音の音しか使わない。",
    etymologyProcess:"voc（呼ぶ）→ 口をふさがずに声そのものが出る音なら…？",
    etymologyConclusion:"voc（呼ぶ）→ 口をふさがずに、声そのものが出ていく音＝母音",
+   spelling:"voc→vow（フランス語を通って c が消えた）",
    relatedWords:[
      {word:"voice",meaning:"声",breakdown:"voc（呼ぶ）→ 口から出して呼びかける音"},
      {word:"vocal",meaning:"声の，ボーカルの",breakdown:"voc（呼ぶ）＋ al（形容詞）→ 声に関わっている"},
@@ -21617,6 +21828,7 @@ const RAW_WORDS=[
    exampleJa2:"この語では、最初の音節にアクセントを置きなさい。",
    etymologyProcess:"ad（～へ）＋ cant（歌う）→ 言葉にそえて歌うように付ける調子は…？",
    etymologyConclusion:"ad（～へ）＋ cant（歌う）→ 言葉にそえて、歌うように付ける調子＝なまり",
+   spelling:"ad→ac（c の前で d が c に）、cant→cent（組み合わさって a が e に）",
    why:"【なぜ】ラテン語 accentus は ad（～へ）＋ cantus（歌）で、「言葉にそえる歌」。ギリシャ語の「声の調子」を訳した語です。そこから語の強弱や、その土地らしい話し方＝なまりになりました。\n【つながり】chant（節をつけて唱える）、enchant（歌いかけて魅了する）も同じ cant の家族です。",
    relatedWords:[
      {word:"chant",meaning:"詠唱する",breakdown:"cant（歌う）→ 節をつけて何度もくり返し唱える"},
@@ -21698,6 +21910,7 @@ const RAW_WORDS=[
    exampleJa2:"彼の長い手紙は、温かく静かな愛情に満ちていた。",
    etymologyProcess:"ad（～へ）＋ fect（作る）→ 相手へ向かって心に作り出される思いなら…？",
    etymologyConclusion:"ad（～へ）＋ fect（作る）→ 相手へ向かって心に作り出される温かい思い＝愛情",
+   spelling:"ad→af（f の前で d が f に）",
    relatedWords:[
      {word:"affect",meaning:"影響する",breakdown:"ad（～へ）＋ fect（作る）→ そこへ働きかけて変化を作る"},
      {word:"effect",meaning:"効果",breakdown:"ef（外へ）＋ fect（作る）→ 外へ作り出される結果"},
@@ -21713,6 +21926,7 @@ const RAW_WORDS=[
    exampleJa2:"彼の音楽への熱意は、年月がたっても薄れることがなかった。",
    etymologyProcess:"en（中へ）＋ the（神）→ 神が中に入り込んだようにわき立つと…？",
    etymologyConclusion:"en（中へ）＋ the（神）→ 神が中に入り込んだようにわき立つ気持ち＝熱意",
+   spelling:"the→th（entheos が変化した形）",
    why:"【なぜ】ギリシャ語 enthousiasmos は「神が中に入り込むこと」。神がかりになって夢中になる様子から、「熱意・熱中」になりました。\n【つながり】theology（神について調べる学問＝神学）も同じ the（神）の家族です。",
    relatedWords:[
      {word:"enthusiastic",meaning:"熱心な",breakdown:"en（中へ）＋ the（神）＋ ic（形容詞）→ 神がかりのように夢中な"},
@@ -21729,6 +21943,7 @@ const RAW_WORDS=[
    exampleJa2:"彼女の怒りは、静かな夕方の散歩の間にゆっくり収まった。",
    etymologyProcess:"rab（狂う）→ 我を忘れるほど激しく燃え上がる怒りなら…？",
    etymologyConclusion:"rab（狂う）→ 我を忘れるほど激しく燃え上がってしまう怒り＝激怒",
+   spelling:"rab→ra（フランス語を通って b が消えた）",
    relatedWords:[
      {word:"rabies",meaning:"狂犬病",breakdown:"rab（狂う）→ 動物を狂わせてしまう恐ろしい病"},
      {synonym:true,word:"anger",meaning:"怒り",breakdown:"ふつうの怒り。rage は我を忘れるほど激しい怒りを指す"},
@@ -22090,6 +22305,7 @@ const RAW_WORDS=[
    exampleJa2:"全部で20人の生徒が、夏の英語キャンプに参加した。",
    etymologyProcess:"all（すっかり）＋ together（一つに）→ すっかり一つにまとめると…？",
    etymologyConclusion:"all（すっかり）＋ together（一つに）→ すっかり一つにまとめて＝完全に",
+   spelling:"all→al（l が1つ落ちた）",
    etymologyMore:["すっかり一つにまとめて数える→全部で，合計で"],
    relatedWords:[
      {word:"gather",meaning:"集める",breakdown:"gather（一つにまとめる）→ ばらばらのものを一か所へ寄せる"},
@@ -22106,6 +22322,7 @@ const RAW_WORDS=[
    exampleJa2:"クラス全体が、彼女の新しく大胆な考えに賛成した。",
    etymologyProcess:"in（否定）＋ tact（触れる）→ 誰にも手をつけられず欠けがないと…？",
    etymologyConclusion:"in（否定）＋ tact（触れる）→ 誰にも手をつけられず、欠けのないまま＝すべての",
+   spelling:"in→en（フランス語で i が e に）、tact→ti（integer がフランス語で縮まった）",
    why:"【なぜ】ラテン語 integer は in（否定）＋ tangere（触れる）で「手をつけられていない」。一部も欠けていない、そのままの状態から「全体の・すべての」になりました。\n【つながり】integer（整数）、intact（損なわれていない）も同じ家族です。",
    relatedWords:[
      {word:"intact",meaning:"損なわれていない",breakdown:"in（否定）＋ tact（触れる）→ 誰にも触られていないままの"},
@@ -22215,6 +22432,7 @@ const RAW_WORDS=[
    exampleJa2:"彼女はどうやら、その急な変更について何も知らなかったらしい。",
    etymologyProcess:"ap（～へ）＋ pear（見えてくる）→ 目の前に見えてくるかぎりでは…？",
    etymologyConclusion:"ap（～へ）＋ pear（見えてくる）→ 目の前に見えてくるかぎりでは＝どうやら～らしい",
+   spelling:"pear→par（ラテン語 parere の形）",
    relatedWords:[
      {word:"appear",meaning:"現れる；～に見える",breakdown:"ap（～へ）＋ pear（見えてくる）→ 目の前に姿が見えてくる"},
      {word:"apparent",meaning:"明らかな；見かけの",breakdown:"ap（～へ）＋ pear（見えてくる）→ ひと目で見てとれる"},
@@ -22339,6 +22557,7 @@ const RAW_WORDS=[
    exampleJa2:"その小さな村は、力のある王の命令にそむいた。",
    etymologyProcess:"dis（否定）＋ fi（信じる）→ 信頼の約束を破って立ち向かうと…？",
    etymologyConclusion:"dis（否定）＋ fi（信じる）→ 信頼の約束を破り捨てて正面から立ち向かう＝そむく",
+   spelling:"dis→de（s が消えた）、fi→fy（語末の i が y に）",
    relatedWords:[
      {word:"faith",meaning:"信頼，信仰",breakdown:"fi（信じる）＋ th（名詞）→ 相手を信じる心そのもの"},
      {word:"confide",meaning:"打ち明ける",breakdown:"con（共に）＋ fi（信じる）→ 相手を信じて秘密を預ける"},
@@ -22386,6 +22605,7 @@ const RAW_WORDS=[
    exampleJa2:"このグラフは、市の人口がどう変化してきたかを示している。",
    etymologyProcess:"in（中へ）＋ lustr（照らす）→ 中まで光を当ててはっきり見せると…？",
    etymologyConclusion:"in（中へ）＋ lustr（照らす）→ 中まで光を当てて、はっきり見せる＝説明する",
+   spelling:"in→il（l の前で n が l に）",
    etymologyMore:["絵で光を当てるように見せる→さし絵を入れる"],
    relatedWords:[
      {word:"illustration",meaning:"さし絵；実例",breakdown:"in（中へ）＋ lustr（照らす）＋ ation（名詞）→ 照らして見せたもの"},
@@ -22617,6 +22837,7 @@ const RAW_WORDS=[
    exampleJa2:"一部の微生物は、私たちの体が食べ物をきちんと消化するのを助ける。",
    etymologyProcess:"micro（小さい）＋ bio（生命）→ 目に見えないほど小さな生き物なら…？",
    etymologyConclusion:"micro（小さい）＋ bio（生命）→ 目に見えないほど小さな生き物＝微生物",
+   spelling:"bio→be（フランス語で縮まった）",
    relatedWords:[
      {word:"microscope",meaning:"顕微鏡",breakdown:"micro（小さい）＋ scope（見る道具）→ 小さなものを見るための道具"},
      {word:"biology",meaning:"生物学",breakdown:"bio（生命）＋ log（学問）→ 生命について調べる学問"},
@@ -22632,6 +22853,7 @@ const RAW_WORDS=[
    exampleJa2:"誰かが、王の夜の飲み物に毒を入れた。",
    etymologyProcess:"pot（飲む）→ 飲むと命を奪ってしまう飲み物なら…？",
    etymologyConclusion:"pot（飲む）→ 飲むと命を奪ってしまう恐ろしい飲み物＝毒",
+   spelling:"pot→pois（フランス語で t が s の音に）",
    why:"【なぜ】ラテン語 potio は「飲むこと・飲み薬」。中世フランス語で「毒の飲み物」を指すようになり、英語では「毒」そのものを表す語になりました。\n【つながり】potion（魔法の飲み薬）は同じ語から来た、形を変えていない兄弟です。",
    relatedWords:[
      {word:"potion",meaning:"（魔法の）飲み薬",breakdown:"pot（飲む）＋ ion（名詞）→ 飲むために作られた液"},
@@ -22679,6 +22901,7 @@ const RAW_WORDS=[
    exampleJa2:"彼女は、クラスのすべての生徒を助けようと努力した。",
    etymologyProcess:"en（～にする）＋ dev（果たすべき務め）→ 自分の務めにして力を尽くすと…？",
    etymologyConclusion:"en（～にする）＋ dev（果たすべき務め）→ 自分の務めにして力を尽くす＝努力する",
+   spelling:"dev→deav（フランス語 devoir から形が変わった）",
    relatedWords:[
      {word:"debt",meaning:"借金",breakdown:"deb（負う）→ 返す務めを負っているもの"},
      {word:"due",meaning:"支払うべき；当然の",breakdown:"due（負っている）→ 果たすべき務めがある"},
@@ -22756,6 +22979,7 @@ const RAW_WORDS=[
    exampleJa2:"彼は誰の助けも借りずに、新しい本棚を組み立てた。",
    etymologyProcess:"as（～へ）＋ simul（一緒に）→ ばらばらのものを一か所へ寄せると…？",
    etymologyConclusion:"as（～へ）＋ simul（一緒に）→ ばらばらのものを一か所へ寄せ集める＝組み立てる",
+   spelling:"simul→sembl（フランス語を通って形が変わった）",
    etymologyMore:["人を一か所へ寄せ集める→（人が）集まる"],
    relatedWords:[
      {word:"assembly",meaning:"集会；組み立て",breakdown:"as（～へ）＋ simul（一緒に）→ 一か所に集まること"},
@@ -22772,6 +22996,7 @@ const RAW_WORDS=[
    exampleJa2:"よい教師は、若い生徒の人格を形づくる手助けをする。",
    etymologyProcess:"modul（小さなます）→ 形と大きさを決めるための器なら…？",
    etymologyConclusion:"modul（小さなます）→ 形と大きさを決めるための器＝型",
+   spelling:"modul→mol（フランス語を通って縮まった）",
    relatedWords:[
      {word:"model",meaning:"模型；手本",breakdown:"modul（小さなます）→ 形を決めるためのひな型"},
      {word:"module",meaning:"（組み立て用の）単位",breakdown:"modul（小さなます）→ 決まった大きさのひとまとまり"},
@@ -23099,6 +23324,7 @@ const RAW_WORDS=[
    exampleJa2:"大雪が2日間、市の鉄道網の機能を止めた。",
    etymologyProcess:"para（そばで）＋ lys（ほどく）→ 体の片側で神経のつながりがほどけると…？",
    etymologyConclusion:"para（そばで）＋ lys（ほどく）→ 体の片側で神経のつながりがほどける＝麻痺させる",
+   spelling:"lys→lyz（動詞になって s が z に）",
    etymologyMore:["体と同じように動けなくする→（交通などの）機能を止める"],
    why:"【なぜ】ギリシャ語 paralysis は para（わきの・片側の）＋ lyein（ゆるめる）で「体の片側がゆるむこと」。もとは脳卒中で片側が動かなくなる状態を指し、そこから体の働きが止まること全体へ広がりました。\n【つながり】analyze（すっかりほどく）も lys の仲間。雪で電車が止まるように、組織や街の働きが止まるときにも使えます。",
    relatedWords:[
@@ -23495,6 +23721,7 @@ const RAW_WORDS=[
    exampleJa2:"彼女はためらわずにその計画に同意した。",
    etymologyProcess:"con（共に）＋ sens（感じる）→ 相手と同じように感じていると示すと…？",
    etymologyConclusion:"con（共に）＋ sens（感じる）→ 相手と同じ気持ちだと示して認める＝（正式な）同意，承諾",
+   spelling:"sens→sent（動詞 sentire の形）",
    relatedWords:[
      {word:"sense",meaning:"感覚；意味",breakdown:"sens（感じる）→ 体や心で受け取るはたらき"},
      {word:"sensitive",meaning:"敏感な",breakdown:"sens（感じる）＋ ive（形容詞）→ わずかな違いもすぐ感じ取る"},
@@ -24004,6 +24231,7 @@ const RAW_WORDS=[
    exampleJa2:"有権者は政府の腐敗にうんざりしている。",
    etymologyProcess:"com（すっかり）＋ rupt（破る）＋ ion（名詞）→ 正しさがすっかり破れてしまうと…？",
    etymologyConclusion:"com（すっかり）＋ rupt（破る）＋ ion（名詞）→ 正しい心がすっかり破れてくずれること＝汚職",
+   spelling:"com→cor（r の前で m が r に）",
    relatedWords:[
      {word:"interrupt",meaning:"じゃまをする",breakdown:"inter（間の）＋ rupt（破る）→ 話の間に割りこんで破る"},
      {word:"erupt",meaning:"噴火する",breakdown:"e（外へ）＋ rupt（破る）→ 山が内から破れて外へ噴き出す"},
@@ -24133,6 +24361,7 @@ const RAW_WORDS=[
    exampleJa2:"クラスの討論で、ケンはいちばん頼りになる味方になった。",
    etymologyProcess:"ad（～へ）＋ lig（結ぶ）→ 相手のほうへ自分を結びつけると…？",
    etymologyConclusion:"ad（～へ）＋ lig（結ぶ）→ 相手のほうへ固く結びついて助け合う相手＝同盟国",
+   spelling:"ad→al（l の前で d が l に）、lig→ly（フランス語で縮まった）",
    relatedWords:[
      {word:"alliance",meaning:"同盟",breakdown:"ad（～へ）＋ lig（結ぶ）＋ ance（名詞）→ 国どうしが結びつくこと"},
      {word:"oblige",meaning:"義務づける",breakdown:"ob（～に向かって）＋ lig（結ぶ）→ 相手に縛りつけてやらせる"},
@@ -24148,6 +24377,7 @@ const RAW_WORDS=[
    exampleJa2:"そのチャンピオンは一度も負けずに5年間君臨した。",
    etymologyProcess:"reg（治める）→ 王として国を治めている期間は…？",
    etymologyConclusion:"reg（治める）→ 王が国を治めること、またその期間＝（王の）治世",
+   spelling:"reg→reig（フランス語を通って形が変わった）",
    relatedWords:[
      {word:"region",meaning:"地域",breakdown:"reg（治める）＋ ion（名詞）→ 一人の王が治める範囲"},
      {word:"regime",meaning:"政権",breakdown:"reg（治める）→ 国を上から治める仕組み"},
@@ -24226,6 +24456,7 @@ const RAW_WORDS=[
    exampleJa2:"彼女の優しさは、うちのチームにとって大きな強みだ。",
    etymologyProcess:"ad（～へ）＋ sat（十分な）→ 借りを返すのに十分なほどあるものは…？",
    etymologyConclusion:"ad（～へ）＋ sat（十分な）→ 借りを返すのに十分なだけ持っている財産＝資産",
+   spelling:"ad→as、sat→set（フランス語 asez を通って変化）",
    why:"【なぜ】古いフランス語 asez（十分に）から。ラテン語 ad satis（十分なほどまで）がもとです。法律では「亡くなった人の借金を払うのに十分な財産」を assets と呼びました。そこから「持っている財産」＝資産、さらに「役に立つもの」＝強みになりました。\n【つながり】satisfy（十分に満たす）の sat と同じ家族です。",
    relatedWords:[
      {word:"satisfy",meaning:"満足させる",breakdown:"sat（十分な）＋ fy（する）→ 十分なところまで満たす"},
@@ -24384,6 +24615,7 @@ const RAW_WORDS=[
    exampleJa2:"この町では、小さな企業が働く人の大半を雇っている。",
    etymologyProcess:"entre（間の）＋ pris（つかむ）→ 両手の間にしっかりつかんで取りかかると…？",
    etymologyConclusion:"entre（間の）＋ pris（つかむ）→ 両手でしっかりつかんで取りかかる大仕事＝（大胆な）事業",
+   spelling:"entre→enter（re が er に入れかわった）",
    etymologyMore:["大仕事に取り組む組織→企業","大仕事をつかみに行く心→進取の気性"],
    relatedWords:[
      {word:"entrepreneur",meaning:"起業家",breakdown:"entre（間の）＋ pren（つかむ）→ 事業を手につかんで始める人"},
@@ -24746,6 +24978,7 @@ const RAW_WORDS=[
    exampleJa2:"私はカナダのペンフレンドと何年も文通した。",
    etymologyProcess:"com（共に）＋ re（後ろへ）＋ spond（誓う）→ 互いに約束を返し合うと…？",
    etymologyConclusion:"com（共に）＋ re（後ろへ）＋ spond（誓う）→ 互いに応え合ってぴったり合う＝（with / to ～と）一致する",
+   spelling:"com→cor（r の前で m が r に）",
    etymologyMore:["手紙で互いに応え合う→（with ～と）文通する"],
    relatedWords:[
      {word:"respond",meaning:"応答する",breakdown:"re（後ろへ）＋ spond（誓う）→ 約束を返すように答える"},
@@ -24793,6 +25026,7 @@ const RAW_WORDS=[
    exampleJa2:"軍は夜明けに敵の基地への襲撃を始めた。",
    etymologyProcess:"ad（～へ）＋ sault（跳ぶ）→ 相手に向かって飛びかかると…？",
    etymologyConclusion:"ad（～へ）＋ sault（跳ぶ）→ 相手に向かっていきなり飛びかかる＝暴行",
+   spelling:"ad→as（s の前で d が s に）",
    etymologyMore:["軍が敵にいきなり襲いかかる→（軍の）襲撃"],
    relatedWords:[
      {word:"result",meaning:"結果",breakdown:"re（後ろへ）＋ sult（跳ぶ）→ はね返って出てきたもの"},
@@ -26234,6 +26468,7 @@ const RAW_WORDS=[
    exampleJa2:"昔は多くの犯罪者が人前で処刑された。",
    etymologyProcess:"ex（外へ）＋ secu（ついて行く）→ 最後までついて行ってやりとげると…？",
    etymologyConclusion:"ex（外へ）＋ secu（ついて行く）→ 最後までついて行ってやりとげる＝（計画を）遂行する",
+   spelling:"secu→ecu（x の後ろで s が消えた）",
    etymologyMore:["判決を最後までやりとげる→～を処刑する"],
    why:"【なぜ】ラテン語 exsequi は ex（外へ＝最後まで）＋ sequi（ついて行く）で「最後までやりとげる」。中世では「判決を最後まで実行する」という意味でも使われ、死刑の判決を実行することから「処刑する」の意味が生まれました。\n【つながり】executive（重役＝実行する人）、sequence（連続）も同じ家族。「エグゼクティブ」は決めたことを実行する人です。",
    relatedWords:[
@@ -26282,6 +26517,7 @@ const RAW_WORDS=[
    exampleJa2:"祖父は来週、退院する予定だ。",
    etymologyProcess:"dis（離れて）＋ carr（荷車）→ 積んだ荷を下ろすと…？",
    etymologyConclusion:"dis（離れて）＋ carr（荷車）→ 積み荷を下ろすように中身を外へ出す＝（液体・ガスなどを）排出する",
+   spelling:"carr→charg（フランス語で c が ch に）",
    etymologyMore:["荷を下ろすように人を外へ出す→（病院などから）退院させる，解放する"],
    relatedWords:[
      {word:"charge",meaning:"請求額",breakdown:"carr（荷車）→ 荷を積むように相手へ負わせる支払い"},
@@ -26349,6 +26585,7 @@ const RAW_WORDS=[
    exampleJa2:"学校はテストでのカンニングを理由に、彼を1週間の停学にした。",
    etymologyProcess:"sub（下で）＋ pend（ぶら下がる）→ 下にぶら下げておくと…？",
    etymologyConclusion:"sub（下で）＋ pend（ぶら下がる）→ 上からつって下にぶら下げる＝つるす",
+   spelling:"sub→sus（subs- の形から b が消えた）",
    etymologyMore:["宙ぶらりんのまま止めておく→（一時的に）停止する，延期する","生徒や社員の身分を宙づりにする→停学［停職］にする"],
    why:"【なぜ】ラテン語 suspendere は「下からつり上げる」。つるされた物は地面に着かず宙ぶらりんです。そこから、物事を決着させずに「宙に浮かせておく」という意味が生まれ、運行の一時停止や停学にも使われるようになりました。\n【つながり】suspense（サスペンス）は結末が宙づりのままハラハラする状態。pendant（ペンダント）もぶら下がる飾りです。",
    relatedWords:[
@@ -26512,6 +26749,7 @@ const RAW_WORDS=[
    exampleJa2:"各部には、週に1時間ずつ体育館が割り当てられている。",
    etymologyProcess:"ad（～へ）＋ loc（場所）＋ ate（動詞）→ それぞれの場所へ置くと…？",
    etymologyConclusion:"ad（～へ）＋ loc（場所）＋ ate（動詞）→ お金や時間をそれぞれの持ち場へ置く＝（予算・時間などを）配分する",
+   spelling:"ad→al（l の前で d が l に）",
    relatedWords:[
      {word:"local",meaning:"地元の",breakdown:"loc（場所）＋ al（～の）→ その場所の"},
      {word:"location",meaning:"場所，位置",breakdown:"loc（場所）＋ ation（名詞）→ 物が置かれている場所"},
@@ -26660,6 +26898,7 @@ const RAW_WORDS=[
    exampleJa2:"その会社は来年、この型の生産をやめる。",
    etymologyProcess:"cess（行く）→ その場から去っていくと…？",
    etymologyConclusion:"cess（行く）→ 立ち去って動きがなくなる＝（続いていたことが）やむ",
+   spelling:"cess→ceas（フランス語を通って形が変わった）",
    why:"【なぜ】ラテン語 cedere は「行く・引き下がる」。そこから「引き下がったまま動かない」という cessare（やめる・休む）が生まれ、フランス語を通って cease になりました。前へ進む cess が、ここでは「身を引いて止まる」ほうへ向かったのです。\n【つながり】process（前へ進む）とは逆向き。ceasefire（停戦）は「撃つのをやめる」です。",
    relatedWords:[
      {word:"process",meaning:"過程",breakdown:"pro（前へ）＋ cess（行く）→ 前へ進んでいく道のり"},
@@ -26739,6 +26978,7 @@ const RAW_WORDS=[
    exampleJa2:"その古い家は何年も放っておかれていた。",
    etymologyProcess:"nec（否定）＋ lect（拾う）→ 拾わずに放っておくと…？",
    etymologyConclusion:"nec（否定）＋ lect（拾う）→ 拾い上げるべきものを拾わない＝（すべきことを）怠る",
+   spelling:"nec→neg（l の前で c が g に）",
    etymologyMore:["世話を拾い上げずにおく→（世話をせず）放っておく"],
    relatedWords:[
      {word:"collect",meaning:"集める",breakdown:"con（共に）＋ lect（拾う）→ ばらばらの物を一か所へ拾い寄せる"},
@@ -26803,6 +27043,7 @@ const RAW_WORDS=[
    exampleJa2:"その選手は試合で、ひざに大けがを負った。",
    etymologyProcess:"sub（下で）＋ tain（保つ）→ 下から支えて保つと…？",
    etymologyConclusion:"sub（下で）＋ tain（保つ）→ 下から支えて倒れないように保ち続ける＝（長く）維持する",
+   spelling:"sub→sus（subs- の形から b が消えた）",
    etymologyMore:["下から持って重さを保つ→（重さを下から）支える","下で受け止めて身に負う→（損害・けがを）受ける"],
    relatedWords:[
      {word:"sustainable",meaning:"持続可能な，サステナブルな",breakdown:"sub（下で）＋ tain（保つ）＋ able（～できる）→ 支え続けられる"},
@@ -27074,6 +27315,7 @@ const RAW_WORDS=[
    exampleJa2:"その新作ゲームは、世界中のファンに心待ちにされている。",
    etymologyProcess:"ante（前に）＋ cip（取る）＋ ate（動詞）→ 起こる前に取りにいくと…？",
    etymologyConclusion:"ante（前に）＋ cip（取る）＋ ate（動詞）→ 起こる前に先回りしてつかんでおく＝（前もって）予想して備える",
+   spelling:"ante→anti（ラテン語でも anti- の形になった）",
    etymologyMore:["よいことを先回りして待つ→心待ちにする"],
    relatedWords:[
      {word:"participate",meaning:"参加する",breakdown:"part（分ける）＋ cip（取る）＋ ate（動詞）→ 分けた一部を受け持つ"},
@@ -27167,6 +27409,7 @@ const RAW_WORDS=[
    exampleJa2:"お荷物は明日必ず届くと、私が保証いたします。",
    etymologyProcess:"ad（～へ）＋ sure（確かな）→ 相手に確かさを届けると…？",
    etymologyConclusion:"ad（～へ）＋ sure（確かな）→ 不安な相手に「確かだ」と言って安心させる＝（不安な人に）請け合う",
+   spelling:"ad→as（s の前で d が s に）",
    etymologyMore:["人でなく物事を確かなものにする→確実にする"],
    relatedWords:[
      {word:"sure",meaning:"確かな",breakdown:"sure（確かな）→ 疑う余地なくはっきりしている"},
@@ -27183,6 +27426,7 @@ const RAW_WORDS=[
    exampleJa2:"嵐による被害は、1000万円と査定された。",
    etymologyProcess:"ad（～へ）＋ sess（座る）→ 裁判官のそばに座ると…？",
    etymologyConclusion:"ad（～へ）＋ sess（座る）→ 裁判官のそばに座って値打ちを決める＝（状況・能力を）見極める",
+   spelling:"ad→as（s の前で d が s に）",
    etymologyMore:["座って金額を決める→（金額を）査定する"],
    why:"【なぜ】ラテン語 assidere は「そばに座る」。昔の裁判では、裁判官のそばに座る補佐役が罰金や税の額を決めていました。そこから「額を査定する」、さらに広く「状況や能力を見極めて評価する」という意味になりました。\n【つながり】session（会議の時間）、possess（所有している）も「座る」の sess の家族です。",
    relatedWords:[
@@ -27376,6 +27620,7 @@ const RAW_WORDS=[
    exampleJa2:"彼女は、その仕事がどれほど大変かについて何の幻想も抱いていない。",
    etymologyProcess:"in（～に）＋ lus（遊ぶ）＋ ion（名詞）→ 目をからかって遊ぶと…？",
    etymologyConclusion:"in（～に）＋ lus（遊ぶ）＋ ion（名詞）→ 目や心がからかわれて本物と思いこむこと＝錯覚",
+   spelling:"in→il（l の前で n が l に）",
    etymologyMore:["心がからかわれて信じた夢→（誤った）幻想，思いこみ"],
    relatedWords:[
      {word:"prelude",meaning:"前奏曲；前ぶれ",breakdown:"pre（先に）＋ lud（遊ぶ）→ 本番の前に軽く奏でる"},
@@ -27536,6 +27781,7 @@ const RAW_WORDS=[
    exampleJa2:"みんなが無事だと聞いて、ほっとした。",
    etymologyProcess:"re（再び）＋ lev（持ち上げる）→ 重荷を持ち上げると…？",
    etymologyConclusion:"re（再び）＋ lev（持ち上げる）→ のしかかる重荷を持ち上げて軽くする＝（苦痛・不安を）和らげる",
+   spelling:"lev→liev（フランス語で e が ie に）",
    etymologyMore:["心の重荷が軽くなる→安心させる（be relieved で「ほっとする」）","仕事の重荷を代わって持つ→（任務を）交代する"],
    relatedWords:[
      {word:"relief",meaning:"安心；救済",breakdown:"re（再び）＋ lev（持ち上げる）→ 重荷を持ち上げて軽くすること"},
@@ -27602,6 +27848,7 @@ const RAW_WORDS=[
    exampleJa2:"そのうわさには、ほんの少しの真実もない。",
    etymologyProcess:"gran（粒）→ 小さな粒がたくさん実ると…？",
    etymologyConclusion:"gran（粒）→ 小さな粒の実をたくさんつける作物＝穀物",
+   spelling:"gran→grain（フランス語で i が入った）",
    etymologyMore:["穀物のような小さなつぶ→（砂・塩などの）粒","つぶほどの小さな量→（a grain of で）ほんの少し"],
    relatedWords:[
      {word:"granite",meaning:"花こう岩",breakdown:"gran（粒）＋ ite（もの）→ 粒々が見える石"},
@@ -27665,6 +27912,7 @@ const RAW_WORDS=[
    exampleJa2:"村人たちは、川の水を畑に引く新しい灌漑設備を作った。",
    etymologyProcess:"in（中へ）＋ rig（水をやる）＋ ation（名詞）→ 田畑の中へ水をやると…？",
    etymologyConclusion:"in（中へ）＋ rig（水をやる）＋ ation（名詞）→ 田畑の中へ水路で水を引き入れること＝灌漑",
+   spelling:"in→ir（r の前で n が r に）",
    relatedWords:[
      {word:"irrigate",meaning:"（田畑に）水を引く",breakdown:"in（中へ）＋ rig（水をやる）＋ ate（動詞）→ 田畑に水を流しこむ"},
      {synonym:true,word:"water",meaning:"水をやる",breakdown:"植物に水をかけること全般"},
@@ -35250,6 +35498,8 @@ function WordDetail({C,word:w,onTapRoot,speakOn=true,head=true,relatedLimit=3,on
         </div>}
         {show("etymBody")&&(w.etymologyMore||[]).filter(l=>!l.includes("→")).map((l,i)=>(
           <div key={"o"+i} style={{fontSize:fs(13,16,18),color:C.text,lineHeight:1.6}}>{l}</div>))}
+        {show("etymBody")&&w.spelling&&<div style={{fontSize:fs(13,16,18),color:C.text,lineHeight:1.6}}>
+          <span style={{color:C.sub}}>つづりの変化：</span>{w.spelling}</div>}
         {show("etymBody")&&w.hook&&<div style={{fontSize:fs(13,16,18),color:C.text,lineHeight:1.6}}>{w.hook}</div>}
       </div>)}
 
