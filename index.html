@@ -550,7 +550,7 @@ const RAW_WORDS=[
      {word:"form",meaning:"形；用紙",breakdown:"form（形）→ ものの外側の形。決まった形の用紙にもなる"},
      {word:"uniform",meaning:"制服",breakdown:"uni（1つの）＋ form（形）→ みんなが同じ形をまとう"},
      {word:"inform",meaning:"知らせる",breakdown:"in（中へ）＋ form（形）→ 相手の頭の中に形をつくってやる"},
-     {word:"perform",meaning:"行う；演じる",breakdown:"per（すっかり）＋ form（形）→ 最後まで形にしてやりきる"}]},
+     {word:"reform",meaning:"～を改革する",breakdown:"re（再び）＋ form（形）→ 形をもう一度作り直す"}]},
 
   {id:27,word:"technology",partOfSpeech:"名詞",meaning:"科学技術",
    meanings:["名|（科学）技術"],
@@ -612,7 +612,7 @@ const RAW_WORDS=[
    relatedWords:[
      {word:"art",meaning:"芸術；技",breakdown:"art（技）→ もとは技そのもの。腕前がやがて芸術に"},
      {word:"artist",meaning:"芸術家",breakdown:"art（技）＋ ist（人）→ 技を持って作り出す人"},
-     {word:"fiction",meaning:"小説，作り話",breakdown:"fic（作る）＋ ion（名詞）→ 頭の中で作り上げた話"},
+     {word:"efficient",meaning:"効率的な",breakdown:"ef（外へ）＋ fic（作る）＋ ient（～な）→ 外へ結果を作り出す"},
      {synonym:true,word:"natural",meaning:"自然の",breakdown:"手を加えていないさま。artificial はその正反対にある語"}]},
 
   {id:31,word:"electric",partOfSpeech:"形容詞",meaning:"電気の",
@@ -856,7 +856,7 @@ const RAW_WORDS=[
    why:"【なぜ】ラテン語 stabilire は「ぐらつかないように固定する」。stable（安定した）と同じ語です。建物を土台に据えるように、制度や会社をしっかり据えるのが establish。\n【つながり】stand（立つ）、statue（像）、stable（安定した）も同じ sta（立つ）です。",
    relatedWords:[
      {word:"stable",meaning:"安定した",breakdown:"sta（立つ）＋ able（できる）→ ぐらつかず立っていられる"},
-     {word:"stand",meaning:"立つ",breakdown:"sta（立つ）→ 足をつけてまっすぐ立つ"},
+     {word:"stand",meaning:"立つ",breakdown:"sta（立つ）→ ラテン語 stare と同じ祖先の英語本来の語"},
      {word:"station",meaning:"駅",breakdown:"sta（立つ）＋ ion（名詞）→ 列車が立ち止まる場所"},
      {word:"statue",meaning:"像",breakdown:"sta（立つ）＋ ue（もの）→ 立たせてあるもの"}]},
 
@@ -2685,7 +2685,7 @@ const RAW_WORDS=[
    why:"【なぜ】hap は「めぐり合わせ・運」。運がふっと降ってきて起きることが happen で、よい運に恵まれた状態が happy になりました。\n【つながり】perhaps（もしかすると）、mishap（災難）も同じ hap。happy はもともと「幸運な」で、「うれしい」は後から出た意味です。",
    relatedWords:[
      {word:"happy",meaning:"幸せな",breakdown:"hap（偶然）＋ y（形容詞）→ 良い偶然に恵まれた気分"},
-     {word:"perhaps",meaning:"たぶん",breakdown:"per（すっかり）＋ hap（偶然）→ 偶然しだいで、そうかもしれない"},
+     {word:"perhaps",meaning:"たぶん",breakdown:"per（～によって）＋ hap（偶然）→ 偶然しだいで、そうかもしれない"},
      {word:"mishap",meaning:"ちょっとした災難",breakdown:"mis（誤って）＋ hap（偶然）→ 悪いほうに転んだ偶然"},
      {word:"happening",meaning:"出来事",breakdown:"hap（偶然）＋ en（～にする）＋ ing（名詞）→ 偶然起きたことがら"}]},
 
@@ -3066,7 +3066,6 @@ const RAW_WORDS=[
    etymologyConclusion:"re（後ろへ）＋ tir（引く）→ 第一線から自分の身を後ろへ引き下げる＝引退する",
    relatedWords:[
      {word:"retirement",meaning:"引退，退職",breakdown:"re（後ろへ）＋ tir（引く）＋ ment（名詞）→ 身を後ろへ引くこと"},
-     {word:"retreat",meaning:"退く，撤退する",breakdown:"re（後ろへ）＋ treat（引く）→ 後ろへ身を引いて下がる"},
      {synonym:true,word:"quit",meaning:"やめる",breakdown:"自分からやめる。retire は年齢や区切りで職を退く"},
      {synonym:true,word:"leave",meaning:"去る",breakdown:"その場を去る。retire は仕事から正式に退くこと"}]},
 
@@ -3533,7 +3532,7 @@ const RAW_WORDS=[
    etymologyConclusion:"bloom（花・咲く）→ かたいつぼみが開いて、花の姿になる＝咲く",
    hook:"in bloom で「咲いている」。blossom（果樹の花）も同じ仲間の語。",
    relatedWords:[
-     {word:"blossom",meaning:"（果樹の）花；咲く",breakdown:"bloom（花・咲く）→ 果樹に咲く花。bloom と同じ仲間"},
+     {word:"blossom",meaning:"（果樹の）花；咲く",breakdown:"blossom（花）→ 果樹に咲く花（bloom と遠い親戚）"},
      {word:"blooming",meaning:"花盛りの",breakdown:"bloom（花・咲く）＋ ing（形容詞）→ 花が開いている最中の"},
      {synonym:true,word:"flower",meaning:"花",breakdown:"花そのもの。bloom は花が開く動きを指す"},
      {synonym:true,word:"bud",meaning:"つぼみ",breakdown:"開く前のつぼみ。bloom はそれが開いた状態"}]},
@@ -3934,8 +3933,8 @@ const RAW_WORDS=[
    etymologyProcess:"van（前へ）＋ age（名詞）→ 人より前に出られる有利さは…？",
    etymologyConclusion:"van（前へ）＋ age（名詞）→ ほかより一歩前に出られる有利な点＝利点",
    relatedWords:[
-     {word:"advance",meaning:"前進する，進歩",breakdown:"ad（～へ）＋ van（前へ）→ 一歩ずつ前へ進み出る"},
-     {word:"advanced",meaning:"上級の，進んだ",breakdown:"ad（～へ）＋ van（前へ）→ ほかより前へ進んだ段階の"},
+     {word:"advance",meaning:"前進する，進歩",breakdown:"van（前に）→ ラテン語 abante（前から）がもと。前へ進み出る"},
+     {word:"advanced",meaning:"上級の，進んだ",breakdown:"van（前に）＋ ed（～された）→ ほかより前へ進んだ段階の"},
      {word:"disadvantage",meaning:"不利な点",breakdown:"dis（否定）＋ ad（～へ）＋ van（前へ）→ 前に出られない点"},
      {synonym:true,word:"benefit",meaning:"恩恵，利益",breakdown:"受け取る得。advantage は他より有利になる点"}]},
 
@@ -3951,8 +3950,8 @@ const RAW_WORDS=[
    etymologyMore:["誰のせいで足りなかったかを指す→（one's ―）責任","地層が裂けてずれた所→断層"],
    relatedWords:[
      {word:"fail",meaning:"失敗する",breakdown:"fail（期待を裏切る）→ 期待どおりにできず終わる"},
-     {word:"faulty",meaning:"欠陥のある",breakdown:"fail（期待を裏切る）＋ y（形容詞）→ 期待を裏切る不具合がある"},
-     {word:"false",meaning:"誤った；偽の",breakdown:"fail（期待を裏切る）→ 本当であるはずを裏切っている"},
+     {word:"faulty",meaning:"欠陥のある",breakdown:"fault（欠ける）＋ y（形容詞）→ 欠点のある"},
+     {word:"false",meaning:"誤った；偽の",breakdown:"fals（だます）→ 本当らしく見せて裏切る"},
      {synonym:true,word:"mistake",meaning:"間違い",breakdown:"やり損ない。fault は誰のせいかまで表す"}]},
 
   {id:235,word:"quality",partOfSpeech:"名詞",meaning:"質",
@@ -4188,7 +4187,7 @@ const RAW_WORDS=[
    etymologyConclusion:"con（共に）＋ vent（来る）→ 必要なものや時間が一緒に来てそろう＝都合がよい",
    relatedWords:[
      {word:"event",meaning:"出来事，行事",breakdown:"e（外へ）＋ vent（来る）→ 外に現れ出てくることがら"},
-     {word:"invent",meaning:"発明する",breakdown:"in（中へ）＋ vent（来る）→ 頭の中に考えが降りてくる"},
+     {word:"invent",meaning:"発明する",breakdown:"in（上に）＋ vent（来る）→ 考えにばったり出くわす"},
      {word:"prevent",meaning:"妨げる",breakdown:"pre（先に）＋ vent（来る）→ 先回りして前に立ちふさがる"},
      {word:"convenience",meaning:"便利さ",breakdown:"con（共に）＋ vent（来る）＋ ence（名詞）→ 一緒にそろっていること"}]},
 
@@ -4205,8 +4204,8 @@ const RAW_WORDS=[
    hook:"fault（欠点）と同じ仲間。true の反対で「事実を裏切る」。",
    relatedWords:[
      {word:"fail",meaning:"失敗する",breakdown:"fail（期待を裏切る）→ 期待どおりにできず終わる"},
-     {word:"fault",meaning:"欠点；責任",breakdown:"fail（期待を裏切る）→ 期待どおりでなく足りないところ"},
-     {word:"falsely",meaning:"誤って",breakdown:"fail（期待を裏切る）＋ ly（副詞）→ 事実を裏切る形で"},
+     {word:"fault",meaning:"欠点；責任",breakdown:"fault（だます・欠ける）→ 期待を裏切る欠点"},
+     {word:"falsely",meaning:"誤って",breakdown:"fals（だます）＋ ly（副詞）→ 偽って"},
      {synonym:true,word:"true",meaning:"本当の",breakdown:"false の反対。事実のとおりである"}]},
 
 {id:251,word:"terrible",partOfSpeech:"形容詞",meaning:"ひどい；とても苦手な",
@@ -6081,8 +6080,8 @@ const RAW_WORDS=[
    why:"【なぜ】ラテン語 angere は「締めつける・苦しめる」。胸が締めつけられて落ち着かない状態が anxious です。\n【つながり】anger（怒り）、anguish（苦悩）も同じ ang。胸が狭く締めつけられる感じが、どの語にも残っています。",
    relatedWords:[
      {word:"anxiety",meaning:"不安",breakdown:"ang（締めつける）＋ ety（名詞）→ 胸が締めつけられる感じ"},
-     {word:"anger",meaning:"怒り",breakdown:"ang（締めつける）→ 北欧語から入った同じ仲間。胸が締めつけられて荒れる心"},
-     {word:"angry",meaning:"怒って",breakdown:"ang（締めつける）＋ y（～な状態の）→ 胸が締めつけられて荒れる"},
+     {word:"anger",meaning:"怒り",breakdown:"ang（締めつける）→ 胸が締めつけられる思い（anxious と親戚）"},
+     {word:"angry",meaning:"怒って",breakdown:"ang（締めつける）＋ y（状態の）→ 胸が締めつけられる（anxious と親戚）"},
      {synonym:true,word:"nervous",meaning:"緊張して",breakdown:"神経が張りつめる。anxious は先の結果を気に病む"}]},
 
   {id:366,word:"satisfy",partOfSpeech:"他動詞",meaning:"満足させる",
@@ -6367,7 +6366,7 @@ const RAW_WORDS=[
    etymologyMore:["もとは実際に通って行く道→道，道のり"],
    relatedWords:[
      {word:"subway",meaning:"地下鉄",breakdown:"sub（下で）＋ way（道）→ 地面の下を通る道"},
-     {word:"highway",meaning:"幹線道路",breakdown:"high（高い）＋ way（道）→ 高く土を盛って作った主要な道"},
+     {word:"highway",meaning:"幹線道路",breakdown:"high（主要な）＋ way（道）→ 町と町を結ぶ大きな道"},
      {synonym:true,word:"method",meaning:"方法",breakdown:"手順の決まったやり方。way はもっと広く使える"},
      {synonym:true,word:"means",meaning:"手段",breakdown:"目的を達する手だて。way は日常的な言い方"}]},
 
@@ -6429,9 +6428,9 @@ const RAW_WORDS=[
    etymologyConclusion:"right（まっすぐ）→ ずれることなくまっすぐそこを指す＝ちょうど，まさに",
    etymologyMore:["まっすぐ筋が通ってずれがない→正しい","筋の通った正当な言い分→権利"],
    relatedWords:[
-     {word:"correct",meaning:"正しい",breakdown:"com（すっかり）＋ rect（まっすぐ）→ 曲がりを直してまっすぐにする"},
-     {word:"direct",meaning:"直接の",breakdown:"di（離れて）＋ rect（まっすぐ）→ よそへそれずまっすぐ向かう"},
-     {word:"erect",meaning:"直立した",breakdown:"ex（外へ）＋ rect（まっすぐ）→ まっすぐ上へ立ち上がる"},
+     {word:"correct",meaning:"正しい",breakdown:"com（すっかり）＋ rect（まっすぐ）→ まっすぐに直す（right と遠い親戚）"},
+     {word:"direct",meaning:"直接の",breakdown:"di（離れて）＋ rect（まっすぐ）→ まっすぐ導く（right とは遠い親戚）"},
+     {word:"erect",meaning:"直立した",breakdown:"e（外へ）＋ rect（まっすぐ）→ まっすぐ上へ立てる（right と遠い親戚）"},
      {synonym:true,word:"exactly",meaning:"正確に",breakdown:"ぴったり合うこと。right は位置や時の「ちょうど」"}]},
 
   {id:388,word:"complete",partOfSpeech:"形容詞",meaning:"完全な",
@@ -6585,7 +6584,7 @@ const RAW_WORDS=[
    etymologyConclusion:"in（中へ）＋ stead（立つ）→ もとのものが立っていた所にそのまま入る＝代わりに",
    relatedWords:[
      {word:"steady",meaning:"安定した",breakdown:"stead（立つ）＋ y（～な状態の）→ 同じ所に立ち続けてぐらつかない"},
-     {word:"bedstead",meaning:"寝台の枠",breakdown:"bed（ベッド）＋ stead（立つ）→ ベッドが立って乗る台"},
+     {word:"bedstead",meaning:"寝台の枠",breakdown:"bed（ベッド）＋ stead（場所）→ ベッドを置く台"},
      {synonym:true,word:"rather",meaning:"むしろ",breakdown:"rather than と使う。instead は「その代わりに」"}]},
 
   {id:398,word:"until",partOfSpeech:"前置詞",meaning:"～まで",
@@ -7044,7 +7043,7 @@ const RAW_WORDS=[
    why:"【なぜ】ギリシャ語 thea は「見ること・眺め」。祭りを見物することから、じっと見つめて考えをまとめることへ移り、「理論」になりました。\n【つながり】theater（劇場）も同じ thea で「見るための場所」。理論も劇場も、もとは「見る」から生まれた語です。",
    relatedWords:[
      {word:"theoretical",meaning:"理論上の",breakdown:"theor（見る）＋ etic（～の）＋ al（～の）→ 頭の中の考えの上でのこと"},
-     {word:"theater",meaning:"劇場",breakdown:"theor（見る）→ 人々がじっと見つめるための場所"},
+     {word:"theater",meaning:"劇場",breakdown:"thea（見る）＋ ter（場所）→ 見物する場所"},
      {synonym:true,word:"hypothesis",meaning:"仮説",breakdown:"確かめる前の仮の考え。theory は裏づけのある説明"},
      {synonym:true,word:"practice",meaning:"実践",breakdown:"実際に行うこと。theory は頭の中の組み立て"}]},
 
@@ -8048,9 +8047,9 @@ const RAW_WORDS=[
    etymologyProcess:"sta（立つ）＋ ard（しっかり）→ 戦場にしっかり立てて味方を集めた旗は…？",
    etymologyConclusion:"sta（立つ）＋ ard（しっかり）→ 戦場に立てた旗が由来といわれ、皆がそろえる目印＝基準",
    relatedWords:[
-     {word:"stand",meaning:"立つ",breakdown:"sta（立つ）→ 足で地面にまっすぐ立っている"},
+     {word:"stand",meaning:"立つ",breakdown:"sta（立つ）→ ラテン語 stare と同じ祖先の英語本来の語"},
      {word:"instant",meaning:"即座の",breakdown:"in（中へ）＋ sta（立つ）→ すぐそこに立っている、その一瞬の"},
-     {word:"constant",meaning:"一定の",breakdown:"con（共に）＋ sta（立つ）→ ずっと同じ所に立ち続けている"},
+     {word:"constant",meaning:"一定の",breakdown:"con（共に）＋ sta（立つ）→ ずっと同じ所に立ち続ける（stand と遠い親戚）"},
      {synonym:true,word:"level",meaning:"水準",breakdown:"高さの位置。standard は満たすべき目安という意味が強い"}]},
 
   {id:490,word:"prosperity",partOfSpeech:"名詞",meaning:"繁栄",
@@ -8455,8 +8454,8 @@ const RAW_WORDS=[
    etymologyMore:["何かを得るために払い出すもの→犠牲"],
    relatedWords:[
      {word:"expensive",meaning:"高価な",breakdown:"ex（外へ）＋ pens（重さを量る）→ 量って払う額が大きい"},
-     {word:"spend",meaning:"（時間）を費やす",breakdown:"pens（重さを量る）→ 量って外へ払い出してしまう"},
-     {word:"depend",meaning:"次第である",breakdown:"de（下へ）＋ pens（重さを量る）→ 下にぶら下がって相手に左右される"},
+     {word:"spend",meaning:"（時間）を費やす",breakdown:"ex（外へ）＋ pend（量る）→ 量ったお金を外へ払い出す"},
+     {word:"depend",meaning:"次第である",breakdown:"de（下へ）＋ pend（ぶら下がる・量る）→ 下にぶら下がって左右される"},
      {word:"pension",meaning:"年金",breakdown:"pens（重さを量る）＋ ion（名詞）→ 量って定期的に支払われるお金"}]},
 
   {id:516,word:"debt",partOfSpeech:"名詞",meaning:"借金",
@@ -9201,7 +9200,7 @@ const RAW_WORDS=[
    etymologyProcess:"en（否定）＋ emy（友）→ 友ではなく害をなそうとするのは…？",
    etymologyConclusion:"en（否定）＋ emy（友）→ 友ではなく、こちらに害を与えようとする相手＝敵",
    relatedWords:[
-     {word:"amateur",meaning:"アマチュア，素人",breakdown:"emy（友）→ ラテン語「愛する」から出た同じ家系"},
+     {word:"amateur",meaning:"アマチュア，素人",breakdown:"am（愛する）＋ ateur（人）→ 好きだからやる人"},
      {synonym:true,word:"rival",meaning:"競争相手",breakdown:"同じ物を争う相手。enemy のような害意はない"},
      {synonym:true,word:"opponent",meaning:"対戦相手",breakdown:"試合や議論で向かい合う相手。enemy より中立的"},
      {synonym:true,word:"hostile",meaning:"敵意のある",breakdown:"相手を敵とみなす気持ち。enemy はその相手そのもの"}]},
@@ -10830,7 +10829,7 @@ const RAW_WORDS=[
    etymologyConclusion:"ad（～へ）＋ vent（来る）→ 時代を変えるものが、こちらへ向かってやって来ること＝到来",
    relatedWords:[
      {word:"event",meaning:"出来事，行事",breakdown:"e（外へ）＋ vent（来る）→ 外へ現れ出てくる出来事"},
-     {word:"invent",meaning:"発明する",breakdown:"in（中へ）＋ vent（来る）→ 頭の中へ思いつきがやって来る"},
+     {word:"invent",meaning:"発明する",breakdown:"in（上に）＋ vent（来る）→ 思いつきにばったり行き当たる"},
      {word:"adventure",meaning:"冒険",breakdown:"ad（～へ）＋ vent（来る）＋ ure（もの）→ 何が来るかわからない出来事"},
      {word:"prevent",meaning:"防ぐ",breakdown:"pre（先に）＋ vent（来る）→ 先回りして、来る前に止める"}]},
 
@@ -10879,7 +10878,7 @@ const RAW_WORDS=[
    relatedWords:[
      {word:"consist",meaning:"成り立つ",breakdown:"con（共に）＋ sist（立つ）→ いくつかが一緒に立って形を作る"},
      {word:"persistent",meaning:"しつこい；根気強い",breakdown:"per（すっかり）＋ sist（立つ）＋ ent（～している）→ 最後まで立ち続けている"},
-     {word:"stand",meaning:"立つ；耐える",breakdown:"sta（立つ）→ 足を地につけてまっすぐ立つ"},
+     {word:"stand",meaning:"立つ；耐える",breakdown:"sta（立つ）→ ラテン語 stare と同じ祖先の英語本来の語"},
      {word:"stable",meaning:"安定した",breakdown:"sta（立つ）＋ able（できる）→ ぐらつかずに立っていられる"}]},
 
   {id:670,word:"examine",partOfSpeech:"他動詞",meaning:"詳しく調べる；診察する",
@@ -11056,7 +11055,7 @@ const RAW_WORDS=[
    relatedWords:[
      {word:"distinct",meaning:"はっきり異なる",breakdown:"dis（バラバラに）＋ stingu（突き刺す）→ 印で刺し分けられてはっきり違う"},
      {word:"instinct",meaning:"本能",breakdown:"in（中へ）＋ stingu（突き刺す）＋ t（名詞）→ 内側から突き動かす力"},
-     {word:"sting",meaning:"刺す；針",breakdown:"sting（突き刺す）→ 針でちくりと突き刺す"},
+     {word:"sting",meaning:"刺す；針",breakdown:"sting（突き刺す）→ ラテン語 stinguere と遠い親戚の英語"},
      {synonym:true,word:"tell",meaning:"見分ける；言う",breakdown:"tell A from B で見分ける。distinguish は硬い言い方"}]},
 
   {id:681,word:"classify",partOfSpeech:"他動詞",meaning:"分類する",
@@ -11198,7 +11197,7 @@ const RAW_WORDS=[
      {word:"note",meaning:"メモ；書き留める",breakdown:"nota（しるし）→ 忘れないように残すしるし"},
      {word:"notebook",meaning:"ノート",breakdown:"nota（しるし）＋ book（本）→ しるしを書きつける本"},
      {word:"notable",meaning:"注目すべき",breakdown:"nota（しるし）＋ able（できる）→ しるしをつけて示せるほど目立つ"},
-     {word:"notify",meaning:"知らせる，通知する",breakdown:"nota（しるし）＋ fy（する）→ しるしを示して相手に知らせる"}]},
+     {word:"notify",meaning:"知らせる，通知する",breakdown:"not（知る）＋ fy（する）→ 相手が知っている状態にする"}]},
 
   {id:690,word:"aware",partOfSpeech:"形容詞",meaning:"（状況に）気づいている",
    meanings:["形|（be aware of で）気づいている"],
@@ -11369,7 +11368,7 @@ const RAW_WORDS=[
      {word:"look",meaning:"見る；様子",breakdown:"look（見る）→ 目を向けて確かめる"},
      {word:"overlook",meaning:"見落とす；見渡す",breakdown:"over（越えて）＋ look（見る）→ 上を通り越して見てしまう"},
      {word:"outcome",meaning:"結果",breakdown:"out（外へ）＋ come（来る）→ 外へ出てきたもの"},
-     {word:"outstanding",meaning:"傑出した",breakdown:"out（外へ）＋ sta（立つ）＋ ing（～している）→ 外へ抜き出て立っている"}]},
+     {word:"outstanding",meaning:"傑出した",breakdown:"out（外へ）＋ stand（立つ）＋ ing（～している）→ 外へ抜き出て立っている"}]},
 
   {id:701,word:"perspective",partOfSpeech:"名詞",meaning:"（ものの）見方，視点",
    meanings:["名|（ものの）見方，視点","名|（絵の）遠近法"],
@@ -11413,7 +11412,7 @@ const RAW_WORDS=[
    etymologyConclusion:"e（外へ）＋ limin（敷居）＋ ate（動詞）→ 家の敷居の外へ追い出して、中に残さない＝排除する",
    why:"【なぜ】ラテン語 limen は「敷居」。家の敷居の外へ追い出すことが eliminate で、「中に残さない」が芯です。\n【つながり】subliminal（敷居の下＝意識にのぼらない）も同じ limen。境を表す limit とは、別の語とも同じ根とも言われ、はっきりしていません。",
    relatedWords:[
-     {word:"limit",meaning:"限界；制限する",breakdown:"limit（境の土手）→ ここまでという境の線"},
+     {word:"limit",meaning:"限界；制限する",breakdown:"limit（境）→ eliminate の limen（敷居）と近い語"},
      {word:"preliminary",meaning:"予備の；予選",breakdown:"pre（先に）＋ limin（敷居）＋ ary（形容詞）→ 敷居をまたぐ前の"},
      {word:"elimination",meaning:"排除，除去",breakdown:"e（外へ）＋ limin（敷居）＋ ation（名詞）→ 外へ追い出すこと"},
      {synonym:true,word:"remove",meaning:"取り除く",breakdown:"その場から動かして取り除く。eliminate は完全になくす"}]},
@@ -11478,7 +11477,7 @@ const RAW_WORDS=[
    relatedWords:[
      {word:"conserve",meaning:"保存する，節約する",breakdown:"con（すっかり）＋ serv（守る）→ 減らさずにすっかり守る"},
      {word:"observe",meaning:"観察する；守る",breakdown:"ob（～に向かって）＋ serv（守る）→ 目を向けてじっと見守る"},
-     {word:"service",meaning:"奉仕，サービス",breakdown:"serv（仕える）＋ ice（名詞）→ 人に仕えてする働き"},
+     {word:"preserve",meaning:"保存する",breakdown:"pre（先に）＋ serv（守る）→ 前もって守っておく"},
      {word:"reserve",meaning:"予約する；取っておく",breakdown:"re（後ろへ）＋ serv（守る）→ 後ろに取りのけて守っておく"}]},
 
   {id:708,word:"preserve",partOfSpeech:"他動詞",meaning:"（もとの姿のまま）保存する",
@@ -11492,8 +11491,8 @@ const RAW_WORDS=[
    etymologyConclusion:"pre（先に）＋ serv（守る）→ 傷む前に先回りして守り、もとの姿のまま保つ＝保存する",
    relatedWords:[
      {word:"preservation",meaning:"保存，保護",breakdown:"pre（先に）＋ serv（守る）＋ ation（名詞）→ 先回りして守ること"},
-     {word:"deserve",meaning:"値する",breakdown:"de（すっかり）＋ serv（仕える）→ すっかり仕えて受けるに値する"},
-     {word:"servant",meaning:"使用人",breakdown:"serv（仕える）＋ ant（人）→ 人に仕える人"},
+     {word:"reserve",meaning:"予約する",breakdown:"re（後ろへ）＋ serv（守る）→ 後のために取り置いて守る"},
+     {word:"observe",meaning:"観察する；守る",breakdown:"ob（～に向かって）＋ serv（守る）→ 目を向けてじっと見守る"},
      {synonym:true,word:"keep",meaning:"保つ，取っておく",breakdown:"そのまま持ち続ける。preserve は傷まないように守る"}]},
 
   {id:709,word:"disaster",partOfSpeech:"名詞",meaning:"災害，大惨事",
@@ -11507,7 +11506,7 @@ const RAW_WORDS=[
    etymologyConclusion:"dis（離れて）＋ aster（星）→ 幸運の星が離れてしまったために起きる大事故＝災害",
    why:"【なぜ】dis（離れて）＋ astrum（星）で「星まわりが悪い」。昔の人は、不幸は星の並びのせいで起きると考えました。その考えが、そのまま「大災害」を表す語になっています。\n【つながり】star（星）、astronomy（天文学）、astrology（占星術）も同じ ast。influence も、同じ「星が運命を決める」という考えから生まれた語です。",
    relatedWords:[
-     {word:"star",meaning:"星；スター",breakdown:"star（星）→ 夜空に光る星。aster と同じ家族の語"},
+     {word:"star",meaning:"星；スター",breakdown:"star（星）→ ギリシャ語 aster と同じ祖先の英語本来の語"},
      {word:"disastrous",meaning:"悲惨な",breakdown:"dis（離れて）＋ aster（星）＋ ous（形容詞）→ 星に見放されたような"},
      {word:"astronomy",meaning:"天文学",breakdown:"astro（星）＋ nom（決まり）＋ y（名詞）→ 星の決まりを調べる学問"},
      {synonym:true,word:"accident",meaning:"事故",breakdown:"思いがけず落ちてくる出来事。disaster は被害がはるかに大きい"}]},
@@ -11540,7 +11539,6 @@ const RAW_WORDS=[
    why:"【なぜ】フランス語 virer は「回る」。en＋viron で「ぐるりと回って取り囲むもの」。自分のまわりを一周して囲んでいるもの全体が environment です。\n【つながり】日本語の「環境」も「環（輪）の中」。英語も日本語も、まわりを囲む輪という同じ絵で考えています。",
    relatedWords:[
      {word:"environmental",meaning:"環境の",breakdown:"en（中へ）＋ viron（輪）＋ ment（名詞）＋ al（～の）→ 取り囲むものの"},
-     {word:"surround",meaning:"取り囲む",breakdown:"super（上から）＋ und（波打つ）→ 波のように周りへ広がって囲む"},
      {word:"enclose",meaning:"同封する；囲む",breakdown:"en（中へ）＋ clos（閉じる）→ 囲いの中へ入れて閉じる"},
      {synonym:true,word:"surroundings",meaning:"周囲の状況",breakdown:"身のまわりのもの。environment は自然も含む広い語"}]},
 
@@ -11570,7 +11568,7 @@ const RAW_WORDS=[
    etymologyConclusion:"lay（置く）＋ er（もの）→ 平らに置いたものが、上へ上へと重なったひと重ね＝層",
    relatedWords:[
      {word:"lay",meaning:"置く，横たえる",breakdown:"lay（置く）→ 平らに寝かせて置く"},
-     {word:"lie",meaning:"横たわる；ある",breakdown:"lay（置く）→ 自分から平らに横たわる"},
+     {word:"lie",meaning:"横たわる；ある",breakdown:"lie（横たわる）→ lay（置く）のもとになった語"},
      {word:"law",meaning:"法律",breakdown:"law（置かれたもの）→ みなの前に置かれた決まり"},
      {synonym:true,word:"level",meaning:"水準；平らな",breakdown:"高さの段階。layer は重なった一枚一枚のこと"}]},
 
@@ -11773,7 +11771,7 @@ const RAW_WORDS=[
    etymologyConclusion:"sol（太陽）＋ ar（～の）→ 太陽から届く光や熱に関わっている＝太陽の",
    relatedWords:[
      {word:"parasol",meaning:"日傘",breakdown:"sol（太陽）→ 日ざしを防いで身を守るための傘"},
-     {word:"sunny",meaning:"晴れた",breakdown:"sun（太陽）＋ y（～な状態の）→ 太陽がしっかり出ている"},
+     {word:"sunny",meaning:"晴れた",breakdown:"sun（太陽）＋ y（～な状態の）→ 日が照っている（solとは同源）"},
      {synonym:true,word:"lunar",meaning:"月の",breakdown:"月に関する。solar は太陽に関する"},
      {synonym:true,word:"energy",meaning:"エネルギー",breakdown:"solar energy で太陽のエネルギー、つまり太陽光発電の力"}]},
 
@@ -11790,7 +11788,7 @@ const RAW_WORDS=[
    relatedWords:[
      {word:"special",meaning:"特別な",breakdown:"speci（種類）＋ al（～の）→ その種類だけの、他と違う"},
      {word:"specific",meaning:"特定の；具体的な",breakdown:"speci（種類）＋ fic（作る）→ 種類をはっきり区切った"},
-     {word:"especially",meaning:"とりわけ",breakdown:"ex（外へ）＋ speci（種類）＋ ly（副詞）→ 他の種類から抜き出して"},
+     {word:"especially",meaning:"とりわけ",breakdown:"especial（特別な）＋ ly（副詞）→ speci（種類）の中でも特別に"},
      {synonym:true,word:"kind",meaning:"種類",breakdown:"ふつうの「種類」。species は生物学で使う「種」"}]},
 
   {id:728,word:"pesticide",partOfSpeech:"名詞",meaning:"殺虫剤，農薬",
@@ -11803,7 +11801,7 @@ const RAW_WORDS=[
    etymologyProcess:"pest（害虫）＋ cide（切る・殺す）→ 害虫を断ち切る薬は…？",
    etymologyConclusion:"pest（害虫）＋ cide（切る・殺す）→ 作物を荒らす害虫を断ち切るための薬＝殺虫剤",
    relatedWords:[
-     {word:"pest",meaning:"害虫，害獣",breakdown:"pest（害虫）→ 作物や人に害を与える生き物"},
+     {word:"pest",meaning:"害虫，害獣",breakdown:"pest（疫病・災い）→ 災いをもたらす生き物"},
      {word:"decide",meaning:"決める",breakdown:"de（すっかり）＋ cide（切る・殺す）→ 迷いを切り落として決める"},
      {word:"precise",meaning:"正確な",breakdown:"pre（先に）＋ cis（切る）→ 先に切りそろえてきっちりした"},
      {synonym:true,word:"insect",meaning:"昆虫",breakdown:"体に切れ目のある虫。pesticide はこれを殺す薬"}]},
@@ -11851,7 +11849,7 @@ const RAW_WORDS=[
    etymologyConclusion:"en（中へ）＋ erg（働く）＋ ic（～の）→ 体の中で力がぐんぐん働いて動き回る＝活発な",
    relatedWords:[
      {word:"energy",meaning:"エネルギー，活力",breakdown:"en（中へ）＋ erg（働く）＋ y（名詞）→ 中で働こうとする力"},
-     {word:"synergy",meaning:"相乗効果",breakdown:"sym（共に）＋ erg（働く）＋ y（名詞）→ 一緒に働いて力が増すこと"},
+     {word:"synergy",meaning:"相乗効果",breakdown:"syn（共に）＋ erg（働く）＋ y（名詞）→ 力を合わせて働くこと"},
      {word:"surgery",meaning:"手術",breakdown:"surg（手で働く）＋ ry（もの）→ 手で erg（働く）こと、つまり手術"},
      {synonym:true,word:"active",meaning:"活動的な",breakdown:"よく動く。energetic は力があふれている感じ"}]},
 
@@ -11958,8 +11956,8 @@ const RAW_WORDS=[
    etymologyConclusion:"ford（前へ進める）→ お金や時間が足りていて、そこまで手を届かせられる＝余裕がある",
    why:"【なぜ】もとの形は古い英語の geforthian で、「成し遂げる・やり通す」。お金や時間が足りていて、そこまでやり通せることを表します。\n【つながり】後半の -ford は forth（前へ）と同じ。頭の af- は、あとから「ラテン語の ad- だろう」と思われて書かれた綴りで、意味はありません。",
    relatedWords:[
-     {word:"forth",meaning:"前へ，外へ",breakdown:"ford（前へ進める）→ 前のほうへ出ていく"},
-     {word:"further",meaning:"さらに；促進する",breakdown:"ford（前へ進める）＋ er（より）→ もっと先へ進める"},
+     {word:"forth",meaning:"前へ，外へ",breakdown:"forth（前へ）→ 前のほうへ出ていく"},
+     {word:"further",meaning:"さらに；促進する",breakdown:"forth（前へ）＋ er（より）→ もっと先へ"},
      {synonym:true,word:"manage",meaning:"何とかやりくりする",breakdown:"何とかやり遂げる。afford はお金や時間が足りている"},
      {synonym:true,word:"spare",meaning:"（時間を）割く；予備の",breakdown:"余分を割く。afford は余裕があってできること"}]},
 
@@ -12117,7 +12115,6 @@ const RAW_WORDS=[
    why:"【なぜ】sine cera（ワックスなし）から来た、という有名な話がありますが、これは後からできた作り話です。本当は sin（一つの）＋ cer（育つ）で、「混ぜ物なしに一つのまま育った」が元の意味だと考えられています。\n【つながり】語源には、もっともらしい作り話がよく混ざります。sincere はその代表例なので、聞いたことがあっても信じすぎないようにしましょう。",
    relatedWords:[
      {word:"increase",meaning:"増える，増やす",breakdown:"in（中へ）＋ creas（育つ）→ 中でぐんぐん育って大きくなる"},
-     {word:"create",meaning:"創造する",breakdown:"creat（生み出す）→ 何もないところから新しく生み出す"},
      {word:"sincerely",meaning:"心から（手紙の結び）",breakdown:"sin（1つ）＋ cer（育つ）＋ ly（副詞）→ まじりけなく心から"},
      {synonym:true,word:"honest",meaning:"正直な",breakdown:"うそをつかない。sincere は気持ちに裏表がない"}]},
 
@@ -12271,7 +12268,7 @@ const RAW_WORDS=[
    relatedWords:[
      {word:"effect",meaning:"効果",breakdown:"ef（外へ）＋ fect（作る）→ 外へ現れ出た結果"},
      {word:"factory",meaning:"工場",breakdown:"fact（作る）＋ ory（場所）→ 物を作り出す場所"},
-     {word:"fiction",meaning:"作り話，小説",breakdown:"fic（作る）＋ ion（名詞）→ 頭の中で作り上げた話"},
+     {word:"sufficient",meaning:"十分な",breakdown:"suf（下から）＋ fic（作る）＋ ient（～な）→ 下から作り足して足りる"},
      {synonym:true,word:"effective",meaning:"効果的な",breakdown:"ねらった結果が出る。efficient は手間や時間の無駄が少ない"}]},
 
   {id:759,word:"reasonable",partOfSpeech:"形容詞",meaning:"（筋が通っていて）納得できる",
@@ -12495,7 +12492,7 @@ const RAW_WORDS=[
    etymologyProcess:"out（外へ）＋ sta（立つ）＋ ing（形容詞）→ 列から一人だけ外へ出て立つと…？",
    etymologyConclusion:"out（外へ）＋ sta（立つ）＋ ing（形容詞）→ 並んだ中から一人だけ外へ抜け出て立つ＝傑出した",
    relatedWords:[
-     {word:"stand",meaning:"立つ",breakdown:"sta（立つ）→ 足で地面をとらえて立つ"},
+     {word:"stand",meaning:"立つ",breakdown:"sta（立つ）→ ラテン語 stare と同じ祖先の英語本来の語"},
      {word:"statue",meaning:"像",breakdown:"sta（立つ）＋ ue（もの）→ 立たせてある人の形"},
      {word:"instant",meaning:"即座の",breakdown:"in（中へ）＋ sta（立つ）→ すぐそこに立っている、その一瞬の"},
      {synonym:true,word:"excellent",meaning:"優れた",breakdown:"とてもよい。outstanding はまわりから頭一つ抜けていること"}]},
@@ -12618,7 +12615,7 @@ const RAW_WORDS=[
    etymologyConclusion:"stead（立つ）＋ y（～な状態の）→ 足場にしっかり立ち、ぐらつかず同じ調子を保つ＝着実な",
    relatedWords:[
      {word:"instead",meaning:"代わりに",breakdown:"in（中へ）＋ stead（立つ）→ その場所に代わって立つ"},
-     {word:"steadily",meaning:"着実に",breakdown:"stead（立つ）＋ ly（副詞）→ ぐらつかない足取りで"},
+     {word:"steadily",meaning:"着実に",breakdown:"stead（場所・立つ所）＋ ly（副詞）→ 同じ所にしっかり立つように"},
      {synonym:true,word:"constant",meaning:"変わらない",breakdown:"ずっと同じ。steady はぐらつかずに続く調子のこと"},
      {synonym:true,word:"firm",meaning:"しっかりした",breakdown:"ぐらつかない。steady は進み方が一定であることを言う"}]},
 
@@ -13290,8 +13287,8 @@ const RAW_WORDS=[
    etymologyConclusion:"scal（はしご）→ はしごの段のように目盛りで測った、全体の大きさ＝規模",
    why:"【なぜ】「規模」の scale はラテン語 scala（はしご）から。はしごの段のように目盛りを刻み、その目盛りで測った大きさが「規模・尺度」です。\n【つながり】escalator（はしごで上がる機械）も同じ scala。なお、魚のうろこの scale と、はかりの scales は、どちらも別の語源なので区別します。",
    relatedWords:[
-     {word:"escalator",meaning:"エスカレーター",breakdown:"ex（外へ）＋ scal（はしご）＋ ator（装置）→ 段が動いて人を上へ運ぶ"},
-     {word:"escalate",meaning:"段階的に上がる",breakdown:"ex（外へ）＋ scal（はしご）＋ ate（動詞）→ 段を一つずつ上がっていく"},
+     {word:"escalator",meaning:"エスカレーター",breakdown:"scal（はしご）＋ ator（装置）→ はしごのように段々上へ運ぶ装置"},
+     {word:"escalate",meaning:"段階的に上がる",breakdown:"scal（はしご）＋ ate（動詞）→ はしごを段々上るように高まる"},
      {synonym:true,word:"size",meaning:"大きさ",breakdown:"物の大きさ。scale は全体の広がりの大きさを言う"},
      {synonym:true,word:"extent",meaning:"及ぶ広さ",breakdown:"どこまで及ぶか。scale はその大きさの段階を言う"}]},
 
@@ -13399,7 +13396,7 @@ const RAW_WORDS=[
    relatedWords:[
      {word:"calculator",meaning:"電卓",breakdown:"calcul（小石）＋ ator（装置）→ 小石の代わりに数を出す機械"},
      {word:"calculation",meaning:"計算",breakdown:"calcul（小石）＋ ation（名詞）→ 小石を動かして数を出すこと"},
-     {word:"calcium",meaning:"カルシウム",breakdown:"calcul（小石）→ 石灰の小石にふくまれている成分"},
+     {word:"calcium",meaning:"カルシウム",breakdown:"calc（石灰・石）＋ ium（元素）→ 石灰にふくまれる元素"},
      {synonym:true,word:"compute",meaning:"（機械で）計算する",breakdown:"機械で数を出す。calculate は式を立てて数を求めること"}]},
 
   {id:833,word:"measure",partOfSpeech:"他動詞",meaning:"測る",
@@ -13412,7 +13409,7 @@ const RAW_WORDS=[
    etymologyProcess:"meas（測る）→ 目盛りを当てて数字にするなら…？",
    etymologyConclusion:"meas（測る）→ 目盛りを当てて、長さや量を数字にして表す＝測る",
    relatedWords:[
-     {word:"meter",meaning:"メートル",breakdown:"meas（測る）→ 長さを測るときの基本の単位"},
+     {word:"meter",meaning:"メートル",breakdown:"meter（測る）→ measure と遠い親戚の、長さの単位"},
      {word:"measurement",meaning:"寸法",breakdown:"meas（測る）＋ ment（名詞）→ 測って出した数"},
      {word:"immense",meaning:"巨大な",breakdown:"in（否定）＋ meas（測る）→ 測りきれないほど大きい"},
      {synonym:true,word:"weigh",meaning:"重さを量る",breakdown:"重さを調べる。measure は長さや量を目盛りで調べること"}]},
@@ -13795,7 +13792,7 @@ const RAW_WORDS=[
    etymologyConclusion:"im（否定）＋ medi（中間）＋ ly（副詞）→ 間に何も挟まず、じかに次が来る＝すぐに",
    relatedWords:[
      {word:"medium",meaning:"中くらいの；媒体",breakdown:"medi（中間）→ 両端のちょうど真ん中にあるもの"},
-     {word:"middle",meaning:"真ん中",breakdown:"middle（中間）→ 両端から等しく離れたところ"},
+     {word:"middle",meaning:"真ん中",breakdown:"middle（中間）→ ラテン語 medi と遠い親戚の英語"},
      {word:"immediate",meaning:"即座の",breakdown:"im（否定）＋ medi（中間）→ 間に何も入り込まない"},
      {synonym:true,word:"instantly",meaning:"即座に",breakdown:"一瞬のうちに。immediately は「間に何も挟まず次に」という含み"}]},
 
@@ -14406,7 +14403,7 @@ const RAW_WORDS=[
    etymologyConclusion:"trans（越えて）＋ fer（運ぶ）→ 今いる線を越えて別の乗り物へ身を運ぶ＝乗り換える",
    etymologyMore:["境を越えて別の所へ運ぶ→移す，移動させる"],
    relatedWords:[
-     {word:"ferry",meaning:"フェリー，渡し船",breakdown:"fer（運ぶ）＋ ry（もの）→ 人や車を向こう岸へ運ぶ船"},
+     {word:"ferry",meaning:"フェリー，渡し船",breakdown:"ferry（運ぶ）→ 人や車を向こう岸へ運ぶ船（fer と遠い親戚）"},
      {word:"offer",meaning:"申し出る",breakdown:"of（相手のほうへ）＋ fer（運ぶ）→ 相手のほうへ差し出す"},
      {word:"prefer",meaning:"より好む",breakdown:"pre（先に）＋ fer（運ぶ）→ 心が先にそちらへ運ばれる"},
      {word:"refer",meaning:"言及する；参照する",breakdown:"re（後ろへ）＋ fer（運ぶ）→ 話を元のところへ運び戻す"}]},
@@ -14613,7 +14610,7 @@ const RAW_WORDS=[
      {word:"distance",meaning:"距離",breakdown:"dis（離れて）＋ stant（立っている）→ 離れて立つ二点の間の長さ"},
      {word:"instant",meaning:"即座の",breakdown:"in（上に）＋ stant（立っている）→ すぐそばに立っている一瞬"},
      {word:"constant",meaning:"絶え間ない",breakdown:"con（共に）＋ stant（立っている）→ ずっと同じ所に立ち続ける"},
-     {word:"stand",meaning:"立つ",breakdown:"sta（立つ）→ 足を地につけてまっすぐ立つ"}]},
+     {word:"stand",meaning:"立つ",breakdown:"sta（立つ）→ ラテン語 stare と同じ祖先の英語本来の語"}]},
 
   {id:911,word:"locate",partOfSpeech:"他動詞",meaning:"位置を突き止める",
    meanings:["他|位置を突き止める","他|（be located で）位置している"],
@@ -14849,7 +14846,7 @@ const RAW_WORDS=[
      {word:"collect",meaning:"集める",breakdown:"col（共に）＋ lect（拾う）→ 一か所へ拾い集める"},
      {word:"select",meaning:"選ぶ",breakdown:"se（離れて）＋ lect（拾う）→ より分けて拾い上げる"},
      {word:"dialogue",meaning:"会話",breakdown:"dia（間で）＋ log（言葉）→ 二人の間で交わされる言葉"},
-     {word:"lecture",meaning:"講義",breakdown:"lect（拾う）＋ ure（名詞）→ 言葉を拾い上げて読み聞かせること"}]},
+     {word:"lecture",meaning:"講義",breakdown:"lect（拾う・読む）＋ ure（名詞）→ dialect の lect と遠い親戚"}]},
 
   {id:926,word:"fluent",partOfSpeech:"形容詞",meaning:"流暢な，すらすら話す",
    meanings:["形|流暢な，すらすら話す"],
@@ -14969,7 +14966,7 @@ const RAW_WORDS=[
    etymologyProcess:"re（後ろへ）＋ veal（覆い）→ かぶせた覆いを取り去ると…？",
    etymologyConclusion:"re（後ろへ）＋ veal（覆い）→ かぶせてあった覆いを取り去って中を見せる＝明らかにする",
    relatedWords:[
-     {word:"veil",meaning:"ベール，覆い",breakdown:"veal（覆い）→ 顔や物にかぶせて隠す薄い布"},
+     {word:"veil",meaning:"ベール，覆い",breakdown:"vel（覆い）→ 顔や物を覆う布"},
      {word:"revelation",meaning:"暴露；啓示",breakdown:"re（後ろへ）＋ veal（覆い）＋ ation（名詞）→ 覆いを取って見せること"},
      {synonym:true,word:"uncover",meaning:"明らかにする",breakdown:"ふたを取ること。reveal は隠していた事実そのものを見せる"},
      {synonym:true,word:"expose",meaning:"さらす",breakdown:"外にさらけ出すこと。reveal は覆いを取って中身を見せる"}]},
@@ -15718,7 +15715,7 @@ const RAW_WORDS=[
    etymologyConclusion:"medi（中間）→ 送り手と受け手の中間に立って伝えるもの＝媒体",
    etymologyMore:["大きさが真ん中あたり→中くらいの"],
    relatedWords:[
-     {word:"middle",meaning:"真ん中",breakdown:"middle（中間）→ 両端から等しく離れたところ"},
+     {word:"middle",meaning:"真ん中",breakdown:"middle（中間）→ ラテン語 medi と遠い親戚の英語"},
      {word:"immediately",meaning:"すぐに",breakdown:"im（否定）＋ medi（中間）→ 間に何も挟まずに"},
      {word:"media",meaning:"メディア，報道機関",breakdown:"medi（中間）→ 情報を伝える媒体の複数形"},
      {word:"means",meaning:"手段",breakdown:"medi（中間）→ 目的と自分の間に立って橋渡しするもの"}]},
@@ -15737,7 +15734,7 @@ const RAW_WORDS=[
    why:"【なぜ】この means は「意味する mean」ではなく、「中ほどの」という別の mean から来ています。目的と自分のあいだ（なかほど）に立つものが「手段」です。\n【つながり】medium（媒体）や middle（真ん中）と発想が同じ。meantime（そのあいだ）、meanwhile（その一方で）も「中ほど」の mean です。",
    relatedWords:[
      {word:"medium",meaning:"媒体",breakdown:"medi（中間）→ 送り手と受け手の間に立って伝えるもの"},
-     {word:"middle",meaning:"真ん中",breakdown:"middle（中間）→ 両端から等しく離れたところ"},
+     {word:"middle",meaning:"真ん中",breakdown:"middle（中間）→ ラテン語 medi と遠い親戚の英語"},
      {synonym:true,word:"method",meaning:"方法",breakdown:"順序立った手順。means は目的に届くための道具や手だてを指す"},
      {synonym:true,word:"way",meaning:"やり方",breakdown:"広く「やり方」。means は by means of の形で手だてを表す"}]},
 
@@ -16330,7 +16327,7 @@ const RAW_WORDS=[
    etymologyConclusion:"sub（下で）＋ sta（立つ）＋ ance（名詞）→ 見た目の下で全体を支えて立っている中身＝物質",
    etymologyMore:["見た目の下にある本当の中身→中身，実質"],
    relatedWords:[
-     {word:"stand",meaning:"立つ",breakdown:"sta（立つ）→ 足を地につけてまっすぐ立つ"},
+     {word:"stand",meaning:"立つ",breakdown:"sta（立つ）→ ラテン語 stare と同じ祖先の英語本来の語"},
      {word:"substantial",meaning:"かなりの；中身のある",breakdown:"sub（下で）＋ sta（立つ）＋ al（形容詞）→ 下でしっかり支えるほどの"},
      {word:"circumstance",meaning:"状況",breakdown:"circ（輪を描く）＋ sta（立つ）→ まわりを取り巻いて立っていること"},
      {word:"constant",meaning:"絶え間ない",breakdown:"con（共に）＋ sta（立つ）＋ ant（形容詞）→ ずっと同じ所に立ち続ける"}]},
@@ -16661,8 +16658,8 @@ const RAW_WORDS=[
    etymologyProcess:"ank（曲がる）→ 足と脚が折れ曲がってつながるところは…？",
    etymologyConclusion:"ank（曲がる）→ 足と脚が折れ曲がってつながっているところ＝足首",
    relatedWords:[
-     {word:"angle",meaning:"角，角度",breakdown:"angle（角）→ 二つの線が折れ曲がってできる角"},
-     {word:"anchor",meaning:"いかり",breakdown:"ank（曲がる）→ 曲がった爪で海底に引っかけるもの"},
+     {word:"angle",meaning:"角，角度",breakdown:"ang（曲がる）→ 曲がってできた角（ankle と親戚）"},
+     {word:"anchor",meaning:"いかり",breakdown:"ank（曲がる）→ 曲がったつめで海底に引っかける（ankle と親戚）"},
      {synonym:true,word:"wrist",meaning:"手首",breakdown:"手と腕のつなぎ目。ankle は足と脚のつなぎ目"},
      {synonym:true,word:"heel",meaning:"かかと",breakdown:"足の後ろの部分。ankle はその上にある曲がる関節"}]},
 
@@ -16853,7 +16850,7 @@ const RAW_WORDS=[
    etymologyProcess:"ag（行う）→ これから行われるべきこととして並べると…？",
    etymologyConclusion:"ag（行う）→ これから行われるべきこととして並べたもの＝議題",
    relatedWords:[
-     {word:"agent",meaning:"代理人",breakdown:"ag（行う）＋ ent（人）→ 代わりに事を行う人"},
+     {word:"agent",meaning:"代理人",breakdown:"ag（行う）＋ ent（人）→ 動いて事を行う人（strategy とは親戚）"},
      {word:"agency",meaning:"代理店，機関",breakdown:"ag（行う）＋ cy（名詞）→ 代わりに事を行うところ"},
      {word:"agile",meaning:"すばやい，機敏な",breakdown:"ag（行う）＋ ile（できる）→ すばやく動いて事を行える"},
      {synonym:true,word:"schedule",meaning:"予定表",breakdown:"時刻まで決めた予定。agenda は会議で話す項目の一覧"}]},
@@ -17323,7 +17320,7 @@ const RAW_WORDS=[
    etymologyConclusion:"ag（行う）＋ cy（名詞）→ 人に代わって事を行う役目を持つところ＝代理店",
    etymologyMore:["国に代わって事を行うところ→（政府の）機関，庁"],
    relatedWords:[
-     {word:"agent",meaning:"代理人",breakdown:"ag（行う）＋ ent（人）→ 代わりに事を行う人"},
+     {word:"agent",meaning:"代理人",breakdown:"ag（行う）＋ ent（人）→ 動いて事を行う人（strategy とは親戚）"},
      {word:"agenda",meaning:"議題",breakdown:"ag（行う）→ これから行われるべきこととして並べたもの"},
      {word:"active",meaning:"活発な",breakdown:"act（追い立てる）＋ ive（形容詞）→ よく動いて事を進める"},
      {synonym:true,word:"office",meaning:"事務所，役所",breakdown:"仕事をする場所。agency は人の代わりに動く組織を指す"}]},
@@ -17983,7 +17980,7 @@ const RAW_WORDS=[
    etymologyConclusion:"strat（軍隊）＋ ag（行う）→ 軍隊を動かして勝ちに導く、大きな筋道＝戦略",
    relatedWords:[
      {word:"strategic",meaning:"戦略的な",breakdown:"strat（軍隊）＋ ag（行う）＋ ic（形容詞）→ 大きな筋道で動く"},
-     {word:"agent",meaning:"代理人",breakdown:"ag（行う）＋ ent（人）→ 代わりに事を行う人"},
+     {word:"agent",meaning:"代理人",breakdown:"ag（行う）＋ ent（人）→ 動いて事を行う人（strategy とは親戚）"},
      {synonym:true,word:"tactics",meaning:"戦術",breakdown:"その場の具体的な手。strategy は全体を見通した大きな筋道"},
      {synonym:true,word:"plan",meaning:"計画",breakdown:"やることの段取り。strategy は勝つための大きな方針"}]},
 
@@ -18642,7 +18639,7 @@ const RAW_WORDS=[
    relatedWords:[
      {synonym:true,word:"seize",meaning:"つかみ取る",breakdown:"ぐっと力強くつかむこと。grab はもっと乱暴で素早い"},
      {synonym:true,word:"catch",meaning:"捕まえる",breakdown:"飛んでくる物を受け止めること。grab は手を出してつかみ取る"},
-     {word:"grasp",meaning:"しっかりつかむ",breakdown:"grab（ひっつかむ）→ 手でぎゅっと握りしめて離さない"},
+     {word:"grasp",meaning:"しっかりつかむ",breakdown:"grasp（つかむ）→ grab と遠い親戚。ぎゅっと握りしめる"},
      {synonym:true,word:"hold",meaning:"持つ，つかんでいる",breakdown:"手を離さずにいること。grab はつかむ瞬間の動き"}]},
 
   {id:1168,word:"seize",partOfSpeech:"他動詞",meaning:"（機会などを）つかみ取る",
@@ -18829,7 +18826,7 @@ const RAW_WORDS=[
    etymologyProcess:"under（下に）＋ go（行く）→ つらいことの下をくぐり抜けていくと…？",
    etymologyConclusion:"under（下に）＋ go（行く）→ つらいことの下をくぐり抜けていく＝経験する",
    relatedWords:[
-     {word:"understand",meaning:"理解する",breakdown:"under（下に）＋ sta（立つ）→ 物事の下に立って支えるように分かる"},
+     {word:"understand",meaning:"理解する",breakdown:"under（下に）＋ stand（立つ）→ 物事の下に立って中身をつかむ"},
      {word:"underline",meaning:"下線を引く；強調する",breakdown:"under（下に）＋ line（線）→ 下に線を引いて目立たせる"},
      {word:"undertake",meaning:"引き受ける",breakdown:"under（下に）＋ take（取る）→ 下に入って重さを引き受ける"},
      {synonym:true,word:"experience",meaning:"経験する",breakdown:"身をもって知ること。undergo はつらいことを受けて通り抜ける"}]},
@@ -19066,7 +19063,7 @@ const RAW_WORDS=[
      {word:"special",meaning:"特別な",breakdown:"speci（種類）＋ al（形容詞）→ 他とは別の種類に属している"},
      {word:"species",meaning:"（生物の）種",breakdown:"speci（種類）→ 生き物を分けたひとつの種類"},
      {word:"specific",meaning:"具体的な，特定の",breakdown:"speci（種類）＋ fic（作る）→ 種類をはっきり区切った"},
-     {word:"especially",meaning:"特に",breakdown:"ex（外へ）＋ speci（種類）＋ ly（副詞）→ 他の種類から取り出して"}]},
+     {word:"especially",meaning:"特に",breakdown:"especial（特別な）＋ ly（副詞）→ speci（種類）の中でも特別に"}]},
 
   {id:1195,word:"semester",partOfSpeech:"名詞",meaning:"学期（半年）",
    meanings:["名|学期（1年を2つに分けたもの）"],
@@ -19190,7 +19187,7 @@ const RAW_WORDS=[
    etymologyConclusion:"inter（間の）＋ medi（中間）→ 初級と上級のちょうど間にあたる＝中級の",
    relatedWords:[
      {word:"medium",meaning:"媒体；中くらいの",breakdown:"medi（中間）→ 送り手と受け手の中間に立って伝えるもの"},
-     {word:"middle",meaning:"真ん中",breakdown:"middle（中間）→ 両端から等しく離れたところ"},
+     {word:"middle",meaning:"真ん中",breakdown:"middle（中間）→ ラテン語 medi と遠い親戚の英語"},
      {word:"immediately",meaning:"すぐに",breakdown:"im（否定）＋ medi（中間）→ 間に何も挟まずに"},
      {word:"media",meaning:"メディア，報道機関",breakdown:"medi（中間）→ 情報を伝える媒体の複数形"}]},
 
@@ -19456,7 +19453,7 @@ const RAW_WORDS=[
    relatedWords:[
      {word:"culture",meaning:"文化",breakdown:"cult（耕す）＋ ure（名詞）→ 人が心を耕して育ててきたもの"},
      {word:"agriculture",meaning:"農業",breakdown:"agri（畑）＋ cult（耕す）→ 畑を耕して作物を作ること"},
-     {word:"colony",meaning:"植民地；集団",breakdown:"cult（耕す）→ 人が移り住んで土地を耕したところ"},
+     {word:"colony",meaning:"植民地；集団",breakdown:"col（耕す）＋ ony（名詞）→ 人が移り住んで耕した土地"},
      {synonym:true,word:"grow",meaning:"育てる",breakdown:"育つ・育てること。cultivate は手をかけて育て上げること"}]},
 
   {id:1220,word:"shade",partOfSpeech:"名詞",meaning:"日陰",
@@ -20734,7 +20731,7 @@ const RAW_WORDS=[
    etymologyMore:["下で支える中身（実体）がある→中身のある，しっかりした"],
    relatedWords:[
      {word:"substance",meaning:"物質；中身",breakdown:"sub（下で）＋ sta（立つ）→ 見た目の下で全体を支える中身"},
-     {word:"stand",meaning:"立つ",breakdown:"sta（立つ）→ 足を地につけてまっすぐ立つ"},
+     {word:"stand",meaning:"立つ",breakdown:"sta（立つ）→ ラテン語 stare と同じ祖先の英語本来の語"},
      {word:"circumstance",meaning:"状況",breakdown:"circ（輪を描く）＋ sta（立つ）→ まわりを取り巻いて立っていること"},
      {word:"constant",meaning:"絶え間ない",breakdown:"con（共に）＋ sta（立つ）＋ ant（形容詞）→ ずっと同じ所に立ち続ける"}]},
 
@@ -21097,7 +21094,7 @@ const RAW_WORDS=[
    etymologyConclusion:"super（上から）＋ sta（立つ）→ 理屈の上に居座り続ける、根拠のない信じ込み＝迷信",
    why:"【なぜ】ラテン語 superstitio は super（上に）＋ stare（立つ）ですが、そこから「迷信」へどう移ったかは諸説あり、はっきりしていません。「理屈を越えて居座り続ける思い込み」と結びつけると覚えやすくなります。\n【つながり】superior（上に立つ）、substance（下で支える中身）も同じ sta の家族です。",
    relatedWords:[
-     {word:"stand",meaning:"立つ",breakdown:"sta（立つ）→ 足を地につけてまっすぐ立つ"},
+     {word:"stand",meaning:"立つ",breakdown:"sta（立つ）→ ラテン語 stare と同じ祖先の英語本来の語"},
      {word:"superior",meaning:"より優れている",breakdown:"super（上から）＋ ior（より～な）→ 他より一段上に立っている"},
      {word:"substance",meaning:"物質；中身",breakdown:"sub（下で）＋ sta（立つ）→ 見た目の下で全体を支える中身"},
      {synonym:true,word:"myth",meaning:"神話；作り話",breakdown:"語り伝えられた話。superstition は根拠なく信じられた考え"}]},
@@ -21267,7 +21264,7 @@ const RAW_WORDS=[
    etymologyProcess:"sta（立つ）→ 人の姿を立てたまま固めて残すと…？",
    etymologyConclusion:"sta（立つ）→ 人の姿を立てたまま固めて残したもの＝像",
    relatedWords:[
-     {word:"stand",meaning:"立つ",breakdown:"sta（立つ）→ 足を地につけてまっすぐ立つ"},
+     {word:"stand",meaning:"立つ",breakdown:"sta（立つ）→ ラテン語 stare と同じ祖先の英語本来の語"},
      {word:"substance",meaning:"物質；中身",breakdown:"sub（下で）＋ sta（立つ）→ 見た目の下で全体を支える中身"},
      {word:"constant",meaning:"絶え間ない",breakdown:"con（共に）＋ sta（立つ）＋ ant（形容詞）→ ずっと同じ所に立ち続ける"},
      {word:"circumstance",meaning:"状況",breakdown:"circ（輪を描く）＋ sta（立つ）→ まわりを取り巻いて立っていること"}]},
@@ -21349,7 +21346,7 @@ const RAW_WORDS=[
      {word:"cycle",meaning:"周期；自転車",breakdown:"cycle（回す）→ ぐるりと一回りして元へ戻ること"},
      {word:"recycle",meaning:"再利用する",breakdown:"re（再び）＋ cycle（回す）→ もう一度ぐるりと回して使う"},
      {synonym:true,word:"dictionary",meaning:"辞書",breakdown:"語の意味を調べる本。encyclopedia は物事の説明を集めた本"},
-     {word:"pediatrician",meaning:"小児科医",breakdown:"ped（子を教える）→ 子どもを診る医者。ped は「子ども」の家族"}]},
+     {word:"pediatrician",meaning:"小児科医",breakdown:"ped（子ども）＋ iatr（治す）＋ ician（人）→ 子どもを治す医者"}]},
 
   {id:1340,word:"heaven",partOfSpeech:"名詞",meaning:"天国",
    meanings:["名|天国","名|（複数で）空，天"],
@@ -21536,7 +21533,7 @@ const RAW_WORDS=[
    relatedWords:[
      {word:"circumstance",meaning:"状況",breakdown:"circ（輪を描く）＋ sta（立つ）→ まわりを取り巻いて立っていること"},
      {word:"substance",meaning:"物質；中身",breakdown:"sub（下で）＋ sta（立つ）→ 見た目の下で全体を支える中身"},
-     {word:"stand",meaning:"立つ",breakdown:"sta（立つ）→ 足を地につけてまっすぐ立つ"},
+     {word:"stand",meaning:"立つ",breakdown:"sta（立つ）→ ラテン語 stare と同じ祖先の英語本来の語"},
      {word:"stable",meaning:"安定した",breakdown:"sta（立つ）＋ able（できる）→ ぐらつかずに立っていられる"}]},
 
   {id:1352,word:"dialogue",partOfSpeech:"名詞",meaning:"会話，対話",
@@ -21598,7 +21595,7 @@ const RAW_WORDS=[
    relatedWords:[
      {word:"noun",meaning:"名詞",breakdown:"noun（名前）→ 物や人の名前を表す語"},
      {word:"name",meaning:"名前",breakdown:"name（名前）→ 人や物を呼ぶための呼び名"},
-     {word:"nominate",meaning:"指名する",breakdown:"noun（名前）＋ ate（動詞）→ 名前を挙げて選び出す"},
+     {word:"nominate",meaning:"指名する",breakdown:"nomin（名前）＋ ate（動詞）→ 名前を挙げて選び出す"},
      {synonym:true,word:"adjective",meaning:"形容詞",breakdown:"名詞を説明する語。pronoun は名詞の代わりに使う語"}]},
 
   {id:1356,word:"accent",partOfSpeech:"名詞",meaning:"なまり；アクセント",
@@ -21991,11 +21988,11 @@ const RAW_WORDS=[
    exampleJa2:"彼らは、とても古い地図に頼らざるを得なかった。",
    etymologyProcess:"re（再び）＋ sorti（出る）→ ほかに道がなく何度もそこへ足を向けると…？",
    etymologyConclusion:"re（再び）＋ sorti（出る）→ ほかに道がなく、くり返しそこへ足を向けて頼る＝訴える",
+   hook:"last resort＝最後の手段。ほかに道がないときに、最後に頼るもの",
    why:"【なぜ】古フランス語 resortir は re（再び）＋ sortir（出る）で「くり返しそこへ出向く」。名詞の「リゾート（行楽地）」も「人が何度も出かける所」から来ています。動詞では「ほかに道がなく、くり返しそこへ足を向ける」→「（最後の手段に）訴える・頼る」になりました。\n【つながり】re は return（戻る）と同じ「再び」です。",
    relatedWords:[
      {synonym:true,word:"rely",meaning:"頼る",breakdown:"あてにすること。resort はほかに手がなくて頼ることを言う"},
      {synonym:true,word:"turn to",meaning:"頼る",breakdown:"その人に向かうこと。resort は最後の手段として使うこと"},
-     {word:"return",meaning:"戻る，返す",breakdown:"re（再び）＋ turn（回る）→ もとの所へもう一度向かう"},
      {synonym:true,word:"depend",meaning:"頼る，依存する",breakdown:"寄りかかること。resort はいよいよのときに頼ることを言う"}]},
 
   {id:1381,word:"formula",partOfSpeech:"名詞",meaning:"公式；決まったやり方",
@@ -22102,7 +22099,7 @@ const RAW_WORDS=[
    why:"【なぜ】ラテン語 integer は in（否定）＋ tangere（触れる）で「手をつけられていない」。一部も欠けていない、そのままの状態から「全体の・すべての」になりました。\n【つながり】integer（整数）、intact（損なわれていない）も同じ家族です。",
    relatedWords:[
      {word:"intact",meaning:"損なわれていない",breakdown:"in（否定）＋ tact（触れる）→ 誰にも触られていないままの"},
-     {word:"integer",meaning:"整数",breakdown:"in（否定）＋ tact（触れる）→ 欠けのない、そのままの数"},
+     {word:"integer",meaning:"整数",breakdown:"in（否定）＋ teg（触れる）→ 欠けのない、そのままの数"},
      {word:"contact",meaning:"接触；連絡する",breakdown:"con（共に）＋ tact（触れる）→ 互いに触れ合う"},
      {synonym:true,word:"whole",meaning:"全体の",breakdown:"欠けのないひとまとまり。entire は一部も欠けていないことを言う"}]},
 
@@ -22643,7 +22640,7 @@ const RAW_WORDS=[
    etymologyConclusion:"acr（鋭い）→ 舌を刺すように鋭い味をもつもの＝酸",
    etymologyMore:["舌を刺す鋭さが言葉に出る→酸っぱい，辛らつな"],
    relatedWords:[
-     {word:"acute",meaning:"鋭い；深刻な",breakdown:"acr（鋭い）→ 先がとがって鋭く、よく切れる"},
+     {word:"acute",meaning:"鋭い；深刻な",breakdown:"ac（鋭い）＋ ute（～された）→ とがって鋭い"},
      {word:"eager",meaning:"熱心な",breakdown:"eag（鋭い）→ 気持ちが鋭くとがって前のめりな"},
      {synonym:true,word:"sour",meaning:"酸っぱい",breakdown:"すっぱい味。acid は化学の「酸」としても使う"},
      {synonym:true,word:"sharp",meaning:"鋭い，刺すような",breakdown:"刺すような感じ。acid は味や言葉の鋭さに使う"}]},
@@ -23225,7 +23222,7 @@ const RAW_WORDS=[
    etymologyMore:["柱や壁をまっすぐ立てる→（建物や像）を建てる"],
    relatedWords:[
      {word:"correct",meaning:"正しい；訂正する",breakdown:"com（すっかり）＋ rect（まっすぐ）→ 曲がりをすっかりまっすぐに直す"},
-     {word:"direct",meaning:"直接の",breakdown:"di（離れて）＋ rect（まっすぐ）→ よそへそれずまっすぐ向かう"},
+     {word:"direct",meaning:"直接の",breakdown:"di（離れて）＋ rect（まっすぐ）→ まっすぐ導く（right とは遠い親戚）"},
      {word:"rectangle",meaning:"長方形",breakdown:"rect（まっすぐ）＋ angle（角）→ 角がまっすぐに立った四角形"},
      {synonym:true,word:"upright",meaning:"まっすぐ立った",breakdown:"やさしい言い方。erect は硬い語で姿勢や建造物に使う"}]},
 
@@ -26150,7 +26147,7 @@ const RAW_WORDS=[
    relatedWords:[
      {word:"draw",meaning:"引く；描く",breakdown:"draw（引っぱる）→ 手前へ引く、線を引いて描く"},
      {word:"drawer",meaning:"引き出し",breakdown:"draw（引っぱる）＋ er（もの）→ 引っぱり出す箱"},
-     {word:"withstand",meaning:"耐える",breakdown:"with（後ろへ）＋ stand（立つ）→ 押されても逆らって立つ"},
+     {word:"withstand",meaning:"耐える",breakdown:"with（逆らって）＋ stand（立つ）→ 押し返して立ちはだかる"},
      {synonym:true,word:"retreat",meaning:"退く",breakdown:"負けて後ろへ下がる。withdraw は自分から引き下げる"}]},
 
   {id:1644,word:"compile",partOfSpeech:"他動詞",meaning:"（資料を集めて）編集する，作成する",
