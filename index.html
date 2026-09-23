@@ -3058,7 +3058,7 @@ const RAW_WORDS=[
    relatedWords:[
      {word:"know",meaning:"知る",breakdown:"know（知る）→ 頭の中でそれが何かわかっている"},
      {word:"known",meaning:"知られた",breakdown:"know（知る）＋ n（～された）→ みんなに知られている"},
-     {word:"acknowledge",meaning:"認める",breakdown:"ac（古い英語の on）＋ knowledge（知っている）→ 知っていると相手へ示す"},
+     {word:"acknowledge",meaning:"認める",breakdown:"ac（～へ）＋ knowledge（知っている）→ 知っていると相手へ示す"},
      {synonym:true,word:"wisdom",meaning:"知恵",breakdown:"知識を使いこなす力。knowledge は知っている中身そのもの"}]},
 
   {id:172,word:"uniform",partOfSpeech:"名詞",meaning:"制服",
@@ -23523,7 +23523,7 @@ const RAW_WORDS=[
    etymologyConclusion:"acid（鋭い）→ 舌を刺すように鋭い味をもつもの＝酸",
    etymologyMore:["舌を刺す鋭さが言葉に出る→酸っぱい，辛らつな"],
    relatedWords:[
-     {word:"acute",meaning:"鋭い；深刻な",breakdown:"ac（鋭い）＋ ute（～された）→ とがって鋭い"},
+     {word:"acute",meaning:"鋭い；深刻な",breakdown:"acu（鋭い）＋ te（～された）→ とがって鋭い"},
      {word:"eager",meaning:"熱心な",breakdown:"eag（鋭い）→ 気持ちが鋭くとがって前のめりな"},
      {synonym:true,word:"sour",meaning:"酸っぱい",breakdown:"すっぱい味。acid は化学の「酸」としても使う"},
      {synonym:true,word:"sharp",meaning:"鋭い，刺すような",breakdown:"刺すような感じ。acid は味や言葉の鋭さに使う"}]},
@@ -34174,7 +34174,7 @@ function processTail(word){
    色と語根マップの集約だけは代表形にそろえる。 */
 const ROOT_ALIAS={
   /* 見出し語の語源点検（2026-09-24）で正しい綴りに直した語根。コラムと絵は元の仲間のものを使う */
-  phen:"phas",edy:"ody",slm:"islam",portion:"part",together:"gather",blame:"bla",crew:"creas",acid:"eag",
+  phen:"phas",edy:"ody",slm:"islam",portion:"part",together:"gather",blame:"bla",crew:"creas",acid:"eag",acu:"eag",
   /* No.1651〜1750 で増えた別綴り（同じ語根の仲間としてまとめる） */
   pond:"pend",scent:"sens",cay:"cad",ros:"rod",ploit:"pli",puls:"pel",prehend:"pris",tut:"tuit",lud:"lus",
   /* No.1451〜1650 で増えた別綴り（同じ語根の仲間としてまとめる） */
@@ -34293,8 +34293,8 @@ function buildRootIndex(words,{withAffixes=false}={}){
   const map={};
   const touch=(r,i,n,all)=>{
     const k=canonRoot(r.morph);
-    if(!map[k]) map[k]={morph:k,glosses:[],words:[],related:[],tally:{prefix:0,root:0,suffix:0}};
-    if(r.gloss&&!map[k].glosses.includes(r.gloss)) map[k].glosses.push(r.gloss);
+    if(!map[k]) map[k]={morph:k,glosses:[],gcount:{},words:[],related:[],tally:{prefix:0,root:0,suffix:0}};
+    if(r.gloss){if(!map[k].glosses.includes(r.gloss)) map[k].glosses.push(r.gloss);map[k].gcount[r.gloss]=(map[k].gcount[r.gloss]||0)+1;}
     map[k].tally[morphType(r.morph,i,n,all)]++;
     return map[k];
   };
@@ -34316,7 +34316,7 @@ function buildRootIndex(words,{withAffixes=false}={}){
       const type=t.prefix>=t.root&&t.prefix>=t.suffix?"prefix":t.suffix>t.root?"suffix":"root";
       /* 関連語が、あとから見出し語としても出てきたときは二重に数えない */
       const related=x.related.filter(r=>!x.words.some(w=>w.word===r.word));
-      return {...x,related,type,gloss:x.glosses.slice(0,2).join("／"),count:x.words.length+related.length};
+      return {...x,related,type,gloss:[...x.glosses].sort((a,b)=>x.gcount[b]-x.gcount[a]).slice(0,2).join("／"),count:x.words.length+related.length};
     })
     .filter(x=>x.count>=2&&(withAffixes||!SUFFIX_STOP.has(x.morph)))
     .sort((a,b)=>b.count-a.count||a.morph.localeCompare(b.morph));
@@ -36623,7 +36623,7 @@ function WhySheet({C,word:w,onClose}){
 }
 
 /* 語根から引ける横断シート */
-function RootSheet({C,entry,onClose,onOpenWord,speakOn=true}){
+function RootSheet({C,entry,onClose,onOpenWord,onStudy,speakOn=true}){
   if(!entry)return null;
   const col=entry.type?{fg:typeColor(entry.type,C),bg:"transparent"}:rootColor(entry.morph,C);
   const kind={prefix:"接頭語",suffix:"接尾語"}[entry.type]||"語根";
@@ -36678,6 +36678,11 @@ function RootSheet({C,entry,onClose,onOpenWord,speakOn=true}){
               })}
             </div>
           </div>
+        )}
+        {onStudy&&entry.words.length>=2&&(
+          <Btn C={C} variant="ghost" style={{marginTop:16}} onClick={()=>onStudy(entry.words)}>
+            <Icon.branch size={18}/>この語根の語をまとめて学習{entry.words.length>20?"（20語まで）":"（"+entry.words.length+"語）"}
+          </Btn>
         )}
         <div data-tour="rootsheet-words" style={{marginTop:16}}>
           {entry.words.map(w=>(
@@ -39847,7 +39852,11 @@ function App(){
       {whyWord&&<WhySheet C={C} word={whyWord} onClose={()=>setWhyWord(null)}/>}
       {rootEntry&&(
         <RootSheet C={C} entry={rootEntry} onClose={()=>setRootEntry(null)}
-          onOpenWord={w=>{setRootEntry(null);setSheetWord(w);}}/>
+          onOpenWord={w=>{setRootEntry(null);setSheetWord(w);}}
+          onStudy={screen==="study"?null:ws=>{const ids=new Set(ws.map(w=>w.id));
+            /* 多い語根（re など）は、まだ覚えていない語を先にして1回20語まで */
+            const p=words.filter(w=>ids.has(w.id)&&!w.manualPass).sort((a,b)=>isMastered(a)-isMastered(b)).slice(0,20);
+            setRootEntry(null);startSession(p);}}/>
       )}
       {modal&&<Modal C={C} title={modal.title} body={modal.body} actions={modal.actions} onClose={()=>setModal(null)}/>}
       {snack&&(
