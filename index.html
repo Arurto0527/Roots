@@ -36177,6 +36177,14 @@ function HomeScreen({C,settings,stats,words,cfg,setCfg,pool,onStart,onNav,resume
         )}
       </div>
 
+      <button onClick={()=>onNav("guess")} className="press" style={{width:"100%",minHeight:56,marginTop:16,
+        borderRadius:4,border:"1px solid "+C.line,background:"transparent",color:C.text,cursor:"pointer",
+        display:"flex",alignItems:"center",gap:10,padding:"10px 14px",textAlign:"left",fontFamily:"inherit"}}>
+        <Icon.branch size={20}/>
+        <span style={{flex:1}}><span style={{display:"block",fontSize:16,fontWeight:700}}>語源で推測チャレンジ</span>
+          <span style={{display:"block",fontSize:13,color:C.sub,marginTop:2}}>初めて見る単語の意味を、習った語根から当てる</span></span>
+      </button>
+
       <button onClick={()=>onNav("list")} style={{width:"100%",textAlign:"left",cursor:"pointer",
         background:"transparent",border:"none",padding:"20px 0",color:"inherit"}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:10}}>
@@ -36708,6 +36716,144 @@ function PartPicker({C,words,part,onPick}){
             </div>
           </div>
         </Overlay>
+      )}
+    </div>
+  );
+}
+
+/* ============================================================
+   SCREEN: GUESS（語源で推測チャレンジ）
+   習った語の「関連語」を、語根だけを手がかりに4択で当てる。
+   丸暗記ではなく「語根で意味を組み立てられるか」を確かめる場所。
+   SM-2 の復習予定には入れない。正解数だけを別のキーに保存する。
+   ============================================================ */
+const GUESS_KEY="roots.guess.v1";
+const GUESS_PER_ROUND=10;
+function buildGuessPool(words){
+  const learnedWords=new Set(words.filter(w=>!isNew(w)).map(w=>w.word));
+  const allMeanings=[];
+  const out=[];const seen=new Set();
+  words.forEach(w=>(w.relatedWords||[]).forEach(r=>{if(!r.synonym)allMeanings.push({word:r.word,meaning:r.meaning});}));
+  words.filter(w=>!isNew(w)).forEach(w=>{
+    const keys=new Set(parseRoots(w).map(r=>canonRoot(r.morph))
+      .filter(k=>!PREFIXES.has(k)&&!SUFFIXES.has(k)&&!SUFFIX_STOP.has(k)));
+    (w.relatedWords||[]).forEach(r=>{
+      if(r.synonym||seen.has(r.word)||learnedWords.has(r.word))return;
+      const ms=splitMorphs(r.breakdown);
+      if(ms.length<2)return;
+      const shared=ms.find(m=>keys.has(canonRoot(m.morph)));
+      if(!shared)return;
+      seen.add(r.word);
+      out.push({word:r.word,meaning:r.meaning,breakdown:r.breakdown,shared,from:w});
+    });
+  });
+  return {cands:out,allMeanings};
+}
+function makeGuessRound(pool){
+  const qs=shuffle(pool.cands).slice(0,GUESS_PER_ROUND);
+  return qs.map(q=>{
+    const head=s=>s.split(/[；，,]/)[0];
+    const used=new Set([head(q.meaning)]);
+    const wrong=[];
+    /* 品詞で見分けられないよう、答えと同じ「動詞っぽさ」の選択肢を先に使う */
+    const verbish=t=>/[うくすつぬふむゆるぐずぶ]$/.test(head(t).replace(/[（(][^）)]*[）)]/g,"").trim());
+    const kind=verbish(q.meaning);
+    const ordered=shuffle(pool.allMeanings).sort((a,b)=>(verbish(a.meaning)!==kind)-(verbish(b.meaning)!==kind));
+    for(const m of ordered){
+      if(wrong.length>=3)break;
+      if(m.word===q.word||used.has(head(m.meaning)))continue;
+      used.add(head(m.meaning));wrong.push(m.meaning);
+    }
+    return {...q,choices:shuffle([q.meaning,...wrong])};
+  });
+}
+function loadGuessStats(){try{return JSON.parse(localStorage.getItem(GUESS_KEY))||{answered:0,correct:0};}catch(e){return {answered:0,correct:0};}}
+function GuessScreen({C,words,settings,onBack}){
+  const pool=useMemo(()=>buildGuessPool(words),[words]);
+  const [round,setRound]=useState(()=>makeGuessRound(pool));
+  const [i,setI]=useState(0);
+  const [picked,setPicked]=useState(null);
+  const [score,setScore]=useState(0);
+  const [total,setTotal]=useState(loadGuessStats);
+  const q=round[i];
+  const choose=c=>{
+    if(picked!=null)return;
+    const ok=c===q.meaning;
+    setPicked(c);
+    if(ok)setScore(s=>s+1);
+    (ok?SFX.correct:SFX.wrong)(settings.soundEnabled!==false);
+    const t={answered:total.answered+1,correct:total.correct+(ok?1:0)};
+    setTotal(t);try{localStorage.setItem(GUESS_KEY,JSON.stringify(t));}catch(e){}
+  };
+  const next=()=>{setPicked(null);setI(i+1);};
+  const again=()=>{setRound(makeGuessRound(pool));setI(0);setPicked(null);setScore(0);};
+  const head=q?q.breakdown.split("→")[0]:"";
+
+  const top=(
+    <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:16}}>
+      <button aria-label="戻る" onClick={onBack}
+        style={{width:40,height:40,marginLeft:-8,borderRadius:4,border:"none",background:"transparent",
+          color:C.text,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}><Icon.back size={22}/></button>
+      <div style={{flex:1,fontSize:16,fontWeight:700,color:C.text}}>語源で推測チャレンジ</div>
+      {round.length>0&&i<round.length&&<span className="num" style={{fontSize:16,color:C.sub}}>{i+1}/{round.length}</span>}
+    </div>
+  );
+  const wrap={flex:1,padding:"10px 16px calc(24px + env(safe-area-inset-bottom))",display:"flex",flexDirection:"column"};
+
+  if(pool.cands.length<4) return (
+    <div style={wrap} className="riseIn">{top}
+      <Empty C={C} title="まだ問題がありません"
+        note="単語をいくつか学習すると、習った語根を使う「初めて見る単語」が出せるようになります。"/>
+    </div>
+  );
+  if(i>=round.length) return (
+    <div style={wrap} className="riseIn">{top}
+      <div style={{textAlign:"center",padding:"32px 0"}}>
+        <div style={{fontSize:16,color:C.sub}}>今回の結果</div>
+        <div className="num" style={{fontSize:40,fontWeight:700,color:C.text,margin:"8px 0"}}>{score} / {round.length}</div>
+        <div style={{fontSize:16,color:C.sub,lineHeight:1.6}}>初めて見る単語でも、語根から意味を組み立てられました。<br/>
+          これまでの合計：{total.correct} / {total.answered} 問</div>
+      </div>
+      <div style={{display:"flex",flexDirection:"column",gap:10,marginTop:"auto"}}>
+        <Btn C={C} onClick={again}>もう一度挑戦する</Btn>
+        <Btn C={C} variant="ghost" onClick={onBack}>ホームに戻る</Btn>
+      </div>
+    </div>
+  );
+  return (
+    <div style={wrap} key={i}>{top}
+      <div className="riseIn" style={{border:"1px solid "+C.line,borderRadius:4,padding:"20px 16px",marginBottom:14}}>
+        <div style={{fontSize:13,color:C.sub,marginBottom:8}}>初めて見る単語です。語根から意味を推測しよう</div>
+        <div style={{fontSize:30,fontWeight:700,color:C.text}} className="en">
+          <Speak C={C} text={q.word} enabled={settings.soundEnabled!==false}>{q.word}</Speak></div>
+        <div style={{marginTop:12}}><Breakdown C={C} text={head} size={16}/></div>
+      </div>
+      <div style={{display:"flex",flexDirection:"column",gap:8}}>
+        {q.choices.map(c=>{
+          const isAns=c===q.meaning, isPick=c===picked, done=picked!=null;
+          return (
+            <button key={c} onClick={()=>choose(c)} className="press" disabled={done}
+              style={{minHeight:56,padding:"10px 14px",borderRadius:4,textAlign:"left",fontSize:16,fontFamily:"inherit",
+                cursor:done?"default":"pointer",display:"flex",alignItems:"center",gap:10,
+                background:done&&isAns?C.text:"transparent",color:done&&isAns?C.bg:(done&&!isPick?C.faint:C.text),
+                border:(done&&(isAns||isPick)?"2px solid ":"1px solid ")+(done&&(isAns||isPick)?C.text:C.line)}}>
+              <span style={{flex:1}}>{c}</span>
+              {done&&isAns&&<Icon.check size={20}/>}
+              {done&&isPick&&!isAns&&<Icon.close size={20}/>}
+            </button>
+          );
+        })}
+      </div>
+      {picked!=null&&(
+        <div className="fadeIn" style={{marginTop:14,borderTop:"1px solid "+C.line,paddingTop:14}}>
+          <div style={{fontSize:16,fontWeight:700,color:C.text,marginBottom:6}}>
+            {picked===q.meaning?"正解！":"正解は「"+q.meaning+"」"}</div>
+          <Breakdown C={C} text={q.breakdown} size={16} lineHeight={1.7}/>
+          <div style={{fontSize:16,color:C.sub,marginTop:10,lineHeight:1.6}}>
+            <span className="en" style={{color:C.root,fontWeight:700}}>{q.shared.morph}</span>（{q.shared.gloss}）は
+            <span className="en" style={{fontWeight:700,color:C.text}}> {q.from.word} </span>（{q.from.meaning}）で習った語根です。</div>
+          <Btn C={C} style={{marginTop:14}} onClick={next}>{i+1<round.length?"次へ":"結果を見る"}</Btn>
+        </div>
       )}
     </div>
   );
@@ -38639,6 +38785,7 @@ function App(){
         <ListScreen C={C} words={words} settings={settings} onTogglePass={toggleManualPass}
           onToggleBookmark={toggleBookmark} onOpen={setSheetWord} onStudyRows={startSession}/>
       )}
+      {screen==="guess"&&<GuessScreen C={C} words={words} settings={settings} onBack={()=>setScreen("home")}/>}
       {screen==="roots"&&<RootsScreen C={C} words={words} onOpenRoot={setRootEntry}/>}
       {screen==="stats"&&<StatsScreen C={C} words={words} stats={stats} earned={earned}/>}
       {screen==="settings"&&(
