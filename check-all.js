@@ -139,16 +139,28 @@ if(orphan.length) detail.push("【使われていない音声（消してよい�
 /* ---------- 5-b. 「なぜこの意味？」コラム ---------- */
 /* 語根から意味が離れている語に書く why の進み具合を見る（無くても NG にはしない）。
    形がくずれている（【なぜ】で始まらない・短すぎる）ものだけを挙げる。 */
-const whyBad=[];
+const whyBad=[],whyDup=[];
 for(const w of RAW){
   if(!w.why) continue;
   if(!/^【なぜ】/.test(w.why)) whyBad.push(w.id+" "+w.word+" : 【なぜ】で始まっていない");
+  else if(!/\n【つながり】/.test(w.why)) whyBad.push(w.id+" "+w.word+" : 【つながり】が無い");
+  else if(w.why.split("\n").length!==2) whyBad.push(w.id+" "+w.word+" : 行が2つでない");
   else if(w.why.length<60) whyBad.push(w.id+" "+w.word+" : 短すぎる（"+w.why.length+"字）");
+  else if(w.why.length>200) whyBad.push(w.id+" "+w.word+" : 長すぎる（"+w.why.length+"字。200字まで）");
+  /* hook と同じ内容を2回読ませない。6文字の並びがどれだけ why に入っているかで見る */
+  if(w.hook){
+    const hk=w.hook.replace(/[。、（）()【】「」]/g,""), wy=w.why.replace(/[。、（）()【】「」]/g,"");
+    let hit=0; for(let i=0;i+6<=hk.length;i++) if(wy.includes(hk.slice(i,i+6))) hit++;
+    const r=hk.length>6?hit/(hk.length-5):0;
+    if(r>0.3) whyDup.push(w.id+" "+w.word+" : hook と why が重なっている（"+Math.round(r*100)+"%）");
+  }
 }
 const whyN=RAW.filter(w=>w.why).length;
 add("なぜコラム（why）の書式",whyBad.length+"件",whyBad.length);
 add("なぜコラムが付いた語",whyN+" / "+RAW.length,0);
+add("なぜコラムと hook の重複",whyDup.length+"件",whyDup.length);
 if(whyBad.length) detail.push("【なぜコラムの書式くずれ】\n  "+whyBad.join("\n  "));
+if(whyDup.length) detail.push("【なぜコラムと hook の重複】\n  "+whyDup.join("\n  "));
 
 /* ---------- 6. 番号まわり ---------- */
 const alphaIds=RAW.filter(w=>w.id>=ALPHA_FROM).map(w=>w.id);
