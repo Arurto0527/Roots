@@ -276,7 +276,7 @@
    etymologyConclusion:"intim（最も内側の）＋ ate（形容詞）→ 心のいちばん内側まで入り合っている＝親密な",
    etymologyMore:["内側の奥まで知っている→（知識が）詳しい，よく知っている","心の内側にしまっておく→個人的な，私的な"],
    relatedWords:[
-     {word:"interior",meaning:"内部；室内の",breakdown:"intern（内側の）＋ ior（より～な）→ より内側にある部分"},
+     {synonym:true,word:"inside",meaning:"内側；内部に",breakdown:"中のほう。intern はもと組織の内側で働く人"},
      {word:"internal",meaning:"内部の",breakdown:"intern（内側の）＋ al（形容詞）→ 中のほうの"},
      {word:"intimacy",meaning:"親密さ",breakdown:"intim（最も内側の）＋ acy（名詞）→ 心の奥まで通う親しさ"},
      {synonym:true,word:"close",meaning:"親しい",breakdown:"親しい全般。intimate はもっと深く親密"}]},
@@ -807,7 +807,7 @@
      {word:"colleague",meaning:"同僚",breakdown:"con（共に）＋ leg（任じる）→ 共に任された仲間"},
      {synonym:true,word:"rumor",meaning:"うわさ",breakdown:"確かでない話。allegedly はそう言われているが未確認"}]},
 
-  {id:2000,word:"whereas",partOfSpeech:"前置詞",meaning:"～だが一方，～であるのに対して",
+  {id:2000,word:"whereas",partOfSpeech:"接続詞",meaning:"～だが一方，～であるのに対して",
    meanings:["接|～だが一方，～であるのに対して"],
    pronunciation:"/werˈæz/",part:200,
    example:"My sister loves sports, whereas I prefer reading books at home.",

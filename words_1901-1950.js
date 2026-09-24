@@ -565,7 +565,7 @@
    etymologyConclusion:"manu（手）＋ script（書く）→ 印刷する前の、手で書いた文章＝原稿",
    etymologyMore:["印刷がない時代に手で写した本→（印刷以前の手書きの）写本"],
    relatedWords:[
-     {word:"manual",meaning:"手動の；説明書",breakdown:"man（手）＋ al（～の）→ 手を使う。手元に置く本"},
+     {word:"manual",meaning:"手動の；説明書",breakdown:"manu（手）＋ al（～の）→ 手を使う。手元に置く本"},
      {word:"manufacture",meaning:"製造する",breakdown:"manu（手）＋ fac（作る）→ もとは手で作ること"},
      {word:"describe",meaning:"描写する",breakdown:"de（下へ）＋ scrib（書く）→ 見たままを書き写す"},
      {word:"script",meaning:"台本",breakdown:"script（書く）→ せりふを書いたもの"}]},

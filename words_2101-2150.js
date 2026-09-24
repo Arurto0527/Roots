@@ -726,7 +726,7 @@
    etymologyConclusion:"intern（内側の）＋ ship（名詞）→ 会社などの内側に入り、実際に働きながら学ぶ期間＝実務研修，インターンシップ",
    relatedWords:[
      {word:"internal",meaning:"内部の",breakdown:"intern（内側の）＋ al（形容詞）→ 中のほうの"},
-     {word:"interior",meaning:"内部；室内の",breakdown:"intern（内側の）＋ ior（より～な）→ より内側にある部分"},
+     {synonym:true,word:"inside",meaning:"内側；内部に",breakdown:"中のほう。intern はもと組織の内側で働く人"},
      {word:"intern",meaning:"実習生",breakdown:"intern（内側の）→ 組織の内側に入って学ぶ人"},
      {synonym:true,word:"training",meaning:"訓練，研修",breakdown:"技を身につける練習全般。internship は職場に入って学ぶ"}]},
 

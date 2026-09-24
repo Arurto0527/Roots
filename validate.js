@@ -89,7 +89,7 @@ const len=s=>[...String(s||"")].length;   // 全角も1字として数える
 const HEAD_RE=/^\s*[^\s（(＋+→]+（[^）]*）(\s*＋\s*[^\s（(＋+→]+（[^）]*）)*\s*$/;
 const MORPH_RE=/^[A-Za-z][A-Za-z-]*$/;
 const FORBIDDEN={posit:"pos",gree:"grat",grac:"grat",a:"ad"};
-const POS_OK=["名詞","他動詞","自動詞","他動詞・自動詞","形容詞","副詞","前置詞","熟語"];
+const POS_OK=["名詞","他動詞","自動詞","他動詞・自動詞","形容詞","副詞","前置詞","接続詞","熟語"];
 const morphsIn=head=>[...String(head).matchAll(/([^\s（(＋+→]+)（([^）]*)）/g)].map(m=>({morph:m[1],gloss:m[2]}));
 
 /* 語根の左側（語根（意味）＋ …）をまとめて調べる。breakdown にも使う */
