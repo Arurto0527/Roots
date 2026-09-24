@@ -276,7 +276,7 @@
    etymologyConclusion:"intim（最も内側の）＋ ate（形容詞）→ 心のいちばん内側まで入り合っている＝親密な",
    etymologyMore:["内側の奥まで知っている→（知識が）詳しい，よく知っている","心の内側にしまっておく→個人的な，私的な"],
    relatedWords:[
-     {synonym:true,word:"inside",meaning:"内側；内部に",breakdown:"中のほう。intern はもと組織の内側で働く人"},
+     {word:"interior",meaning:"内部；室内の",breakdown:"intern（内側の）＋ ior（より～な）→ より内側にある部分"},
      {word:"internal",meaning:"内部の",breakdown:"intern（内側の）＋ al（形容詞）→ 中のほうの"},
      {word:"intimacy",meaning:"親密さ",breakdown:"intim（最も内側の）＋ acy（名詞）→ 心の奥まで通う親しさ"},
      {synonym:true,word:"close",meaning:"親しい",breakdown:"親しい全般。intimate はもっと深く親密"}]},
