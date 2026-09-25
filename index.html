@@ -43720,12 +43720,12 @@ const freshState=()=>({
 });
 
 /* ============================================================
-   TUTORIAL（はじめての人への吹き出し案内）
-   学習者が光っている場所を自分でタップすると、次へ進む
+   TUTORIAL（はじめての人への案内）
+   ① IntroLesson … unpredictable を分解して、語源で意味を当てる体験（全画面）
+   ② TUTORIAL_STEPS … そのあとホームで出す、短い吹き出し案内。光っている場所をタップすると次へ進む
    ・target … 光らせる部品の data-tour の名前（配列なら、見つかった最初のもの）。null は画面の真ん中に出す
-   ・screen … その説明をどの画面で出すか（study は、タップで動くデモ。記録は変えない）
+   ・screen … その説明をどの画面で出すか
    ・pass   … true ならタップが本物のボタンにも届く（画面の移動など）。false なら説明だけして進む
-   ・face   … study のとき、はじめに見せる面（ask＝問題、reveal＝答え）
    ・tap    … 吹き出しに出す「どこを押すか」
    ・mood   … ルーツくん（先生役）の表情。normal＝笑顔／teach＝説明する／think＝考える／cheer＝応援する
    ・scroll … true なら、光っている所を自由にスクロールして読める（進むのは吹き出しの「次へ」）
@@ -43733,99 +43733,26 @@ const freshState=()=>({
 const TUTORIAL_KEY="roots.tutorialDone";
 const TUTORIAL_ACCENT="#534AB7";
 const TUTORIAL_STEPS=[
-  /* --- ホーム：まず1回やってみる --- */
-  {target:"home-start",screen:"home",pass:false,mood:"cheer",tap:"「学習をはじめる」をタップ",
-   title:"まず1回やってみよう",
-   body:"やあ、ハルト！ さっそく1回やってみよう。\n1時間まとめてより、毎日10分のほうが残るんだ。ここを押すと、今日やるべき単語をぼくが選ぶよ。\n練習だから、記録には残らない。"},
-
-  /* --- 学習デモ：問題の面 --- */
-  {target:"hint",screen:"study",face:"ask",pass:true,mood:"teach",tap:"「語源のヒント」をタップ",
-   title:"すぐに答えを見ない",
-   body:"まず3秒、「意味なんだっけ」と考えてみて。\nこの“思い出そうとする時間”が、記憶をいちばん強くするんだ。\n出てこなければ、ヒントを開こう。"},
-  {target:"hint-panel",screen:"study",face:"ask",pass:false,mood:"teach",tap:"読んだらここをタップ",
-   title:"パーツから意味を当てる",
-   body:"出るのは答えじゃなく、単語を分けたパーツだけ。\nad（〜へ）＋ grat（心地よい）→ 気持ちが近づく →「賛成する」。\n自分で当てた単語は、忘れにくいんだ。"},
-  {target:"card",screen:"study",face:"ask",pass:true,mood:"normal",tap:"カードをタップ",
-   title:"答えを確かめよう",
-   body:"当たっても、はずれてもいい。カードを押して答えを見よう。\n「予想と合っていたか」を確かめる。ここで差がつくよ。"},
-
-  /* --- 学習デモ：答えの面 --- */
-  {target:"root-color",screen:"study",face:"reveal",pass:true,mood:"teach",tap:"色分けの図をタップ",
-   title:"色は3つの役わり",
-   body:"青＝接頭語（向きを変える）\nオレンジ＝語根（意味の中心）\n緑＝接尾語（品詞を決める）\nオレンジさえ覚えれば、初めて見る単語も予想できるよ。"},
-  {target:"reveal-tab-1",screen:"study",face:"reveal",pass:true,mood:"teach",tap:"「語源」をタップ",
-   title:"“なぜその意味か”を読む",
-   body:"語源のページには、どうしてこの意味になったかが書いてある。\n理由がわかった単語は、丸暗記よりずっと長く残るんだ。"},
-  {target:"reveal-tab-2",screen:"study",face:"reveal",pass:true,mood:"normal",tap:"「例文」をタップ",
-   title:"例文は1回、声に出す",
-   body:"声に出すと、意味と使い方がセットで残る。\n長文やリスニングで出てきたとき、気づけるようになるよ。"},
-  {target:"buttons",screen:"study",face:"reveal",pass:true,mood:"think",tap:"どちらかをタップ",
-   title:"ここは正直に押す",
-   body:"少しでも迷ったら「もう一度」。すぐまた出てくるよ。\n「覚えた」の単語は、1日後 → 3日後 → 1週間後と、忘れそうなころに戻ってくる。\nごまかすと、このしくみが働かないんだ。"},
-
-  /* --- ホーム：条件を変える --- */
-  {target:"home-mode",screen:"home",pass:true,mood:"normal",tap:"「条件を変える」をタップ",
-   title:"練習はここまで",
-   body:"今のぶんは記録に残っていないよ。\n最後に、テスト前に使えるボタンを開いてみよう。"},
-  {target:"home-modeseg",screen:"home",pass:false,mood:"teach",tap:"見たらここをタップ",
-   title:"3つから選べる",
-   body:"おまかせ … 今日やるべき単語をぼくが選ぶ（ふだんはこれ）\n範囲から … テスト範囲だけ\n苦手だけ … まちがえた単語だけ"},
-
-  /* --- 語根 --- */
-  {target:"nav-roots",screen:"home",pass:true,mood:"cheer",tap:"下の「語根」をタップ",
-   title:"次は、ぼくの得意分野",
-   body:"語源で覚えるいちばんの強みが「語根」の画面だよ。"},
-  {target:"roots-item",screen:"roots",pass:true,mood:"normal",tap:"語根をひとつタップ",
-   title:"ひとつ開いてみよう",
-   body:"よく使われる順に並んでいるよ。どれでもいいので押してみて。"},
-  {target:"rootsheet-words",screen:"roots",pass:false,scroll:true,mood:"teach",
-   title:"これが全部、仲間の単語",
-   body:"このパーツを使う単語が、ここに全部出ているよ。1つ覚えるだけで、これだけまとめて読める。\n指で上下に動かして、どんな単語があるか見てみて。"},
-  {target:"rootsheet-close",screen:"roots",pass:true,mood:"normal",tap:"×をタップして閉じる",
-   title:"閉じて次へ",
-   body:"右上の × で閉じられるよ。"},
-
-  /* --- 単語帳 --- */
-  {target:"nav-list",screen:"roots",pass:true,mood:"normal",tap:"下の「単語帳」をタップ",
-   title:"次は単語帳",
-   body:"全部の単語が番号順に並んでいる画面だよ。"},
-  {target:"list-row",screen:"list",pass:true,mood:"normal",tap:"単語をひとつタップ",
-   title:"ひとつ開いてみよう",
-   body:"気になる単語を押してみて。"},
-  {target:"wordsheet-body",screen:"list",pass:false,scroll:true,mood:"teach",
-   title:"1語ぶんが1画面に",
-   body:"意味・発音・色分け・絵・例文が、ここにまとまっているよ。指で上下に動かすと、下の例文まで読める。\n授業の前や電車の中で、さっと見直そう。それだけでも記憶は戻る。"},
-  {target:"wordsheet-close",screen:"list",pass:true,mood:"normal",tap:"×をタップして閉じる",
-   title:"閉じて次へ",
-   body:"右上の × で閉じられるよ。"},
-
-  /* --- 記録 --- */
-  {target:["nav-stats","nav-admin"],screen:"list",pass:true,mood:"cheer",tap:"下の「記録」をタップ",
-   title:"次は記録",
-   body:"がんばりが目に見えると、続けやすくなるよ。"},
-  {target:"stats-top",screen:"stats",pass:false,mood:"cheer",tap:"見たらここをタップ",
-   title:"1日休んでも大丈夫",
-   body:"連続日数や正解率、カレンダーが出るよ。\n連続が切れても、やめる理由にはならない。次の日に再開すれば、また伸びていく。"},
-
-  /* --- 設定 --- */
-  {target:"nav-settings",screen:"stats",pass:true,mood:"normal",tap:"下の「設定」をタップ",
-   title:"最後に設定",
-   body:"自分に合わせて調整できるよ。"},
-  {target:"settings-study",screen:"settings",pass:true,mood:"normal",tap:"「学習」をタップ",
-   title:"開いてみよう",
-   body:"まずは「学習」。ここがいちばん大事な設定だよ。"},
-  {target:"settings-goal",screen:"settings",pass:false,mood:"teach",tap:"見たらここをタップ",
-   title:"続けられる量にする",
-   body:"このつまみで、1回の語数を5〜50語に変えられる。毎日続けられる量がいちばん強いんだ。\n設定はほかにも、音・通知・文字の大きさなどがあるよ。上の検索からも探せるから、あとで自分でのぞいてみて。"},
-
-  /* --- ホームへ --- */
-  {target:"nav-home",screen:"settings",pass:true,mood:"normal",tap:"下の「ホーム」をタップ",
-   title:"ホームにもどろう",
-   body:"毎日ここから始めるよ。"},
-
-  /* --- しめくくり --- */
+  {target:"home-start",screen:"home",pass:false,mood:"cheer",tap:"見たらここをタップ",
+   title:"毎日ここを押すだけ",
+   body:"今日やる単語は、ぼくが選ぶよ。\n1時間まとめてより、毎日10分のほうが残るんだ。"},
+  {target:"home-mode",screen:"home",pass:false,mood:"teach",tap:"見たらここをタップ",
+   title:"テスト前はここ",
+   body:"「範囲から」でテスト範囲だけ、「苦手だけ」でまちがえた単語だけを出せるよ。"},
+  {target:"nav-list",screen:"home",pass:false,mood:"normal",tap:"見たらここをタップ",
+   title:"単語帳",
+   body:"全部の単語が番号順に並んでいるよ。知っている単語は「既知」にして、出題から外せる。"},
+  {target:"nav-roots",screen:"home",pass:false,mood:"teach",tap:"見たらここをタップ",
+   title:"語根",
+   body:"さっきの dict みたいなパーツが一覧になっているよ。開くと、仲間の単語がまとめて見られる。"},
+  {target:["nav-stats","nav-admin"],screen:"home",pass:false,mood:"cheer",tap:"見たらここをタップ",
+   title:"記録",
+   body:"連続日数やカレンダーが見られるよ。1日休んでも、次の日に再開すれば大丈夫。"},
+  {target:"nav-settings",screen:"home",pass:false,mood:"normal",tap:"見たらここをタップ",
+   title:"設定",
+   body:"1回の語数・音・文字の大きさを変えられるよ。\nこの案内も「チュートリアルをもう一度見る」からいつでも見られる。"},
   {target:null,screen:"home",mood:"cheer",title:"続けるコツは3つ",
-   body:"・毎日同じ時間に開く（寝る前や朝の電車）\n・復習がたまったら、新しい単語より復習を先に\n・まちがえた単語は「条件を変える → 苦手だけ」\n\nいっしょにがんばろう！\n先生からID番号をもらった人は、設定の「データ」で入力してね。この案内は「チュートリアルをもう一度見る」からいつでも見られるよ。"},
+   body:"・毎日同じ時間に開く（寝る前や朝の電車）\n・復習がたまったら、新しい単語より復習を先に\n・少しでも迷ったら「もう一度」を押す\n\n先生からID番号をもらった人は、設定の「データ」で入力してね。"},
 ];
 
 const INITIAL_WORDS = RAW_WORDS.map(w=>({...w,...freshState()}));
@@ -47267,27 +47194,225 @@ function TutorialOverlay({C,steps,index,onNext,onSkip,children}){
   );
 }
 
-/* 学習画面のステップ用：本物の学習画面の部品で、ダミーの1語を見せる
-   ヒント・カード・例文はタップで本物と同じように動くが、採点しても記録は一切変えない */
-function TutorialDemoStudy({C,settings,face}){
-  const item=useMemo(()=>{
-    /* 説明文の例（a＋gree）に合わせて agree を使う。無ければ語源のパーツが2つ以上ある語 */
-    const w=RAW_WORDS.find(x=>x.word==="agree")
-      ||RAW_WORDS.find(x=>{try{return parseRoots(x).length>=2&&x.example;}catch(e){return false;}})||RAW_WORDS[0];
-    return {word:{...w,...freshState()},format:"w_en_ja",cloze:null,firstTry:true,lapse:false,seen:0};
-  },[]);
-  const [phase,setPhase]=useState(face==="reveal"?"reveal":"ask");
-  const [hint,setHint]=useState(false);
-  useEffect(()=>{if(face==="reveal")setPhase("reveal");},[face]);
-  const noop=()=>{};
+/* はじめての体験：unpredictable を分解して、語源から意味を当てる
+   記録は一切変えない。最後まで行くと onDone（そのあと短い吹き出し案内へ）、スキップで onSkip */
+const INTRO_PARTS=[
+  {m:"un",g:"〜でない",k:"pre"},
+  {m:"pre",g:"前に",k:"pre"},
+  {m:"dict",g:"言う",k:"root"},
+  {m:"able",g:"〜できる",k:"suf"},
+];
+const INTRO_CHOICES=[
+  {t:"言い返せない",ok:false},
+  {t:"予測できない",ok:true},
+  {t:"前もって話せる",ok:false},
+];
+const INTRO_FAMILY=[
+  {pre:"pre",root:"dict",post:"",ja:"予測する"},
+  {pre:"",root:"dict",post:"ionary",ja:"辞書"},
+  {pre:"contra",root:"dict",post:"",ja:"矛盾する；反論する"},
+  {pre:"",root:"dict",post:"ate",ja:"書き取らせる；指図する"},
+];
+const INTRO_DAYS=["今日","1日後","3日後","1週間後","3週間後"];
+function IntroLesson({C,name,onDone,onSkip}){
+  const [step,setStep]=useState(0);
+  const [opened,setOpened]=useState([]);     /* ひらいたパーツの番号 */
+  const [pick,setPick]=useState(null);       /* 選んだ答えの番号 */
+  const [day,setDay]=useState(0);            /* 「覚えた」を押した回数 */
+  const LAST=6;
+  const who=name&&name!=="あなた"?name:"";
+  const col=k=>C[k];
+  const next=()=>{setStep(s=>Math.min(LAST,s+1));try{window.scrollTo(0,0);}catch(e){}};
+  const moods=["cheer","teach","think","think","cheer","teach","cheer"];
+  const says=[
+    (who?who+"、":"")+"ようこそ！ ぼくはルーツくん。\nいきなりだけど、この単語の意味わかる？",
+    "長い単語は、パーツに分けられるんだ。\n色は3つの役わりを表しているよ。",
+    "パーツをひとつずつタップして、意味を見てみよう。",
+    "パーツの意味をつなげると、どうなる？",
+    "dict（言う）を覚えると、ほかの単語もまとめて読めるよ。",
+    "最後に、覚え方のしくみ。\n「覚えた」を押すほど、次に出てくる日が遠くなるんだ。",
+    (who?who+"、":"")+"これで準備OK！\n最後に、画面のどこに何があるかだけ案内するね。",
+  ];
+  const Word=({dim})=>(
+    <div className="en" style={{fontSize:34,fontWeight:700,letterSpacing:"-0.01em",textAlign:"center",
+      margin:"8px 0 4px",wordBreak:"break-all"}}>
+      {INTRO_PARTS.map((p,i)=>(
+        <span key={i} style={{color:dim?C.text:col(p.k),transition:"color .4s"}}>{p.m}</span>
+      ))}
+    </div>
+  );
+  const Chip=({p,i,tap})=>{
+    const on=!tap||opened.includes(i);
+    return (
+      <button onClick={tap?()=>setOpened(o=>o.includes(i)?o:[...o,i]):undefined} disabled={!tap}
+        className={tap?"press":undefined}
+        style={{flex:1,minWidth:0,minHeight:88,borderRadius:10,border:"2px solid "+col(p.k),
+          background:C.bg,color:C.text,cursor:tap?"pointer":"default",fontFamily:"inherit",
+          display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:4,padding:"6px 2px"}}>
+        <span className="en" style={{fontSize:20,fontWeight:700,color:col(p.k)}}>{p.m}</span>
+        <span style={{fontSize:14,color:on?C.text:C.faint,fontWeight:on?700:400}}>{on?p.g:"？"}</span>
+      </button>
+    );
+  };
+  const legend=[["pre","青","接頭語","向きや打ち消しを足す"],["root","オレンジ","語根","意味の中心"],["suf","緑","接尾語","品詞を決める"]];
+  const canNext=[true,true,opened.length>=INTRO_PARTS.length,pick!=null,true,day>=2,true][step];
+  const btnLabel=[
+    "わからない…",
+    "次へ",
+    opened.length>=INTRO_PARTS.length?"次へ":"あと"+(INTRO_PARTS.length-opened.length)+"つ",
+    pick==null?"答えを選んでね":"次へ",
+    "次へ",
+    day>=2?"次へ":"「覚えた」を押してみよう",
+    "案内を見る",
+  ][step];
   return (
-    <div style={{position:"fixed",top:0,bottom:0,left:0,right:0,margin:"0 auto",width:"100%",maxWidth:430,
-      zIndex:0,isolation:"isolate",background:C.bg,display:"flex",flexDirection:"column",paddingTop:"env(safe-area-inset-top)"}}>
-      <StudyScreen C={C} item={item} settings={settings}
-        ui={{key:"tour",phase,hint,timedOut:false,timeLeft:null}}
-        progress={{done:phase==="reveal"?1:0,total:1}}
-        handlers={{onFlip:()=>setPhase("reveal"),onHint:()=>setHint(true),onHideHint:()=>setHint(false),
-          onGrade:noop,onExit:noop,onTapRoot:noop,canUndo:false,onUndo:noop}}/>
+    <div role="dialog" aria-modal="true" aria-label="はじめての案内"
+      style={{position:"fixed",inset:0,zIndex:1000,background:C.bg,color:C.text,overflowY:"auto"}}>
+      <div style={{maxWidth:430,margin:"0 auto",minHeight:"100%",boxSizing:"border-box",display:"flex",flexDirection:"column",
+        padding:"calc(12px + env(safe-area-inset-top)) 16px calc(20px + env(safe-area-inset-bottom))"}}>
+        {/* 上：進みぐあいとスキップ */}
+        <div style={{display:"flex",alignItems:"center",gap:8}}>
+          <div style={{display:"flex",gap:6,flex:1}} aria-label={(step+1)+" / "+(LAST+1)}>
+            {Array.from({length:LAST+1}).map((_,i)=>(
+              <span key={i} style={{flex:1,height:4,borderRadius:2,background:i<=step?TUTORIAL_ACCENT:C.line,transition:"background .3s"}}/>
+            ))}
+          </div>
+          <button onClick={onSkip} style={{minHeight:44,padding:"0 4px 0 12px",border:"none",background:"transparent",
+            color:C.sub,fontSize:14,cursor:"pointer",fontFamily:"inherit"}}>スキップ</button>
+        </div>
+
+        {/* ルーツくんのせりふ */}
+        <div key={"say"+step} className="riseIn" style={{display:"flex",gap:12,alignItems:"flex-start",margin:"16px 0 20px"}}>
+          <img src={"chara/"+moods[step]+".png"} alt="ルーツくん" width="64" height="54"
+            onError={e=>{e.currentTarget.style.display="none";}} style={{width:64,height:"auto",flexShrink:0}}/>
+          <div style={{flex:1,background:C.sunken,borderRadius:12,padding:"12px 14px",fontSize:16,lineHeight:1.7,
+            whiteSpace:"pre-line"}}>{says[step]}</div>
+        </div>
+
+        <div key={"body"+step} className="riseIn" style={{flex:1}}>
+          {step===0&&(<>
+            <Word dim/>
+            <div style={{textAlign:"center",fontSize:14,color:C.sub,marginTop:8}}>知らなくて大丈夫。1分後には読めるようになるよ。</div>
+          </>)}
+
+          {step===1&&(<>
+            <Word/>
+            <div style={{display:"flex",flexDirection:"column",gap:10,marginTop:20}}>
+              {legend.map(([k,cn,name,what])=>(
+                <div key={k} style={{display:"flex",alignItems:"center",gap:12,padding:"12px 14px",
+                  border:"1px solid "+C.line,borderRadius:10}}>
+                  <span style={{width:14,height:14,borderRadius:7,background:col(k),flexShrink:0}}/>
+                  <div style={{fontSize:16}}><b style={{color:col(k)}}>{cn}＝{name}</b><span style={{color:C.sub}}>（{what}）</span></div>
+                </div>
+              ))}
+            </div>
+            <div style={{fontSize:14,color:C.sub,marginTop:14,lineHeight:1.7}}>
+              いちばん大事なのはオレンジ。語根さえわかれば、初めて見る単語も予想できるよ。</div>
+          </>)}
+
+          {step===2&&(
+            <div style={{display:"flex",gap:6}}>
+              {INTRO_PARTS.map((p,i)=><Chip key={i} p={p} i={i} tap/>)}
+            </div>
+          )}
+
+          {step===3&&(<>
+            <div style={{display:"flex",gap:6}}>
+              {INTRO_PARTS.map((p,i)=><Chip key={i} p={p} i={i}/>)}
+            </div>
+            <div style={{display:"flex",flexDirection:"column",gap:10,marginTop:20}}>
+              {INTRO_CHOICES.map((c,i)=>{
+                const chosen=pick===i,show=pick!=null;
+                const good=show&&c.ok,badPick=chosen&&!c.ok;
+                return (
+                  <button key={i} onClick={()=>{if(pick==null)setPick(i);}} className="press"
+                    style={{minHeight:56,borderRadius:10,fontSize:16,fontWeight:700,fontFamily:"inherit",cursor:pick==null?"pointer":"default",
+                      border:"2px solid "+(good?C.suf:badPick?C.root:C.line),
+                      background:good?(C.isDark?"#1B2A20":"#EEF5F0"):C.bg,color:C.text,
+                      display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
+                    {good&&<span aria-hidden="true" style={{color:C.suf}}>○</span>}
+                    {badPick&&<span aria-hidden="true" style={{color:C.root}}>×</span>}
+                    {c.t}
+                  </button>
+                );
+              })}
+            </div>
+            {pick!=null&&(
+              <div className="riseIn" style={{marginTop:16,padding:"14px",borderRadius:10,background:C.sunken,fontSize:16,lineHeight:1.8}}>
+                <b>{INTRO_CHOICES[pick].ok?"正解！ ":"おしい！ "}</b>
+                <span style={{color:C.pre}}>前もって（pre）</span><span style={{color:C.root}}>言う（dict）</span>
+                ことが<span style={{color:C.suf}}>できる（able）</span>…の<span style={{color:C.pre}}>反対（un）</span>
+                →「<b>予測できない</b>」
+                <div style={{fontSize:14,color:C.sub,marginTop:6}}>自分で当てた単語は、忘れにくいんだ。</div>
+              </div>
+            )}
+          </>)}
+
+          {step===4&&(<>
+            <div style={{textAlign:"center",marginBottom:14}}>
+              <span className="en" style={{display:"inline-block",padding:"6px 18px",borderRadius:999,
+                border:"2px solid "+C.root,color:C.root,fontSize:20,fontWeight:700}}>dict</span>
+              <span style={{fontSize:16,marginLeft:8}}>＝ 言う</span>
+            </div>
+            <div style={{display:"flex",flexDirection:"column",gap:8}}>
+              {INTRO_FAMILY.map((f,i)=>(
+                <div key={i} className="riseIn" style={{animationDelay:(i*0.12)+"s",animationFillMode:"both",
+                  display:"flex",alignItems:"baseline",justifyContent:"space-between",gap:12,
+                  padding:"14px",border:"1px solid "+C.line,borderRadius:10}}>
+                  <span className="en" style={{fontSize:18,fontWeight:700}}>
+                    {f.pre}<span style={{color:C.root}}>{f.root}</span>{f.post}</span>
+                  <span style={{fontSize:14,color:C.sub,textAlign:"right"}}>{f.ja}</span>
+                </div>
+              ))}
+            </div>
+            <div style={{fontSize:14,color:C.sub,marginTop:14,lineHeight:1.7}}>
+              下のメニューの「語根」から、こういう仲間をいつでも見られるよ。</div>
+          </>)}
+
+          {step===5&&(<>
+            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",margin:"8px 4px 6px"}}>
+              {INTRO_DAYS.map((d,i)=>(
+                <div key={i} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:6,flex:1}}>
+                  <span style={{width:18,height:18,borderRadius:9,transition:"all .3s",
+                    background:i<=day?TUTORIAL_ACCENT:"transparent",border:"2px solid "+(i<=day?TUTORIAL_ACCENT:C.border)}}/>
+                  <span style={{fontSize:13,color:i<=day?C.text:C.faint,fontWeight:i===day?700:400}}>{d}</span>
+                </div>
+              ))}
+            </div>
+            <div style={{fontSize:16,textAlign:"center",margin:"14px 0",minHeight:28}}>
+              {day===0?"今日はじめて覚えた":day<INTRO_DAYS.length-1?"次に出てくるのは「"+INTRO_DAYS[day]+"」":"ここまで来たら「習得」！"}
+            </div>
+            <div style={{display:"flex",gap:10}}>
+              <Btn C={C} variant="ghost" onClick={()=>setDay(0)}>もう一度</Btn>
+              <Btn C={C} onClick={()=>setDay(d=>Math.min(INTRO_DAYS.length-1,d+1))}>覚えた</Btn>
+            </div>
+            <div style={{fontSize:14,color:C.sub,marginTop:14,lineHeight:1.7}}>
+              忘れそうなころに、ぼくがもう一度出すよ。少しでも迷ったら「もう一度」。すぐまた出てくるから大丈夫。</div>
+          </>)}
+
+          {step===6&&(
+            <div style={{textAlign:"center",marginTop:12}}>
+              <Word/>
+              <div style={{fontSize:16,marginTop:6}}>予測できない</div>
+              <div style={{fontSize:14,color:C.sub,marginTop:18,lineHeight:1.8}}>
+                ここでやったことは記録には残らないよ。<br/>本番は、ホームの「学習をはじめる」から。</div>
+            </div>
+          )}
+        </div>
+
+        {/* 下のボタン */}
+        <div style={{marginTop:24}}>
+          {step===0?(
+            <div style={{display:"flex",flexDirection:"column",gap:10}}>
+              <Btn C={C} onClick={next}>わからない…</Btn>
+              <Btn C={C} variant="ghost" onClick={next}>なんとなくわかる</Btn>
+            </div>
+          ):(
+            <Btn C={C} onClick={step===LAST?onDone:next} disabled={!canNext}
+              style={!canNext?{opacity:.4,cursor:"default"}:undefined}>{btnLabel}</Btn>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
@@ -49619,6 +49744,7 @@ function SettingsScreen({C,settings,stats,words,earned,onChange,onReset,onTutori
 function App(){
   const [screen,setScreen]=useState("loading");
   const [tour,setTour]=useState(null);   /* 吹き出し案内の何番目か（null＝出していない） */
+  const [intro,setIntro]=useState(false); /* はじめての体験（unpredictable）を出しているか */
   /* 次のステップへ。そのステップの画面（デモ以外）を開く */
   const tourNext=useCallback(()=>{
     setTour(t=>{
@@ -49700,7 +49826,7 @@ function App(){
       setSettings({...DEFAULT_SETTINGS,...se,formats:{...DEFAULT_SETTINGS.formats,...(se.formats||{})}});
       setScreen("home");
       /* すでに使っている人にも、まだ見ていなければ1回だけ出す */
-      if(lsGet(TUTORIAL_KEY)!==true)setTour(0);
+      if(lsGet(TUTORIAL_KEY)!==true)setIntro(true);
     }else setScreen("auth");
 
     /* 保存係（Service Worker）が新しい版を見つけたら知らせる。
@@ -50005,7 +50131,7 @@ function App(){
     setSettings(s);persist(words,s,stats,earned);
     if(s.reminderEnabled)requestNotify();
     setScreen("home");
-    if(lsGet(TUTORIAL_KEY)!==true)setTour(0);
+    if(lsGet(TUTORIAL_KEY)!==true)setIntro(true);
   },[words,stats,earned,persist]);
 
   /* ---------- 書き出し・読み込み ---------- */
@@ -50190,7 +50316,7 @@ function App(){
       {screen==="settings"&&(
         <SettingsScreen C={C} settings={settings} stats={stats} words={words} earned={earned}
           onChange={changeSettings} onReset={resetAll} onTutorial={()=>nav("tutorial")}
-          onReplayTour={()=>{lsSet(TUTORIAL_KEY,false);setScreen("home");window.scrollTo(0,0);setTour(0);}}
+          onReplayTour={()=>{lsSet(TUTORIAL_KEY,false);setScreen("home");window.scrollTo(0,0);setIntro(true);}}
           onExport={doExport} onImport={doImport} notice={notice}/>
       )}
       {screen==="admin"&&<AdminScreen C={C}/>}
@@ -50201,10 +50327,12 @@ function App(){
       {tour!=null&&(
         <TutorialOverlay C={C} steps={TUTORIAL_STEPS} index={Math.min(tour,TUTORIAL_STEPS.length-1)}
           onNext={tourNext}
-          onSkip={()=>{lsSet(TUTORIAL_KEY,true);setTour(null);}}>
-          {TUTORIAL_STEPS[tour]&&TUTORIAL_STEPS[tour].screen==="study"&&
-            <TutorialDemoStudy C={C} settings={settings} face={TUTORIAL_STEPS[tour].face}/>}
-        </TutorialOverlay>
+          onSkip={()=>{lsSet(TUTORIAL_KEY,true);setTour(null);}}/>
+      )}
+      {intro&&(
+        <IntroLesson C={C} name={settings.name}
+          onDone={()=>{setIntro(false);setScreen("home");window.scrollTo(0,0);setTour(0);}}
+          onSkip={()=>{lsSet(TUTORIAL_KEY,true);setIntro(false);}}/>
       )}
 
       {sheetWord&&(
