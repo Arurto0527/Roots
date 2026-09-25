@@ -247,3 +247,35 @@ exception when unique_violation then
   return 'taken';
 end;
 $$;
+
+-- ============================================================
+-- feedback：設定画面の「お問い合わせ・不具合の報告」（2026-09 追加）
+-- 生徒は自分の名前で送るだけ（読めない）。管理者は読んで「既読」にできる
+-- ============================================================
+create table if not exists public.feedback (
+  id           bigint generated always as identity primary key,
+  user_id      uuid not null default auth.uid() references auth.users(id) on delete cascade,
+  created_at   timestamptz not null default now(),
+  kind         text not null check (kind in ('bug','idea','question')),
+  body         text not null check (char_length(body) between 1 and 2000),
+  email        text,
+  student_code text,
+  device       text check (device is null or char_length(device) <= 500),
+  read_at      timestamptz
+);
+create index if not exists feedback_created_idx on public.feedback (created_at desc);
+alter table public.feedback enable row level security;
+
+drop policy if exists feedback_insert on public.feedback;
+create policy feedback_insert on public.feedback
+  for insert to authenticated with check (user_id = auth.uid() and read_at is null);
+drop policy if exists feedback_admin_read on public.feedback;
+create policy feedback_admin_read on public.feedback
+  for select to authenticated using (public.is_admin());
+drop policy if exists feedback_admin_update on public.feedback;
+create policy feedback_admin_update on public.feedback
+  for update to authenticated using (public.is_admin()) with check (public.is_admin());
+
+grant insert (kind, body, email, student_code, device) on public.feedback to authenticated;
+grant select on public.feedback to authenticated;
+grant update (read_at) on public.feedback to authenticated;

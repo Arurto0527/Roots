@@ -47292,9 +47292,32 @@ function TutorialDemoStudy({C,settings,face}){
   );
 }
 
+/* 管理者用：まだ読んでいないお問い合わせの数。1分ごとと、既読にしたときに数え直す */
+function useFeedbackUnread(enabled){
+  const [n,setN]=useState(0);
+  useEffect(()=>{
+    if(!enabled)return;
+    let alive=true;
+    const count=async()=>{
+      try{
+        const {count:c,error}=await withTimeout(sb.from("feedback").select("id",{count:"exact",head:true}).is("read_at",null),10000);
+        if(!error&&alive)setN(c||0);
+      }catch(e){}
+    };
+    count();
+    const t=setInterval(count,60000);
+    window.addEventListener("roots-feedback-changed",count);
+    return ()=>{alive=false;clearInterval(t);window.removeEventListener("roots-feedback-changed",count);};
+  },[enabled]);
+  return n;
+}
+
 function BottomNav({C,screen,onNav}){
   /* 管理者は「記録」のかわりに「管理」を出す */
   const isAdmin=Cloud.profile&&Cloud.profile.role==="admin";
+  const unread=useFeedbackUnread(!!isAdmin);
+  /* 画面を切りかえたときにも数え直す */
+  useEffect(()=>{if(isAdmin)window.dispatchEvent(new Event("roots-feedback-changed"));},[screen]);
   const items=[["home","ホーム"],["list","単語帳"],["roots","語根"],isAdmin?["admin","管理"]:["stats","記録"],["settings","設定"]];
   return (
     <nav style={{position:"fixed",bottom:0,left:"50%",transform:"translateX(-50%)",width:"100%",maxWidth:430,
@@ -47305,8 +47328,14 @@ function BottomNav({C,screen,onNav}){
         return (
           <button key={id} data-tour={"nav-"+id} onClick={()=>onNav(id)} aria-current={on?"page":undefined}
             style={{flex:1,padding:"14px 0 16px",background:"transparent",border:"none",cursor:"pointer",
-              color:on?C.text:C.faint,fontSize:13,fontWeight:on?700:400}}>
-            {label}
+              color:on?C.text:C.faint,fontSize:13,fontWeight:on?700:400}}
+            aria-label={id==="admin"&&unread?label+"（未読のお問い合わせ "+unread+"件）":undefined}>
+            <span style={{position:"relative",display:"inline-block"}}>
+              {label}
+              {id==="admin"&&unread>0&&<span className="num" style={{position:"absolute",top:-8,right:-18,minWidth:18,height:18,
+                padding:"0 5px",borderRadius:9,background:"#DC2626",color:"#fff",fontSize:11,fontWeight:700,
+                lineHeight:"18px",textAlign:"center",boxSizing:"border-box"}}>{unread>99?"99+":unread}</span>}
+            </span>
           </button>
         );
       })}
@@ -48818,6 +48847,61 @@ function DayBars({C,values,max,height=36,labels}){
   );
 }
 
+/* 管理画面の「問合せ」タブ。新しい順に並べ、開いたものは既読にできる */
+function FeedbackInbox({C,box,small}){
+  const [items,setItems]=useState(null);
+  const [err,setErr]=useState(null);
+  const [filter,setFilter]=useState("unread");
+  const load=useCallback(async()=>{
+    setErr(null);
+    try{
+      const {data,error}=await withTimeout(sb.from("feedback")
+        .select("id,created_at,kind,body,email,student_code,device,read_at")
+        .order("created_at",{ascending:false}).limit(200),15000);
+      if(error)throw error;
+      setItems(data||[]);
+    }catch(e){setErr((e&&e.message)||"読み込めませんでした");}
+  },[]);
+  useEffect(()=>{load();},[load]);
+  const setRead=async(it,read)=>{
+    const read_at=read?new Date().toISOString():null;
+    setItems(xs=>xs.map(x=>x.id===it.id?{...x,read_at}:x));
+    try{
+      const {error}=await withTimeout(sb.from("feedback").update({read_at}).eq("id",it.id),10000);
+      if(error)throw error;
+    }catch(e){window.alert("更新できませんでした：" + ((e&&e.message)||""));load();}
+    window.dispatchEvent(new Event("roots-feedback-changed"));
+  };
+  const kindLabel=k=>(FEEDBACK_KINDS.find(x=>x[0]===k)||[k,k])[1];
+  const fmt=t=>{const d=new Date(t);return (d.getMonth()+1)+"/"+d.getDate()+" "+d.toLocaleTimeString("ja-JP",{hour:"2-digit",minute:"2-digit"});};
+  if(err)return <div style={{...box,fontSize:14,lineHeight:1.7}}>読み込めませんでした：{err}</div>;
+  if(!items)return <div style={{color:C.sub,fontSize:16}}>読み込み中…</div>;
+  const shown=filter==="unread"?items.filter(x=>!x.read_at):items;
+  return (<>
+    <div style={{display:"flex",gap:6,marginBottom:10}}>
+      {[["unread","未読 "+items.filter(x=>!x.read_at).length],["all","すべて "+items.length]].map(([k,l])=>(
+        <button key={k} onClick={()=>setFilter(k)} style={small(filter===k)}>{l}</button>))}
+      <button onClick={load} style={{...small(false),flex:"0 0 auto",padding:"0 14px"}}>更新</button>
+    </div>
+    {shown.length===0&&<div style={{fontSize:15,color:C.sub,padding:"8px 2px"}}>{filter==="unread"?"未読のお問い合わせはありません":"まだお問い合わせはありません"}</div>}
+    {shown.map(it=>(
+      <div key={it.id} style={{...box,borderColor:it.read_at?C.border:C.accent}}>
+        <div style={{display:"flex",justifyContent:"space-between",gap:8,fontSize:13,color:C.sub,marginBottom:6}}>
+          <span><b style={{color:it.kind==="bug"?"#DC2626":C.accent}}>{kindLabel(it.kind)}</b>　{it.student_code||"ID未設定"}</span>
+          <span className="num">{fmt(it.created_at)}</span>
+        </div>
+        <div style={{fontSize:16,color:C.text,lineHeight:1.7,whiteSpace:"pre-wrap",wordBreak:"break-word"}}>{it.body}</div>
+        <div style={{fontSize:12,color:C.faint,marginTop:8,lineHeight:1.6,wordBreak:"break-all"}}>
+          {it.email&&<a href={"mailto:"+it.email+"?subject="+encodeURIComponent("Roots へのお問い合わせについて")} style={{color:C.sub}}>{it.email}</a>}
+          {it.device&&<div>{it.device}</div>}
+        </div>
+        <button onClick={()=>setRead(it,!it.read_at)} style={{...small(false),width:"100%",marginTop:10}}>
+          {it.read_at?"未読にもどす":"読んだ（既読にする）"}</button>
+      </div>
+    ))}
+  </>);
+}
+
 function AdminScreen({C}){
   const [raw,setRaw]=useState(null);
   const [err,setErr]=useState(null);
@@ -48827,6 +48911,7 @@ function AdminScreen({C}){
   const [open,setOpen]=useState(null);
   const [sort,setSort]=useState("last");
   const [loadedAt,setLoadedAt]=useState(null);
+  const unread=useFeedbackUnread(true);
 
   const load=useCallback(async()=>{
     setErr(null);
@@ -49078,14 +49163,16 @@ function AdminScreen({C}){
             <button key={"g"+k} onClick={()=>setGroup(k)}
               style={{...small(group===k),flex:"0 0 auto",padding:"0 14px",whiteSpace:"nowrap"}}>{l}（{n}）</button>))}
         </div>
-        <div role="tablist" style={{display:"flex",gap:8,marginBottom:12}}>
-          {[["class","クラス"],["students","生徒"],["words","単語"]].map(([k,l])=>(
-            <button key={k} role="tab" aria-selected={tab===k} style={pill(tab===k)} onClick={()=>setTab(k)}>{l}</button>))}
+        <div role="tablist" style={{display:"flex",gap:6,marginBottom:12}}>
+          {[["class","クラス"],["students","生徒"],["words","単語"],["inbox","問合せ"+(unread?"("+unread+")":"")]].map(([k,l])=>(
+            <button key={k} role="tab" aria-selected={tab===k} style={{...pill(tab===k),fontSize:15,padding:"0 4px",
+              color:k==="inbox"&&unread&&tab!==k?"#DC2626":pill(tab===k).color}} onClick={()=>setTab(k)}>{l}</button>))}
         </div>
         {tab==="class"&&renderClass()}
         {tab==="students"&&renderStudents()}
         {tab==="words"&&renderWords()}
-        <Btn C={C} variant="ghost" style={{marginTop:12}} onClick={exportCsv}>一覧をCSVで保存（Excel用）</Btn>
+        {tab==="inbox"&&<FeedbackInbox C={C} box={box} small={small}/>}
+        {tab!=="inbox"&&<Btn C={C} variant="ghost" style={{marginTop:12}} onClick={exportCsv}>一覧をCSVで保存（Excel用）</Btn>}
       </>)}
     </div>
   );
@@ -49197,6 +49284,48 @@ function StudentIdBox({C}){
   );
 }
 
+/* お問い合わせ・不具合の報告。Supabase の feedback 表に入り、管理画面の「お問い合わせ」に届く */
+const FEEDBACK_KINDS=[["bug","不具合"],["idea","意見・要望"],["question","質問"]];
+function ContactBox({C,screenHint}){
+  const [kind,setKind]=useState("bug");
+  const [body,setBody]=useState("");
+  const [busy,setBusy]=useState(false);
+  const [msg,setMsg]=useState(null);
+  const text=body.trim();
+  const send=async()=>{
+    if(text.length<3){setMsg({bad:true,text:"内容を書いてください"});return;}
+    setBusy(true);setMsg(null);
+    try{
+      const info=[navigator.userAgent,"画面 "+window.innerWidth+"×"+window.innerHeight,
+        "表示 "+(screenHint||"")].join(" / ").slice(0,500);
+      const {error}=await withTimeout(sb.from("feedback").insert({kind,body:text.slice(0,2000),
+        email:(Cloud.user&&Cloud.user.email)||null,
+        student_code:(Cloud.profile&&Cloud.profile.student_code)||null,device:info}),10000);
+      if(error)throw error;
+      setBody("");window.dispatchEvent(new Event("roots-feedback-changed"));setMsg({text:"送りました。ありがとうございます。返事が必要なときは、登録のメールアドレスに連絡します。"});
+    }catch(e){setMsg({bad:true,text:"送れませんでした。通信を確認して、もう一度押してください"});}
+    setBusy(false);
+  };
+  return (
+    <div>
+      <div style={{fontSize:13.5,fontWeight:700,color:C.text,marginBottom:8}}>種類</div>
+      <Seg C={C} options={FEEDBACK_KINDS} value={kind} onPick={setKind}/>
+      <div style={{fontSize:13.5,fontWeight:700,color:C.text,margin:"16px 0 8px"}}>内容</div>
+      <textarea value={body} onChange={e=>setBody(e.target.value)} maxLength={2000} rows={6}
+        aria-label="お問い合わせの内容"
+        placeholder={kind==="bug"?"例：単語帳で ○○ を押すと画面が白くなる（いつ・どの画面で・何をしたか）":"自由に書いてください"}
+        style={{width:"100%",boxSizing:"border-box",padding:12,fontSize:16,lineHeight:1.6,borderRadius:4,resize:"vertical",
+          border:"1px solid "+C.border,background:C.bg,color:C.text,fontFamily:"inherit"}}/>
+      <div style={{fontSize:12,color:C.faint,textAlign:"right",marginTop:4}}>{body.length} / 2000</div>
+      <div style={{fontSize:12,color:C.sub,lineHeight:1.7,margin:"6px 0 12px"}}>
+        送ると、内容といっしょにメールアドレス・ID番号・使っている端末の種類が管理者に届きます。
+      </div>
+      <Btn C={C} onClick={send} disabled={busy||!text} style={{opacity:busy||!text?.4:1}}>{busy?"送っています…":"送る"}</Btn>
+      {msg&&<div role="status" style={{fontSize:13,color:msg.bad?C.bad:C.ok,marginTop:10,lineHeight:1.7}}>{msg.text}</div>}
+    </div>
+  );
+}
+
 function SettingsScreen({C,settings,stats,words,earned,onChange,onReset,onTutorial,onReplayTour,onExport,onImport,notice}){
   const fileRef=useRef(null);
   const box={background:C.card,border:"1px solid "+C.border,borderRadius:4,padding:16,marginBottom:10};
@@ -49220,6 +49349,7 @@ function SettingsScreen({C,settings,stats,words,earned,onChange,onReset,onTutori
     {id:"remind",title:"通知",note:"復習リマインド"+(settings.reminderEnabled?(settings.reminderTime||"21:00"):"オフ")},
     {id:"look",title:"表示",note:"名前・外観・文字サイズ"},
     {id:"data",title:"データ",note:"ID番号・書き出し・読み込み・削除"},
+    {id:"contact",title:"お問い合わせ・不具合の報告",note:"意見・要望・質問もこちらから"},
   ];
   const cur=groups.find(g=>g.id===section);
   /* 設定の検索。title は画面に出ている見出し（開いたあとその場所までスクロールする）、words は探すときの言い換え */
@@ -49239,6 +49369,7 @@ function SettingsScreen({C,settings,stats,words,earned,onChange,onReset,onTutori
     {title:"文字サイズ",sec:"look",words:"文字 大きさ フォント 小 中 大 見やすさ"},
     {title:"データの持ち出し",sec:"data",words:"書き出し 読み込み バックアップ 保存 機種変更 引き継ぎ エクスポート インポート"},
     {title:"学習データを削除する",sec:"data",words:"削除 リセット 初期化 消す 全部消す"},
+    {title:"種類",sec:"contact",words:"問い合わせ 不具合 バグ 意見 要望 質問 連絡 報告 困った"},
     {title:"効果的な使い方",sec:null,words:"使い方 チュートリアル ヘルプ 説明 はじめて"},
   ];
   const kw=q.trim().toLowerCase();
@@ -49380,6 +49511,9 @@ function SettingsScreen({C,settings,stats,words,earned,onChange,onReset,onTutori
       </div>
 
       </>)}
+      {section==="contact"&&(
+      <div style={box} data-setbox="1"><ContactBox C={C} screenHint="設定"/></div>
+      )}
       {section==="data"&&(<>
       {/* バックアップ */}
       <div style={box} data-setbox="1">
