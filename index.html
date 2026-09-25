@@ -43751,7 +43751,7 @@ const TUTORIAL_STEPS=[
   {target:"list-meaning",screen:"list",pass:true,mood:"think",tap:"隠れた所をタップ",
    title:"思い出してから見る",
    body:"まず意味を思い出してみて。\nそれから、隠れた所を押して答えを見よう。"},
-  {target:"list-recall",screen:"list",pass:true,mood:"teach",tap:"○か×をタップ",
+  {target:"list-col",need:'[data-tour="list-recall"] button',screen:"list",pass:true,mood:"teach",tap:"○か×をタップ",
    title:"○か×をつける",
    body:"わかったら ○、わからなかったら ×。\n（練習だから、あとで元に戻しておくよ）"},
   {target:"list-hide",screen:"list",pass:true,mood:"normal",tap:"「意味を隠し中」をタップ",
@@ -43760,9 +43760,9 @@ const TUTORIAL_STEPS=[
   {target:"list-hide",screen:"list",pass:true,mood:"cheer",tap:"もう一度タップ",
    title:"× だけがもう一度隠れる",
    body:"もう一度押すと、○ をつけた単語は隠れず、× とまだの単語だけが隠れるよ。\nこれをくり返すと、効率よく覚えられる。"},
-  {target:"list-word",screen:"list",pass:true,mood:"teach",tap:"単語をタップ",
+  {target:"list-col",need:'[data-tour="list-word"]',screen:"list",pass:true,mood:"teach",tap:"英単語をタップ",
    title:"覚えにくい単語は開く",
-   body:"単語を押すと、その単語の画面が開くよ。"},
+   body:"× にした単語は、また意味が隠れたね。\n覚えにくい単語は、英単語を押すと、その単語の画面が開くよ。"},
   {target:"wordsheet-body",screen:"list",pass:false,scroll:true,mood:"teach",
    title:"語源を「フック」にする",
    body:"語源や絵が見られるよ。指で上下に動かして読んでみて。\n覚えるときの「引っかかり（フック）」にしよう。"},
@@ -43794,7 +43794,10 @@ const TUTORIAL_STEPS=[
    body:"本番では、イラストの語根を押すと、その語根のコラムが開くよ。"},
   {target:"reveal-tab-2",screen:"study",face:"reveal",pass:true,mood:"teach",tap:"「例文」をタップ",
    title:"例文も見る",
-   body:"例文の英文を押すと、発音が聞けるよ。\nその単語との接点を、どんどん増やそう。"},
+   body:"答えの面は、「答え・語源・例文」の3ページに分かれているよ。"},
+  {target:"reveal-examples",screen:"study",face:"reveal",pass:false,scroll:true,mood:"teach",
+   title:"英文を押すと発音が聞ける",
+   body:"英文をタップすると、発音が聞けるよ。やってみて。\nその単語との接点を、どんどん増やそう。"},
   {target:"buttons",screen:"study",face:"reveal",pass:true,mood:"think",tap:"どちらかをタップ",
    title:"覚えた？ もう一度？",
    body:"覚えたら「覚えた」。自信がなければ「もう一度」を押すと、あとでまた出てくるよ。"},
@@ -43806,8 +43809,9 @@ const TUTORIAL_STEPS=[
   {target:null,screen:"settings",mood:"cheer",title:"これでおしまい！",
    body:"・毎日同じ時間に開く（寝る前や朝の電車）\n・少しでも迷ったら「もう一度」\n・覚えにくい単語は、語源や例文で接点を増やす\n\n先生からID番号をもらった人は、設定の「データ」で入力してね。この案内は「チュートリアルをもう一度見る」からいつでも見られるよ。"},
 ];
-/* 案内のあいだに単語帳でつけた ○× は、終わったら元に戻す */
+/* 案内のあいだは単語帳の ○× をいったん空にして（○ の語は隠れないので、案内どおりに動かなくなる）、終わったら元に戻す */
 const LIST_RECALL_KEY="roots.listRecall.v16";
+const TOUR_SNAP_KEY="roots.tourRecallSnap";
 
 /* 練習モードのステップ用：本物の学習画面の部品で、predict を1語だけ見せる
    カード・タブはタップで本物と同じように動くが、採点しても記録は一切変えない */
@@ -47104,9 +47108,9 @@ function TutorialOverlay({C,steps,index,onNext,onSkip,children}){
     if(!el)return false;
     const r=el.getBoundingClientRect();
     if(!r.width&&!r.height)return false;
-    setRect({top:r.top-PAD,left:r.left-PAD,width:r.width+PAD*2,height:r.height+PAD*2});
+    setRect({top:r.top-PAD,left:r.left-PAD,width:r.width+PAD*2,height:r.height+PAD*2,idx:index});
     return true;
-  },[step.target]);
+  },[step.target,index]);
 
   /* 画面の切りかえ直後は部品がまだ無いことがあるので、少し待ちながら探す */
   useLayoutEffect(()=>{
@@ -47129,7 +47133,14 @@ function TutorialOverlay({C,steps,index,onNext,onSkip,children}){
     return ()=>{alive=false;clearTimeout(timer);};
   },[index,step.target,measure]);
 
-  /* 画面の大きさ・向き・スクロールが変わったら測り直す */
+  /* 画面の大きさ・向き・スクロールが変わったら測り直す。
+     下から出てくるシートは動いている途中で測ると位置がずれるので、少しの間はくり返し測る */
+  useEffect(()=>{
+    if(!step.target)return;
+    let n=0;
+    const t=setInterval(()=>{if(++n>12)clearInterval(t);else measure();},150);
+    return ()=>clearInterval(t);
+  },[index,step.target,measure]);
   useEffect(()=>{
     const on=()=>{if(step.target)measure();};
     window.addEventListener("resize",on);window.addEventListener("orientationchange",on);
@@ -47147,8 +47158,10 @@ function TutorialOverlay({C,steps,index,onNext,onSkip,children}){
     const on=e=>{
       let hit=null;try{hit=e.target.closest&&e.target.closest(sels);}catch(err){}
       if(!hit||done)return;
-      /* need があるときは、光っている中の、その部品（ボタンなど）を押したときだけ進む */
-      if(step.need){let n=null;try{n=e.target.closest(step.need);}catch(err){}if(!n||!hit.contains(n))return;}
+      /* need があるときは、光っている中の、その部品を押したときだけ進む。
+         ほかの所へのタップは止める（行ごと押すと別の画面が開いてしまうのを防ぐ） */
+      if(step.need){let n=null;try{n=e.target.closest(step.need);}catch(err){}
+        if(!n||!hit.contains(n)){e.stopPropagation();e.preventDefault();return;}}
       done=true;
       setTimeout(onNext,180);
     };
@@ -47158,7 +47171,7 @@ function TutorialOverlay({C,steps,index,onNext,onSkip,children}){
 
   /* 吹き出しは部品の下に出す。下に入りきらなければ上に、それも無理なら画面の下のほうに */
   useLayoutEffect(()=>{
-    if(!rect)return;
+    if(!rect||rect.idx!==index||!step.target)return;
     const vw=window.innerWidth,vh=window.innerHeight;
     const bh=bubble.current?bubble.current.offsetHeight:180;
     const bw=Math.min(360,vw-EDGE*2);
@@ -47170,7 +47183,7 @@ function TutorialOverlay({C,steps,index,onNext,onSkip,children}){
     top=Math.max(EDGE,Math.min(top,vh-EDGE-bh));
     const left=Math.max(EDGE,Math.min(rect.left+rect.width/2-bw/2,vw-EDGE-bw));
     setPos({top,left,width:bw});
-  },[rect]);
+  },[rect,index,step.target]);
 
   /* 案内のあいだは、うしろの画面がスクロールしないようにする */
   useEffect(()=>{
@@ -47179,8 +47192,9 @@ function TutorialOverlay({C,steps,index,onNext,onSkip,children}){
     return ()=>{document.body.style.overflow=prev;};
   },[]);
 
-  const center=!!(pos&&pos.center);
-  const showRect=rect&&!center;
+  /* 光らせる場所がないステップは、必ず真ん中に出して「次へ」で進める（前のステップの位置を使わない） */
+  const center=!step.target||!!(pos&&pos.center);
+  const showRect=rect&&rect.idx===index&&!center;
   const bw=Math.min(360,window.innerWidth-EDGE*2);
   const bubbleStyle=center
     ?{top:"50%",left:"50%",width:bw,transform:"translate(-50%,-50%)"}
@@ -48019,7 +48033,7 @@ function RevealFace({C,item,onTapRoot,timedOut}){
         <div ref={pager} onScroll={e=>{const el=e.currentTarget;setPage(Math.round(el.scrollLeft/el.clientWidth));}}
           style={{flex:1,minHeight:0,display:"flex",overflowX:"auto",scrollSnapType:"x mandatory",scrollbarWidth:"none"}}>
           {pages.map((p,i)=>(
-            <div key={i} style={{flex:"0 0 100%",scrollSnapAlign:"start",overflowY:"auto",padding:16,boxSizing:"border-box"}}>
+            <div key={i} data-tour={i===2?"reveal-examples":undefined} style={{flex:"0 0 100%",scrollSnapAlign:"start",overflowY:"auto",padding:16,boxSizing:"border-box"}}>
               {i>0&&<div style={{fontSize:15,color:C.sub,marginBottom:4}}>{p.name}</div>}
               <WordDetail C={C} word={w} onTapRoot={onTapRoot} only={p.only} head={i===0} big xl/>
               {i===0&&<div data-tour="picto"><Pictogram C={C} word={w} onTapRoot={onTapRoot}/></div>}
@@ -48579,7 +48593,7 @@ function ListScreen({C,words,onTogglePass,onToggleBookmark,onOpen,settings,onStu
               style={{display:"flex",gap:12,alignItems:"center",padding:"12px 0",
                 borderBottom:"1px solid "+C.line,cursor:"pointer"}}>
               <div style={{width:3,alignSelf:"stretch",minHeight:38,borderRadius:4,background:isWeak(w)?C.bad:c,flexShrink:0}}/>
-              <div style={{flex:1,minWidth:0}}>
+              <div data-tour={ri===0?"list-col":undefined} style={{flex:1,minWidth:0}}>
                 <div className="num" style={{fontSize:12,color:C.sub,marginBottom:3}}>No. {w.id}</div>
                 <div style={{display:"flex",alignItems:"center",gap:6,minWidth:0}}>
                   <div data-tour={ri===0?"list-word":undefined} className="en" style={{fontSize:14.5,fontWeight:700,color:C.text,overflow:"hidden",
@@ -49849,11 +49863,13 @@ function App(){
   const [screen,setScreen]=useState("loading");
   const [tour,setTour]=useState(null);   /* 吹き出し案内の何番目か（null＝出していない） */
   const [intro,setIntro]=useState(false); /* はじめての体験（unpredictable）を出しているか */
-  const recallSnap=useRef(undefined);     /* 案内をはじめる前の単語帳の ○×（終わったら戻す） */
+  /* 案内をはじめる前の単語帳の ○× を TOUR_SNAP_KEY に預けておき、終わったら戻す。
+     途中でページを開き直しても、次に開いたときに戻す */
   const restoreRecall=useCallback(()=>{
-    if(recallSnap.current===undefined)return;
-    if(recallSnap.current==null)lsDel(LIST_RECALL_KEY);else lsSet(LIST_RECALL_KEY,recallSnap.current);
-    recallSnap.current=undefined;
+    const snap=lsGet(TOUR_SNAP_KEY);
+    if(!snap||typeof snap!=="object")return;
+    if(snap.v==null)lsDel(LIST_RECALL_KEY);else lsSet(LIST_RECALL_KEY,snap.v);
+    lsDel(TOUR_SNAP_KEY);
   },[]);
   /* 次のステップへ。そのステップの画面（デモ以外）を開く */
   const tourNext=useCallback(()=>{
@@ -49931,6 +49947,7 @@ function App(){
     if(st)setStats({...DEFAULT_STATS,...st,history:st.history||{}});
     const bd=lsGet(KEY.badges)||lsGet(LEGACY.badges);
     if(Array.isArray(bd))setEarned(bd.filter(id=>BADGES.some(b=>b.id===id)));
+    restoreRecall();   /* 案内の途中で閉じていたら、単語帳の ○× を元に戻す */
     const se=lsGet(KEY.settings)||lsGet(LEGACY.settings);
     if(se){
       setSettings({...DEFAULT_SETTINGS,...se,formats:{...DEFAULT_SETTINGS.formats,...(se.formats||{})}});
@@ -50444,7 +50461,7 @@ function App(){
       )}
       {intro&&(
         <IntroLesson C={C} name={settings.name}
-          onDone={()=>{recallSnap.current=lsGet(LIST_RECALL_KEY)||null;setIntro(false);setScreen("home");window.scrollTo(0,0);setTour(0);}}
+          onDone={()=>{if(!lsGet(TOUR_SNAP_KEY))lsSet(TOUR_SNAP_KEY,{v:lsGet(LIST_RECALL_KEY)||null});lsDel(LIST_RECALL_KEY);setIntro(false);setScreen("home");window.scrollTo(0,0);setTour(0);}}
           onSkip={()=>{lsSet(TUTORIAL_KEY,true);setIntro(false);}}/>
       )}
 
