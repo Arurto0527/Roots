@@ -50542,8 +50542,11 @@ function LoginScreen({C,onSignedIn}){
       <div style={{color:C.accent,marginBottom:20}}><Icon.root size={44}/></div>
       <div className="en" style={{fontSize:38,fontWeight:700,color:C.text,letterSpacing:"-0.03em"}}>Roots</div>
       <div style={{fontSize:14,color:C.sub,marginTop:12,textAlign:"center",lineHeight:1.9}}>
-        {step==="email"?"登録したメールアドレスでログインしてください。":"メールに届いた数字を入力してください。"}
+        {step==="email"?<>学習の記録を残すために、<br/>メールアドレスでログインします。</>:"メールに届いた数字を入力してください。"}
       </div>
+      {step==="email"&&<div style={{fontSize:12.5,color:C.faint,marginTop:8,textAlign:"center",lineHeight:1.8}}>
+        覚えた単語や進みぐあいが保存され、<br/>ほかの端末でも続きから学習できます。<br/>パスワードはいりません。
+      </div>}
       <div style={{height:32}}/>
       <div style={{width:"100%",maxWidth:340}}>
         {step==="email"?(<>
