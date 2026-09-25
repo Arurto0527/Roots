@@ -47214,16 +47214,36 @@ const INTRO_FAMILY=[
   {pre:"",root:"dict",post:"ate",ja:"書き取らせる；指図する"},
 ];
 const INTRO_DAYS=["今日","1日後","3日後","1週間後","3週間後"];
+/* 使い方2つ。[太字にする所, 続きの文] */
+const INTRO_HOWTO=[
+  {title:"単語帳でチェック",tag:"いちばんかんたん",steps:[
+    ["下の「単語帳」","をタップ"],
+    ["上のプルダウン","から、覚えたい範囲を選ぶ"],
+    ["「意味を隠す」","を押して、意味を隠す"],
+    ["隠れた所をタップ","して答えを見る。わかったら ○、わからなかったら ×"],
+    ["もう一度「意味を隠す」","を押すと、× の単語だけが隠れる。くり返して効率よく覚えよう"],
+    ["覚えにくい単語は、単語をタップ","。語源が見られるので、覚える「フック」にしよう"],
+  ]},
+  {title:"練習モード",tag:"しっかり覚える",steps:[
+    ["下の「ホーム」","をタップ"],
+    ["「条件を変える」","を開く。「範囲から」を選ぶと、やりたい範囲を決められる"],
+    ["範囲が決まったら「学習をはじめる」","をタップ"],
+    ["まず意味を思い出す","。すぐに答えを見ない"],
+    ["カードをタップ","すると答えが出る。覚えたら「覚えた」、自信がなければ「もう一度」でまた出てくる"],
+    ["1周したあとも、覚えにくい単語は語源や例文を見直そう","。イラストをタップするとコラム、英文をタップすると発音が出る。その単語との接点をどんどん増やそう"],
+  ]},
+];
 function IntroLesson({C,name,onDone,onSkip}){
   const [step,setStep]=useState(0);
   const [opened,setOpened]=useState([]);     /* ひらいたパーツの番号 */
   const [pick,setPick]=useState(null);       /* 選んだ答えの番号 */
   const [day,setDay]=useState(0);            /* 「覚えた」を押した回数 */
-  const LAST=6;
+  const LAST=9;
   const who=name&&name!=="あなた"?name:"";
   const col=k=>C[k];
-  const next=()=>{setStep(s=>Math.min(LAST,s+1));try{window.scrollTo(0,0);}catch(e){}};
-  const moods=["cheer","teach","think","think","cheer","teach","cheer"];
+  const box=useRef(null);
+  const next=()=>{setStep(s=>Math.min(LAST,s+1));try{box.current.scrollTo(0,0);}catch(e){}};
+  const moods=["cheer","teach","think","think","cheer","teach","normal","teach","teach","cheer"];
   const says=[
     (who?who+"、":"")+"ようこそ！ ぼくはルーツくん。\nいきなりだけど、この単語の意味わかる？",
     "長い単語は、パーツに分けられるんだ。\n色は3つの役わりを表しているよ。",
@@ -47231,6 +47251,9 @@ function IntroLesson({C,name,onDone,onSkip}){
     "パーツの意味をつなげると、どうなる？",
     "dict（言う）を覚えると、ほかの単語もまとめて読めるよ。",
     "最後に、覚え方のしくみ。\n「覚えた」を押すほど、次に出てくる日が遠くなるんだ。",
+    "語源で読むコツはわかったね！\nここからは、アプリの使い方。使い方は2つあるよ。",
+    "1つ目は、単語帳でチェックする使い方。\nいちばんかんたんだよ。",
+    "2つ目は、練習モード。\n1語ずつカードで、しっかり覚えられるよ。",
     (who?who+"、":"")+"これで準備OK！\n最後に、画面のどこに何があるかだけ案内するね。",
   ];
   const Word=({dim})=>(
@@ -47255,7 +47278,7 @@ function IntroLesson({C,name,onDone,onSkip}){
     );
   };
   const legend=[["pre","青","接頭語","向きや打ち消しを足す"],["root","オレンジ","語根","意味の中心"],["suf","緑","接尾語","品詞を決める"]];
-  const canNext=[true,true,opened.length>=INTRO_PARTS.length,pick!=null,true,day>=2,true][step];
+  const canNext=[true,true,opened.length>=INTRO_PARTS.length,pick!=null,true,day>=2,true,true,true,true][step];
   const btnLabel=[
     "わからない…",
     "次へ",
@@ -47263,10 +47286,13 @@ function IntroLesson({C,name,onDone,onSkip}){
     pick==null?"答えを選んでね":"次へ",
     "次へ",
     day>=2?"次へ":"「覚えた」を押してみよう",
+    "次へ",
+    "次へ",
+    "次へ",
     "案内を見る",
   ][step];
   return (
-    <div role="dialog" aria-modal="true" aria-label="はじめての案内"
+    <div ref={box} role="dialog" aria-modal="true" aria-label="はじめての案内"
       style={{position:"fixed",inset:0,zIndex:1000,background:C.bg,color:C.text,overflowY:"auto"}}>
       <div style={{maxWidth:430,margin:"0 auto",minHeight:"100%",boxSizing:"border-box",display:"flex",flexDirection:"column",
         padding:"calc(12px + env(safe-area-inset-top)) 16px calc(20px + env(safe-area-inset-bottom))"}}>
@@ -47391,11 +47417,45 @@ function IntroLesson({C,name,onDone,onSkip}){
           </>)}
 
           {step===6&&(
+            <div style={{display:"flex",flexDirection:"column",gap:10}}>
+              {INTRO_HOWTO.map((h,i)=>(
+                <div key={i} style={{display:"flex",alignItems:"center",gap:14,padding:"16px 14px",
+                  border:"1px solid "+C.line,borderRadius:10}}>
+                  <span className="num" style={{width:36,height:36,borderRadius:18,background:TUTORIAL_ACCENT,color:"#FFFFFF",
+                    display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,fontWeight:700,flexShrink:0}}>{i+1}</span>
+                  <div>
+                    <div style={{fontSize:16,fontWeight:700}}>{h.title}</div>
+                    <div style={{fontSize:14,color:C.sub,marginTop:2}}>{h.tag}</div>
+                  </div>
+                </div>
+              ))}
+              <div style={{fontSize:14,color:C.sub,marginTop:6,lineHeight:1.7}}>
+                ここでやったことは記録には残らないよ。</div>
+            </div>
+          )}
+
+          {(step===7||step===8)&&(()=>{const h=INTRO_HOWTO[step-7];return (<>
+            <div style={{fontSize:16,fontWeight:700,marginBottom:10}}>
+              <span style={{color:TUTORIAL_ACCENT}}>使い方{step-6}</span>　{h.title}</div>
+            <ol style={{listStyle:"none",margin:0,padding:0,display:"flex",flexDirection:"column",gap:8}}>
+              {h.steps.map(([b,rest],i)=>(
+                <li key={i} style={{display:"flex",gap:10,alignItems:"flex-start",padding:"10px 12px",
+                  border:"1px solid "+C.line,borderRadius:10}}>
+                  <span className="num" style={{width:24,height:24,borderRadius:12,border:"2px solid "+TUTORIAL_ACCENT,
+                    color:TUTORIAL_ACCENT,fontSize:13,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center",
+                    flexShrink:0,marginTop:1}}>{i+1}</span>
+                  <span style={{fontSize:16,lineHeight:1.6}}><b>{b}</b>{rest}</span>
+                </li>
+              ))}
+            </ol>
+          </>);})()}
+
+          {step===9&&(
             <div style={{textAlign:"center",marginTop:12}}>
               <Word/>
               <div style={{fontSize:16,marginTop:6}}>予測できない</div>
-              <div style={{fontSize:14,color:C.sub,marginTop:18,lineHeight:1.8}}>
-                ここでやったことは記録には残らないよ。<br/>本番は、ホームの「学習をはじめる」から。</div>
+              <div style={{marginTop:22,padding:"14px",borderRadius:10,background:C.sunken,fontSize:16,lineHeight:1.7,textAlign:"left"}}>
+                <b>設定</b>も見てみてね。出題のしかたや発音（アメリカ／イギリス）なども変えられるよ。</div>
             </div>
           )}
         </div>
