@@ -47185,12 +47185,20 @@ function TutorialOverlay({C,steps,index,onNext,onSkip,children}){
     setPos({top,left,width:bw});
   },[rect,index,step.target]);
 
-  /* 案内のあいだは、うしろの画面がスクロールしないようにする */
+  /* 暗い部分はタッチを素通しにして、うしろの画面を自由にスクロールできるようにする。
+     そのかわり、光っている所と吹き出しの外のタップは止める（画面が切りかわらないように） */
+  const root=useRef(null);
   useEffect(()=>{
-    const prev=document.body.style.overflow;
-    document.body.style.overflow="hidden";
-    return ()=>{document.body.style.overflow=prev;};
-  },[]);
+    const on=e=>{
+      const t=e.target;
+      if(root.current&&root.current.contains(t)&&!(t.closest&&t.closest("[data-tour-demo]")))return;
+      const el=step.target?tourFind(step.target):null;
+      if(el&&el.contains(t))return;
+      e.stopPropagation();e.preventDefault();
+    };
+    document.addEventListener("click",on,true);
+    return ()=>document.removeEventListener("click",on,true);
+  },[index,step.target]);
 
   /* 光らせる場所がないステップは、必ず真ん中に出して「次へ」で進める（前のステップの位置を使わない） */
   const center=!step.target||!!(pos&&pos.center);
@@ -47202,16 +47210,16 @@ function TutorialOverlay({C,steps,index,onNext,onSkip,children}){
   const shade={position:"fixed",background:"rgba(0,0,0,.72)"};
 
   return (
-    <div role="dialog" aria-modal="true" aria-label="使い方の案内" style={{position:"fixed",inset:0,zIndex:1000,pointerEvents:"none"}}>
+    <div ref={root} role="dialog" aria-modal="true" aria-label="使い方の案内" style={{position:"fixed",inset:0,zIndex:1000,pointerEvents:"none"}}>
       <style>{`@keyframes tourIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
         @keyframes tourInC{from{opacity:0;transform:translate(-50%,calc(-50% + 6px));}to{opacity:1;transform:translate(-50%,-50%);}}
         @keyframes tourPulse{0%{box-shadow:0 0 0 0 rgba(83,74,183,.55);}100%{box-shadow:0 0 0 12px rgba(83,74,183,0);}}`}</style>
       {/* 学習画面のデモなど、暗幕の下に見せたいもの */}
-      {children&&<div style={{pointerEvents:"auto"}}>{children}</div>}
+      {children&&<div data-tour-demo="1" style={{pointerEvents:"auto"}}>{children}</div>}
       {showRect?(()=>{
-        /* 切り抜きのまわりに暗い板を4枚。板は押せない。切り抜きの中だけ、下の部品を押せる */
+        /* 切り抜きのまわりに暗い板を4枚。板はタッチを素通しにする（スクロールのため。タップは上の on で止める） */
         const r=rect,bottom=r.top+r.height,right=r.left+r.width;
-        const pe={pointerEvents:"auto"};
+        const pe={pointerEvents:"none"};
         return (<>
           <div style={{...shade,...pe,top:0,left:0,right:0,height:Math.max(0,r.top)}}/>
           <div style={{...shade,...pe,top:bottom,left:0,right:0,bottom:0}}/>
@@ -47230,7 +47238,7 @@ function TutorialOverlay({C,steps,index,onNext,onSkip,children}){
           )}
         </>);
       })():(
-        <div style={{...shade,inset:0,pointerEvents:"auto"}}/>
+        <div style={{...shade,inset:0,pointerEvents:"none"}}/>
       )}
       {hidden?(
         /* たたんでいるあいだ。画面の下に小さく出して、いつでも戻せるようにする */
