@@ -48086,8 +48086,24 @@ function RevealFace({C,item,onTapRoot,timedOut}){
     {name:"例文",only:["examples"]},
   ];
   const goPage=i=>{const el=pager.current;if(el)el.scrollTo({left:el.clientWidth*i,behavior:"smooth"});};
+  /* この単語のまちがい・修正点を、この画面から送る */
+  const [report,setReport]=useState(null);
   return (
     <div style={{flex:1,minHeight:0,display:"flex",flexDirection:"column"}}>
+      {report&&(
+        <Overlay C={C} onClose={()=>setReport(null)} z={130}>
+          <div className="slideUp" style={{background:C.card,borderRadius:4,width:"100vw",maxWidth:430,boxSizing:"border-box",
+            maxHeight:"85vh",overflowY:"auto",padding:"12px 20px calc(24px + env(safe-area-inset-bottom))"}}>
+            <div style={{display:"flex",alignItems:"center",marginBottom:12}}>
+              <div style={{flex:1,fontSize:16,fontWeight:700,color:C.text}}>修正点を送る</div>
+              <button aria-label="閉じる" onClick={()=>setReport(null)}
+                style={{width:40,height:40,borderRadius:4,border:"1px solid "+C.border,background:"transparent",
+                  color:C.sub,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}><Icon.close size={19}/></button>
+            </div>
+            <ContactBox C={C} about={report} screenHint={"学習画面 "+report}/>
+          </div>
+        </Overlay>
+      )}
       {timedOut&&(
         <div style={{border:"1px solid "+C.line,color:C.text,borderRadius:4,padding:"7px 12px",
           fontSize:13,fontWeight:700,marginBottom:8,flexShrink:0,textAlign:"center"}}>時間切れ</div>
@@ -48110,6 +48126,9 @@ function RevealFace({C,item,onTapRoot,timedOut}){
               fontSize:14,border:"1px solid "+(page===i?C.text:C.line),background:page===i?C.text:"transparent",
               color:page===i?C.bg:C.sub}}>{p.name}</button>
           ))}
+          <button aria-label="この単語の修正点を送る" onClick={()=>setReport("No."+w.id+" "+w.word+"・"+pages[page].name)}
+            style={{padding:"9px 14px",borderRadius:999,cursor:"pointer",fontSize:14,border:"1px dashed "+C.line,
+              background:"transparent",color:C.sub,fontFamily:"inherit"}}>報告</button>
         </div>
       </div>
     </div>
@@ -49593,7 +49612,7 @@ function StudentIdBox({C}){
 
 /* お問い合わせ・不具合の報告。Supabase の feedback 表に入り、管理画面の「お問い合わせ」に届く */
 const FEEDBACK_KINDS=[["bug","不具合"],["idea","意見・要望"],["question","質問"]];
-function ContactBox({C,screenHint}){
+function ContactBox({C,screenHint,about}){
   const [kind,setKind]=useState("bug");
   const [body,setBody]=useState("");
   const [busy,setBusy]=useState(false);
@@ -49605,7 +49624,8 @@ function ContactBox({C,screenHint}){
     try{
       const info=[navigator.userAgent,"画面 "+window.innerWidth+"×"+window.innerHeight,
         "表示 "+(screenHint||"")].join(" / ").slice(0,500);
-      const {error}=await withTimeout(sb.from("feedback").insert({kind,body:text.slice(0,2000),
+      const full=(about?"【"+about+"】\n":"")+text;
+      const {error}=await withTimeout(sb.from("feedback").insert({kind,body:full.slice(0,2000),
         email:(Cloud.user&&Cloud.user.email)||null,
         student_code:(Cloud.profile&&Cloud.profile.student_code)||null,device:info}),10000);
       if(error)throw error;
@@ -49615,12 +49635,13 @@ function ContactBox({C,screenHint}){
   };
   return (
     <div>
+      {about&&<div style={{fontSize:13.5,color:C.sub,marginBottom:12,lineHeight:1.6}}>対象：<b style={{color:C.text}}>{about}</b></div>}
       <div style={{fontSize:13.5,fontWeight:700,color:C.text,marginBottom:8}}>種類</div>
       <Seg C={C} options={FEEDBACK_KINDS} value={kind} onPick={setKind}/>
       <div style={{fontSize:13.5,fontWeight:700,color:C.text,margin:"16px 0 8px"}}>内容</div>
       <textarea value={body} onChange={e=>setBody(e.target.value)} maxLength={2000} rows={6}
         aria-label="お問い合わせの内容"
-        placeholder={kind==="bug"?"例：単語帳で ○○ を押すと画面が白くなる（いつ・どの画面で・何をしたか）":"自由に書いてください"}
+        placeholder={about?"例：例文の和訳が不自然／語源の説明がまちがっている など":kind==="bug"?"例：単語帳で ○○ を押すと画面が白くなる（いつ・どの画面で・何をしたか）":"自由に書いてください"}
         style={{width:"100%",boxSizing:"border-box",padding:12,fontSize:16,lineHeight:1.6,borderRadius:4,resize:"vertical",
           border:"1px solid "+C.border,background:C.bg,color:C.text,fontFamily:"inherit"}}/>
       <div style={{fontSize:12,color:C.faint,textAlign:"right",marginTop:4}}>{body.length} / 2000</div>
