@@ -46856,6 +46856,7 @@ function Overlay({C,children,onClose,align="flex-end",z=100}){
      どれだけ z を上げても下のナビの後ろに隠れてしまうため。 */
   return ReactDOM.createPortal(
     <div onClick={onClose} className="fadeIn" role="dialog" aria-modal="true"
+      data-tour-free={z>=1100?"1":undefined}  /* 案内の上に出すシートは、案内中でもタップできるようにする */
       style={{position:"fixed",inset:0,background:C.overlay,zIndex:z,display:"flex",
         alignItems:align,justifyContent:"center",padding:align==="center"?20:0}}>
       <div onClick={e=>e.stopPropagation()}>{children}</div>
@@ -50492,14 +50493,14 @@ function App(){
         <WordSheet C={C} word={words.find(w=>w.id===sheetWord.id)||sheetWord} onClose={()=>setSheetWord(null)}
           onTogglePass={toggleManualPass} onToggleBookmark={toggleBookmark} onTapRoot={openRootFromChip}/>
       )}
-      {whyWord&&<div data-tour-free="1"><WhySheet C={C} word={whyWord} onClose={()=>setWhyWord(null)} z={tour!=null?1100:120}/></div>}
+      {whyWord&&<WhySheet C={C} word={whyWord} onClose={()=>setWhyWord(null)} z={tour!=null?1100:120}/>}
       {rootEntry&&(
-        <div data-tour-free="1"><RootSheet C={C} entry={rootEntry} onClose={()=>setRootEntry(null)} z={tour!=null?1100:120}
+        <RootSheet C={C} entry={rootEntry} onClose={()=>setRootEntry(null)} z={tour!=null?1100:120}
           onOpenWord={w=>{setRootEntry(null);setSheetWord(w);}}
           onStudy={screen==="study"?null:ws=>{const ids=new Set(ws.map(w=>w.id));
             /* 多い語根（re など）は、まだ覚えていない語を先にして1回20語まで */
             const p=words.filter(w=>ids.has(w.id)&&!w.manualPass).sort((a,b)=>isMastered(a)-isMastered(b)).slice(0,20);
-            setRootEntry(null);startSession(p);}}/></div>
+            setRootEntry(null);startSession(p);}}/>
       )}
       {modal&&<Modal C={C} title={modal.title} body={modal.body} actions={modal.actions} onClose={()=>setModal(null)}/>}
       {snack&&(
