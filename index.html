@@ -44377,16 +44377,30 @@ function splitMorphs(text){
 
 /* 関連語の成り立ちのうち、見出し語と共通するパーツを見分ける関数を作る。
    同じ語根でも綴りが変わることがある（assault の sault と insult の sult）ので、
-   ROOT_ALIAS でまとめた代表形が同じか、語根どうしで意味（gloss）が同じなら共通とみなす */
+   ROOT_ALIAS でまとめた代表形が同じか、意味（gloss）が同じなら共通とみなす。
+   ただし「名詞」「～する」のような文法上の意味は、同じでも共通とはみなさない */
+const GENERIC_GLOSS=/^(名詞|形容詞|動詞|副詞|～?する|もの|人|～の|～な|～にする|～のような|～に関する|～された|～している|小さい|場所|～な状態の|状態|性質|行為|こと)$/;
 function sharedPartTest(parts){
   const canon=new Set(parts.map(p=>canonRoot(p.morph)));
-  const rootGloss=new Set(parts.filter((p,i)=>morphType(p.morph,i,parts.length,parts)==="root"&&p.gloss).map(p=>p.gloss));
-  return (m,i,ms)=>canon.has(canonRoot(m.morph))
-    ||(!!m.gloss&&rootGloss.has(m.gloss)&&morphType(m.morph,i,ms.length,ms)==="root");
+  const byGloss={};
+  parts.forEach((p,i)=>{
+    if(morphType(p.morph,i,parts.length,parts)!=="prefix"&&p.gloss&&!GENERIC_GLOSS.test(p.gloss))
+      (byGloss[p.gloss]=byGloss[p.gloss]||[]).push(p.morph.toLowerCase());
+  });
+  return (m,i,ms)=>{
+    if(canon.has(canonRoot(m.morph))) return true;
+    const heads=m.gloss&&byGloss[m.gloss];
+    if(!heads) return false;
+    const t=morphType(m.morph,i,ms.length,ms);
+    if(t==="root") return true;
+    /* 接尾語あつかいになる語（able など）は、綴りの頭も同じときだけ（abil と able。poss と ible は別） */
+    return t==="suffix"&&heads.some(h=>h.slice(0,2)===m.morph.toLowerCase().slice(0,2));
+  };
 }
 /* 関連語の見出しの中で、共通するパーツがどこにあるかを探す。返り値は [{at,len,type}]
    綴りが少し変わっていても拾えるよう、パーツの頭から（sult→sul…）、
-   だめなら語根はお尻から（spect→pect：expect）縮めながら探す */
+   だめなら語根はお尻から（spect→pect：expect）縮めながら探し、
+   それでもなければ、4文字以上のパーツは1文字ちがいまで同じとみなす（long→length の leng、bind→bond） */
 function sharedSpans(word,ms,isShared){
   const low=String(word||"").toLowerCase();const out=[];let from=0,lastEnd=0;
   ms.forEach((x,i)=>{
@@ -44394,11 +44408,16 @@ function sharedSpans(word,ms,isShared){
     let found=-1,len=0;
     for(let L=m.length;L>=Math.min(2,m.length)&&found<0;L--){
       const k=low.indexOf(m.slice(0,L),from);
-      if(k>=0&&(i>0||t!=="prefix"||k===0)){found=k;len=L;}
+      if(k>=0&&(i>0||ms.length===1||t!=="prefix"||k===0)){found=k;len=L;}
     }
     if(found<0&&t!=="prefix")for(let L=m.length-1;L>=3&&found<0;L--){
       const k=low.indexOf(m.slice(m.length-L),from);
       if(k>=0){found=k;len=L;}
+    }
+    if(found<0&&m.length>=4)for(let k=from;k+m.length<=low.length&&found<0;k++){
+      let d=0;
+      for(let j=0;j<m.length;j++) if(low[k+j]!==m[j]) d++;
+      if(d<=1&&low[k]===m[0]){found=k;len=m.length;}
     }
     if(found<0)return;
     from=found+1;
@@ -45039,11 +45058,13 @@ const PICTO_ROOT={
   naught:<><path d="M6 20l6 20h24l6-20z"/><path d="M6 20l8-8h20l8 8"/><ellipse cx="24" cy="29" rx="5" ry="7"/></>,
   rog:<><path d="M20 42V26l-4-5M20 26V16M26 25V14M32 25V15M38 27V19"/><path d="M20 42h18V27"/><path d="M6 6h18a4 4 0 0 1 4 4v4a4 4 0 0 1-4 4h-12l-5 4v-4a4 4 0 0 1-1-4v-4a4 4 0 0 1 4-4z"/><path d="M13 10c0-3 6-3 6 0 0 2-3 2-3 4M16 16h.5"/></>,
   vig:<><rect x="4" y="16" width="36" height="18" rx="3"/><path d="M40 21h4v8h-4"/><path d="M9 21v8M15 21v8M21 21v8M27 21v8M33 21v8"/><path d="M26 2l-8 10h8l-6 10" transform="translate(0,-2)"/></>,
-  humil:<><path d="M4 42h40"/><path d="M32 28c-5-4-11-2-15 4"/><path d="M32 28l-2 14h10"/><circle cx="13" cy="37" r="4"/><path d="M20 32l-3 10"/><path d="M40 6v14M36 16l4 4 4-4"/></>,
+  /* 低い：地面近くに身を低くかがめる */
+  humil:<><path d="M4 42h40"/><circle cx="12" cy="26" r="3.5"/><path d="M14 29l8 5v8M22 34l-6 8M16 30l-2 6"/><path d="M38 6v16M34 18l4 4 4-4"/></>,
   court:<><path d="M6 42V18h8v-6h-2l4-6 4 6h-2v6h8v-6h-2l4-6 4 6h-2v6h8v24"/><path d="M20 42v-8a4 4 0 0 1 8 0v8"/><path d="M4 42h40"/><path d="M34 12h-2l4-6 4 6h-2v6"/></>,
   haunt:<><path d="M12 42V24L24 14l12 10v18z"/><path d="M8 26L24 12l16 14"/><path d="M20 42v-8h8v8"/><path d="M28 16c0-6 4-10 8-10s8 4 8 10v10l-3-2-2 2-3-2-2 2-3-2-3 2z"/><path d="M34 12h.5M38 12h.5"/></>,
   indulg:<><path d="M16 24l8 20 8-20z"/><path d="M19 30l7 7M22 26l8 8"/><path d="M14 24h20c2-4-1-7-4-7 1-4-2-7-6-7 0-4-2-6-2-6-4 2-6 4-6 7-3 0-5 3-4 6-3 1-3 5 2 7z"/></>,
-  flaw:<><ellipse cx="22" cy="22" rx="18" ry="10"/><ellipse cx="22" cy="22" rx="10" ry="5"/><path d="M30 13l3 5 5-2"/><path d="M22 12l2 5-3 3 2 4"/><path d="M36 34l4 2-2 4-4-2z"/></>,
+  /* はがれたかけら：角が欠けて、かけらがはがれ落ちる */
+  flaw:<><path d="M8 8h32v32H8V24l6-2 2-8-8-2z"/><path d="M4 30l7-3 3 3-2 5-7 1z"/></>,
   analog:<><path d="M6 42L42 42 6 10z"/><path d="M6 42h18L6 26"/><path d="M12 42v-3M9 36h3"/></>,
   allel:<><path d="M14 44L20 4M34 44L28 4"/><path d="M11 38h26M12 30h24M14 22h20M15 14h18M16 8h16"/></>,
   cruc:<><path d="M24 6v38"/><path d="M24 10h14l4 4-4 4H24"/><path d="M24 22H10l-4 4 4 4h14"/><path d="M14 44h20"/><path d="M4 38c6-2 10-2 16 0M28 38c6-2 10-2 16 0"/></>,
@@ -45060,8 +45081,10 @@ const PICTO_ROOT={
   empt:<><path d="M8 4h32"/><path d="M24 4v14"/><rect x="20" y="16" width="8" height="4"/><path d="M20 20l-6 8 4 6M28 20l6 8-4 6"/><circle cx="24" cy="31" r="5"/><path d="M4 44h40M8 44v-4h32v4"/></>,
   swift:<><path d="M30 20L6 8l10 12-10 12 24-12"/><path d="M30 20c4-2 10-2 14 0-4 2-10 2-14 0z"/><path d="M4 38h14M12 44h14M22 38h8"/></>,
   might:<><rect x="2" y="4" width="6" height="16" rx="1"/><rect x="40" y="4" width="6" height="16" rx="1"/><path d="M8 12h32"/><circle cx="24" cy="20" r="4"/><path d="M16 12l4 12h8l4-12"/><path d="M20 24l-1 8M28 24l1 8M19 32l-5 10M29 32l5 10"/><path d="M8 44h32"/></>,
-  hent:<><path d="M8 6h24l8 8v28H8z"/><path d="M32 6v8h8"/><path d="M14 16h12M14 22h18M14 28h10"/><circle cx="30" cy="34" r="5"/><path d="M27 38l-2 6 5-3 5 3-2-6"/></>,
-  thrive:<><path d="M24 44V22"/><path d="M24 30l-8-6M24 26l8-6"/><circle cx="24" cy="14" r="11"/><circle cx="18" cy="12" r="2"/><circle cx="29" cy="10" r="2"/><circle cx="26" cy="18" r="2"/><circle cx="16" cy="18" r="1.5"/><path d="M14 44h20"/><path d="M40 20V6M36 10l4-4 4 4"/></>,
+  /* 行う：レバーを引いて動かす人 */
+  hent:<><circle cx="10" cy="10" r="4"/><path d="M10 14v14M10 28l-4 12M10 28l4 12M10 18l14-2"/><rect x="26" y="32" width="18" height="10" rx="1.5"/><path d="M35 32L28 16"/><circle cx="27" cy="14" r="3"/><path d="M34 10a10 10 0 0 1 6 6M40 16l0-4M40 16h-4"/></>,
+  /* つかみ取る：ボールをぎゅっとつかむ手（pris と同じ） */
+  thrive:<><circle cx="28" cy="26" r="9"/><path d="M2 18h12M2 34h12"/><path d="M14 18c2-6 10-9 18-7 5 1 6 5 3 7-2 1-5 1-7 0"/><path d="M26 20c5-2 10-1 12 2 1 3-2 5-5 4"/><path d="M14 34c4 5 13 6 18 3"/></>,
   dim:<><path d="M16 26a8 8 0 1 1 12 0v4h-12z"/><path d="M17 34h10M19 38h6"/><path d="M8 18h3M33 18h3M22 6v3" strokeDasharray="1 3"/><path d="M42 8v32M38 34h8"/></>,
   gloom:<><path d="M8 20a6 6 0 0 1 8-6 8 8 0 0 1 15 0 6 6 0 1 1 3 12H10a6 6 0 0 1-2-6z"/><path d="M6 32a5 5 0 0 1 6-5 7 7 0 0 1 13 0 5 5 0 1 1 3 10H8a5 5 0 0 1-2-5z"/><path d="M32 30v4M36 28v4M40 30v4M14 40v4M20 40v4"/></>,
   barren:<><path d="M4 30h40"/><path d="M8 30l4 6-3 6M20 30l-2 6 4 6M32 30l3 5-2 7M12 36h6M35 35l5 3"/><path d="M24 30V16M24 22l-6-6M24 18l5-5"/><circle cx="38" cy="10" r="4"/></>,
@@ -45073,7 +45096,8 @@ const PICTO_ROOT={
   ultra:<><path d="M24 42V22"/><path d="M4 42h40"/><path d="M6 36C10 8 38 8 42 36"/><path d="M36 33l6 3 1-7"/></>,
   surd:<><path d="M16 30c0-12 5-20 13-20 7 0 11 5 11 11 0 6-5 8-7 11s-2 10-9 10c-4 0-6-3-6-5"/><path d="M26 22c0-4 5-5 6-1"/><path d="M6 6l36 36"/></>,
   vulner:<><rect x="6" y="18" width="36" height="12" rx="6" transform="rotate(-45 24 24)"/><rect x="18" y="18" width="12" height="12" rx="1" transform="rotate(-45 24 24)"/><path d="M22 24h.5M26 24h.5M24 22v.5M24 26v.5"/></>,
-  exo:<><path d="M26 44c-2-10-2-20 2-28"/><path d="M28 16c-6-6-14-6-20-2M28 16c4-7 12-9 18-6M28 16c-2-6-8-10-14-10M28 16c7-2 13 2 16 8M28 16c-6 1-11 6-12 12"/><path d="M4 44h40"/></>,
+  /* 外の：枠の外へ出る（ex と同じ） */
+  exo:<><rect x="6" y="12" width="20" height="24" rx="2"/><circle cx="13" cy="24" r="3"/><path d="M19 24h23M35 17l7 7-7 7"/></>,
   tame:<><path d="M8 12c-4 2-4 12 0 14M26 12c4 2 4 12 0 14"/><path d="M9 12c2-4 14-4 16 0v14c0 6-4 10-8 10s-8-4-8-10z"/><circle cx="13" cy="20" r="1"/><circle cx="21" cy="20" r="1"/><path d="M15 28h4l-2 2z"/><path d="M11 36h12"/><path d="M17 36c4 6 14 4 20-6"/><rect x="34" y="20" width="8" height="12" rx="4"/></>,
   dens:<><rect x="6" y="6" width="36" height="36" rx="2"/><circle cx="14" cy="14" r="3"/><circle cx="24" cy="14" r="3"/><circle cx="34" cy="14" r="3"/><circle cx="14" cy="24" r="3"/><circle cx="24" cy="24" r="3"/><circle cx="34" cy="24" r="3"/><circle cx="14" cy="34" r="3"/><circle cx="24" cy="34" r="3"/><circle cx="34" cy="34" r="3"/></>,
   lie:<><circle cx="10" cy="24" r="4"/><path d="M15 26h26"/><path d="M4 32h40M6 32v8M42 32v8"/><path d="M40 24v2"/></>,
@@ -45087,7 +45111,8 @@ const PICTO_ROOT={
   aur:<><path d="M4 22c6-8 14-8 20 0 6-8 14-8 20 0"/><path d="M22 20l2 3 2-3"/><path d="M24 44V30M19 35l5-5 5 5"/><path d="M4 42c0-4 8-4 8 0M36 42c0-4 8-4 8 0"/></>,
   cumul:<><ellipse cx="24" cy="40" rx="12" ry="4"/><path d="M12 40v-5M36 40v-5"/><ellipse cx="24" cy="35" rx="12" ry="4"/><path d="M12 35v-5M36 35v-5"/><ellipse cx="24" cy="30" rx="12" ry="4"/><ellipse cx="24" cy="10" rx="8" ry="3"/><path d="M24 15v8M20 19l4 4 4-4"/></>,
   ampl:<><rect x="6" y="8" width="22" height="32" rx="2"/><circle cx="17" cy="28" r="7"/><circle cx="17" cy="28" r="2"/><path d="M12 14h.5M17 14h.5M22 14h.5"/><path d="M33 18c3 3 3 9 0 12M38 13c5 5 5 17 0 22M43 8c7 7 7 25 0 32"/></>,
-  solus:<><rect x="18" y="4" width="12" height="18" rx="6"/><path d="M12 16c0 8 5 12 12 12s12-4 12-12"/><path d="M24 28v12M16 42h16"/></>,
+  /* ただひとり：広い地面にぽつんと一人 */
+  solus:<><circle cx="24" cy="20" r="3.5"/><path d="M24 23.5v9M24 32.5l-3 7M24 32.5l3 7M24 26l-4 3M24 26l4 3"/><path d="M2 40h44"/><path d="M8 44h4M36 44h4" /></>,
   heap:<><path d="M4 42c4-12 10-20 20-24 10 4 16 12 20 24z"/><circle cx="18" cy="34" r="1.5"/><circle cx="26" cy="28" r="1.5"/><circle cx="30" cy="36" r="1.5"/><path d="M36 4v14M31 18h10l-5 7z"/></>,
   ev:<><ellipse cx="24" cy="14" rx="18" ry="8"/><path d="M24 9c7 0 11 2 11 5s-5 5-11 5-11-2-11-5 4-5 11-5zM24 12c3 0 5 1 5 2s-2 2-5 2-5-1-5-2 2-2 5-2z"/><path d="M6 14v22c0 3 8 6 18 6s18-3 18-6V14"/><path d="M6 36l-4 6M42 36l4 6M14 40l-2 5M34 40l2 5"/><path d="M14 22v12M30 24v10"/></>,
   day:<><path d="M4 34h40"/><path d="M12 34a12 12 0 0 1 24 0"/><path d="M24 12v6M10 20l4 4M38 20l-4 4M4 28h4M40 28h4"/><path d="M10 40h28M16 45h16"/></>,
@@ -45097,17 +45122,20 @@ const PICTO_ROOT={
   rai:<><path d="M4 40h40M4 44h40"/><rect x="7" y="14" width="6" height="26"/><rect x="15" y="14" width="6" height="26"/><rect x="23" y="14" width="6" height="26"/><rect x="31" y="14" width="6" height="26"/><path d="M4 8h40"/></>,
   bound:<><rect x="4" y="6" width="40" height="36" rx="2"/><path d="M22 6c-4 8 6 12 0 20s6 12 2 16" strokeDasharray="3 3"/><circle cx="12" cy="18" r="2"/><path d="M33 28l3 3 5-6"/></>,
   equip:<><path d="M4 34h40l-6 8H10z"/><path d="M30 34V6M30 6h12M40 6v6"/><rect x="36" y="14" width="8" height="7"/><rect x="10" y="26" width="8" height="8"/><rect x="18" y="26" width="8" height="8"/><rect x="14" y="18" width="8" height="8"/></>,
-  triev:<><path d="M4 44L30 6"/><path d="M30 6c8 0 12 6 12 14v14"/><path d="M42 34c0 4-5 4-5 0"/><circle cx="36" cy="41" r="4"/></>,
+  /* 見つける：虫めがねで探し物（かぎ）を見つける */
+  triev:<><circle cx="20" cy="20" r="12"/><path d="M29 29l12 12"/><circle cx="16" cy="20" r="3"/><path d="M19 20h7M24 20v3M22 20v2"/><path d="M40 4v8M40 16v.5"/></>,
   broch:<><path d="M8 8h26v34H8z"/><path d="M12 4h26v34"/><path d="M14 12v4M14 20v4M14 28v4M14 36v2"/><path d="M36 42l8-24"/><ellipse cx="44" cy="16" rx="1" ry="2.5"/></>,
   let:<><rect x="10" y="4" width="28" height="40" rx="4"/><path d="M19 14v7M29 14v7"/><path d="M21 30a3 3 0 0 1 6 0v3h-6z"/></>,
   haven:<><path d="M6 44V26c0-6 4-8 8-8M42 44V26c0-6-4-8-8-8"/><path d="M16 36h16l-3 4H19z"/><path d="M24 36v-8l5 3"/><path d="M4 8c3-3 6-3 9 0s6 3 9 0 6-3 9 0 6 3 9 0"/></>,
   pav:<><path d="M18 6h12l14 38H4z"/><path d="M14 16h20M10 28h28M6 38h36"/><path d="M24 6v10M20 16l-2 12M28 16l2 12M14 28l-2 10M24 28v10M34 28l2 10"/></>,
   scip:<><path d="M6 34h36l-6 8H12z"/><path d="M24 34V6"/><path d="M24 8l14 22H24"/><path d="M24 12L12 30h12"/><path d="M2 46c4-2 8-2 12 0s8 2 12 0 8-2 12 0"/></>,
   orn:<><path d="M24 2v6"/><rect x="20" y="8" width="8" height="5" rx="1"/><circle cx="24" cy="28" r="15"/><path d="M10 24c9 4 19 4 28 0M11 32c9 4 17 4 26 0"/><path d="M20 24l1 1M28 24l-1 1"/></>,
-  cosm:<><rect x="16" y="24" width="16" height="20" rx="2"/><rect x="18" y="16" width="12" height="8"/><path d="M19 16V8l10-4v12"/><path d="M16 30h16"/></>,
+  /* 整えること：ばらばらのものをきちんと並べる */
+  cosm:<><circle cx="6" cy="10" r="1.8"/><circle cx="14" cy="18" r="1.8"/><circle cx="5" cy="24" r="1.8"/><circle cx="12" cy="32" r="1.8"/><circle cx="7" cy="40" r="1.8"/><path d="M18 24h8M23 20l4 4-4 4"/><circle cx="33" cy="12" r="1.8"/><circle cx="42" cy="12" r="1.8"/><circle cx="33" cy="24" r="1.8"/><circle cx="42" cy="24" r="1.8"/><circle cx="33" cy="36" r="1.8"/><circle cx="42" cy="36" r="1.8"/></>,
   camer:<><path d="M6 42V20c0-10 8-16 18-16s18 6 18 16v22z"/><path d="M14 42V22c0-6 4-10 10-10s10 4 10 10v20"/><path d="M4 42h40"/><path d="M24 4v8"/></>,
   dwell:<><path d="M10 26V14a4 4 0 0 1 4-4h14a4 4 0 0 1 4 4v12"/><path d="M6 24a3 3 0 0 1 6 0v6h18v-6a3 3 0 0 1 6 0v12H6z"/><path d="M9 36v4M33 36v4"/><path d="M42 42V14M38 14h8l-2-6h-4z"/></>,
-  acous:<><path d="M14 20c-6 0-10 4-10 10 0 8 6 14 14 14s14-6 14-14c0-6-4-10-10-10-2 0-3 2-4 2s-2-2-4-2z"/><circle cx="18" cy="30" r="4"/><path d="M20 28L38 10"/><path d="M36 6l6 6-4 2-4-4z"/><path d="M13 38h10"/></>,
+  /* 聞く：耳と音の波（aud と同じ） */
+  acous:<><path d="M27 40c-7 0-12-6-12-14 0-8 5-14 12-14 5 0 9 4 9 9 0 6-7 6-7 11"/><circle cx="29" cy="31" r="1.6"/><path d="M9 18c-2 4-2 10 0 14M4 13c-3 7-3 17 0 24"/></>,
   tomb:<><path d="M4 42L24 8l20 34z"/><path d="M14 25h20M9 34h30"/><path d="M21 42v-6h6v6"/></>,
   master:<><path d="M4 16l20-8 20 8-20 8z"/><path d="M12 20v10c0 4 24 4 24 0V20"/><path d="M44 16v12"/><path d="M42 28h4v4h-4z"/></>,
   piece:<><path d="M8 14h9a4 4 0 1 1 8 0h9v9a4 4 0 1 1 0 8v9H25a4 4 0 1 0-8 0H8v-9a4 4 0 1 0 0-8z"/></>,
@@ -45133,7 +45161,8 @@ const PICTO_ROOT={
   solari:<><circle cx="15" cy="11" r="5"/><circle cx="33" cy="17" r="5"/><path d="M6 42c0-11 4-17 9-17s9 6 9 17M24 42c0-9 4-14 9-14s9 5 9 14"/><path d="M20 28c4-5 9-7 13-4"/><path d="M38 21c-1 2-1.5 3 0 3.5s1.5-1.5 0-3.5z"/></>,
   rouse:<><path d="M4 40V22M44 40V30M4 34h40"/><path d="M4 30h8"/><circle cx="20" cy="14" r="5"/><path d="M20 19v9h18v6"/><path d="M28 6v5M34 8l-3 4M22 3v4"/></>,
   start:<><circle cx="24" cy="9" r="4"/><path d="M24 13v13M14 12l10 6 10-6M24 26l-6 8M24 26l6 8"/><path d="M8 44h32"/><path d="M16 39h16"/><path d="M7 5l4 4M41 5l-4 4M5 18h4M39 18h4"/></>,
-  thrill:<><circle cx="24" cy="10" r="5"/><path d="M14 44c0-14 4-24 10-24s10 10 10 24"/><path d="M4 30h40M38 25l6 5-6 5M4 25l5 5-5 5"/><path d="M12 14l-4-3M36 14l4-3"/></>,
+  /* 突き通す：矢が板を突きぬける */
+  thrill:<><rect x="20" y="6" width="8" height="36" rx="1"/><path d="M2 24h16M30 24h8"/><path d="M36 18l7 6-7 6"/><path d="M28 20l3-2M28 28l3 2"/></>,
   ora:<><path d="M23 6c-2 0-4 3-5 8l-2 12-4 6v6h11z"/><path d="M25 6c2 0 4 3 5 8l2 12 4 6v6H25z"/><path d="M12 38h11M25 38h11M10 44h12M26 44h12"/><path d="M8 10l3 3M40 10l-3 3M24 0v2"/></>,
   shed:<><path d="M24 44V22M24 30l-8-8M24 26l7-7"/><path d="M8 44h32"/><path d="M12 4c6 0 10 4 12 10-6 1-11-3-12-10zM36 6c-5 1-8 5-9 10 5 0 9-4 9-10z"/><path d="M38 26c2 1 3 3 2 5-2-1-3-3-2-5zM12 32c2 1 3 3 2 5-2-1-3-3-2-5zM34 38c2 0 4 2 4 4-2 0-4-2-4-4z"/></>,
   yearn:<><path d="M24 22l-8-8a5 5 0 0 1 8-6 5 5 0 0 1 8 6z"/><path d="M18 46V36l-4-6M18 36V26M24 34V24M30 34V25M36 36V29"/><path d="M18 46h18V36"/></>,
@@ -45141,7 +45170,8 @@ const PICTO_ROOT={
   fur:<><circle cx="24" cy="28" r="14"/><path d="M15 22l6 3M33 22l-6 3"/><path d="M18 36c3-3 9-3 12 0"/><path d="M8 12c-2-3 0-6 3-6M40 12c2-3 0-6-3-6M24 10V2M18 8l-2-4M30 8l2-4"/></>,
   intim:<><rect x="4" y="4" width="40" height="40"/><rect x="12" y="12" width="24" height="24"/><rect x="19" y="19" width="10" height="10"/><circle cx="24" cy="24" r="1.5"/></>,
   aesthe:<><path d="M6 8c6 0 10 5 10 11v3l-3 5h3v5c0 2 2 3 4 3"/><path d="M16 22h-1"/><circle cx="36" cy="18" r="3"/><circle cx="36" cy="11" r="3"/><circle cx="36" cy="25" r="3"/><circle cx="30" cy="18" r="3"/><circle cx="42" cy="18" r="3"/><path d="M36 28v16M36 38l-5-4"/><path d="M21 24c2-1 4-1 6 0M21 28c2 0 3 1 4 2"/></>,
-  temn:<><rect x="12" y="6" width="22" height="20" rx="5"/><path d="M12 12h14M12 18h14M12 24h14"/><path d="M14 26v14a3 3 0 0 0 6 0V26"/><path d="M34 12h6v12h-6"/></>,
+  /* さげすむ：高いところから相手を見下ろす */
+  temn:<><path d="M2 30h16v14"/><circle cx="10" cy="8" r="3.5"/><path d="M10 11.5v10M10 21.5l-3 8.5M10 21.5l3 8.5M10 14l-4 4M10 14l4 4"/><path d="M14 9l14 16" strokeDasharray="2 3"/><path d="M28 25l-4-1M28 25l-1-4"/><circle cx="36" cy="33" r="2.5"/><path d="M36 35.5v4M36 39.5l-2 3.5M36 39.5l2 3.5"/><path d="M18 44h28"/></>,
   surge:<><path d="M4 44h40"/><path d="M6 44C14 42 16 32 18 24 20 14 28 8 36 10c4 1 6 4 5 7-3-3-8-2-9 2-1 5 4 8 9 6-2 8-10 19-19 19"/><path d="M8 34V20M4 24l4-4 4 4"/></>,
   slight:<><rect x="22" y="6" width="4" height="36" rx="2"/><path d="M4 24h12M11 19l5 5-5 5M44 24H32M37 19l-5 5 5 5"/></>,
   radic:<><path d="M4 18h40"/><path d="M24 18V8M24 12c-4-4-8-4-10-2 2 3 6 4 10 2zM24 10c4-4 8-4 10-2-2 3-6 4-10 2z"/><path d="M24 18v24M24 24l-10 8-4 8M24 24l10 6 6 8M24 32l-6 6M24 30l6 6M14 32l-6 0M34 30l6-2"/></>,
@@ -45150,10 +45180,12 @@ const PICTO_ROOT={
   name:<><rect x="4" y="10" width="40" height="28" rx="3"/><circle cx="15" cy="21" r="4"/><path d="M8 33c0-4 3-6 7-6s7 2 7 6"/><path d="M27 19h11M27 25h11M27 31h7"/></>,
   where:<><path d="M24 44V6"/><path d="M24 10h14l5 5-5 5H24M24 24H10l-5 5 5 5h14"/><path d="M28 13v.1"/><path d="M30 13a2 2 0 1 1 3 2c-1 .5-1 1-1 2M32 19v.1"/><path d="M14 27a2 2 0 1 1 3 2c-1 .5-1 1-1 2M16 33v.1"/><path d="M16 44h16"/></>,
   roam:<><path d="M6 40c6-10 16 0 18-10s-14-8-12-16 16-6 20 0 2 14 8 12 4-12 2-18" strokeDasharray="3 4"/><path d="M40 12l4-4 3 5"/><circle cx="6" cy="40" r="2.5"/></>,
-  stroll:<><path d="M8 20h22a12 12 0 0 1-12 12H14a6 6 0 0 1-6-6z"/><path d="M8 20a11 11 0 0 1 11-11v11"/><path d="M30 20l6-12h6"/><circle cx="12" cy="40" r="4"/><circle cx="28" cy="40" r="4"/><path d="M14 32l-2 4M26 32l2 4"/></>,
+  /* 放浪する：あちこちさまよう道すじ（roam と同じ） */
+  stroll:<><path d="M6 40c6-10 16 0 18-10s-14-8-12-16 16-6 20 0 2 14 8 12 4-12 2-18" strokeDasharray="3 4"/><path d="M40 12l4-4 3 5"/><circle cx="6" cy="40" r="2.5"/></>,
   wane:<><path d="M28 6a18 18 0 1 0 0 36 14 18 0 0 1 0-36z"/><path d="M28 6a18 18 0 0 1 0 36" strokeDasharray="3 4"/></>,
   deterior:<><path d="M6 6v36h36"/><path d="M10 12l8 8 6-4 8 12 8 6"/><path d="M34 34l6 0 0-6"/><path d="M20 24l-2 4 3 1-2 4"/></>,
-  plumb:<><path d="M24 2v18"/><path d="M18 20h12l-6 14z"/><path d="M4 38c4-2 8-2 12 0s8 2 12 0 8-2 12 0M4 44c4-2 8-2 12 0s8 2 12 0 8-2 12 0"/><path d="M14 30c3-2 5-2 5 0M34 30c-3-2-5-2-5 0"/></>,
+  /* 鉛：糸の先の鉛のおもり */
+  plumb:<><path d="M24 2v16"/><path d="M16 18h16l-8 22z"/><path d="M20 24h8"/><path d="M6 44h36"/></>,
   fire:<><path d="M8 44l32-10M8 34l32 10"/><path d="M24 36c-8 0-11-6-9-12 1-3 3-5 3-10 4 2 6 6 6 9 1-3 3-4 3-7 5 4 7 10 5 14-1 4-4 6-8 6z"/></>,
   cram:<><path d="M8 22h32v20H8z"/><path d="M6 22c4-6 10-8 18-8s14 2 18 8"/><path d="M14 22c0-5 3-8 6-8M28 14c3 0 6 3 6 8"/><path d="M24 2v8M19 6l5 5 5-5"/><path d="M8 30h32"/></>,
   vapor:<><path d="M10 24h24v10a8 8 0 0 1-8 8h-8a8 8 0 0 1-8-8z"/><path d="M34 27h3a4 4 0 0 1 0 8h-3"/><path d="M6 44h32"/><path d="M16 18c-3-3 3-6 0-10M22 18c-3-3 3-6 0-10M28 18c-3-3 3-6 0-10"/></>,
@@ -45187,17 +45219,21 @@ const PICTO_ROOT={
   harness:<><path d="M26 4l2 6c6 2 12 8 14 16l-2 4h-6l-6-2c-2 6-4 10-4 16H8c0-10 4-18 10-26l4-8z"/><path d="M24 10l-2-6"/><circle cx="30" cy="16" r="1.5"/><path d="M40 24l-8-4M26 12l8 16M32 20l-4 6"/><path d="M28 26L10 20"/></>,
   cav:<><path d="M2 42L18 10l8 8 6-6 14 30z"/><path d="M16 42c0-10 4-16 8-16s8 6 8 16"/><path d="M4 42h40"/></>,
   body:<><path d="M18 4h12"/><path d="M20 4v4c-6 1-10 4-10 8 0 6 4 8 4 14s-2 6-2 12h24c0-6-2-6-2-12s4-8 4-14c0-4-4-7-10-8V4"/></>,
-  scrut:<><path d="M2 44l8-12 8 4 8-8 6 6 6 10z"/><circle cx="28" cy="16" r="9"/><path d="M34 22l8 8"/><path d="M24 14l4 4M30 12l-2 5"/></>,
-  mentor:<><circle cx="16" cy="9" r="5"/><path d="M8 44V26c0-6 4-10 8-10s8 4 8 10v18"/><circle cx="34" cy="22" r="4"/><path d="M28 44v-8c0-5 3-8 6-8s6 3 6 8v8"/><path d="M22 22c4 0 8 2 11 6"/></>,
+  /* がらくた：割れたつぼや折れた板のがらくたの山 */
+  scrut:<><path d="M2 42h44"/><path d="M6 42l4-10h8l-2 10"/><path d="M18 42V26l6-2 2 18"/><path d="M26 42l4-12 10 4-2 8"/><path d="M10 32l-2-6 6-2M20 24l1-6 3 1M34 32l2-6"/><path d="M40 20l4-4M38 16h4v4"/></>,
+  /* 賢人の名：ひげをたくわえ、つえを持つ老人 */
+  mentor:<><circle cx="18" cy="10" r="4.5"/><path d="M14 13c0 5 2 8 4 8s4-3 4-8"/><path d="M18 21v10M18 31l-4 11M18 31l4 11M18 24l8 4"/><path d="M28 10v32M26 10h4"/></>,
   templ:<><path d="M4 16L24 6l20 10z"/><path d="M6 16h36M6 38h36M4 42h40"/><path d="M11 20v14M19 20v14M29 20v14M37 20v14"/></>,
   gauge:<><path d="M6 34a18 18 0 0 1 36 0z"/><path d="M24 34l10-12"/><circle cx="24" cy="34" r="2"/><path d="M10 26l3 1M14 18l2 2M24 16v3M34 18l-2 2M38 26l-3 1"/></>,
   ver:<><path d="M10 4h20l8 8v32H10z"/><path d="M30 4v8h8"/><path d="M16 28l5 5 11-12"/></>,
   pledge:<><path d="M16 26V14M20 24V8M24 24V6M28 24V8M32 26V14"/><path d="M16 26c0 6 3 10 8 10s8-4 8-10"/><path d="M6 40h36M8 36h32v8H8z"/></>,
   lament:<><circle cx="24" cy="22" r="16"/><path d="M15 17l5 2M33 17l-5 2"/><ellipse cx="24" cy="30" rx="4" ry="3"/><path d="M16 22c-2 4-2 7-1 9M32 22c2 4 2 7 1 9"/><path d="M8 42c4-2 6-2 8 0M32 42c2-2 4-2 8 0"/></>,
   gust:<><path d="M4 34h28c0 5-6 8-14 8S4 39 4 34z"/><path d="M10 34c2-2 14-2 16 0"/><ellipse cx="22" cy="18" rx="5" ry="3.5" transform="rotate(-25 22 18)"/><path d="M26 16l16-10"/><path d="M20 24v3M20 29v1"/></>,
-  harbor:<><path d="M4 8h40"/><path d="M8 4l-2 4M16 4l-2 4M24 4l-2 4M32 4l-2 4M40 4l-2 4"/><path d="M6 8v26h14M42 8v26H28"/><path d="M18 22h12l-2 4H20z"/><path d="M24 22v-8l5 6"/><path d="M4 42c4-3 8-3 12 0s8 3 12 0 8-3 12 0"/></>,
+  /* 避難所：堤防に囲まれて小舟が休む港 */
+  harbor:<><path d="M6 44V26a18 18 0 0 1 12-17M42 44V26a18 18 0 0 0-12-17"/><path d="M16 34h16l-3 4H19z"/><path d="M24 34V24l6 8"/><path d="M2 8c3-2 5 2 8 0M38 8c3-2 5 2 8 0" /></>,
   fric:<><path d="M4 38h40"/><rect x="12" y="24" width="18" height="14" rx="1"/><path d="M34 31h8M38 27l4 4-4 4"/><path d="M12 42l-3 3M18 42l-3 3M24 42l-3 3"/></>,
-  veterin:<><ellipse cx="20" cy="30" rx="8" ry="7"/><circle cx="11" cy="19" r="3"/><circle cx="18" cy="13" r="3"/><circle cx="27" cy="15" r="3"/><circle cx="30" cy="23" r="3"/><path d="M38 6v12M32 12h12"/></>,
+  /* 荷を運ぶ家畜：背に荷をのせた、耳の長いロバ */
+  veterin:<><rect x="13" y="11" width="16" height="9" rx="2"/><path d="M8 20h24c3 0 5 2 5 5v5H8c-3 0-4-2-4-5s1-5 4-5z"/><path d="M34 22l4-8 4 2-2 8"/><path d="M38 14l-1-8M41 15l2-8"/><path d="M10 30v12M15 30v12M28 30v12M33 30v12"/><path d="M4 22l-3 8"/><path d="M21 11v9"/></>,
   obes:<><circle cx="24" cy="8" r="5"/><path d="M18 14c-10 4-12 12-10 20s8 8 16 8 14 0 16-8-0-16-10-20"/><path d="M18 44v-2M30 44v-2"/></>,
   neur:<><circle cx="16" cy="18" r="6"/><path d="M11 14l-6-6M10 20l-6 2M14 12l-2-8M20 13l3-7"/><path d="M21 22l12 14"/><path d="M33 36l3 7M33 36l7 2M33 36l5 5"/></>,
   diabet:<><path d="M8 6h32L28 22v6h-8v-6z"/><path d="M24 28v4"/><path d="M24 36c-2 3-2 5 0 5s2-2 0-5M24 44v.1"/><path d="M14 10c4 2 16 2 20 0"/></>,
@@ -45205,7 +45241,8 @@ const PICTO_ROOT={
   iatr:<><path d="M12 4v12a8 8 0 0 0 16 0V4"/><path d="M10 4h4M26 4h4"/><path d="M20 24v8c0 6 4 10 10 10s8-4 8-8v-8"/><circle cx="38" cy="22" r="4"/></>,
   cardi:<><path d="M24 42L8 26A9 9 0 0 1 24 14a9 9 0 0 1 16 12z"/><path d="M4 28h10l3-6 4 12 4-16 3 10h16"/></>,
   kidney:<><path d="M28 6c-10 0-18 8-18 18s8 18 18 18c6 0 10-4 8-10-1-4-4-5-4-8s3-4 4-8c2-6-2-10-8-10z"/><path d="M34 24h8"/></>,
-  fames:<><path d="M2 10h20c0 7-4 10-10 10S2 17 2 10z"/><path d="M8 20v2h8v-2"/><path d="M30 4c-2 6-2 10 0 14 4 6 12 8 12 16 0 6-4 10-10 10"/><path d="M20 30c2-2 4 2 6 0M18 36c2-2 4 2 6 0"/></>,
+  /* 飢え：空っぽのおわんと、おなかの鳴る音 */
+  fames:<><path d="M4 22h26a13 12 0 0 1-26 0z"/><path d="M11 40h12"/><path d="M17 34v6"/><path d="M26 16l12-12"/><ellipse cx="40.5" cy="3.5" rx="3" ry="1.8" transform="rotate(-45 40.5 3.5)"/><path d="M38 26c3 1 3 3 0 4s-3 3 0 4 3 3 0 4"/><path d="M13 14v.5M17 14v.5M21 14v.5"/></>,
   riot:<><circle cx="14" cy="16" r="4"/><path d="M14 20v12M14 32l-4 10M14 32l4 10M14 24l-6-10M14 24l6-10"/><circle cx="34" cy="16" r="4"/><path d="M34 20v12M34 32l-4 10M34 32l4 10M34 24l-6-10M34 24l6-10"/><path d="M26 4l-3 6h4l-3 6"/></>,
   asyl:<><path d="M6 24L24 8l18 16"/><path d="M12 20v22h24V20"/><circle cx="24" cy="28" r="3"/><path d="M19 42c0-6 2-9 5-9s5 3 5 9"/><path d="M2 12l6 6M46 12l-6 6"/></>,
   hier:<><path d="M24 8l8 10-8 12-8-12z"/><path d="M16 18h16"/><path d="M24 2v2M12 10l2 2M36 10l-2 2M8 20h2M38 20h2"/><path d="M14 32h20v4H14zM10 36h28v4H10zM6 40h36v4H6z"/></>,
@@ -45216,7 +45253,8 @@ const PICTO_ROOT={
   /* grp_04：No.2127〜2297 の語根の絵 */
   clash:<><ellipse cx="15" cy="28" rx="4" ry="12" transform="rotate(-25 15 28)"/><ellipse cx="33" cy="28" rx="4" ry="12" transform="rotate(25 33 28)"/><path d="M24 4v7M15 8l4 5M33 8l-4 5"/><path d="M8 34l-5 3M40 34l5 3"/></>,
   atroc:<><path d="M4 12c12 5 28 5 40 0-2 20-10 28-20 28S6 32 4 12z"/><path d="M11 15l3 10 3-9M31 16l3 9 3-10"/><path d="M15 36l3-7 3 8M27 37l3-8 3 7"/></>,
-  bribe:<><path d="M4 16h40M10 16v26M38 16v26"/><circle cx="24" cy="30" r="5"/><path d="M22 30h4"/><path d="M13 30h4M31 30h4M32 27l3 3-3 3"/></>,
+  /* パンのかけら：ちぎったパンのひとかけ */
+  bribe:<><path d="M14 30V16c-4 0-6-3-5-6s6-5 15-5 14 2 15 5-1 6-5 6v8l-4 2 3 3-3 2 2 4H14z"/><path d="M36 30l6 3-2 5 4 3-6 1-3-4z"/></>,
   culp:<><circle cx="32" cy="12" r="5"/><path d="M24 42c0-12 3-22 8-22s8 10 8 22"/><path d="M4 26h14M13 21l5 5-5 5"/><path d="M44 4v5M44 13v.5"/></>,
   pit:<><path d="M2 18h12v22h20V18h12"/><path d="M4 12l2 2M40 12l3 2"/><path d="M18 30h12M20 35h8"/></>,
   fall:<><circle cx="24" cy="30" r="6"/><path d="M19 8v12M24 5v16M29 8v12"/><path d="M6 42h36"/></>,
@@ -45230,7 +45268,8 @@ const PICTO_ROOT={
   arct:<><circle cx="24" cy="28" r="14"/><circle cx="13" cy="16" r="5"/><circle cx="35" cy="16" r="5"/><ellipse cx="24" cy="34" rx="6" ry="4"/><circle cx="18" cy="26" r="1.5"/><circle cx="30" cy="26" r="1.5"/><path d="M24 32v2"/></>,
   lati:<><circle cx="24" cy="24" r="18"/><path d="M9 14h30M6 24h36M9 34h30"/><path d="M24 6c-6 6-6 30 0 36" strokeDasharray="2 3"/></>,
   odor:<><path d="M36 6c-1 10-9 18-9 24 0 3 3 4 7 4"/><path d="M34 34c2 2 6 2 8 0"/><path d="M4 18c3-2 5 2 8 0s5 2 8 0M4 26c3-2 5 2 8 0s5 2 8 0M4 34c3-2 5 2 8 0s5 2 8 0"/></>,
-  mead:<><path d="M2 42h44"/><path d="M6 42l-2-14M10 42V26M14 42l2-14M18 42l1-10"/><path d="M26 42c0-14 18-14 18 0"/><path d="M30 34l4-4M34 38l6-6"/></>,
+  /* 刈った草：鎌で刈った草地 */
+  mead:<><path d="M4 42h40"/><path d="M6 42V26M10 42V22M14 42V28M18 42V24"/><path d="M24 42v-3M28 42v-3M32 42v-3M36 42v-3"/><path d="M26 8c8-4 18 0 18 8-4-4-10-5-16-2"/><path d="M28 14l-6 14"/></>,
   calamit:<><path d="M6 44V28l12-10 12 10v16z"/><path d="M14 44v-8h8v8"/><path d="M38 2l-8 12h8l-8 12"/><path d="M26 28l2 4M32 30l-2 4"/></>,
   meteor:<><circle cx="33" cy="33" r="7"/><path d="M28 27L8 7M26 33L6 21M33 26L21 6"/><path d="M30 31l2 2M35 35l1 1"/></>,
   oid:<><path d="M14 42v-6a10 10 0 0 1-2-8V18a12 12 0 0 1 24 0v10a10 10 0 0 1-2 8v6"/><rect x="17" y="18" width="5" height="4"/><rect x="26" y="18" width="5" height="4"/><path d="M19 30h10M24 6V2"/><path d="M8 20h4M36 20h4"/></>,
@@ -45243,15 +45282,19 @@ const PICTO_ROOT={
   off:<><path d="M6 42V18h22v8h8v16z"/><rect x="34" y="4" width="8" height="8"/><path d="M29 14l3-3M33 18l3-3"/></>,
   carn:<><ellipse cx="27" cy="19" rx="14" ry="10" transform="rotate(-35 27 19)"/><path d="M19 28l-9 9"/><circle cx="7" cy="37" r="3"/><circle cx="11" cy="41" r="3"/><path d="M22 18c3-3 7-4 10-3"/></>,
   vor:<><path d="M36 12A16 16 0 1 0 36 36L22 24z"/><circle cx="18" cy="16" r="2"/><circle cx="42" cy="24" r="2.5"/></>,
-  site:<><path d="M24 44V10"/><path d="M24 18c-4-2-7-6-7-10 4 0 7 4 7 10zM24 18c4-2 7-6 7-10-4 0-7 4-7 10z"/><path d="M24 28c-4-2-7-6-7-10 4 0 7 4 7 10zM24 28c4-2 7-6 7-10-4 0-7 4-7 10z"/><path d="M24 38c-4-2-7-6-7-10 4 0 7 4 7 10zM24 38c4-2 7-6 7-10-4 0-7 4-7 10z"/></>,
-  cortex:<><path d="M16 44V4M32 44V14"/><path d="M32 14c4-4 10-4 12 2-4 1-8 1-12-2z"/><path d="M20 10v6M27 16v8M20 26v6M27 32v8M20 38v4"/></>,
-  sib:<><circle cx="16" cy="12" r="5"/><circle cx="32" cy="12" r="5"/><path d="M10 42V24a6 6 0 0 1 12 0v18M26 42V24a6 6 0 0 1 12 0v18"/><path d="M22 30h4"/></>,
+  /* 食べ物：ごはんを盛ったおわんとはし */
+  site:<><path d="M8 26h32a16 14 0 0 1-32 0z"/><path d="M18 40h12"/><path d="M12 26c0-6 5-9 12-9s12 3 12 9"/><path d="M30 4l-6 18M38 4l-8 18"/></>,
+  /* 木の皮：幹の外側の皮がめくれる */
+  cortex:<><path d="M14 44V12M32 44V12"/><ellipse cx="23" cy="10" rx="9" ry="4"/><ellipse cx="23" cy="10" rx="4" ry="1.5"/><path d="M32 22c6-2 10 0 12 4-4 2-8 2-12 0"/><path d="M32 30l-4 2v6l4 2"/><path d="M8 44h30"/></>,
+  /* 親族：手をつなぐ親と子（famil と同じ） */
+  sib:<><circle cx="16" cy="10" r="4.5"/><path d="M16 15v14M16 29l-5 13M16 29l5 13M16 19l-6 6M16 19l8 6"/><circle cx="33" cy="20" r="3.5"/><path d="M33 24v10M33 34l-4 8M33 34l4 8M33 27l-9-2M33 27l5 4"/></>,
   stigma:<><path d="M4 4l20 20"/><path d="M22 28l6-6 6 6-6 6z"/><path d="M2 44h44"/><path d="M40 20c2-2 0-4 2-6M44 26c2-2 0-4 2-6"/></>,
   turmoil:<><path d="M24 24c0-3 4-3 4 0s-4 7-8 4-4-10 2-12 14 2 12 10-10 14-18 10-10-14-4-20 16-8 22 0"/><path d="M42 4l-3 5M6 44l3-5"/></>,
   loop:<><path d="M6 44V12h6v6h6v-6h6v6h6v-6h6v6h6v26"/><rect x="21" y="24" width="6" height="14" rx="3"/></>,
   hole:<><ellipse cx="22" cy="38" rx="16" ry="6"/><ellipse cx="22" cy="38" rx="10" ry="3"/><path d="M34 37V6l10 5-10 5"/></>,
   digit:<><path d="M16 44V28c0-2 2-4 4-4h12c2 0 4 2 4 4v10c0 4-2 6-6 6z"/><path d="M20 24V8a3 3 0 0 1 6 0v16"/><path d="M26 26a2 2 0 0 1 4 0M30 26a2 2 0 0 1 4 0"/><path d="M36 6l3-2v10"/></>,
-  bulk:<><path d="M4 30h40l-6 10H10z"/><path d="M10 30c0-16 28-16 28 0"/><path d="M16 22l6 4M26 18l2 7M32 24l-4 3"/></>,
+  /* 船の積み荷：船に積み上げた荷 */
+  bulk:<><path d="M4 30h40l-6 10H10z"/><path d="M26 30V10M26 12l8 6-8 4"/><rect x="8" y="22" width="7" height="8"/><rect x="15" y="22" width="7" height="8"/><rect x="11" y="15" width="7" height="7"/><path d="M4 44c3-2 5 2 8 0s5 2 8 0 5 2 8 0 5 2 8 0"/></>,
   longi:<><path d="M4 30c5-8 9 8 14 0s9 8 14 0 6-6 8-4"/><circle cx="41" cy="25" r="4"/><path d="M44 22l3-2"/><path d="M4 40h40M4 37v6M44 37v6"/></>,
   turn:<><path d="M14 42V20a10 10 0 0 1 20 0v18"/><path d="M28 32l6 6 6-6"/></>,
   aqu:<><path d="M4 12h20a6 6 0 0 1 6 6v4"/><path d="M4 8v8M26 22h8"/><path d="M30 28c-4 6-5 8-5 10a5 5 0 0 0 10 0c0-2-1-4-5-10z"/></>,
@@ -45268,11 +45311,13 @@ const PICTO_ROOT={
   chol:<><path d="M18 6v8c-6 3-8 9-8 15 0 8 6 13 14 13s14-5 14-13c0-6-2-12-8-15V6z"/><path d="M16 6h16"/><path d="M11 28c4-2 9 2 13 0s9-2 13 0"/><path d="M36 32l-2 4" /><path d="M20 34v2"/></>,
   scorn:<><circle cx="17" cy="15" r="11"/><path d="M12 14h4M21 16h4"/><path d="M13 21c4 1 7 0 9-4"/><path d="M26 6l3-2"/><circle cx="38" cy="34" r="3"/><path d="M38 37v5M34 40l4-2 4 2"/><path d="M2 44h44"/></>,
   menac:<><path d="M4 42V6h30c4 0 8 4 6 8l-14 4-8 2-8 0"/><path d="M14 20v22"/><circle cx="32" cy="30" r="3"/><path d="M32 33v6l-3 4M32 39l3 4M28 35h8"/><path d="M4 42h40"/></>,
-  verge:<><path d="M2 26h22l2 4-2 6 2 8"/><circle cx="20" cy="10" r="3"/><path d="M20 13v7l-3 6M20 20l4 6M15 17l5 1 5-3"/><path d="M34 30v10M30 36l4 4 4-4"/></>,
+  /* 棒：まっすぐな1本の棒 */
+  verge:<><path d="M16 42L34 8"/><circle cx="35.5" cy="5.5" r="2.5"/><path d="M8 42h24"/></>,
   hol:<><ellipse cx="24" cy="18" rx="17" ry="6"/><path d="M7 18v16c0 3 8 6 17 6s17-3 17-6V18"/><path d="M7 26c6 3 28 3 34 0"/><circle cx="17" cy="16" r="2"/><circle cx="24" cy="14" r="2"/><circle cx="31" cy="16" r="2"/><circle cx="24" cy="20" r="2"/><path d="M3 44h42"/></>,
   numb:<><path d="M14 42V24l-4-6M14 24V12M20 22V9M26 22V10M32 24V14"/><path d="M14 42h18V24"/><path d="M40 4v14M33 7l14 8M33 15l14-8"/><path d="M36 26l3 3-3 3 3 3"/></>,
   later:<><path d="M8 16l10-8h24v24l-10 8H8z"/><path d="M8 16h24v24M32 16l10-8"/><path d="M35 17l4-3M35 23l4-3M35 29l4-3M35 35l4-3"/></>,
-  sec:<><circle cx="16" cy="9" r="4"/><path d="M16 13v15l-5 14M16 28l5 14M16 17l-6 9M16 17l8 8"/><circle cx="32" cy="9" r="4"/><path d="M32 13v15l-5 14M32 28l5 14M32 17l6 9M32 17l-8 8"/><path d="M4 44h40"/></>,
+  /* そばに：ぴったり横に並ぶ */
+  sec:<><rect x="8" y="16" width="14" height="16" rx="1.5"/><circle cx="29" cy="24" r="7"/><path d="M8 38v3h28v-3"/></>,
   dra:<><path d="M2 42h44"/><path d="M4 36h40"/><path d="M4 4c4 10 4 20 0 32M44 4c-4 10-4 20 0 32M4 4h40"/><circle cx="24" cy="16" r="3.5"/><path d="M24 20v8l-4 8M24 28l4 8M18 22l6 2 7-5"/></>,
   ubi:<><path d="M24 44S10 28 10 18a14 14 0 0 1 28 0c0 10-14 26-14 26z"/><path d="M20 15a4 4 0 1 1 5 4c-1 1-1 2-1 3"/><path d="M24 26v1"/></>,
   que:<><circle cx="24" cy="24" r="19"/><path d="M5 24h38M24 5c-8 8-8 30 0 38M24 5c8 8 8 30 0 38"/><path d="M14 16l2 4 2-4a2 2 0 1 0-4 0zM30 12l2 4 2-4a2 2 0 1 0-4 0zM12 30l2 4 2-4a2 2 0 1 0-4 0zM30 30l2 4 2-4a2 2 0 1 0-4 0z"/></>,
@@ -45299,7 +45344,8 @@ const PICTO_ROOT={
   cyn:<><path d="M14 10l-8 12 6 4 4-8"/><path d="M34 10l8 12-6 4-4-8"/><path d="M14 10c4-3 16-3 20 0 3 6 4 14 2 20-3 8-7 12-12 12s-9-4-12-12c-2-6-1-14 2-20z"/><path d="M19 22v2M29 22v2"/><path d="M21 32h6l-3 3z"/><path d="M24 35v3"/></>,
   silv:<><path d="M24 44V30"/><path d="M24 4L10 22h6L6 32h36L32 22h6z"/><path d="M18 14l-4 8M24 12l-4 10M30 14l-4 8"/></>,
   arbitr:<><circle cx="24" cy="8" r="4"/><rect x="17" y="14" width="14" height="16" rx="2"/><path d="M21 14v16M27 14v16"/><path d="M17 16L8 8M31 16l9 8"/><path d="M20 30l-2 14M28 30l2 14"/><path d="M40 20l4 2-4 4"/></>,
-  obsolesc:<><rect x="14" y="22" width="30" height="20" rx="2"/><circle cx="36" cy="32" r="4"/><path d="M18 28h10M18 34h8"/><path d="M2 2v20M2 2l16 16M2 2h20"/><path d="M2 10c4 0 7-1 8-3 1-2 0-4 0-4M2 16c7 0 12-2 13-6 1-3 1-6 0-8"/><path d="M4 44h40"/></>,
+  /* 使われなくなる：くもの巣のはった古いカセット */
+  obsolesc:<><rect x="4" y="14" width="40" height="28" rx="2"/><circle cx="15" cy="28" r="4.5"/><circle cx="33" cy="28" r="4.5"/><path d="M19.5 28h9M12 37h24"/><path d="M4 14l12 12M4 26h4M16 14v4"/><path d="M4 19c3 0 5-2 5-5M4 23c5 0 8-4 9-9"/></>,
   carp:<><path d="M2 6c12-2 22 2 28 10"/><path d="M20 8c-4 6-6 12-6 18M20 8c1 6 4 12 8 16"/><circle cx="13" cy="30" r="4"/><circle cx="29" cy="28" r="4"/><path d="M46 20c-6 0-12 2-15 3"/><path d="M46 34c-6 0-12-4-15-7"/></>,
   sollemn:<><path d="M6 44h36M10 44V32h28v12"/><path d="M6 32h36"/><rect x="21" y="16" width="6" height="16"/><path d="M24 16v-3"/><path d="M24 4c-3 4-3 6 0 8 3-2 3-4 0-8z"/><path d="M14 10l3 3M34 10l-3 3"/></>,
   rigor:<><path d="M4 22h40v6H4z"/><path d="M10 28l-4 10h8zM38 28l-4 10h8z"/><path d="M24 4v12M19 11l5 5 5-5"/><path d="M2 40h44"/></>,
@@ -45311,13 +45357,15 @@ const PICTO_ROOT={
   soak:<><path d="M12 8h24v32a4 4 0 0 1-4 4H16a4 4 0 0 1-4-4z"/><path d="M12 16c4-2 8-2 12 0s8 2 12 0"/><ellipse cx="19" cy="27" rx="3" ry="2.5"/><ellipse cx="28" cy="31" rx="3" ry="2.5"/><ellipse cx="21" cy="37" rx="3" ry="2.5"/><ellipse cx="29" cy="22" rx="3" ry="2.5"/></>,
   dip:<><path d="M4 30h40c0 7-9 12-20 12S4 37 4 30z"/><path d="M42 4L27 23"/><circle cx="24" cy="27" r="5"/><path d="M14 36v2M32 36v2"/></>,
   slap:<><path d="M14 40V22l-4-6M14 22V10M20 20V7M26 20V8M32 22V12"/><path d="M14 40h18V22"/><path d="M38 12l6-4M39 20h7M38 28l6 4"/></>,
-  brac:<><path d="M24 34l-7-7a4.5 4.5 0 0 1 7-5 4.5 4.5 0 0 1 7 5z"/><path d="M6 16c0 16 8 26 18 26s18-10 18-26"/><path d="M6 16l-2-6M42 16l2-6"/></>,
+  /* 腕：両腕でハートをだきかかえる */
+  brac:<><path d="M4 44V30c0-8 6-14 14-14"/><path d="M11 44V31c0-5 3-8 7-8"/><path d="M44 44V30c0-8-6-14-14-14"/><path d="M37 44V31c0-5-3-8-7-8"/><path d="M18 16c3 0 4 3 2 5l-2 2M30 16c-3 0-4 3-2 5l2 2"/><path d="M24 36l-5-5a3 3 0 0 1 5-4 3 3 0 0 1 5 4z"/></>,
   bark:<><path d="M6 28h36l-6 8H12z"/><path d="M12 14l18 22"/><path d="M10 12l4 4"/><path d="M4 42c4-2 8-2 12 0s8 2 12 0 8-2 12 0"/></>,
   penetr:<><rect x="20" y="6" width="8" height="36"/><path d="M4 24h38M35 17l7 7-7 7"/></>,
   trud:<><path d="M28 42V8h14v34"/><path d="M4 25h20M17 18l7 7-7 7"/><path d="M2 42h44"/></>,
   util:<><path d="M32 6a8 8 0 0 0-9 10L8 31l5 5 15-15a8 8 0 0 0 10-9l-5 4-5-5z"/><path d="M6 42h36"/></>,
   blink:<><path d="M6 22c6 6 30 6 36 0"/><path d="M11 26l-3 5M18 28l-1 5M24 29v5M30 28l1 5M37 26l3 5"/><path d="M8 12h4M36 12h4M24 6v4"/></>,
-  spin:<><path d="M24 6v6"/><path d="M12 18h24L24 38z"/><path d="M24 38v4"/><path d="M6 22c-3 6 2 12 10 14M42 22c3 6-2 12-10 14"/><path d="M13 36l3 0 0-3M35 36l-3 0 0-3"/></>,
+  /* 糸をつむぐ：くるくる回る紡錘から糸がのびる */
+  spin:<><path d="M24 4v36"/><ellipse cx="24" cy="32" rx="10" ry="3.5"/><path d="M20 10h8M20 14h8M20 18h8"/><path d="M24 6c8-2 14 2 20 0"/><path d="M12 40a12 4 0 0 0 24 0M36 40l-3 1M36 40l-1-3"/></>,
   rota:<><circle cx="24" cy="24" r="14"/><circle cx="24" cy="24" r="3"/><path d="M24 10v11M24 27v11M10 24h11M27 24h11"/><path d="M36 4l5 6-7 2"/></>,
   scramble:<><path d="M4 42L42 12"/><circle cx="24" cy="16" r="4"/><path d="M22 20l-4 10M18 30l-8 4M18 30l6 4M21 24l8-2M21 24l-7-3"/></>,
   vani:<><circle cx="20" cy="14" r="5" strokeDasharray="3 3"/><path d="M10 40c0-10 4-16 10-16s10 6 10 16" strokeDasharray="3 3"/><path d="M36 10l6-4M38 20h7M36 30l6 4"/></>,
@@ -45326,12 +45374,14 @@ const PICTO_ROOT={
   haste:<><circle cx="30" cy="26" r="12"/><path d="M30 14v-4M26 10h8M30 26l5-5"/><path d="M4 20h10M2 28h10M4 36h10"/></>,
   ceal:<><rect x="10" y="26" width="28" height="16"/><path d="M8 12h32v6H8z"/><path d="M24 2v7M20 5l4 4 4-4"/><circle cx="24" cy="34" r="3"/></>,
   guise:<><path d="M8 16h32M16 16l2-10h12l2 10"/><circle cx="18" cy="24" r="4"/><circle cx="30" cy="24" r="4"/><path d="M22 24h4"/><path d="M16 34c3-3 6-3 8-1 2-2 5-2 8 1"/><path d="M18 42h12"/></>,
-  nec:<><rect x="10" y="6" width="28" height="36" rx="2"/><rect x="15" y="12" width="6" height="6"/><rect x="15" y="22" width="6" height="6"/><rect x="15" y="32" width="6" height="6"/><path d="M25 15h8M25 25h8M25 35h8"/></>,
+  /* 否定：禁止マーク（否定の接頭語と同じ） */
+  nec:<><circle cx="24" cy="24" r="16"/><path d="M12.7 12.7l22.6 22.6"/></>,
   linger:<><path d="M8 24h14v8a6 6 0 0 1-6 6h-2a6 6 0 0 1-6-6z"/><path d="M22 26h3a3 3 0 0 1 0 6h-3"/><path d="M12 18c-2-3 2-5 0-8M17 18c-2-3 2-5 0-8"/><path d="M28 12c6 0 6 4 12 4M30 20c5 0 5 3 10 3M30 6c6 0 6 3 12 3"/><path d="M4 42h40"/></>,
   pedi:<><path d="M22 17c7 0 11 6 11 14 0 8-3 13-8 13s-8-5-8-12c0-8-2-15 5-15z"/><circle cx="20" cy="9" r="3.5"/><circle cx="27" cy="8" r="2.5"/><circle cx="32" cy="10.5" r="2.2"/><circle cx="35.5" cy="15" r="2"/></>,
   discipl:<><path d="M4 8h40"/><circle cx="10" cy="17" r="3.5"/><path d="M10 21v10M6 25h8M10 31l-3 9M10 31l3 9"/><circle cx="24" cy="17" r="3.5"/><path d="M24 21v10M20 25h8M24 31l-3 9M24 31l3 9"/><circle cx="38" cy="17" r="3.5"/><path d="M38 21v10M34 25h8M38 31l-3 9M38 31l3 9"/></>,
   tuit:<><path d="M8 14c6-7 26-7 32 0-6 7-26 7-32 0z"/><circle cx="24" cy="14" r="3"/><circle cx="24" cy="30" r="4"/><path d="M16 44c0-5 4-8 8-8s8 3 8 8"/></>,
-  eth:<><path d="M8 30l-2 12M8 30l2 12"/><path d="M8 30l8-8M11 27l2 6"/><circle cx="18" cy="18" r="3.5"/><path d="M40 30l2 12M40 30l-2 12"/><path d="M40 30l-8-8M37 27l-2 6"/><circle cx="30" cy="18" r="3.5"/><path d="M2 44h44"/></>,
+  /* 習慣：毎日同じ印がつくカレンダー（mor と同じ） */
+  eth:<><rect x="6" y="10" width="36" height="32" rx="2"/><path d="M6 18h36M15 6v8M33 6v8"/><path d="M10 26l2.5 2.5 4-4M21 26l2.5 2.5 4-4M32 26l2.5 2.5 4-4M10 35l2.5 2.5 4-4M21 35l2.5 2.5 4-4M32 35l2.5 2.5 4-4"/></>,
   psych:<><path d="M30 42v-8c6-2 10-7 10-14A14 14 0 0 0 12 18l-4 8h4v6c0 3 3 4 6 4h2v6"/><path d="M25 28l-5-5a3 3 0 0 1 5-3.5 3 3 0 0 1 5 3.5z"/></>,
   archae:<><path d="M18 6h12M20 6v4c-8 4-10 12-8 20 2 6 6 10 12 12 6-2 10-6 12-12 2-8 0-16-8-20V6"/><path d="M16 12c-5 0-7 5-4 9M32 12c5 0 7 5 4 9"/><path d="M19 22l5 5-2 5 4 4"/></>,
   dorm:<><rect x="6" y="28" width="26" height="12" rx="6"/><path d="M28 6h9l-9 9h9M38 18h6l-6 6h6"/><path d="M2 44h44"/></>,
@@ -45342,13 +45392,17 @@ const PICTO_ROOT={
   night:<><path d="M28 6a16 16 0 1 0 14 24A13 13 0 0 1 28 6z"/><path d="M10 8l1.5 3 3 1.5-3 1.5L10 17l-1.5-3-3-1.5 3-1.5z"/><path d="M40 8v4M38 10h4"/></>,
   mare:<><path d="M2 42h44"/><circle cx="9" cy="33" r="4"/><path d="M13 36h28v6"/><circle cx="27" cy="21" r="5"/><path d="M23 17l-2-6M31 17l2-6"/><path d="M24 26l-3 10M30 26l3 10"/><path d="M25 21h.5M29 21h.5"/></>,
   stereo:<><path d="M24 6l16 8v20l-16 8-16-8V14z"/><path d="M8 14l16 8 16-8M24 22v20"/></>,
-  lus:<><path d="M14 36V16h18v20"/><path d="M8 36h30"/><path d="M14 22h18"/><path d="M34 12l8-8"/><path d="M40 16l1 2 2 1-2 1-1 2-1-2-2-1 2-1zM44 28l1 1.5 1.5 1-1.5 1-1 1.5-1-1.5-1.5-1 1.5-1z"/></>,
+  /* 遊ぶ：はずむボールと積み木 */
+  lus:<><circle cx="14" cy="14" r="7"/><path d="M8 11c4 2 8 2 12 0M8 17c4-2 8-2 12 0"/><path d="M22 18c6 4 10 12 12 22" strokeDasharray="2 3"/><rect x="30" y="30" width="10" height="10"/><rect x="34" y="20" width="10" height="10"/><path d="M4 42h40"/></>,
   toler:<><circle cx="16" cy="10" r="4"/><rect x="22" y="6" width="18" height="14" rx="1"/><path d="M16 14l4 14-6 14M20 28l6 14"/><path d="M17 17l6 1"/></>,
   understand:<><circle cx="18" cy="16" r="9"/><path d="M8 42c0-8 4-14 10-14s10 6 10 14"/><path d="M30 14l5 5 9-11"/></>,
-  keen:<><path d="M6 42L36 12l6-6-2 8L10 44z"/><path d="M38 22l3 2M42 18l3-1M40 28l1 3"/></>,
-  trim:<><path d="M8 42V30h32v12"/><path d="M4 42h40"/><path d="M14 8l20 16M34 8L14 24"/><circle cx="11" cy="6" r="3"/><circle cx="37" cy="6" r="3"/></>,
+  /* 勇ましい：盾を構えて立つ人 */
+  keen:<><circle cx="16" cy="10" r="4.5"/><path d="M16 15v14M16 29l-5 13M16 29l5 13M16 19l-6-6M8 6v10"/><path d="M26 16h14v10c0 7-7 11-7 11s-7-4-7-11z"/><path d="M16 20l10 2"/></>,
+  /* 整える：はさみで生け垣を平らに刈る */
+  trim:<><path d="M4 42V30c2-4 4 0 6-4s4 0 6-4 4 0 6-4h20v24"/><path d="M22 22h20"/><path d="M4 42h40"/><path d="M26 4l14 12M40 4L26 16"/><circle cx="24" cy="3" r="2"/><circle cx="42" cy="3" r="2"/></>,
   gran:<><ellipse cx="14" cy="38" rx="3" ry="4"/><ellipse cx="24" cy="38" rx="3" ry="4"/><ellipse cx="34" cy="38" rx="3" ry="4"/><ellipse cx="19" cy="29" rx="3" ry="4"/><ellipse cx="29" cy="29" rx="3" ry="4"/><ellipse cx="24" cy="20" rx="3" ry="4"/><path d="M24 6v6"/></>,
-  wheat:<><path d="M24 44V8"/><path d="M24 14c-4-2-6-6-6-9 4 1 6 5 6 9M24 14c4-2 6-6 6-9-4 1-6 5-6 9M24 23c-4-2-6-6-6-9 4 1 6 5 6 9M24 23c4-2 6-6 6-9-4 1-6 5-6 9M24 32c-4-2-6-6-6-9 4 1 6 5 6 9M24 32c4-2 6-6 6-9-4 1-6 5-6 9"/></>,
+  /* 白いもの：麦の穂と、ひいた白い粉の山 */
+  wheat:<><path d="M16 42V8"/><path d="M16 14c-4-1-6-4-6-7 4 1 6 4 6 7zM16 14c4-1 6-4 6-7-4 1-6 4-6 7zM16 22c-4-1-6-4-6-7 4 1 6 4 6 7zM16 22c4-1 6-4 6-7-4 1-6 4-6 7zM16 30c-4-1-6-4-6-7 4 1 6 4 6 7zM16 30c4-1 6-4 6-7-4 1-6 4-6 7z"/><path d="M26 42c2-8 6-12 9-12s7 4 9 12z"/><path d="M33 36h.5M37 38h.5"/></>,
   forest:<><path d="M10 42v-8M4 34h12L10 20z"/><path d="M24 42v-10M17 32h14L24 12z"/><path d="M38 42v-8M32 34h12l-6-14z"/><path d="M2 42h44"/></>,
   drought:<><circle cx="34" cy="12" r="5"/><path d="M34 2v3M44 12h-3M41 5l-2 2M27 5l2 2"/><path d="M4 28h40v14H4z"/><path d="M12 28l4 6-2 8M26 28l-4 6 4 8M36 28l2 6-3 3"/></>,
   rig:<><path d="M10 20h20v18H10z"/><path d="M30 24l10-8"/><path d="M10 24c-6 0-6 10 0 10"/><path d="M42 20l1 3M40 22l-1 3M44 24l2 2"/><path d="M4 44h40"/></>,
@@ -45357,14 +45411,17 @@ const PICTO_ROOT={
   wilder:<><circle cx="24" cy="30" r="7"/><path d="M20 24l-6-8-5-2M14 16l-2-7M28 24l6-8 5-2M34 16l2-7"/><path d="M22 36l2 5 2-5"/><path d="M21 29h.5M27 29h.5"/></>,
   rod:<><path d="M8 34c0-10 8-16 18-16 7 0 12 6 12 10l5 3-5 3H8z"/><circle cx="18" cy="17" r="4"/><circle cx="32" cy="27" r="1"/><path d="M8 34c-5 2-5 8 1 8"/></>,
   flam:<><path d="M24 44c-8 0-12-6-12-12 0-8 8-12 8-22 4 4 6 8 6 12 2-2 3-4 3-6 4 4 7 10 7 16 0 6-4 12-12 12z"/><path d="M24 44c-3 0-5-2-5-5 0-4 5-6 5-10 2 3 5 6 5 10 0 3-2 5-5 5z"/></>,
-  galax:<><path d="M24 24c3-3 8-1 8 3s-6 8-11 5-5-11 2-14 14 1 14 9-9 14-17 12"/><path d="M8 8h.5M40 10h.5M42 40h.5M6 38h.5M14 44h.5"/></>,
+  /* ミルク：牛乳びん */
+  galax:<><path d="M18 4h12v6l4 6v26a2 2 0 0 1-2 2H16a2 2 0 0 1-2-2V16l4-6z"/><path d="M18 10h12M14 24h20"/><path d="M40 8l1 3 3 1-3 1-1 3-1-3-3-1 3-1z"/></>,
   chill:<><path d="M10 22h28l-4 20H14z"/><path d="M20 22V6h8v16M20 10h8"/><path d="M14 28h5M30 30h4M20 35h4"/><path d="M4 14l3 2M44 14l-3 2"/></>,
   thermo:<><path d="M20 30V8a4 4 0 0 1 8 0v22a8 8 0 1 1-8 0z"/><path d="M24 14v20"/><path d="M34 10h5M34 16h5M34 22h5"/></>,
-  foss:<><rect x="6" y="10" width="36" height="28" rx="4"/><path d="M24 24c2-2 5-1 5 2s-4 5-7 3-3-7 1-9 9 0 9 5-4 10-10 9"/></>,
+  /* 掘る：シャベルで地面を掘る */
+  foss:<><path d="M2 26h44"/><path d="M4 32h40M6 38h36" strokeDasharray="3 4"/><path d="M26 30l10-24M33 4l6 3"/><path d="M22 28l4 4 6-4-2-4z"/><path d="M8 26c2-5 8-7 12-3"/></>,
   /* No.1451〜1650 で増えた語根の絵（2026-09-23 に追加） */
   flu:<><path d="M8 6h14v8H14"/><path d="M14 14v4"/><path d="M14 22c-2 3-3 5-3 7a3 3 0 0 0 6 0c0-2-1-4-3-7z"/><path d="M8 40c6-4 10-4 16 0s10 4 16 0"/><path d="M26 32c4-3 8-3 12 0"/></>,
   person:<><circle cx="14" cy="14" r="6"/><path d="M4 42c0-10 4-16 10-16s10 6 10 16"/><path d="M28 10c5-2 11-2 16 0 0 8-3 14-8 15-5-1-8-7-8-15z"/><path d="M32 14h2M38 14h2"/></>,
-  put:<><path d="M6 20h36M6 40h36"/><path d="M8 20v20M40 20v20"/><rect x="18" y="8" width="12" height="10"/><path d="M24 4v2"/><rect x="12" y="30" width="10" height="10"/></>,
+  /* 置く：そっと下ろして置く（set と同じ） */
+  put:<><rect x="14" y="24" width="20" height="12" rx="2"/><path d="M6 40h36"/><path d="M24 6v12"/><path d="M19 13l5 5 5-5"/></>,
   heir:<><path d="M14 14l4-6 6 5 6-5 4 6v6H14z"/><path d="M6 40h14l6-6"/><path d="M42 40H28"/><path d="M24 24v8"/><path d="M20 28l4 4 4-4"/></>,
   weary:<><circle cx="20" cy="14" r="5"/><path d="M20 19c0 8 4 12 10 16"/><path d="M20 26l-8 6"/><path d="M30 35l-2 9M30 35l6 8"/><path d="M36 8c2 3 2 5 0 6"/></>,
   pall:<><circle cx="24" cy="22" r="14"/><path d="M18 20v3M30 20v3"/><path d="M19 30c3-2 7-2 10 0"/><path d="M14 8v6M20 5v6M28 5v6M34 8v6"/></>,
@@ -45375,7 +45432,8 @@ const PICTO_ROOT={
   shrug:<><circle cx="24" cy="16" r="6"/><path d="M8 20c4-6 8-4 10 2M40 20c-4-6-8-4-10 2"/><path d="M18 22v16h12V22"/><path d="M6 14l2 4M42 14l-2 4"/></>,
   bias:<><rect x="6" y="6" width="36" height="36"/><path d="M6 42L42 6"/><path d="M6 30l24-24M18 42l24-24"/></>,
   dign:<><rect x="12" y="34" width="24" height="10"/><circle cx="24" cy="10" r="5"/><path d="M24 15v11M18 20h12M24 26l-4 8M24 26l4 8"/></>,
-  virt:<><path d="M8 40V28c0-4 4-6 8-6h4l4-10c2-4 8-4 10 0l2 6-6 2-2-2-2 8c6 0 12 4 12 10v4z"/></>,
+  /* 男らしい力：両腕で力こぶを作る人 */
+  virt:<><circle cx="24" cy="10" r="4.5"/><path d="M24 15v15"/><path d="M24 19H11V9M24 19h13V9"/><circle cx="11" cy="7" r="2.5"/><circle cx="37" cy="7" r="2.5"/><path d="M12 19c0-4 7-4 7 0M29 19c0-4 7-4 7 0"/><path d="M24 30l-6 12M24 30l6 12"/></>,
   arist:<><path d="M24 42c-10-2-16-10-16-22"/><path d="M24 42c10-2 16-10 16-22"/><path d="M10 26l-4-2M12 32l-4 0M16 37l-4 2M38 26l4-2M36 32l4 0M32 37l4 2"/><path d="M24 8l3 6 6 1-4 4 1 6-6-3-6 3 1-6-4-4 6-1z"/></>,
   cracy:<><path d="M24 6v28"/><circle cx="24" cy="6" r="3"/><path d="M8 42h32"/><path d="M12 42V32h24v10"/><path d="M18 26h12"/></>,
   bel:<><path d="M6 42L36 12M42 42L12 12"/><path d="M36 12l4-8 2 6zM12 12l-4-8-2 6z"/><path d="M30 18l4 4M18 18l-4 4"/></>,
@@ -45387,7 +45445,8 @@ const PICTO_ROOT={
   hygi:<><path d="M24 4c-6 10-10 14-10 20a10 10 0 0 0 20 0c0-6-4-10-10-20z"/><path d="M24 20v10M19 25h10"/><path d="M8 42h32"/></>,
   patent:<><path d="M8 8h26v32H8z"/><path d="M34 8c4 0 6 2 6 4s-2 4-6 4"/><path d="M14 16h14M14 22h14M14 28h8"/><circle cx="30" cy="34" r="4"/></>,
   ethn:<><circle cx="12" cy="30" r="6"/><circle cx="24" cy="26" r="6"/><circle cx="36" cy="30" r="6"/><path d="M24 20V6h12l-3 4 3 4H24"/></>,
-  onym:<><rect x="6" y="14" width="36" height="22" rx="3"/><path d="M6 22h36"/><path d="M12 30h24" stroke-dasharray="4 3"/><path d="M20 14V8h8v6"/></>,
+  /* 名前：名札（名前の欄が「？」） */
+  onym:<><path d="M8 14h32a3 3 0 0 1 3 3v20a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3V17a3 3 0 0 1 3-3z"/><path d="M18 14l6-8 6 8"/><path d="M20 23c0-4 8-4 8 0 0 3-4 3-4 6M24 33v.5"/></>,
   metro:<><circle cx="18" cy="11" r="5"/><path d="M12 14c-2-10 14-10 12 0"/><path d="M18 18L8 44h20z"/><circle cx="36" cy="26" r="4"/><path d="M30 44c0-8 3-12 6-12s6 4 6 12"/><path d="M22 28l9 6"/></>,
   title:<><path d="M10 6h24l4 4v32H10z"/><rect x="14" y="14" width="20" height="8"/><path d="M14 30h20M14 36h14"/></>,
   demo:<><circle cx="10" cy="14" r="4"/><circle cx="24" cy="14" r="4"/><circle cx="38" cy="14" r="4"/><circle cx="17" cy="28" r="4"/><circle cx="31" cy="28" r="4"/><path d="M4 44c2-8 10-10 20-10s18 2 20 10"/></>,
@@ -45411,14 +45470,17 @@ const PICTO_ROOT={
   marg:<><rect x="8" y="4" width="32" height="40"/><path d="M16 4v40" stroke-dasharray="3 3"/><path d="M20 12h14M20 18h14M20 24h14M20 30h10"/></>,
   cel:<><path d="M20 44V12l4-6 4 6v32"/><path d="M4 44h40"/><rect x="6" y="34" width="8" height="10"/><rect x="34" y="34" width="8" height="10"/><path d="M16 6l-4-2M32 6l4-2"/></>,
   random:<><path d="M4 14h8c8 0 12 20 20 20h8"/><path d="M4 34h8c8 0 12-20 20-20h8"/><path d="M36 10l4 4-4 4M36 30l4 4-4 4"/></>,
-  war:<><path d="M8 30c0-12 7-20 16-20s16 8 16 20z"/><path d="M8 30h32v6H8z"/><path d="M24 10V4"/><path d="M18 30v-8h12v8"/></>,
+  /* 戦い：交差したやり（bel と同じ） */
+  war:<><path d="M6 42L36 12M42 42L12 12"/><path d="M36 12l4-8 2 6zM12 12l-4-8-2 6z"/><path d="M30 18l4 4M18 18l-4 4"/></>,
   troop:<><circle cx="10" cy="10" r="3"/><circle cx="24" cy="10" r="3"/><circle cx="38" cy="10" r="3"/><circle cx="10" cy="28" r="3"/><circle cx="24" cy="28" r="3"/><circle cx="38" cy="28" r="3"/><path d="M10 13v8M24 13v8M38 13v8M10 31v8M24 31v8M38 31v8"/></>,
   shield:<><circle cx="20" cy="26" r="14"/><circle cx="20" cy="26" r="4"/><path d="M44 6L34 16"/><path d="M36 22l6 2"/></>,
   tort:<><path d="M8 6c16 6 16 12 32 18"/><path d="M40 6C24 12 24 18 8 24"/><path d="M8 24c16 6 16 12 32 18"/><path d="M40 24C24 30 24 36 8 42"/></>,
-  pute:<><circle cx="18" cy="12" r="5"/><path d="M18 17v10l8 4v10"/><path d="M18 27H8l-2 14"/><path d="M26 31h-6"/><path d="M24 14c4-2 6 0 4 4"/><circle cx="36" cy="8" r="2"/><circle cx="42" cy="4" r="1.5"/></>,
+  /* 考える：頭の中で歯車が回る */
+  pute:<><path d="M30 42v-8c6-1 9-6 9-13 0-8-6-14-15-14S9 13 9 21c0 3 1 5 2 7l-3 5h4v4c0 2 2 3 4 3h3v2"/><circle cx="25" cy="20" r="5"/><path d="M25 13v2M25 25v2M18 20h2M30 20h2M20 15l1.4 1.4M28.6 23.6l1.4 1.4M30 15l-1.4 1.4M21.4 23.6L20 25"/></>,
   tactic:<><rect x="4" y="4" width="40" height="40"/><circle cx="14" cy="34" r="3"/><circle cx="24" cy="34" r="3"/><circle cx="34" cy="34" r="3"/><path d="M14 30c0-10 8-16 18-18"/><path d="M28 10l4 2-2 4"/></>,
   quarrel:<><circle cx="10" cy="18" r="6"/><circle cx="38" cy="18" r="6"/><path d="M26 10l-4 8h6l-4 8"/><path d="M10 24v14M38 24v14"/><path d="M4 44h40"/></>,
-  slaughter:<><path d="M8 10h24v14H8z"/><path d="M32 16h10"/><path d="M12 30c4 6 10 8 16 6"/><path d="M16 38l-4 6M26 40l0 4"/></>,
+  /* 打ち殺す：おので打ちおろす */
+  slaughter:<><path d="M8 40L28 20"/><path d="M26 12l10 10-6 6-10-10a6 6 0 0 1 6-6z"/><path d="M4 44h22"/><path d="M36 30l6 2M34 36l4 5M40 24l5-1"/></>,
   render:<><rect x="18" y="6" width="12" height="10"/><path d="M8 24h32"/><path d="M32 18l8 6-8 6"/><path d="M4 40h12l4-4h8l4 4h12"/></>,
   hostil:<><path d="M6 36c2-12 10-20 22-20 6 0 10 4 12 10"/><path d="M40 26l4 4-6 2"/><path d="M12 26l-4-8M18 21l-2-9M24 18l1-9M31 18l3-8M36 21l5-6"/><path d="M4 36h40"/></>,
   wreck:<><path d="M6 30l30-10 6 8-28 12z"/><path d="M20 26l-2-16 10 8"/><path d="M4 44c6-3 10-3 16 0s10 3 16 0 8-3 10-1"/></>,
@@ -45427,8 +45489,10 @@ const PICTO_ROOT={
   lid:<><circle cx="18" cy="24" r="6"/><circle cx="30" cy="24" r="6"/><path d="M2 24h8M46 24h-8"/><path d="M6 20l4 4-4 4M42 20l-4 4 4 4"/><path d="M24 12v4M24 32v4"/></>,
   nephew:<><circle cx="24" cy="8" r="4"/><path d="M24 12v6M12 18h24M12 18v6M36 18v6"/><circle cx="12" cy="28" r="4"/><circle cx="36" cy="28" r="4"/><path d="M36 32v6"/><circle cx="36" cy="42" r="3"/></>,
   fant:<><circle cx="18" cy="22" r="12"/><path d="M14 20h1M22 20h1"/><path d="M15 28h6"/><path d="M34 12h10v8h-6l-4 4z"/><path d="M36 14l6 4M42 14l-6 4"/></>,
-  folk:<><ellipse cx="18" cy="32" rx="10" ry="10"/><circle cx="18" cy="32" r="3"/><path d="M24 24l16-16"/><path d="M38 6l6 6"/><path d="M14 40l8-8"/></>,
-  nav:<><circle cx="24" cy="24" r="18"/><path d="M24 10l5 14-5 14-5-14z"/><path d="M24 6v2M24 40v2M6 24h2M40 24h2"/></>,
+  /* 民衆：並んだ人々（popul と同じ） */
+  folk:<><circle cx="12" cy="14" r="4"/><circle cx="24" cy="14" r="4"/><circle cx="36" cy="14" r="4"/><path d="M5 30c0-5 3-8 7-8s7 3 7 8M17 30c0-5 3-8 7-8s7 3 7 8M29 30c0-5 3-8 7-8s7 3 7 8"/><path d="M6 38h36"/></>,
+  /* 船：オールでこぐ小舟 */
+  nav:<><path d="M4 28h40l-6 10H10z"/><path d="M14 28l-6-18M34 28l6-18"/><path d="M6 8l4 4M42 8l-4 4"/><path d="M2 44c4-2 6 2 10 0s6 2 10 0 6 2 10 0 6 2 10 0"/></>,
   flee:<><rect x="28" y="6" width="14" height="36"/><circle cx="14" cy="10" r="4"/><path d="M14 14l-2 12 6 6-2 10M12 26l-6 6M14 18l8 4"/><path d="M24 24h8"/><path d="M30 20l4 4-4 4"/></>,
   crawl:<><circle cx="38" cy="18" r="5"/><path d="M34 22H14c-4 0-6 2-6 6"/><path d="M30 22l2 12M14 22l-4 12"/><path d="M4 36h40"/></>,
   hover:<><path d="M8 10h32"/><path d="M24 10v4"/><path d="M14 16h20c2 0 4 2 4 5v3H12v-3c0-3 1-5 2-5z"/><path d="M12 24l-4 4h8"/><path d="M10 38c4-3 8-3 12 0s8 3 12 0 6-2 8 0"/></>,
@@ -45448,14 +45512,16 @@ const PICTO_ROOT={
   refrain:<><path d="M28 10l8 4 4 10-4 4-6-4-4 18H14l2-16 4-12z"/><circle cx="32" cy="16" r="1.5"/><path d="M36 24L8 32"/><path d="M8 32v4"/></>,
   halt:<><path d="M8 16l8-8h16l8 8v16l-8 8H16l-8-8z"/><path d="M18 30V18M22 30V16M26 30V16M30 30V20"/></>,
   stimul:<><path d="M4 40L32 12"/><path d="M32 12l6-2-2 6z"/><circle cx="40" cy="24" r="4"/><path d="M42 18l2-3M44 26l3 1"/></>,
-  anim:<><rect x="6" y="8" width="36" height="32" rx="2"/><path d="M6 14h36M6 34h36"/><path d="M10 8v6M18 8v6M26 8v6M34 8v6M10 34v6M18 34v6M26 34v6M34 34v6"/><circle cx="24" cy="20" r="3"/><path d="M24 23v5l-3 3M24 28l3 3M20 25h8"/></>,
+  /* 命・息：口から出る息 */
+  anim:<><path d="M26 42v-6c5-1 8-6 8-12 0-7-5-13-13-13S8 17 8 24c0 3 1 5 2 7l-3 4h4v3c0 2 2 3 4 3h3v1"/><path d="M36 26c3 0 5-2 5-4s-2-3-3-1M38 32c4 0 7-2 7-5M36 20c2-3 5-4 8-3"/></>,
   spur:<><path d="M8 4h12v26h10l2 6H8z"/><path d="M32 33h4"/><circle cx="41" cy="33" r="5"/><circle cx="41" cy="33" r="1.5"/><path d="M41 26v2M41 38v2"/></>,
   blur:<><rect x="6" y="8" width="36" height="32"/><path d="M14 32l6-10 6 10"/><path d="M18 34l6-10 6 10" stroke-dasharray="2 2"/><circle cx="32" cy="16" r="3"/><circle cx="34" cy="17" r="3" stroke-dasharray="2 2"/></>,
   shadow:<><circle cx="14" cy="10" r="4"/><path d="M14 14v16M14 30l-4 10M14 30l4 10M14 20l-6 4M14 20l6 4"/><path d="M18 40h26l-6-8H22" stroke-dasharray="3 3"/><circle cx="42" cy="6" r="3"/></>,
   worse:<><path d="M12 6v24"/><path d="M6 24l6 6 6-6"/><path d="M32 6v34"/><path d="M26 34l6 6 6-6"/></>,
   jeopard:<><ellipse cx="24" cy="30" rx="10" ry="4"/><path d="M14 30v4c0 2 4 4 10 4s10-2 10-4v-4"/><path d="M20 6c0-3 8-3 8 1 0 3-4 3-4 7"/><circle cx="24" cy="19" r="1"/><path d="M8 22l-2-4M40 22l2-4"/></>,
   bully:<><circle cx="14" cy="8" r="5"/><path d="M14 13v18M14 31l-4 12M14 31l4 12"/><path d="M14 18l10-8"/><rect x="22" y="4" width="6" height="6" rx="2"/><circle cx="36" cy="32" r="3"/><path d="M36 35c-3 2-4 6-2 9h6"/></>,
-  squeeze:<><ellipse cx="24" cy="18" rx="12" ry="8"/><path d="M8 12l4 6-4 6M40 12l-4 6 4 6"/><path d="M24 28v4M22 36v2M26 38v2"/><path d="M14 44h20"/></>,
+  /* ぎゅっと押しつぶす：両側から押して汁をしぼり出す */
+  squeeze:<><ellipse cx="24" cy="20" rx="8" ry="11"/><path d="M4 20h8M9 16l4 4-4 4M44 20h-8M39 16l-4 4 4 4"/><path d="M20 36c-1 2-1 3 0 4 1-1 1-2 0-4zM28 38c-1 2-1 3 0 4 1-1 1-2 0-4zM24 42c-1 2-1 3 0 4 1-1 1-2 0-4z"/></>,
   rub:<><rect x="16" y="10" width="16" height="10" transform="rotate(-20 24 15)"/><path d="M6 30c6-4 10 4 16 0s10 4 16 0"/><path d="M8 40h32"/></>,
   smash:<><path d="M14 6h20l-3 18H17z"/><path d="M8 42l6-6M18 44l2-6M28 44l-2-6M40 42l-6-6"/><path d="M4 32l6 2M44 32l-6 2"/><path d="M20 24l4 6 4-6"/></>,
   pil:<><path d="M6 42h36"/><path d="M14 42l6-8 6 8M22 34l4-6 4 6"/><path d="M40 4L28 24"/><path d="M24 22l6 6M22 26l6 2"/></>,
@@ -45466,7 +45532,8 @@ const PICTO_ROOT={
   tempor:<><circle cx="24" cy="24" r="18"/><path d="M24 24V12"/><path d="M24 24l9 6"/><path d="M24 4v4M44 24h-4M24 44v-4M4 24h4"/></>,
   medi:<><rect x="4" y="16" width="12" height="16" rx="2"/><rect x="32" y="16" width="12" height="16" rx="2"/><path d="M24 10v28"/><circle cx="24" cy="24" r="4"/></>,
   dead:<><path d="M6 34h36"/><path d="M12 34V22a6 6 0 0 1 6-6h8a6 6 0 0 1 6 6v12"/><circle cx="22" cy="10" r="4"/><path d="M36 8l8 8M44 8l-8 8"/></>,
-  place:<><rect x="4" y="10" width="40" height="32" rx="2"/><circle cx="24" cy="26" r="6"/><path d="M24 20v-6"/><path d="M14 42v-6M34 42v-6"/></>,
+  /* 広場：上から見た、噴水のある広場 */
+  place:<><rect x="4" y="4" width="40" height="40" rx="2"/><circle cx="24" cy="24" r="6"/><path d="M24 4v12M24 32v12M4 24h12M32 24h12"/><circle cx="12" cy="12" r="1.5"/><circle cx="36" cy="36" r="1.5"/><circle cx="36" cy="12" r="1.5"/></>,
   chang:<><path d="M8 18h28"/><path d="M30 12l6 6-6 6"/><path d="M40 32H12"/><path d="M18 26l-6 6 6 6"/></>,
   liber:<><path d="M6 42V24a12 12 0 0 1 24 0v18"/><path d="M4 42h28"/><path d="M12 14v28M18 12v30"/><path d="M24 14v10"/><path d="M30 26l6-4"/><path d="M33 18c2-3 4-3 5 0c1-3 3-3 5 0"/><path d="M38 8c2-3 4-3 5 0c1-3 3-3 5 0"/></>,
   trick:<><path d="M8 14h32v10a16 16 0 0 1-32 0z"/><circle cx="18" cy="22" r="2.5"/><circle cx="30" cy="22" r="2.5"/><path d="M18 33c4 3 8 3 12 0"/><path d="M24 40v6"/></>,
@@ -45494,7 +45561,8 @@ const PICTO_ROOT={
   high:<><path d="M4 42l12-20 8 12 6-10 8 18z"/><path d="M42 20V4"/><path d="M37 9l5-5 5 5"/></>,
   classic:<><path d="M6 12h36"/><path d="M10 8h28"/><path d="M12 12v26M20 12v26M28 12v26M36 12v26"/><path d="M4 42h40"/></>,
   herit:<><rect x="4" y="10" width="14" height="12" rx="2"/><rect x="30" y="26" width="14" height="12" rx="2"/><path d="M20 20l8 8"/><path d="M28 20v8h-8"/></>,
-  tale:<><circle cx="14" cy="16" r="7"/><path d="M4 42c0-7 4-11 10-11s10 4 10 11"/><path d="M26 8h18v14H34l-6 5v-5h-2z"/><path d="M31 15h8"/></>,
+  /* 語る：開いた本から話がわき出る（narr と同じ） */
+  tale:<><path d="M24 42c-6-4-13-4-19-2V18c6-2 13-2 19 2 6-4 13-4 19-2v22c-6-2-13-2-19 2z"/><path d="M24 20v22"/><path d="M10 25h9M10 31h9M29 25h9M29 31h9"/><path d="M16 12c2-3 4-3 6 0M26 12c2-3 4-3 6 0M20 6c2-3 4-3 6 0"/></>,
   liter:<><path d="M10 6h20l8 8v28H10z"/><path d="M30 6v8h8"/><path d="M16 22h14M16 28h14M16 34h8"/></>,
   trag:<><path d="M18 18c-4-6-10-8-14-6 2 6 6 9 10 10"/><path d="M30 18c4-6 10-8 14-6-2 6-6 9-10 10"/><path d="M16 20h16v10a8 8 0 0 1-16 0z"/><circle cx="20" cy="26" r="1.5"/><circle cx="28" cy="26" r="1.5"/><path d="M22 40h4v6h-4z"/></>,
   ody:<><path d="M20 34V10l16-4v24"/><path d="M20 16l16-4"/><circle cx="14" cy="36" r="6"/><circle cx="30" cy="32" r="6"/></>,
@@ -45502,7 +45570,8 @@ const PICTO_ROOT={
   bio:<><path d="M24 42V20"/><path d="M24 26c-8 0-12-5-12-12 8 0 12 5 12 12z"/><path d="M24 30c8 0 12-5 12-12-8 0-12 5-12 12z"/><path d="M14 42h20"/></>,
   verb:<><path d="M6 10h36v22H20l-10 8v-8H6z"/><path d="M14 17h20"/><path d="M14 25h12"/></>,
   pret:<><circle cx="7" cy="14" r="4"/><path d="M7 20v14"/><circle cx="41" cy="14" r="4"/><path d="M41 20v14"/><rect x="19" y="20" width="10" height="9" rx="1"/><path d="M12 24h5"/><path d="M31 24h5"/></>,
-  veal:<><path d="M8 40V18c0-6 6-10 16-10s16 4 16 10v22"/><path d="M8 40c3-4 5-4 8 0s5 4 8 0 5-4 8 0 5 4 8 0"/><path d="M18 22h12"/></>,
+  /* 覆い：垂れ下がる布（すそを少しめくる） */
+  veal:<><path d="M4 6h40"/><path d="M8 6v34h10c-1-10 0-24 0-34M18 6c0 10 1 24 0 34M30 6v14c0 6 4 10 10 12l4-2V6"/><path d="M30 20c-4 4-4 12 0 18"/></>,
   seek:<><circle cx="20" cy="20" r="12"/><path d="M29 29l12 12"/><path d="M14 20a6 6 0 016-6"/></>,
   muse:<><path d="M4 26c5-7 11-10 17-10s12 3 17 10"/><path d="M4 26c5 6 11 9 17 9s12-3 17-9"/><circle cx="21" cy="26" r="4"/><circle cx="40" cy="13" r="2"/><circle cx="44" cy="6" r="3"/></>,
   fascin:<><path d="M8 40L30 18"/><path d="M26 14l4-4 8 8-4 4z"/><path d="M14 8l1.5 4.5L20 14l-4.5 1.5L14 20l-1.5-4.5L8 14l4.5-1.5z"/><circle cx="40" cy="30" r="2"/></>,
@@ -45511,7 +45580,8 @@ const PICTO_ROOT={
   scare:<><circle cx="24" cy="27" r="9"/><circle cx="20" cy="25" r="1.5"/><circle cx="28" cy="25" r="1.5"/><path d="M20 32c2-2 6-2 8 0"/><path d="M24 13V6"/><path d="M12 18l-5-5"/><path d="M36 18l5-5"/></>,
   arm:<><path d="M24 4l4 6v18h-8V10z"/><path d="M11 28h26"/><path d="M24 28v10"/><circle cx="24" cy="41" r="3"/></>,
   maze:<><rect x="4" y="4" width="40" height="40" rx="2"/><path d="M4 16h20v8H12v12h24V12"/><path d="M28 24h8"/><circle cx="22" cy="30" r="2"/></>,
-  irrit:<><circle cx="24" cy="28" r="10"/><path d="M18 25l5 2"/><path d="M30 25l-5 2"/><path d="M19 34c3-2 7-2 10 0"/><path d="M24 6v6"/><path d="M10 10l6 6"/><path d="M38 10l-6 6"/></>,
+  /* いらだたせる：怒りのしるしが浮かぶ顔 */
+  irrit:<><circle cx="22" cy="26" r="15"/><path d="M15 23l5 2M29 23l-5 2"/><path d="M16 34c4-3 8-3 12 0"/><path d="M34 6v6M31 9h6M38 10v6M35 13h6"/><path d="M10 8c-2-2 0-4 2-3M14 6c-1-3 2-4 3-2"/></>,
   set:<><rect x="14" y="24" width="20" height="12" rx="2"/><path d="M6 40h36"/><path d="M24 6v12"/><path d="M19 13l5 5 5-5"/></>,
   puzzle:<><path d="M6 10h12a3 3 0 016 0h12v12a3 3 0 000 6v12H24a3 3 0 00-6 0H6z"/><path d="M38 6h6v6h-6z" stroke-dasharray="3 3"/><path d="M38 36h6v6h-6z" stroke-dasharray="3 3"/></>,
   bore:<><circle cx="24" cy="24" r="17"/><path d="M15 20h6"/><path d="M27 20h6"/><path d="M17 31h14"/><path d="M38 4h6l-6 6h6"/></>,
@@ -45520,7 +45590,8 @@ const PICTO_ROOT={
   shame:<><circle cx="24" cy="24" r="16"/><path d="M15 21c2 2 4 2 6 0"/><path d="M27 21c2 2 4 2 6 0"/><path d="M20 33c3-2 5-2 8 0"/><path d="M12 29l2-3M15 30l2-3"/><path d="M31 30l2-3M34 29l2-3"/><path d="M42 10c-2 3-2 5 0 6c2-1 2-3 0-6z"/></>,
   luct:<><circle cx="24" cy="13" r="5"/><path d="M24 18v8"/><path d="M13 16l11 7 11-7"/><path d="M4 33c4-4 8 4 12 0s8 4 12 0 8 4 12 0"/><path d="M4 42c4-4 8 4 12 0s8 4 12 0 8 4 12 0"/></>,
   trem:<><rect x="18" y="14" width="12" height="20" rx="2"/><path d="M12 18c-3 3-3 9 0 12"/><path d="M36 18c3 3 3 9 0 12"/><path d="M6 14c-5 6-5 14 0 20"/><path d="M42 14c5 6 5 14 0 20"/></>,
-  boast:<><circle cx="14" cy="10" r="5"/><path d="M6 40V26c0-6 4-9 8-9s8 3 8 9v14"/><path d="M28 8h16v14H36l-5 6v-6h-3z"/><path d="M33 15h6"/></>,
+  /* 大きく言う：メガホンで大声を出す人 */
+  boast:<><circle cx="10" cy="14" r="4.5"/><path d="M2 40c0-10 3-18 8-18s8 8 8 18"/><path d="M16 22l4 4"/><path d="M20 22l14-8v24l-14-8z"/><path d="M38 18l6-4M38 26h7M38 34l6 4"/></>,
   jeal:<><path d="M24 43S8 30 8 20a8 8 0 0116-4 8 8 0 0116 4c0 10-16 23-16 23z"/><path d="M24 36c-4-3-5-8-3-11 1 2 2 2 3 1 1 3 4 4 4 7 0 2-2 4-4 3z"/><path d="M12 8l-2-4"/><path d="M36 8l2-4"/></>,
   yell:<><circle cx="18" cy="24" r="13"/><circle cx="18" cy="30" r="5"/><path d="M12 18h4"/><path d="M21 18h4"/><path d="M34 16c4 5 4 11 0 16"/><path d="M40 11c7 8 7 18 0 26"/></>,
   fid:<><path d="M24 26s-8-6-8-11a4 4 0 018-2 4 4 0 018 2c0 5-8 11-8 11z"/><path d="M8 32c0 6 7 10 16 10s16-4 16-10"/><path d="M8 32h32"/></>,
@@ -45529,7 +45600,8 @@ const PICTO_ROOT={
   fear:<><path d="M24 6l20 36H4z"/><path d="M27 16l-9 14h6l-2 10 9-14h-6z"/><path d="M11 12L7 8"/><path d="M37 12l4-4"/></>,
   meta:<><ellipse cx="11" cy="37" rx="4" ry="6"/><ellipse cx="21" cy="27" rx="4" ry="6"/><ellipse cx="31" cy="17" rx="4" ry="6"/><path d="M38 12l6-6"/><path d="M44 6l-1 6"/><path d="M44 6l-6 1"/></>,
   hod:<><path d="M4 44L20 10"/><path d="M44 44L28 10"/><path d="M14 10h20"/><path d="M24 16v5"/><path d="M24 27v6"/><path d="M24 39v5"/></>,
-  tot:<><circle cx="24" cy="24" r="20"/><circle cx="17" cy="18" r="4"/><circle cx="31" cy="18" r="4"/><circle cx="17" cy="32" r="4"/><circle cx="31" cy="32" r="4"/></>,
+  /* すべて：全部をぐるりとまとめる */
+  tot:<><circle cx="16" cy="20" r="3"/><circle cx="26" cy="16" r="3"/><circle cx="34" cy="24" r="3"/><circle cx="18" cy="30" r="3"/><circle cx="28" cy="30" r="3"/><path d="M24 8c10 0 18 6 18 15s-8 17-18 17S6 32 6 23 14 8 24 8z"/><path d="M42 23l3 6"/></>,
   larg:<><path d="M12 42c0-12 4-16 4-20h16c0 4 4 8 4 20z"/><path d="M14 22h20"/><circle cx="17" cy="12" r="4"/><circle cx="26" cy="8" r="4"/><circle cx="34" cy="13" r="4"/></>,
   som:<><path d="M14 10h20v28a10 10 0 01-20 0z"/><path d="M10 10h28"/><path d="M14 30c3-2 7 2 10 0s7 2 10 0"/></>,
   tex:<><rect x="8" y="8" width="32" height="32" rx="2"/><path d="M8 18h32M8 28h32"/><path d="M18 8v32M28 8v32"/></>,
@@ -45540,24 +45612,30 @@ const PICTO_ROOT={
   more:<><rect x="6" y="30" width="8" height="12"/><rect x="18" y="22" width="8" height="20"/><rect x="30" y="12" width="8" height="30"/><path d="M38 7h8M42 3v8"/></>,
   over:<><rect x="18" y="30" width="12" height="12"/><path d="M8 42C8 18 40 18 40 42"/><path d="M40 42l-4-6M40 42l4-6"/></>,
   other:<><circle cx="10" cy="16" r="5"/><circle cx="24" cy="16" r="5"/><circle cx="38" cy="16" r="5"/><rect x="18" y="30" width="12" height="12" rx="2"/><path d="M6 24h36" stroke-dasharray="3 3"/></>,
-  wise:<><path d="M24 44V28l-12-12"/><path d="M24 28l12-12"/><circle cx="12" cy="13" r="4"/><circle cx="36" cy="13" r="4"/></>,
+  /* やり方：行き方を示す道しるべ */
+  wise:<><path d="M24 44V4"/><path d="M24 8h14l4 4-4 4H24M24 20H10l-4 4 4 4h14"/><path d="M16 44h16"/></>,
   worth:<><path d="M26 6H8a2 2 0 0 0-2 2v18a2 2 0 0 0 .6 1.4l14 14a2 2 0 0 0 2.8 0l14-14a2 2 0 0 0 0-2.8L27.4 6.6A2 2 0 0 0 26 6z"/><circle cx="15" cy="15" r="3"/><path d="M40 34l1.5 4.5L46 40l-4.5 1.5L40 46l-1.5-4.5L34 40l4.5-1.5z"/></>,
   bless:<><path d="M24 4c5 8 8 11 8 15a8 8 0 0 1-16 0c0-4 3-7 8-15z"/><path d="M10 32c0 8 6 12 14 12s14-4 14-12"/><path d="M10 32h28"/></>,
   glor:<><path d="M24 8l3.5 7 8 1-6 5.5 1.5 8-7-4-7 4 1.5-8-6-5.5 8-1z"/><path d="M14 26c-6 4-6 12 0 16"/><path d="M34 26c6 4 6 12 0 16"/><path d="M14 42h20"/></>,
   fest:<><path d="M4 12c12 8 28 8 40 0"/><path d="M7 14l7 2-4 8z"/><path d="M20 18h8l-4 10z"/><path d="M34 16l7-2-4 10z"/></>,
-  radi:<><circle cx="24" cy="24" r="7"/><path d="M24 4v8M24 36v8M4 24h8M36 24h8"/><path d="M10 10l6 6M38 10l-6 6M10 38l6-6M38 38l-6-6"/></>,
-  labor:<><path d="M8 40h32"/><path d="M14 40v-6h20v6"/><path d="M18 34v-5h12v5"/><rect x="16" y="8" width="18" height="7" rx="1"/><path d="M25 15v9"/></>,
+  /* 放射する：中心から四方へ広がる */
+  radi:<><circle cx="24" cy="24" r="4"/><path d="M24 16V4M20 8l4-4 4 4M24 32v12M20 40l4 4 4-4M16 24H4M8 20l-4 4 4 4M32 24h12M40 20l4 4-4 4"/><path d="M18 18l-6-6M30 30l6 6M30 18l6-6M18 30l-6 6"/></>,
+  /* 働く：重い荷をかついで汗を流す人 */
+  labor:<><circle cx="16" cy="14" r="4"/><path d="M16 18l-2 12M14 30l-5 12M14 30l6 12M15 22l8-6"/><path d="M20 12c0-6 18-8 20 0 3 8-2 12-10 12s-12-4-10-12z"/><path d="M28 6l2-3M32 6l-2-3"/><path d="M6 20c-2 1-2 3 0 4M4 14c-2 1-2 3 0 4"/></>,
   mol:<><path d="M8 30l6-12 12-6 14 8 2 14-10 8H16z"/><path d="M14 18l12 2 12-4M26 20l-2 22"/></>,
   cell:<><rect x="10" y="6" width="28" height="36" rx="2"/><rect x="18" y="14" width="12" height="10"/><path d="M22 14v10M26 14v10"/><path d="M16 42v-10h6v10"/></>,
   solid:<><rect x="6" y="10" width="36" height="28" rx="2"/><circle cx="15" cy="19" r="6"/><circle cx="27" cy="19" r="6"/><circle cx="15" cy="31" r="6"/><circle cx="27" cy="31" r="6"/><circle cx="37" cy="25" r="4"/></>,
   satel:<><circle cx="22" cy="25" r="9"/><circle cx="24" cy="24" r="19" stroke-dasharray="3 3"/><circle cx="40" cy="15" r="3.5"/></>,
-  orb:<><circle cx="24" cy="24" r="16"/><circle cx="24" cy="24" r="5"/><path d="M24 8l-5-4M24 8l-5 4"/></>,
+  /* 輪：まわりの輪（軌道）を回る */
+  orb:<><ellipse cx="24" cy="26" rx="20" ry="8" transform="rotate(-20 24 26)"/><circle cx="24" cy="26" r="7"/><path d="M19 22c2-2 5-2 7-1"/><circle cx="41" cy="16" r="3.5"/></>,
   lanc:<><path d="M8 40L33 15"/><path d="M42 6l-4 13-11 2z"/><path d="M14 34l6 6"/></>,
   pharmac:<><rect x="6" y="8" width="34" height="14" rx="7"/><path d="M23 8v14"/><circle cx="24" cy="36" r="9"/><path d="M18 30l12 12"/></>,
-  heal:<><circle cx="24" cy="24" r="17"/><path d="M24 7v34" stroke-dasharray="3 3"/><path d="M17 15l14 6M17 27l14 6"/></>,
+  /* 丸ごと無事な：傷に貼ったばんそうこう（元どおりの丸） */
+  heal:<><circle cx="24" cy="24" r="16"/><rect x="12" y="19" width="24" height="10" rx="5" transform="rotate(-35 24 24)"/><path d="M22 23h.5M26 25h.5"/></>,
   ank:<><path d="M10 8v20a12 12 0 0 0 12 12h16"/><path d="M38 40l-6-5M38 40l-6 5"/><path d="M16 30a8 8 0 0 0 4 4" stroke-dasharray="3 3"/></>,
   tum:<><path d="M4 38h9c0-13 6-20 11-20s11 7 11 20h9"/><path d="M24 12V4l-4 5M24 4l4 5"/><path d="M14 30c0-8 4-12 10-12s10 4 10 12" stroke-dasharray="3 3"/></>,
-  chin:<><path d="M12 10v12a12 12 0 0 0 24 0V10"/><circle cx="24" cy="34" r="3"/><path d="M12 10h6M30 10h6"/></>,
+  /* あご：横顔のあご先 */
+  chin:<><path d="M30 4c-10 0-18 7-18 17 0 3 1 6 3 8l-3 5 4 1v4c0 3 3 5 6 5h4c3 0 5 2 5 4"/><path d="M36 38l-6-2M36 38l-4 4M36 38h8"/></>,
   chest:<><rect x="6" y="20" width="36" height="20" rx="2"/><path d="M6 20a18 8 0 0 1 36 0"/><path d="M6 28h36"/><rect x="21" y="25" width="6" height="8" rx="1"/></>,
   breast:<><circle cx="24" cy="21" r="14"/><circle cx="24" cy="21" r="7" stroke-dasharray="3 3"/><path d="M21 35h6l-3 5z"/><path d="M24 40v5"/></>,
   lung:<><path d="M10 42C10 22 24 6 40 6c0 16-14 28-30 30z"/><path d="M40 6L14 38"/><path d="M22 20l6 2M18 27l7 2M26 14l5 2"/></>,
@@ -45577,7 +45655,8 @@ const PICTO_ROOT={
   king:<><path d="M8 36h32"/><path d="M8 36l-2-18 10 8 8-12 8 12 10-8-2 18"/><circle cx="24" cy="10" r="2.5"/></>,
   res:<><path d="M24 6l16 9v18l-16 9-16-9V15z"/><path d="M8 15l16 9 16-9"/><path d="M24 24v18"/></>,
   imper:<><circle cx="16" cy="12" r="5"/><path d="M16 19v16"/><path d="M16 24l12-6"/><path d="M33 16h8M33 22h6"/></>,
-  aid:<><circle cx="12" cy="12" r="4"/><path d="M12 16v12"/><path d="M12 22l10 4"/><circle cx="34" cy="26" r="4"/><path d="M34 30v10"/><path d="M34 30l-8-4"/></>,
+  /* 助ける：手をのばして引き上げる */
+  aid:<><path d="M4 18h22v26"/><circle cx="14" cy="8" r="3.5"/><path d="M14 11.5V18M14 14l8 8"/><circle cx="34" cy="26" r="3.5"/><path d="M34 29.5v8M34 37.5l-3 6.5M34 37.5l3 6.5M34 32l-8-6"/><path d="M22 22l4 4"/></>,
   parl:<><path d="M5 8h30v20H21l-8 8v-8H5z"/><path d="M11 15h18M11 21h12"/><rect x="34" y="26" width="12" height="10" rx="2"/></>,
   terra:<><path d="M4 34h40"/><path d="M4 34c6-10 12-10 18 0"/><path d="M22 34c6-12 14-12 22 0"/><path d="M8 40h32"/></>,
   fortun:<><circle cx="24" cy="26" r="16"/><circle cx="24" cy="26" r="3"/><path d="M24 10v32M8 26h32M13 15l22 22M35 15L13 37"/><path d="M24 4v4"/></>,
@@ -45586,10 +45665,13 @@ const PICTO_ROOT={
   bin:<><circle cx="14" cy="14" r="6"/><circle cx="34" cy="14" r="6"/><circle cx="14" cy="34" r="6"/><circle cx="34" cy="34" r="6"/><path d="M20 14h8M20 34h8"/></>,
   link:<><ellipse cx="13" cy="24" rx="9" ry="6"/><ellipse cx="24" cy="24" rx="9" ry="6"/><ellipse cx="35" cy="24" rx="9" ry="6"/></>,
   lev:<><rect x="14" y="28" width="20" height="14" rx="2"/><path d="M24 24V6"/><path d="M16 14l8-8 8 8"/><path d="M8 28h4M36 28h4"/></>,
-  mort:<><path d="M14 42V20a10 10 0 0120 0v22z"/><path d="M24 16v14M18 22h12"/><path d="M8 42h32"/></>,
-  pris:<><circle cx="24" cy="31" r="7"/><path d="M24 4v10"/><path d="M24 14c-9 0-14 7-11 17l4 3"/><path d="M24 14c9 0 14 7 11 17l-4 3"/><path d="M18 14h12"/></>,
+  /* 死：葉の落ちた枯れ木 */
+  mort:<><path d="M20 44V26l-8-8M12 18l-4 2M12 18V10M20 26l8-8 2-8M28 18h8M20 32l-6-4"/><path d="M22 44V30"/><path d="M8 44h24"/><path d="M38 30c3 0 4 3 3 5-3 0-4-2-3-5z"/><path d="M34 40c2 0 3 2 2 3"/></>,
+  /* つかむ：ボールをぎゅっとつかむ手 */
+  pris:<><circle cx="28" cy="26" r="9"/><path d="M2 18h12M2 34h12"/><path d="M14 18c2-6 10-9 18-7 5 1 6 5 3 7-2 1-5 1-7 0"/><path d="M26 20c5-2 10-1 12 2 1 3-2 5-5 4"/><path d="M14 34c4 5 13 6 18 3"/></>,
   vit:<><path d="M12 10h24l-3 30H15z"/><path d="M24 10v12l-7 4 9 6-3 8"/><path d="M8 6l6 6M14 6l-6 6"/></>,
-  bull:<><circle cx="24" cy="24" r="16"/><ellipse cx="24" cy="24" rx="7" ry="16"/><path d="M8 24h32"/></>,
+  /* 丸いもの：まるいあわ */
+  bull:<><circle cx="22" cy="26" r="14"/><path d="M14 20a9 9 0 0 1 6-5"/><circle cx="38" cy="10" r="4"/><circle cx="42" cy="22" r="2"/></>,
   sword:<><path d="M24 4l5 8v20h-10V12z"/><path d="M12 34h24"/><path d="M22 34v8h4v-8"/><path d="M20 44h8"/></>,
   wound:<><path d="M10 30L30 10a6 6 0 0 1 8 8L18 38a6 6 0 0 1-8-8z"/><path d="M18 22l8 8M22 18l8 8"/><path d="M6 8l4 4M4 16h4"/></>,
   triumph:<><path d="M8 42V20a16 16 0 0132 0v22"/><path d="M18 42V28a6 6 0 0112 0v14"/><path d="M4 42h40"/><path d="M6 30c-4-4-4-10 0-14M42 30c4-4 4-10 0-14"/></>,
@@ -45616,25 +45698,30 @@ const PICTO_ROOT={
   grab:<><path d="M12 42V22a3 3 0 016 0v-6a3 3 0 016 0v-2a3 3 0 016 0v8"/><path d="M36 22a3 3 0 016 0v10c0 6-4 10-10 10H12"/><circle cx="26" cy="9" r="4"/></>,
   seize:<><circle cx="32" cy="12" r="5"/><path d="M14 40V26a3 3 0 016 0v-5a3 3 0 016 0v3"/><path d="M26 24a3 3 0 016 0v8c0 5-4 8-9 8h-9"/><path d="M4 12h8M4 19h6M4 26h4"/></>,
   tonar:<><path d="M14 22a7 7 0 011-13 10 10 0 0119 2 6 6 0 01-1 11z"/><path d="M26 24l-8 10h7l-3 10 11-13h-7l4-7z"/><path d="M12 30l-3 6M40 30l-3 6"/></>,
-  lumin:<><circle cx="24" cy="24" r="9"/><path d="M24 4v6M24 38v6M4 24h6M38 24h6"/><path d="M10 10l4 4M38 38l-4-4M38 10l-4 4M10 38l4-4"/></>,
+  /* 光：ろうそくの明かり */
+  lumin:<><rect x="18" y="24" width="12" height="18" rx="1"/><path d="M24 24v-4"/><path d="M24 20c-4-3-4-8 0-12 4 4 4 9 0 12z"/><path d="M12 14l-4-2M36 14l4-2M10 22H6M38 22h4"/></>,
   menda:<><path d="M8 8h32v32H8z"/><path d="M20 8l4 10-6 6 7 7-4 9"/><circle cx="34" cy="34" r="3"/></>,
   dur:<><rect x="6" y="20" width="36" height="18" rx="2"/><path d="M18 20v18M30 20v18"/><path d="M24 16l-4-10M24 16l4-10M24 16V4"/></>,
   contra:<><path d="M4 24h16"/><path d="M15 19l5 5-5 5"/><path d="M44 24H28"/><path d="M33 19l-5 5 5 5"/><path d="M24 8v32" stroke-dasharray="3 3"/></>,
   go:<><circle cx="16" cy="9" r="4"/><path d="M16 13v10l-6 10"/><path d="M16 23l7 6-2 9"/><path d="M10 18l12-2"/><path d="M30 24h12M37 19l5 5-5 5"/></>,
-  corpor:<><circle cx="24" cy="10" r="6"/><path d="M24 16v16"/><path d="M12 22h24"/><path d="M24 32l-7 12M24 32l7 12"/></>,
+  /* 体：人の体の形 */
+  corpor:<><circle cx="24" cy="7" r="4.5"/><path d="M18 14h12l8 4-2 12-4-8v22h-5V32h-2v12h-5V22l-4 8-2-12z"/></>,
   riv:<><path d="M6 8c6 10-6 14 0 22s0 8 0 10"/><path d="M42 8c-6 10 6 14 0 22s0 8 0 10"/><path d="M14 16c8 4 12 4 20 0"/><path d="M14 28c8 4 12 4 20 0"/></>,
   vestig:<><path d="M10 38c-3-4-2-9 2-9s5 5 2 9z"/><path d="M11 25c-2-2-1-4 1-4s3 2 1 4z"/><path d="M26 24c-3-4-2-9 2-9s5 5 2 9z"/><path d="M27 11c-2-2-1-4 1-4s3 2 1 4z"/><path d="M38 40h4M38 33h4"/></>,
   sem:<><circle cx="12" cy="12" r="3.5"/><circle cx="24" cy="12" r="3.5"/><circle cx="36" cy="12" r="3.5"/><circle cx="12" cy="30" r="3.5"/><circle cx="24" cy="30" r="3.5"/><circle cx="36" cy="30" r="3.5"/><path d="M6 40h36"/></>,
   mestr:<><path d="M32 6a18 18 0 100 36A22 22 0 0132 6z"/><circle cx="40" cy="12" r="2"/><circle cx="42" cy="22" r="1.5"/></>,
-  phil:<><path d="M24 40S8 30 8 19a8 8 0 0116-4 8 8 0 0116 4c0 11-16 21-16 21z"/><path d="M14 44c2-4 6-5 10-5s8 1 10 5"/><path d="M39 14l2 4 4 2-4 2-2 4-2-4-4-2 4-2z"/></>,
+  /* 愛する：向き合う2人のあいだのハート */
+  phil:<><circle cx="8" cy="18" r="4"/><path d="M2 42c0-10 2-16 6-16s6 6 6 16"/><circle cx="40" cy="18" r="4"/><path d="M34 42c0-10 2-16 6-16s6 6 6 16"/><path d="M24 34l-6-6a4 4 0 0 1 6-5 4 4 0 0 1 6 5z"/></>,
   soph:<><circle cx="24" cy="26" r="14"/><circle cx="18" cy="24" r="4"/><circle cx="30" cy="24" r="4"/><path d="M24 30l-3 4h6z"/><path d="M12 14l4 5M36 14l-4 5"/></>,
   geo:<><circle cx="24" cy="20" r="14"/><path d="M10 20h28"/><path d="M24 6c6 7 6 21 0 28M24 6c-6 7-6 21 0 28"/><path d="M4 42h40"/></>,
-  medit:<><path d="M32 40H18a12 12 0 01-4-23 11 11 0 0121-2 9 9 0 01-3 17v8z"/><path d="M26 30a5 5 0 115-5 4 4 0 01-4 4 3 3 0 01-3-3"/><circle cx="40" cy="10" r="2.5"/><circle cx="45" cy="4" r="1.5"/></>,
+  /* じっくり考える：座ってあごに手を当て、考えにふける */
+  medit:<><circle cx="18" cy="12" r="5"/><path d="M18 17v10l8 4v10"/><path d="M18 27H8l-2 14"/><path d="M26 31h-6"/><path d="M24 14c4-2 6 0 4 4"/><circle cx="36" cy="8" r="2"/><circle cx="42" cy="4" r="1.5"/></>,
   caut:<><path d="M24 6L44 40H4z"/><path d="M14 30c5-6 15-6 20 0-5 6-15 6-20 0z"/><circle cx="24" cy="30" r="3"/></>,
   ident:<><rect x="4" y="12" width="14" height="24" rx="2"/><rect x="30" y="12" width="14" height="24" rx="2"/><path d="M21 20h6M21 28h6"/><path d="M8 18h6M34 18h6"/></>,
   shad:<><circle cx="8" cy="8" r="4"/><circle cx="20" cy="12" r="3.5"/><path d="M20 16v12M14 20h12M20 28l-4 12M20 28l4 12"/><path d="M4 42h40"/><path d="M24 42l14-10h6l-10 10" stroke-dasharray="3 2"/></>,
   breeze:<><path d="M4 16h24a5 5 0 10-5-5"/><path d="M4 26h30a5 5 0 11-5 5"/><path d="M4 36h18"/></>,
-  ser:<><rect x="4" y="18" width="18" height="12" rx="6"/><rect x="26" y="18" width="18" height="12" rx="6"/><path d="M18 24h12"/><path d="M12 10v4M36 34v4"/></>,
+  /* つなぐ：糸に通してつなげた玉 */
+  ser:<><path d="M2 30c8-8 36-8 44 0"/><circle cx="10" cy="25" r="3.5"/><circle cx="19" cy="22" r="3.5"/><circle cx="29" cy="22" r="3.5"/><circle cx="38" cy="25" r="3.5"/></>,
   fog:<><path d="M6 24h24a8 8 0 00-14-9 10 10 0 00-10 9z"/><path d="M6 32h36M10 38h30M14 44h22"/><path d="M34 20h8" stroke-dasharray="3 3"/></>,
   moist:<><path d="M6 36h36"/><path d="M16 28c0-5 6-9 6-14 0 5 6 9 6 14a6 6 0 01-12 0z"/><circle cx="9" cy="22" r="3"/><circle cx="39" cy="26" r="3"/></>,
   damp:<><path d="M8 34h32v8H8z"/><path d="M16 30c-4-5 4-7 0-12s4-8 0-12"/><path d="M26 30c-4-5 4-7 0-12s4-8 0-12"/><path d="M36 30c-4-5 4-7 0-10"/></>,
@@ -45656,7 +45743,8 @@ const PICTO_ROOT={
   vena:<><path d="M4 8c14 2 26 2 40 0"/><path d="M4 40c14-2 26-2 40 0"/><path d="M4 25c8 0 14-1 20-5c6-3 12-5 20-5"/><path d="M24 20c6 4 12 9 20 10"/><path d="M14 24c4 2 6 5 8 10"/></>,
   breed:<><ellipse cx="24" cy="34" rx="16" ry="8"/><path d="M8 34q16 10 32 0"/><ellipse cx="24" cy="24" rx="7" ry="9"/><path d="M17 12q3-3 0-6M24 12q3-3 0-6M31 12q3-3 0-6"/></>,
   earnest:<><circle cx="24" cy="24" r="17"/><circle cx="24" cy="24" r="10"/><circle cx="24" cy="24" r="3"/><path d="M41 7L26 22"/><path d="M41 7l-7 1M41 7l-1 7"/></>,
-  dilig:<><path d="M24 27s-10-7-10-13a5 5 0 0110-3 5 5 0 0110 3c0 6-10 13-10 13z"/><path d="M6 43q0-13 10-15l4 7"/><path d="M42 43q0-13-10-15l-4 7"/><path d="M12 31l-5-4M36 31l5-4"/></>,
+  /* 心をこめる：心をこめて手をかける（ハートとペン） */
+  dilig:<><path d="M20 38L6 24a8 8 0 0 1 14-10 8 8 0 0 1 14 10"/><path d="M28 42l14-14 4 4-14 14h-4z"/><path d="M38 32l4 4"/></>,
   carm:<><path d="M7 41L29 19"/><path d="M5 39l4 4"/><path d="M28 11l2 5 5 2-5 2-2 5-2-5-5-2 5-2z"/><path d="M40 20l1.5 4 4 1.5-4 1.5L40 31l-1.5-4-4-1.5 4-1.5z"/><path d="M38 7l1 3 3 1-3 1-1 3-1-3-3-1 3-1z"/></>,
   horr:<><circle cx="24" cy="24" r="14"/><circle cx="18" cy="21" r="3"/><circle cx="30" cy="21" r="3"/><ellipse cx="24" cy="32" rx="5" ry="4"/><path d="M9 12L5 8M39 12l4-4M9 36l-4 4M39 36l4 4"/></>,
   miser:<><circle cx="24" cy="24" r="16"/><circle cx="18" cy="22" r="1.8"/><circle cx="30" cy="22" r="1.8"/><path d="M14 18l6-3M34 18l-6-3"/><path d="M16 35q8-7 16 0"/><path d="M18 27l-3 6a3 3 0 006 0z"/></>,
@@ -45672,11 +45760,13 @@ const PICTO_ROOT={
   vas:<><path d="M14 8h20"/><path d="M16 8c0 8-6 10-6 18 0 9 6 14 14 14s14-5 14-14c0-8-6-10-6-18"/><path d="M12 26q12 6 24 0"/><path d="M16 44h16"/></>,
   steep:<><path d="M10 44V10l26 34z"/><path d="M6 16l4-6 4 6"/><path d="M4 44h40"/><path d="M22 36a14 14 0 00-9-9" stroke-dasharray="3 3"/></>,
   evit:<><path d="M3 38h9c4 0 6-16 14-16s10 16 14 16h5"/><path d="M45 38l-4-3M45 38l-4 3"/><circle cx="26" cy="37" r="5"/><path d="M23 34l6 6M29 34l-6 6"/></>,
-  uter:<><circle cx="24" cy="40" r="3"/><path d="M24 37L12 17"/><path d="M24 37l12-20"/><circle cx="10" cy="12" r="5"/><circle cx="38" cy="12" r="5"/></>,
+  /* 二つのうちどちらか：2つの箱と「？」 */
+  uter:<><rect x="4" y="24" width="14" height="14" rx="1.5"/><rect x="30" y="24" width="14" height="14" rx="1.5"/><path d="M20 10c0-5 8-5 8 0 0 3-4 3-4 6M24 20v.5"/><path d="M18 20l-4 2M30 20l4 2"/></>,
   brev:<><path d="M6 16h36"/><path d="M6 12v8M42 12v8"/><path d="M6 34h12"/><path d="M6 30v8M18 30v8"/></>,
   tough:<><path d="M6 30q18-20 36 0"/><path d="M6 30v6M42 30v6"/><path d="M24 5v9"/><path d="M24 14l-3-4M24 14l3-4"/><path d="M14 40h20"/></>,
   agor:<><path d="M4 40h40"/><path d="M8 40V18M16 40V18M32 40V18M40 40V18"/><path d="M4 18h40"/><path d="M4 18L24 8l20 10"/><circle cx="21" cy="33" r="2.5"/><circle cx="28" cy="35" r="2.5"/></>,
-  pecu:<><rect x="8" y="16" width="24" height="14" rx="4"/><path d="M12 30v10M18 30v10M26 30v10"/><path d="M32 20h8a4 4 0 014 4v4a3 3 0 01-3 3h-9"/><path d="M40 20l2-6M36 20l-1-6"/><circle cx="16" cy="22" r="2.5"/><circle cx="25" cy="25" r="2"/></>,
+  /* 家畜：牛 */
+  pecu:<><path d="M8 20h24c4 0 6 3 6 6v6H8c-3 0-4-2-4-5v-2c0-3 1-5 4-5z"/><path d="M38 24l4-6h-6M38 20l2-6M42 18l2-4"/><path d="M11 32v10M16 32v10M28 32v10M33 32v10"/><path d="M4 22l-2 8"/><path d="M14 22c2 2 4 2 6 0M24 26c2 2 4 2 5 0"/></>,
   numer:<><rect x="6" y="8" width="36" height="32" rx="3"/><path d="M6 18h36M6 28h36"/><circle cx="14" cy="13" r="3"/><circle cx="22" cy="13" r="3"/><circle cx="16" cy="23" r="3"/><circle cx="30" cy="33" r="3"/><circle cx="38" cy="33" r="3"/></>,
   arithm:<><path d="M14 8v12M8 14h12"/><path d="M28 14h12"/><path d="M9 29l10 10M19 29L9 39"/><path d="M28 34h12"/><circle cx="34" cy="29" r="2"/><circle cx="34" cy="39" r="2"/></>,
   bunch:<><circle cx="18" cy="16" r="5"/><circle cx="30" cy="16" r="5"/><circle cx="24" cy="26" r="5"/><path d="M24 31v6"/><path d="M17 41h14"/></>,
@@ -45694,10 +45784,12 @@ const PICTO_ROOT={
   myth:<><path d="M6 38V16c6-3 12-3 18 0v22c-6-3-12-3-18 0z"/><path d="M24 38V16c6-3 12-3 18 0v22c-6-3-12-3-18 0z"/><path d="M14 2h20a3 3 0 013 3v4a3 3 0 01-3 3H22l-4 3v-3h-4a3 3 0 01-3-3V5a3 3 0 013-3z"/></>,
   craft:<><path d="M12 26v-9a3 3 0 016 0v7"/><path d="M18 24V13a3 3 0 016 0v11"/><path d="M24 24V14a3 3 0 016 0v12"/><path d="M30 26v-6a3 3 0 016 0v14a8 8 0 01-8 8h-8a8 8 0 01-8-8v-4"/></>,
   journ:<><rect x="6" y="10" width="36" height="32" rx="3"/><path d="M6 20h36"/><path d="M15 4v10M33 4v10"/><rect x="18" y="27" width="12" height="9" rx="1"/></>,
-  cycle:<><path d="M38 24a14 14 0 11-6-11.5"/><path d="M34 4v9h-9"/><circle cx="24" cy="24" r="4"/></>,
+  /* 回す：ぐるっと回ってもとに戻る矢印 */
+  cycle:<><path d="M38 18A15 15 0 0 0 10 20"/><path d="M38 10v8h-8"/><path d="M10 30a15 15 0 0 0 28-2"/><path d="M10 38v-8h8"/></>,
   ped:<><circle cx="14" cy="12" r="5"/><path d="M14 17v14"/><path d="M14 31l-4 10M14 31l4 10"/><path d="M14 22h10"/><circle cx="34" cy="24" r="4"/><path d="M34 28v8"/><path d="M34 36l-3 6M34 36l3 6"/></>,
   heaven:<><circle cx="34" cy="14" r="6"/><path d="M34 4v3M44 14h3M41 7l2-2"/><path d="M9 36a6 6 0 010-12 9 9 0 0117-2 5 5 0 011 14z"/><path d="M8 44h30" stroke-dasharray="3 3"/></>,
-  funer:<><path d="M14 44V20a10 10 0 0120 0v24z"/><path d="M24 26v12"/><path d="M18 30h12"/><path d="M6 44h36"/></>,
+  /* 葬送：花を供えた墓 */
+  funer:<><path d="M12 42V16a12 12 0 0 1 24 0v26"/><path d="M24 14v12M18 19h12"/><path d="M4 42h40"/><path d="M6 42v-6M4 34a2 2 0 0 1 4 0M40 42v-6M38 34a2 2 0 0 1 4 0"/></>,
   soul:<><circle cx="20" cy="30" r="7"/><path d="M10 44a10 10 0 0120 0"/><path d="M28 24c8-2 6-10 2-12s-8 3-3 6" stroke-dasharray="3 3"/><circle cx="38" cy="8" r="3"/></>,
   presb:<><circle cx="20" cy="10" r="6"/><path d="M20 16v16"/><path d="M20 32l-5 12M20 32l5 12"/><path d="M14 22h12"/><path d="M34 18v26"/><path d="M30 18a4 4 0 018 0"/></>,
   sacr:<><path d="M10 44V32h28v12"/><path d="M6 32h36"/><path d="M24 26c4-3 3-8 0-10-3 4-6 6 0 10z"/><path d="M24 4v5M14 10l3 4M34 10l-3 4"/></>,
@@ -45715,8 +45807,10 @@ const PICTO_ROOT={
   scold:<><path d="M9 6h30a4 4 0 014 4v14a4 4 0 01-4 4H21l-8 7v-7H9a4 4 0 01-4-4V10a4 4 0 014-4z"/><path d="M26 11l-6 9h6l-6 8"/><circle cx="34" cy="38" r="4"/><path d="M29 46a5 5 0 0110 0"/></>,
   threat:<><path d="M42 11v26"/><path d="M42 24H22"/><path d="M28 18l-6 6 6 6"/><circle cx="12" cy="16" r="5"/><path d="M12 21v10"/><path d="M12 31l-5 10M12 31l5 10"/></>,
   mourn:<><path d="M22 36S6 25 6 16a8 8 0 0116-3 8 8 0 0116 3c0 9-16 20-16 20z"/><path d="M40 30c3 4 4 6 4 8a4 4 0 01-8 0c0-2 1-4 4-8z"/><path d="M16 44h14" stroke-dasharray="3 3"/></>,
-  curse:<><path d="M6 10h36v22H24l-8 8v-8H6z"/><path d="M26 15l-5 7h5l-5 7"/><path d="M14 16h4M14 22h3"/></>,
-  trigger:<><path d="M10 14h24v8H10z"/><path d="M24 22v6a5 5 0 0 0 10 0"/><path d="M20 34H8"/><path d="M13 29l-5 5 5 5"/></>,
+  /* のろいの言葉：こわい顔の入ったふきだし */
+  curse:<><path d="M6 6h36v24H20l-8 8v-8H6z"/><circle cx="24" cy="17" r="6"/><path d="M21 15l2 2M23 15l-2 2M25 15l2 2M27 15l-2 2"/><path d="M22 21h4"/><path d="M36 9l2-2M38 12h3"/></>,
+  /* 引くもの：ひもを引いて動かす */
+  trigger:<><path d="M4 4h40"/><path d="M24 4v20"/><circle cx="24" cy="28" r="4"/><path d="M18 34c0-2 2-3 3-2l2 2M30 34c0-2-2-3-3-2l-2 2"/><path d="M18 34v8h12v-8"/><path d="M38 20v14M34 30l4 4 4-4"/></>,
   sorti:<><rect x="10" y="5" width="18" height="38" rx="2"/><circle cx="24" cy="24" r="2"/><path d="M31 24h12"/><path d="M38 19l5 5-5 5"/></>,
   whelm:<><rect x="8" y="30" width="32" height="10" rx="2"/><path d="M12 26a12 10 0 0 1 24 0"/><path d="M32 22l4 4-4 4"/><path d="M4 45h40"/></>,
   sheer:<><path d="M24 6c8 11 13 16 13 22a13 13 0 0 1-26 0c0-6 5-11 13-22z"/><path d="M40 8l1.5 4.5L46 14l-4.5 1.5L40 20l-1.5-4.5L34 14l4.5-1.5z"/><path d="M17 30a7 7 0 0 0 5 6"/></>,
@@ -45732,7 +45826,8 @@ const PICTO_ROOT={
   fut:<><path d="M26 5l16 10-8 9-16-10z"/><path d="M22 20L7 41"/><path d="M31 31l4 6M37 27l6 3"/></>,
   break:<><path d="M6 16h12l-4 8 6 8H6z"/><path d="M42 16H30l4 8-6 8h14z"/><path d="M24 9V4M17 11l-3-4M31 11l3-4"/><path d="M24 40v4"/></>,
   through:<><rect x="18" y="5" width="12" height="38" rx="2"/><path d="M3 24h39"/><path d="M36 18l6 6-6 6"/></>,
-  grav:<><path d="M12 18h24l5 24H7z"/><path d="M24 3v10"/><path d="M19 9l5 5 5-5"/><path d="M4 45h40"/></>,
+  /* 重い：おもりで板がしなる */
+  grav:<><path d="M14 24h20l4 12H10z"/><path d="M20 24a4 4 0 0 1 8 0"/><path d="M4 38q20 8 40 0"/><path d="M24 4v10M20 10l4 4 4-4"/></>,
   thes:<><rect x="15" y="16" width="18" height="12" rx="2"/><path d="M6 38h36"/><path d="M24 3v7"/><path d="M20 7l4 4 4-4"/><path d="M15 28v10M33 28v10" stroke-dasharray="3 3"/></>,
   micro:<><circle cx="20" cy="20" r="13"/><path d="M30 30l12 12"/><circle cx="20" cy="20" r="2"/></>,
   tox:<><path d="M12 6c10 6 10 30 0 36"/><path d="M12 6v36"/><path d="M12 24h24"/><path d="M31 19l6 5-6 5"/><path d="M42 20c2 3 3 4.5 3 6a3 3 0 0 1-6 0c0-1.5 1-3 3-6z"/></>,
@@ -45767,7 +45862,8 @@ const PICTO_ROOT={
   nov:<><path d="M22 6l4 13 13 4-13 4-4 13-4-13-13-4 13-4z"/><path d="M40 6l1.5 4.5L46 12l-4.5 1.5L40 18l-1.5-4.5L34 12l4.5-1.5z"/></>,
   ord:<><path d="M20 11h22M20 24h22M20 37h22"/><circle cx="10" cy="11" r="3.5"/><circle cx="10" cy="24" r="3.5"/><circle cx="10" cy="37" r="3.5"/></>,
   simil:<><rect x="4" y="13" width="16" height="22" rx="2"/><rect x="28" y="13" width="16" height="22" rx="2"/><path d="M22 20h4M22 28h4"/></>,
-  weigh:<><path d="M8 20h32l4 22H4z"/><path d="M24 20V8"/><path d="M17 14h14"/></>,
+  /* 重さを量る：天びん（pend と同じ） */
+  weigh:<><circle cx="24" cy="6" r="2"/><path d="M24 8v30"/><path d="M10 14h28"/><path d="M10 14l-5 11a6 6 0 0 0 10 0z"/><path d="M38 14l5 11a6 6 0 0 1-10 0z"/><path d="M16 40h16"/></>,
   articul:<><path d="M6 42l12-12"/><circle cx="24" cy="24" r="6"/><path d="M30 18l12-12"/><path d="M4 44l3-3M41 7l3-3"/></>,
   bed:<><path d="M5 34V17"/><path d="M5 25h30a7 7 0 0 1 7 7v2"/><path d="M5 34h37"/><circle cx="14" cy="20" r="4"/><path d="M6 40v-6M41 40v-6"/></>,
   friger:<><path d="M24 5v38M9 15l30 18M39 15L9 33"/><path d="M19 9l5 5 5-5M19 39l5-5 5 5"/></>,
@@ -45777,16 +45873,20 @@ const PICTO_ROOT={
   foot:<><ellipse cx="19" cy="31" rx="9" ry="12"/><circle cx="11" cy="15" r="3"/><circle cx="18" cy="11" r="3"/><circle cx="25" cy="12" r="2.6"/><circle cx="31" cy="16" r="2.3"/><circle cx="36" cy="22" r="2"/></>,
   sea:<><path d="M9 28h30l-4 9H13z"/><path d="M24 28V9l11 9-11 5"/><path d="M4 42c4-3 8-3 12 0s8 3 12 0 8-3 12 0"/></>,
   tact:<><path d="M19 42V24l-4-5"/><path d="M19 24V11a2.5 2.5 0 0 1 5 0v11"/><path d="M24 19a2.5 2.5 0 0 1 5 0v5M29 23a2.5 2.5 0 0 1 5 0v10c0 6-4 9-9 9h-6"/></>,
-  tract:<><rect x="30" y="17" width="13" height="14"/><path d="M30 24H14"/><path d="M14 17v14"/><path d="M5 24h9"/><path d="M11 19l-6 5 6 5"/></>,
+  /* 引く：ロープで箱を引っぱる人 */
+  tract:<><circle cx="38" cy="10" r="4"/><path d="M38 14l-3 12M35 26l-5 14M35 26l6 14"/><path d="M37 17l-8 6"/><path d="M29 23H14"/><rect x="4" y="18" width="10" height="10" rx="1.5"/><path d="M2 40h44"/></>,
   wid:<><path d="M8 13v22M40 13v22"/><path d="M8 24h32"/><path d="M15 18l-7 6 7 6M33 18l7 6-7 6"/></>,
   /* No.551〜650 で増えた語根の絵（2026-09-22 に追加） */
   tach:<><path d="M14 8h20"/><path d="M24 8v34"/><path d="M8 24h32v9H8z"/></>,
   nect:<><circle cx="16" cy="24" r="10"/><circle cx="32" cy="24" r="10"/></>,
-  stick:<><circle cx="24" cy="8" r="4"/><path d="M24 12v22"/><path d="M8 34h32"/><path d="M8 34v8h32v-8"/></>,
+  /* 突き刺す：串が玉を突き通す */
+  stick:<><circle cx="24" cy="24" r="9"/><path d="M6 42L42 6"/><path d="M38 6h4v4"/><path d="M4 44l4-4"/></>,
   thief:<><circle cx="19" cy="14" r="9"/><path d="M10 13h18"/><circle cx="16" cy="13" r="1.5"/><circle cx="23" cy="13" r="1.5"/><path d="M30 28h12l2 14H28z"/><path d="M33 28v-4a3 3 0 0 1 6 0v4"/></>,
   crim:<><circle cx="13" cy="30" r="8"/><circle cx="35" cy="30" r="8"/><path d="M21 30h6"/><path d="M13 22V12M35 22V12"/></>,
-  mot:<><rect x="6" y="18" width="16" height="14"/><path d="M26 25h16M35 18l7 7-7 7"/></>,
-  pun:<><path d="M26 10l6-6 12 12-6 6z"/><path d="M30 20L16 34"/><path d="M4 42h26"/><path d="M8 36h18v6H8z"/></>,
+  /* 動かす：勢いよく転がる玉 */
+  mot:<><circle cx="30" cy="28" r="10"/><path d="M4 22h10M2 28h12M4 34h10"/><path d="M4 40h40"/><path d="M26 12a10 10 0 0 1 12 4M38 16l0-5M38 16h-5"/></>,
+  /* 罰：牢屋の鉄格子の中の人 */
+  pun:<><circle cx="24" cy="22" r="7"/><path d="M21 21h.5M27 21h.5M21 26c2-1 4-1 6 0"/><rect x="6" y="6" width="36" height="36" rx="2"/><path d="M15 6v36M24 6v8M24 30v12M33 6v36"/></>,
   viol:<><path d="M4 32h14M30 32h14"/><path d="M24 6v24"/><path d="M16 22l8 8 8-8"/><path d="M12 38l4 6M24 40v6M36 38l-4 6"/></>,
   emy:<><circle cx="11" cy="13" r="6"/><path d="M2 40c0-9 4-14 9-14s9 5 9 14"/><circle cx="37" cy="13" r="6"/><path d="M28 40c0-9 4-14 9-14s9 5 9 14"/><path d="M19 18l10 10M29 18L19 28"/></>,
   flict:<><path d="M4 24h14M30 24h14"/><path d="M18 17l6 7-6 7M30 17l-6 7 6 7"/></>,
@@ -45805,29 +45905,34 @@ const PICTO_ROOT={
   deal:<><rect x="6" y="20" width="14" height="20" rx="2"/><rect x="28" y="20" width="14" height="20" rx="2"/><path d="M24 16V4M18 10l6-6 6 6"/></>,
   clue:<><circle cx="18" cy="26" r="12"/><path d="M8 20c8 4 12 8 16 16M28 18c-6 6-10 10-12 18"/><path d="M30 26c6 0 8 4 8 8s2 6 6 6"/></>,
   limit:<><path d="M6 12v24"/><path d="M6 24h28"/><path d="M27 17l7 7-7 7"/><path d="M42 8v32" stroke-width="3.4"/></>,
-  for:<><circle cx="24" cy="24" r="16"/><path d="M13 13l22 22"/></>,
+  /* 打ち消し：禁止マーク（否定の never・nec と同じ） */
+  for:<><circle cx="24" cy="24" r="16"/><path d="M12.7 12.7l22.6 22.6"/></>,
   bid:<><circle cx="13" cy="13" r="7"/><path d="M3 40c0-9 4-14 10-14s10 5 10 14"/><path d="M27 10h18v13H35l-5 6v-6h-3z"/><path d="M32 16h8"/></>,
   ban:<><path d="M8 8h32v18H8z"/><path d="M24 26v14M16 42h16"/><path d="M16 13l16 8M32 13l-16 8"/></>,
   fuse:<><path d="M8 10h14v10c0 6-8 8-8 14"/><path d="M22 14c8 0 12 4 12 10"/><path d="M28 30h14l-3 12H31z"/></>,
   suade:<><circle cx="36" cy="12" r="6"/><path d="M28 40c0-8 4-12 8-12s8 4 8 12"/><path d="M4 24h18M15 18l7 6-7 6"/><path d="M10 14c2-3 6-3 8 0"/></>,
-  vinc:<><path d="M6 40h36"/><path d="M18 40V22h12v18"/><circle cx="24" cy="12" r="5"/><path d="M12 30l6-8M36 30l-6-8"/></>,
+  /* 打ち勝つ：表彰台の1位で両手を上げる人 */
+  vinc:<><circle cx="24" cy="8" r="4"/><path d="M24 12v10M24 22l-4 6M24 22l4 6M24 15l-7-7M24 15l7-7"/><path d="M4 44V34h12v10M16 44V28h16v16M32 44V37h12v7"/><path d="M24 34v5"/></>,
   spir:<><path d="M24 4v16"/><path d="M16 12h16"/><path d="M24 20c-2-4-8-5-11 0-3 5-3 14-1 18 2 3 7 2 9-2 2-4 3-9 3-16z"/><path d="M24 20c2-4 8-5 11 0 3 5 3 14 1 18-2 3-7 2-9-2-2-4-3-9-3-16z"/></>,
   boost:<><path d="M24 40V12"/><path d="M14 22l10-10 10 10"/><path d="M10 40c4-6 10-6 14 0M38 40c-4-6-10-6-14 0"/></>,
   pand:<><rect x="18" y="18" width="12" height="12"/><path d="M14 14L4 4M4 12V4h8M34 14L44 4M44 12V4h-8M14 34L4 44M4 36v8h8M34 34l10 10M44 36v8h-8"/></>,
   spread:<><path d="M6 34c8-8 28-8 36 0"/><circle cx="12" cy="18" r="1.8"/><circle cx="20" cy="12" r="1.8"/><circle cx="28" cy="12" r="1.8"/><circle cx="36" cy="18" r="1.8"/><circle cx="24" cy="22" r="1.8"/></>,
   tie:<><path d="M24 24c-8-8-16-4-16 2s8 8 16 0"/><path d="M24 24c8-8 16-4 16 2s-8 8-16 0"/><path d="M20 30l-6 12M28 30l6 12"/></>,
   fast:<><path d="M8 20h32v8H8z"/><circle cx="16" cy="24" r="2.5"/><circle cx="32" cy="24" r="2.5"/><path d="M12 20v-6h24v6M12 28v6h24v-6"/></>,
-  fix:<><path d="M24 4v26"/><path d="M18 8h12M18 14h12M18 20h12M18 26h12"/><path d="M19 30l5 9 5-9z"/><path d="M6 39h36"/></>,
+  /* 打ち込む：木づちを振り下ろして、くいを地面に打ち込む */
+  fix:<><path d="M4 34h40"/><path d="M26 22h8v12"/><path d="M26 22v12"/><path d="M26 34l4 8 4-8" strokeDasharray="2 3"/><path d="M6 30L18 14"/><rect x="12" y="4" width="16" height="7" rx="1.5" transform="rotate(35 20 8)"/><path d="M34 16l4-4M36 20h5"/></>,
   stall:<><path d="M6 18l6-8h24l6 8z"/><path d="M8 18v24h32V18"/><path d="M20 42V28h8v14"/></>,
   ey:<><path d="M34 18a11 11 0 0 0-22 0c0 9 4 12 4 18a6 6 0 0 0 11 3"/><path d="M26 19a5 5 0 0 0-8 4"/></>,
   gage:<><rect x="10" y="22" width="28" height="18" rx="2"/><path d="M17 22v-6a7 7 0 0 1 14 0v6"/><circle cx="24" cy="31" r="3"/></>,
   bump:<><circle cx="14" cy="28" r="8"/><rect x="30" y="20" width="14" height="16"/><path d="M24 14l-3 5M28 20l5-3M24 42l-3-5"/></>,
   bend:<><path d="M16 5c15 6 15 32 0 38"/><path d="M16 5v38"/><path d="M16 24h14M26 20l4 4-4 4"/></>,
   hug:<><circle cx="24" cy="12" r="6"/><path d="M10 24c0 10 6 16 14 16s14-6 14-16"/><path d="M10 24c-4 0-6 4-4 8M38 24c4 0 6 4 4 8"/></>,
-  stare:<><path d="M4 24c6-10 34-10 40 0-6 10-34 10-40 0z"/><circle cx="24" cy="24" r="6"/><path d="M24 4v6M8 8l4 5M40 8l-4 5"/></>,
+  /* こわばる：棒のように固まって動けない人 */
+  stare:<><circle cx="24" cy="10" r="5"/><path d="M22 9h.5M26 9h.5"/><path d="M24 15v15M24 30v12M20 30v12h8V30M18 16v14M30 16v14"/><path d="M40 8v8M36 12h8M37 9l6 6M43 9l-6 6"/></>,
   gaze:<><path d="M4 30c6-10 26-10 32 0-6 10-26 10-32 0z"/><circle cx="20" cy="30" r="5"/><path d="M40 8l2 5 5 2-5 2-2 5-2-5-5-2 5-2z"/></>,
   glance:<><path d="M6 28c6-8 22-8 28 0-6 8-22 8-28 0z"/><circle cx="20" cy="28" r="4"/><path d="M30 14h12M36 8l6 6-6 6"/></>,
-  glimpse:<><path d="M10 6v36M38 6v36"/><path d="M10 6c6 4 6 32 0 36M38 6c-6 4-6 32 0 36"/><path d="M24 18v4M24 26v4M20 22h-2M30 22h-2"/></>,
+  /* かすかに光る：少し開いた扉のすき間からもれる光 */
+  glimpse:<><path d="M6 4h26v40H6z"/><path d="M32 4l10 4v32l-10 4"/><path d="M34 24h10M34 18l8-4M34 30l8 4" strokeDasharray="2 3"/><path d="M28 24h.5"/></>,
   stretch:<><path d="M4 24h6M38 24h6"/><path d="M10 24c2-8 4 8 6 0s4 8 6 0 4 8 6 0 4 8 6 0"/><path d="M10 18v12M38 18v12"/></>,
   stumble:<><circle cx="18" cy="10" r="5"/><path d="M18 15l-4 12 8 6"/><path d="M14 27l-6 8"/><path d="M22 33l2 8"/><circle cx="34" cy="38" r="5"/><path d="M28 43h16"/></>,
   lean:<><path d="M38 6v36"/><circle cx="20" cy="12" r="5"/><path d="M22 17l10 6"/><path d="M22 17l-6 12 4 13"/><path d="M16 29l-6 13"/></>,
@@ -45842,10 +45947,12 @@ const PICTO_ROOT={
   scatter:<><circle cx="24" cy="24" r="4"/><circle cx="8" cy="12" r="2"/><circle cx="40" cy="12" r="2"/><circle cx="8" cy="38" r="2"/><circle cx="40" cy="38" r="2"/><circle cx="24" cy="6" r="2"/><circle cx="24" cy="42" r="2"/><path d="M20 20l-8-6M28 20l8-6M20 28l-8 6M28 28l8 6"/></>,
   fold:<><path d="M8 12h32v24H8z"/><path d="M24 12v24"/><path d="M24 12l12 12-12 12"/></>,
   hang:<><path d="M6 8h36"/><path d="M16 8v8M32 8v8"/><path d="M10 16h12l-6 20zM26 16h12l-6 20z"/></>,
-  lease:<><path d="M6 20c6 0 8 8 14 8s8-8 14-8 8 8 8 8"/><path d="M6 32c6 0 8 4 14 4s8-4 14-4 8 4 8 4"/><path d="M12 12v6M36 12v6"/></>,
+  /* ゆるめる：手をはなれて浮かんでいく風船 */
+  lease:<><ellipse cx="30" cy="14" rx="9" ry="10"/><path d="M30 24l-2 3h4z"/><path d="M30 27c-2 4 2 6 0 10"/><path d="M6 40h8c2 0 4-2 6-4M6 34h6l4-2"/><path d="M20 36l2-4"/><path d="M26 8a5 5 0 0 1 4-2"/></>,
   strike:<><path d="M6 40L30 16"/><path d="M26 8l14 14-6 6L20 14z"/><path d="M8 20l-4-6M18 10l-2-6"/><path d="M38 38l6 4M40 32h6"/></>,
   beat:<><ellipse cx="24" cy="18" rx="16" ry="6"/><path d="M8 18v12c0 4 7 6 16 6s16-2 16-6V18"/><path d="M12 8l6 6M36 8l-6 6"/></>,
-  twist:<><path d="M16 6c16 6-16 12 0 18s-16 12 0 18"/><path d="M32 6c-16 6 16 12 0 18s16 12 0 18"/></>,
+  /* より合わせる：2本がねじれて1本の縄になる */
+  twist:<><path d="M14 4c0 6 20 8 20 14S14 24 14 30s20 8 20 14"/><path d="M34 4c0 6-20 8-20 14s20 6 20 12-20 8-20 14"/></>,
   skip:<><circle cx="16" cy="10" r="5"/><path d="M16 15l6 8-4 10"/><path d="M22 23l8 4"/><path d="M18 33l-6 8"/><path d="M30 40h14M30 40l-4 4"/><path d="M6 44h12" stroke-dasharray="3 3"/></>,
   stir:<><path d="M8 18h28l-3 22H11z"/><path d="M30 14l6-8"/><path d="M14 26c4-4 12-4 16 0"/></>,
   /* No.451〜550 で増えた語根の絵（2026-09-22 に追加） */
@@ -45860,26 +45967,33 @@ const PICTO_ROOT={
   cough:<><path d="M8 18c0-6 6-10 12-10s12 4 12 10-6 12-12 12h-4l-6 6v-6c-1-1-2-5-2-12z"/><path d="M36 16l6-3M38 24h7M36 32l6 3"/></>,
   blood:<><path d="M24 6s-12 16-12 23a12 12 0 0 0 24 0C36 22 24 6 24 6z"/><path d="M18 30c0 5 3 8 7 9"/></>,
   feint:<><path d="M24 8a16 16 0 0 1 0 32" stroke-dasharray="4 4"/><path d="M24 8a16 16 0 0 0 0 32" stroke-dasharray="2 6"/><path d="M16 22h16" stroke-dasharray="3 3"/></>,
-  haust:<><path d="M8 14h32"/><path d="M12 14l4 26h16l4-26"/><path d="M18 22h12"/><path d="M24 4v8"/></>,
+  /* 汲み出す：ひしゃくで水をくみ出す */
+  haust:<><path d="M4 26h26v10a6 6 0 0 1-6 6H10a6 6 0 0 1-6-6z"/><path d="M4 32c4-2 6 2 10 0s6 2 10 0 4 1 6 0"/><path d="M26 16a5 5 0 0 0 10 0zM36 16l8-12"/><path d="M31 22v2M31 27v1"/></>,
   cur:<><path d="M24 34S12 26 12 18a6 6 0 0 1 12-2 6 6 0 0 1 12 2c0 8-12 16-12 16z"/><path d="M8 42c5-6 27-6 32 0"/></>,
   stiff:<><rect x="10" y="20" width="28" height="8"/><path d="M10 14v20M38 14v20"/><path d="M4 24h4M40 24h4"/></>,
   mus:<><ellipse cx="24" cy="30" rx="13" ry="8"/><circle cx="14" cy="20" r="5"/><circle cx="33" cy="28" r="1.5"/><path d="M37 33c4 1 6 4 5 8"/></>,
   tongue:<><path d="M8 18c8-7 24-7 32 0"/><path d="M8 18h32"/><path d="M8 18c0 10 7 17 16 17s16-7 16-17"/><path d="M18 25c0 11 2 17 6 17s6-6 6-17z"/></>,
   sweat:<><circle cx="22" cy="22" r="13"/><path d="M17 18v3M27 18v3"/><path d="M16 28c4 3 8 3 12 0"/><path d="M40 20s-4 6-4 9a4 4 0 0 0 8 0c0-3-4-9-4-9z"/></>,
-  civ:<><path d="M6 24L24 12l18 12"/><path d="M10 24v14h28V24"/><circle cx="18" cy="31" r="3"/><circle cx="30" cy="31" r="3"/><path d="M13 38c0-4 2-6 5-6s5 2 5 6M25 38c0-4 2-6 5-6s5 2 5 6"/></>,
+  /* 市民：家が立ち並ぶ町 */
+  civ:<><path d="M4 42V28l7-6 7 6v14M18 42V24l8-7 8 7v18M34 42V30l5-5 5 5v12"/><path d="M2 42h44"/><path d="M9 42v-6h4v6M24 42v-7h4v7"/></>,
   race:<><circle cx="10" cy="16" r="5"/><circle cx="24" cy="13" r="6"/><circle cx="38" cy="16" r="5"/><path d="M2 36c0-6 4-10 8-10s8 4 8 10M14 40c0-7 5-12 10-12s10 5 10 12M30 36c0-6 4-10 8-10s8 4 8 10"/></>,
   rur:<><circle cx="36" cy="12" r="6"/><path d="M4 26c8-6 32-6 40 0"/><path d="M4 32c8-6 32-6 40 0"/><path d="M4 38c8-6 32-6 40 0"/></>,
   dom:<><path d="M6 24L24 8l18 16"/><path d="M11 24v16h26V24"/><rect x="20" y="30" width="8" height="10"/></>,
   globe:<><circle cx="24" cy="24" r="17"/><path d="M7 24h34"/><ellipse cx="24" cy="24" rx="8" ry="17"/></>,
   urb:<><path d="M6 42V18h12v24"/><path d="M18 42V8h12v34"/><path d="M30 42V22h12v20"/><path d="M10 24h4M10 32h4M22 16h4M22 26h4M34 30h4"/></>,
   bord:<><rect x="8" y="10" width="32" height="28" rx="2" stroke-dasharray="3 3"/><path d="M8 10v28" stroke-width="3.4"/></>,
-  pact:<><path d="M24 4v18"/><path d="M16 4h16"/><path d="M6 26h36"/><path d="M24 26v6"/><path d="M13 32l-4 8M24 34v6M35 32l4 8"/></>,
+  /* 打ち込む：木づちを振り下ろして、くいを地面に打ち込む（fix と同じ） */
+  pact:<><path d="M4 34h40"/><path d="M26 22h8v12"/><path d="M26 22v12"/><path d="M26 34l4 8 4-8" strokeDasharray="2 3"/><path d="M6 30L18 14"/><rect x="12" y="4" width="16" height="7" rx="1.5" transform="rotate(35 20 8)"/><path d="M34 16l4-4M36 20h5"/></>,
   equ:<><path d="M8 18h32M8 30h32"/><path d="M14 8v4M34 36v4"/></>,
-  lat:<><rect x="6" y="18" width="14" height="12"/><path d="M24 24h16M35 18l6 6-6 6"/></>,
-  puta:<><circle cx="18" cy="26" r="13"/><circle cx="18" cy="26" r="4"/><path d="M18 13v5M18 39v-5M5 26h5M31 26h-5"/><circle cx="35" cy="11" r="2.5"/><circle cx="42" cy="5" r="1.5"/></>,
+  /* 運ぶ：箱を持って運ぶ人（port と同じ） */
+  lat:<><circle cx="11" cy="10" r="4"/><path d="M11 14v13M5 19h12M11 27l-4 13M11 27l4 13"/><rect x="21" y="14" width="14" height="12" rx="1.5"/><path d="M37 20h7M41 16l4 4-4 4"/></>,
+  /* 考える：頭の中で歯車が回る（pute と同じ） */
+  puta:<><path d="M30 42v-8c6-1 9-6 9-13 0-8-6-14-15-14S9 13 9 21c0 3 1 5 2 7l-3 5h4v4c0 2 2 3 4 3h3v2"/><circle cx="25" cy="20" r="5"/><path d="M25 13v2M25 25v2M18 20h2M30 20h2M20 15l1.4 1.4M28.6 23.6l1.4 1.4M30 15l-1.4 1.4M21.4 23.6L20 25"/></>,
   trend:<><path d="M6 36l10-8 8 6 12-16"/><path d="M28 12h10v10"/></>,
-  mor:<><ellipse cx="12" cy="36" rx="4" ry="6"/><circle cx="12" cy="28" r="1.6"/><ellipse cx="24" cy="26" rx="4" ry="6"/><circle cx="24" cy="18" r="1.6"/><ellipse cx="36" cy="16" rx="4" ry="6"/><circle cx="36" cy="8" r="1.6"/></>,
-  ard:<><path d="M14 44V6"/><path d="M14 8h22l-5 8 5 8H14z"/><path d="M8 44h12"/><path d="M8 38h12"/></>,
+  /* 習わし：毎日同じ印がつくカレンダー */
+  mor:<><rect x="6" y="10" width="36" height="32" rx="2"/><path d="M6 18h36M15 6v8M33 6v8"/><path d="M10 26l2.5 2.5 4-4M21 26l2.5 2.5 4-4M32 26l2.5 2.5 4-4M10 35l2.5 2.5 4-4M21 35l2.5 2.5 4-4M32 35l2.5 2.5 4-4"/></>,
+  /* しっかり：地面に深く打ち込んだ杭 */
+  ard:<><path d="M20 4h8v26l-4 8-4-8z"/><path d="M4 30h40"/><path d="M8 36l4-6M16 36l4-6M30 36l4-6M38 36l4-6"/></>,
   sper:<><path d="M24 6l5 11 12 1-9 8 3 12-11-6-11 6 3-12-9-8 12-1z"/><path d="M8 42h32" stroke-dasharray="3 3"/></>,
   jud:<><path d="M24 6v6M10 12h28"/><path d="M14 12l-6 12h12zM34 12l6 12H28z"/><path d="M8 24c0 4 3 6 6 6s6-2 6-6M28 24c0 4 3 6 6 6s6-2 6-6"/><path d="M24 12v28M16 40h16"/></>,
   car:<><path d="M24 30S14 24 14 17a5 5 0 0 1 10-2 5 5 0 0 1 10 2c0 7-10 13-10 13z"/><path d="M10 40c0-6 6-8 14-8s14 2 14 8"/></>,
@@ -45892,7 +46006,8 @@ const PICTO_ROOT={
   wag:<><circle cx="24" cy="20" r="11"/><path d="M19 20h10M24 15v10"/><path d="M18 30l-4 12 10-5 10 5-4-12"/></>,
   vast:<><path d="M4 36h40"/><path d="M10 36l3 4-2 4M34 36l-2 4 3 4"/><path d="M24 36V14"/><path d="M24 22l-7-6M24 27l7-6M17 16l-2-4M31 21l3-3"/></>,
   vest:<><path d="M16 8l8 8 8-8"/><path d="M16 8l-6 4 2 28h12V16"/><path d="M32 8l6 4-2 28H24"/><path d="M24 24v16"/></>,
-  fin:<><path d="M24 6v36"/><path d="M6 24h12M30 24h12"/><path d="M24 6h14v12H24z"/><path d="M6 42h36"/></>,
+  /* 終わり：ゴールテープを切る人 */
+  fin:<><path d="M6 8v34M42 8v34"/><path d="M6 16l10 4M42 16l-10 4"/><circle cx="24" cy="14" r="3.5"/><path d="M24 18v10M24 22l-6 3M24 22l6-3M24 28l-4 10M24 28l5 9"/><path d="M4 42h40"/></>,
   hire:<><circle cx="30" cy="16" r="7"/><path d="M26 16h8M30 12v8"/><path d="M8 38V26l-3-5"/><path d="M8 26V16M14 24V13M20 25V15"/><path d="M8 38c0 4 4 5 8 5h8V25"/></>,
   fess:<><circle cx="14" cy="14" r="6"/><path d="M5 40c0-9 4-15 9-15s9 6 9 15"/><path d="M28 12c4 4 4 12 0 16M34 7c7 7 7 23 0 30"/></>,
   doc:<><path d="M6 12h16c2 0 2 2 2 2v24c0-2 0-2-2-2H6z"/><path d="M42 12H26c-2 0-2 2-2 2v24c0-2 0-2 2-2h16z"/><path d="M24 14v22"/><path d="M30 8l6 4-6 4z"/></>,
@@ -45900,13 +46015,15 @@ const PICTO_ROOT={
   leg:<><circle cx="12" cy="14" r="5"/><circle cx="36" cy="14" r="5"/><path d="M4 38c0-8 4-13 8-13s8 5 8 13M28 38c0-8 4-13 8-13s8 5 8 13"/><path d="M18 22h12M26 18l4 4-4 4"/></>,
   arch:<><path d="M8 34h32"/><path d="M8 34L6 14l10 8 8-12 8 12 10-8-2 20z"/><circle cx="24" cy="8" r="2"/></>,
   tect:<><path d="M6 26L24 10l18 16"/><path d="M11 26v14h26V26"/><path d="M28 14l10-6"/><path d="M34 4h10v8H34z"/></>,
-  funct:<><circle cx="24" cy="24" r="8"/><circle cx="24" cy="24" r="3"/><path d="M24 6v6M24 36v6M6 24h6M36 24h6M11 11l5 5M32 32l5 5M37 11l-5 5M16 32l-5 5"/></>,
+  /* 果たす：かみ合って回る歯車 */
+  funct:<><circle cx="17" cy="19" r="6"/><path d="M17 8v4M17 26v4M6 19h4M24 19h4M9.2 11.2l2.8 2.8M22 24l2.8 2.8M24.8 11.2L22 14M12 24l-2.8 2.8"/><circle cx="32" cy="32" r="5"/><path d="M32 23v3.5M32 37.5V41M23 32h3.5M37.5 32H41M25.6 25.6l2.5 2.5M35.9 35.9l2.5 2.5M38.4 25.6l-2.5 2.5M28.1 35.9l-2.5 2.5"/></>,
   edge:<><path d="M6 30l24-18 6 6-24 18z"/><path d="M6 30l6 6"/><path d="M30 12l6 6"/><path d="M36 24l6 6-6 6"/></>,
   make:<><rect x="6" y="28" width="20" height="12"/><path d="M28 20l12-12M34 4l10 10-5 5-10-10z"/><path d="M16 28v-6"/></>,
   up:<><path d="M24 42V10"/><path d="M12 22L24 8l12 14"/><path d="M8 44h32"/></>,
   /* No.351〜450 で増えた語根の絵（2026-09-22 に追加） */
   nounce:<><path d="M8 20v8h8l14 8V12L16 20z"/><path d="M34 17c4 4 4 10 0 14"/><path d="M39 12c6 7 6 17 0 24"/></>,
-  sign:<><path d="M24 42V14"/><path d="M8 40h32"/><path d="M24 12h16l-5 7 5 7H24z"/></>,
+  /* しるし：目じるしの札（mark と同じ） */
+  sign:<><path d="M7 21L21 7h14v14L21 35z"/><circle cx="29" cy="14" r="2.5"/></>,
   mean:<><path d="M6 10h36v22H24l-9 8v-8H6z"/><path d="M24 17c-2-3-7-1-7 2 0 4 7 8 7 8s7-4 7-8c0-3-5-5-7-2z"/></>,
   trust:<><circle cx="24" cy="17" r="12"/><path d="M24 42V25"/></>,
   lig:<><rect x="6" y="16" width="20" height="16" rx="8"/><rect x="22" y="16" width="20" height="16" rx="8"/></>,
@@ -45922,14 +46039,17 @@ const PICTO_ROOT={
   fright:<><circle cx="24" cy="24" r="14"/><circle cx="19" cy="21" r="2.5"/><circle cx="29" cy="21" r="2.5"/><ellipse cx="24" cy="32" rx="4" ry="3"/></>,
   gret:<><path d="M16 8s-7 11-7 16a7 7 0 0 0 14 0c0-5-7-16-7-16z"/><path d="M34 24s-4 7-4 10a4 4 0 0 0 8 0c0-3-4-10-4-10z"/></>,
   fav:<><path d="M24 30S13 24 13 17a5.5 5.5 0 0 1 11-2 5.5 5.5 0 0 1 11 2c0 7-11 13-11 13z"/><path d="M9 40c5-5 25-5 30 0"/></>,
-  esse:<><path d="M9 8v32M39 8v32"/><circle cx="24" cy="24" r="7"/></>,
+  /* ある：「ここにある」を示す印 */
+  esse:<><path d="M24 38s-11-11-11-19a11 11 0 0 1 22 0c0 8-11 19-11 19z"/><circle cx="24" cy="19" r="4"/><ellipse cx="24" cy="40" rx="12" ry="3"/></>,
   pi:<><path d="M24 26s-9-5-9-11a4.5 4.5 0 0 1 9-2 4.5 4.5 0 0 1 9 2c0 6-9 11-9 11z"/><path d="M7 27c0 9 8 15 17 15s17-6 17-15"/></>,
   due:<><circle cx="17" cy="24" r="9"/><circle cx="17" cy="24" r="4"/><path d="M30 24h12M36 18l6 6-6 6"/></>,
   sult:<><circle cx="9" cy="35" r="4"/><circle cx="39" cy="35" r="4"/><path d="M9 33c4-20 26-20 30 0"/></>,
-  end:<><path d="M6 24h24"/><path d="M38 8v32"/><path d="M24 18l6 6-6 6"/></>,
+  /* いちばん端：線の端の丸 */
+  end:<><path d="M4 24h30"/><circle cx="38" cy="24" r="5"/><path d="M4 18v12"/></>,
   way:<><path d="M15 42L22 8M33 42L26 8"/><path d="M24 36v-5M24 27v-5M24 18v-5"/></>,
   sake:<><path d="M6 10h36v22H24l-9 8v-8H6z"/><path d="M24 15v9M24 27v2"/></>,
-  ple:<><path d="M14 10h20l-3 30H17z"/><path d="M15 22h18"/><path d="M24 4v4"/></>,
+  /* 満たす：器にいっぱいまで注ぐ */
+  ple:<><path d="M12 18l3 24h18l3-24z"/><path d="M12.5 22h23M13.2 28h21.6M14 34h20"/><path d="M24 2v11M20 9l4 4 4-4"/></>,
   hard:<><path d="M7 37l9-19 10-6 15 10-4 15z"/><path d="M16 18l10 4 15-2M26 22l-4 15"/></>,
   most:<><path d="M6 40h36"/><rect x="9" y="29" width="8" height="11"/><rect x="20" y="21" width="8" height="19"/><rect x="31" y="11" width="8" height="29"/></>,
   part:<><circle cx="24" cy="24" r="16"/><path d="M24 8v32M8 24h16"/></>,
@@ -45938,7 +46058,8 @@ const PICTO_ROOT={
   act:<><circle cx="13" cy="11" r="4"/><path d="M13 15v12M13 19l8 4M13 27l-4 13M13 27l6 13"/><path d="M26 22h14M35 17l5 5-5 5"/></>,
   there:<><path d="M24 42c8-13 13-19 13-25a13 13 0 0 0-26 0c0 6 5 12 13 25z"/><circle cx="24" cy="17" r="4.5"/></>,
   fore:<><circle cx="33" cy="13" r="5"/><path d="M33 18v12M27 23h12M33 30l-4 11M33 30l4 11"/><path d="M6 24h11M13 20l4 4-4 4"/></>,
-  till:<><path d="M6 31h28"/><path d="M34 31V9"/><path d="M34 11h13l-4 6 4 6H34z"/></>,
+  /* ～まで：壁のところまで進む矢印 */
+  till:<><path d="M6 24h28M27 17l7 7-7 7"/><path d="M40 8v32"/></>,
   side:<><rect x="7" y="15" width="17" height="18"/><rect x="29" y="15" width="12" height="18"/></>,
   test:G.hand,
   bind:<><rect x="12" y="9" width="24" height="30" rx="2"/><path d="M7 19h34M7 29h34"/></>,
@@ -45946,15 +46067,19 @@ const PICTO_ROOT={
   hon:<><circle cx="24" cy="30" r="9"/><path d="M17 22L13 7h22l-4 15"/><path d="M24 26l1.7 3.4 3.8.5-2.8 2.6.7 3.7-3.4-1.8-3.4 1.8.7-3.7-2.8-2.6 3.8-.5z"/></>,
   chat:<><path d="M5 9h22v13H15l-6 6v-6H5z"/><path d="M43 21H25v13h8l6 6v-6h4z"/></>,
   monstr:<><rect x="16" y="8" width="26" height="18" rx="1"/><path d="M29 26v14M22 40h14"/><path d="M6 40L20 18"/><path d="M21 13h14M21 19h10"/></>,
-  phas:<><circle cx="24" cy="24" r="7"/><path d="M24 6v6M24 36v6M6 24h6M36 24h6M11 11l4 4M33 33l4 4M37 11l-4 4M15 33l-4 4"/></>,
+  /* 見せる：幕を開けて中を見せる */
+  phas:<><path d="M4 6h40"/><path d="M6 6c0 12 4 24 10 34H6zM42 6c0 12-4 24-10 34h10z"/><path d="M24 17l2.5 5 5.5.8-4 3.9 1 5.5-5-2.6-5 2.6 1-5.5-4-3.9 5.5-.8z"/></>,
   agger:<><path d="M5 38h38"/><path d="M9 38c4-15 26-15 30 0"/><path d="M16 31c3-7 13-7 16 0"/></>,
-  spond:<><circle cx="24" cy="30" r="10"/><path d="M18 21l6-8 6 8-6 5z"/></>,
+  /* 誓う：本に手を置いて誓う（pledge と同じ） */
+  spond:<><path d="M16 26V14M20 24V8M24 24V6M28 24V8M32 26V14"/><path d="M16 26c0 6 3 10 8 10s8-4 8-10"/><path d="M6 40h36M8 36h32v8H8z"/></>,
   whisper:<><path d="M7 24c7-8 19-8 26 0-7 8-19 8-26 0z"/><path d="M9 24h22"/><path d="M38 18h5M38 24h4M38 30h3"/></>,
   mark:<><path d="M7 21L21 7h14v14L21 35z"/><circle cx="29" cy="14" r="2.5"/></>,
-  chem:<><path d="M20 7v13L10 38h28L28 20V7"/><path d="M17 7h14"/><path d="M14 29h20"/></>,
+  /* 金属を溶かす術：火にかけたるつぼで金属が溶ける */
+  chem:<><path d="M10 8h28l-3 16a6 6 0 0 1-6 5H19a6 6 0 0 1-6-5z"/><path d="M13 14c3-2 5 2 8 0s5 2 8 0 5 2 6 0"/><path d="M14 29l-4 6M34 29l4 6M8 35h32"/><path d="M18 46c-3-2-3-6 0-9 3 3 3 7 0 9zM24 46c-3-2-3-6 0-9 3 3 3 7 0 9zM30 46c-3-2-3-6 0-9 3 3 3 7 0 9z"/></>,
   nucle:<><path d="M24 6c10 0 16 8 16 18s-6 18-16 18S8 34 8 24 14 6 24 6z"/><circle cx="24" cy="24" r="6"/></>,
   sue:<><circle cx="12" cy="13" r="4"/><path d="M12 17v10M7 21h10M12 27l-4 12M12 27l5 12"/><circle cx="35" cy="13" r="4"/><path d="M35 17v10M30 21h10M35 27l-4 12M35 27l5 12"/></>,
-  come:<><path d="M40 24H15M23 16l-8 8 8 8"/><path d="M9 7v34"/></>,
+  /* 来る：こちらへ歩いてくる人 */
+  come:<><circle cx="30" cy="10" r="4"/><path d="M30 14l-3 12M27 26l-6 12M27 26l6 12M29 17l-7 5M29 17l6 5"/><path d="M4 42h40"/><path d="M6 36h8M4 30h6" /><path d="M12 12H4M8 8l-4 4 4 4"/></>,
   striv:<><path d="M5 17h15M15 11l6 6-6 6"/><path d="M43 31H28M33 25l-6 6 6 6"/></>,
   aim:<><circle cx="24" cy="24" r="16"/><circle cx="24" cy="24" r="8"/><circle cx="24" cy="24" r="2"/></>,
   chall:<><circle cx="10" cy="12" r="4"/><path d="M10 16v12M5 20h10M10 28l-4 12M10 28l4 12"/><circle cx="38" cy="12" r="4"/><path d="M38 16v12M33 20h10M38 28l-4 12M38 28l4 12"/><path d="M26 6l-6 14h8l-6 14"/></>,
@@ -45962,7 +46087,8 @@ const PICTO_ROOT={
   dizzy:<><circle cx="24" cy="32" r="9"/><path d="M11 15c3-4 8-4 11 0s8 4 11 0"/><path d="M13 8c3-4 8-4 11 0s8 4 11 0"/></>,
   pet:<><circle cx="14" cy="28" r="4"/><path d="M14 32v9M14 35l-5 6M14 35l5 6"/><path d="M15 26l9-7"/><path d="M34 9l2.6 6.4 6.9.5-5.3 4.5 1.6 6.7-5.8-3.7-5.8 3.7 1.6-6.7-5.3-4.5 6.9-.5z"/></>,
   starv:<><path d="M8 25h32c0 9-7 15-16 15S8 34 8 25z"/><path d="M18 10l12 9M30 10l-12 9"/></>,
-  rest:<><path d="M7 38V20h19a9 9 0 0 1 9 9v9"/><path d="M7 29h28"/><path d="M7 38h32"/><circle cx="15" cy="25" r="3.5"/></>,
+  /* 立ち止まる：一時停止の印の前で止まる人 */
+  rest:<><circle cx="14" cy="10" r="4"/><path d="M14 14v14M14 28l-4 12M14 28l4 12M14 18l-6 6M14 18l6 6"/><rect x="28" y="12" width="4" height="18" rx="1"/><rect x="36" y="12" width="4" height="18" rx="1"/><path d="M4 42h40"/></>,
   surg:<><path d="M6 42l9-9"/><path d="M15 33l16-16 5 5-16 16z"/><path d="M31 17l7-7 4 4-7 7"/></>,
   ease:<><circle cx="24" cy="24" r="14"/><path d="M17 20h5M26 20h5"/><path d="M17 28c4 5 10 5 14 0"/></>,
   /* No.41〜49（LEAP の並びに合わせて入れ替えた語）で増えた語根 */
@@ -45979,37 +46105,46 @@ const PICTO_ROOT={
   raw:<><path d="M6 24c6-10 20-10 27 0-7 10-21 10-27 0z"/><path d="M33 24l9-8v16z"/><circle cx="15" cy="21" r="1.6"/></>,
   empty:<><path d="M10 10h28"/><path d="M15 10l3 28h12l3-28"/></>,
   smooth:<><path d="M6 16c4-7 8 7 12 0s8 7 12 0 8 7 12 0"/><path d="M6 32h36"/></>,
-  famil:<><path d="M8 22L24 8l16 14"/><path d="M12 22v18h24V22"/><circle cx="19" cy="28" r="3"/><circle cx="30" cy="28" r="3"/><path d="M14 40c0-4 2-7 5-7s5 3 5 7M25 40c0-4 2-7 5-7s5 3 5 7"/></>,
-  use:<><path d="M10 40l18-18"/><path d="M22 12l14 14-5 5-14-14z"/></>,
+  /* 家族：手をつなぐ親と子 */
+  famil:<><circle cx="16" cy="10" r="4.5"/><path d="M16 15v14M16 29l-5 13M16 29l5 13M16 19l-6 6M16 19l8 6"/><circle cx="33" cy="20" r="3.5"/><path d="M33 24v10M33 34l-4 8M33 34l4 8M33 27l-9-2M33 27l5 4"/></>,
+  /* 使う：道具（スパナ） */
+  use:<><path d="M30 6a8 8 0 0 0-8 10L8 30a4 4 0 0 0 6 6l14-14a8 8 0 0 0 10-8l-5 3-4-2-1-4z"/><circle cx="11" cy="33" r="1.2"/></>,
   creas:<><path d="M24 40V18"/><path d="M24 24c-6 0-10-4-10-9 6-1 10 3 10 9z"/><path d="M24 22c6 0 10-4 10-9-6-1-10 3-10 9z"/><path d="M8 40h32"/></>,
   divid:<><path d="M24 6v36"/><path d="M16 24H6M11 19l-5 5 5 5"/><path d="M32 24h10M37 19l5 5-5 5"/></>,
-  quart:<><circle cx="24" cy="24" r="16"/><path d="M24 8v32M8 24h32"/></>,
+  /* 4番目：円を4つに分けた1切れ */
+  quart:<><path d="M22 10a16 16 0 1 0 16 16H22z"/><path d="M26 6v16h16A16 16 0 0 0 26 6z"/><path d="M22 26L10.7 37.3"/></>,
   lot:<><path d="M6 38h34"/><path d="M12 38V18M20 38V14M28 38V20M36 30V8"/></>,
   pile:<><rect x="10" y="30" width="28" height="9"/><rect x="14" y="21" width="20" height="9"/><rect x="18" y="12" width="12" height="9"/></>,
-  rat:<><path d="M10 10v28M38 10v28"/><circle cx="24" cy="18" r="2.5"/><circle cx="24" cy="30" r="2.5"/></>,
+  /* 計算する：電卓（comput と同じ） */
+  rat:<><rect x="10" y="5" width="28" height="38" rx="3"/><path d="M16 13h16"/><circle cx="18" cy="25" r="2"/><circle cx="24" cy="25" r="2"/><circle cx="30" cy="25" r="2"/><circle cx="18" cy="34" r="2"/><circle cx="24" cy="34" r="2"/><circle cx="30" cy="34" r="2"/></>,
   fig:<><path d="M19 8h10M21 8c0 6-9 8-9 18 0 8 5 13 12 13s12-5 12-13c0-10-9-12-9-18"/><path d="M6 40c4-2 8-2 12 0M30 40c4-2 8-2 12 0"/></>,
   lack:<><path d="M13 8l3 32h16l3-32"/><path d="M15.5 30h17"/><path d="M14 14h20" stroke-dasharray="3 3"/></>,
   ready:<><rect x="8" y="12" width="32" height="24" rx="2"/><path d="M15 24l6 6 12-14"/></>,
   juxta:<><rect x="8" y="16" width="14" height="16"/><rect x="26" y="16" width="14" height="16"/></>,
-  suit:<><ellipse cx="13" cy="34" rx="4" ry="6"/><ellipse cx="24" cy="24" rx="4" ry="6"/><ellipse cx="35" cy="14" rx="4" ry="6"/></>,
+  /* 付き従う：前の人のあとに続いて進む（sequ と同じ） */
+  suit:<><circle cx="37" cy="10" r="3.5"/><path d="M31 24c0-5 3-8 6-8s6 3 6 8"/><circle cx="24" cy="18" r="3.5"/><path d="M18 32c0-5 3-8 6-8s6 3 6 8"/><circle cx="11" cy="26" r="3.5"/><path d="M5 40c0-5 3-8 6-8s6 3 6 8"/><path d="M28 44l12-10M40 34v5M40 34h-5"/></>,
   scene:<><path d="M6 8h36"/><path d="M13 8c0 10-2 14-2 22M35 8c0 10 2 14 2 22"/><path d="M6 38h36"/><path d="M18 30h12v8H18z"/></>,
   time:<><circle cx="24" cy="24" r="16"/><path d="M24 14v10l7 5"/></>,
   spring:<><path d="M16 38h16"/><path d="M16 34h16l-16-5h16l-16-5h16"/><path d="M24 16V6M20 10l4-4 4 4"/></>,
   min:<><rect x="8" y="12" width="22" height="22"/><rect x="34" y="28" width="8" height="8"/></>,
   ann:<><rect x="8" y="12" width="32" height="28" rx="2"/><path d="M8 20h32"/><path d="M16 8v8M32 8v8"/><circle cx="24" cy="30" r="4"/></>,
   recent:<><path d="M24 7l4 11 11 4-11 4-4 11-4-11-11-4 11-4z"/></>,
-  ere:<><path d="M40 24H12M19 17l-7 7 7 7"/><path d="M7 11v26"/></>,
+  /* 前に：針を前へ戻す時計 */
+  ere:<><circle cx="24" cy="26" r="15"/><path d="M24 26v-9M24 26l6 4"/><path d="M14 5a20 20 0 0 0-9 9M5 14l-1-6M5 14l6-1"/></>,
   est:<><path d="M8 39h32"/><rect x="8" y="27" width="10" height="12"/><rect x="19" y="15" width="10" height="24"/><rect x="30" y="31" width="10" height="8"/><path d="M24 11V6"/></>,
   late:<><circle cx="19" cy="24" r="12"/><path d="M19 16v8l6 4"/><path d="M35 24h8M39 20l4 4-4 4"/></>,
   mod:<><path d="M6 30h36"/><path d="M24 30V14"/><circle cx="24" cy="11" r="3"/><path d="M13 30v-5M35 30v-5"/></>,
   delay:<><path d="M10 17v14M17 17v14"/><path d="M25 24h15M35 19l5 5-5 5"/></>,
-  borrow:<><path d="M42 24H17M24 18l-7 6 7 6"/><path d="M9 11v26"/></>,
-  lend:<><path d="M6 24h25M24 18l7 6-7 6"/><path d="M39 11v26"/></>,
+  /* 借り受ける：差し出した手に物を受け取る */
+  borrow:<><rect x="17" y="4" width="14" height="11" rx="1.5"/><path d="M24 18v8M20 22l4 4 4-4"/><path d="M4 34h12c2 0 4 1 5 2h6c2 0 2 3 0 3h-9"/><path d="M16 34l4-4h8l12-4c2 0 3 2 1 3l-9 7"/><path d="M4 30v10"/></>,
+  /* 貸す：渡したものが、あとで戻ってくる */
+  lend:<><rect x="18" y="12" width="12" height="10" rx="1.5"/><path d="M4 17h11M33 17h9M38 13l4 4-4 4"/><path d="M42 34H8" strokeDasharray="3 3"/><path d="M13 29l-5 5 5 5"/></>,
   rent:<><path d="M6 21L20 9l14 12"/><path d="M10 21v17h20V21"/><circle cx="38" cy="33" r="6"/><path d="M38 29v8"/></>,
   board:<><path d="M6 18h36v12H6z"/><path d="M13 22v4M21 22v4M29 22v4M37 22v4"/></>,
   garbage:<><path d="M8 15h32"/><path d="M12 15h24l-2 25H14z"/><path d="M18 10h12"/><path d="M20 22v11M28 22v11"/></>,
   item:<><circle cx="10" cy="14" r="2.5"/><circle cx="10" cy="24" r="2.5"/><circle cx="10" cy="34" r="2.5"/><path d="M18 14h22M18 24h22M18 34h22"/></>,
-  wheel:<><circle cx="24" cy="24" r="15"/><circle cx="24" cy="24" r="4"/><path d="M24 9v6M24 33v6M9 24h6M33 24h6"/></>,
+  /* 回る輪：スポークのある車輪 */
+  wheel:<><circle cx="24" cy="24" r="18"/><circle cx="24" cy="24" r="14"/><circle cx="24" cy="24" r="3"/><path d="M24 10v11M24 27v11M10 24h11M27 24h11M14 14l8 8M26 26l8 8M34 14l-8 8M22 26l-8 8"/></>,
   bargain:<><circle cx="24" cy="11" r="6"/><path d="M6 26h30M30 21l6 5-6 5"/><path d="M42 38H12M18 33l-6 5 6 5"/></>,
   stuff:<><rect x="10" y="20" width="28" height="18" rx="1.5"/><path d="M16 27h16M16 33h16"/><path d="M24 6v9M20 11l4 4 4-4"/></>,
   string:<><path d="M9 11v26M39 11v26"/><path d="M9 24h30"/><circle cx="24" cy="24" r="3.5"/></>,
@@ -46023,30 +46158,38 @@ const PICTO_ROOT={
   greet:<><path d="M18 40V24l-3-5M18 24V12M24 22V9M30 22V11M36 24V16"/><path d="M18 40h18V24"/><path d="M9 14c1-3 4-5 7-5M7 7c3-4 8-5 12-3"/></>,
   room:<><path d="M8 13h32v27H8z"/><path d="M22 40V24h10v16"/><circle cx="30" cy="33" r="1.6"/></>,
   story:<><path d="M8 13v27M40 13v27"/><path d="M8 13h32M8 22h32M8 31h32M8 40h32"/></>,
-  sit:<><rect x="16" y="13" width="16" height="12" rx="1.5"/><path d="M6 29h36"/><path d="M12 29v7M36 29v7"/></>,
+  /* 座る：いすに座る人（「置く」の意味の sit は set の絵） */
+  sit:<><circle cx="18" cy="8" r="4.5"/><path d="M18 13v12h10v14"/><path d="M18 18l8 4"/><path d="M8 20v24M8 30h24v14"/></>,
   yard:<><rect x="6" y="10" width="36" height="30"/><circle cx="24" cy="21" r="7"/><path d="M24 28v12"/></>,
   bottom:<><path d="M8 38h32"/><path d="M24 8v22M17 23l7 7 7-7"/></>,
   row:<><circle cx="10" cy="24" r="4"/><circle cx="24" cy="24" r="4"/><circle cx="38" cy="24" r="4"/></>,
-  rumor:<><path d="M6 9h20v12H15l-6 6v-6H6z"/><path d="M22 25h20v12h-5l-6 6v-6h-9z"/></>,
+  /* 人々のざわめき：あちこちから小さな話し声 */
+  rumor:<><circle cx="10" cy="30" r="4"/><circle cx="24" cy="30" r="4"/><circle cx="38" cy="30" r="4"/><path d="M3 44c0-5 3-8 7-8s7 3 7 8M17 44c0-5 3-8 7-8s7 3 7 8M31 44c0-5 3-8 7-8s7 3 7 8"/><path d="M4 6h12v8H9l-3 3v-3H4zM18 10h12v8h-7l-3 3v-3h-2zM32 4h12v8h-2v3l-3-3h-7z"/></>,
   spell:<><path d="M4 33l6-17 6 17M6 28h8"/><path d="M20 16h5a4 4 0 0 1 0 8h-5zM20 24h6a4 4 0 0 1 0 8h-6z"/><path d="M44 19a7 7 0 1 0 0 10"/></>,
-  all:<><path d="M14 8H8v32h6M34 8h6v32h-6"/><circle cx="16" cy="24" r="3"/><circle cx="24" cy="24" r="3"/><circle cx="32" cy="24" r="3"/></>,
+  /* すっかり：半分から全部までぬりつぶされる（接頭語の「すっかり」と同じ絵） */
+  all:<><circle cx="8" cy="24" r="7"/><path d="M8 17v14"/><path d="M10.9 17.6L8.0 20.5M13.6 19.8L8.0 25.4M15.0 23.4L8.0 30.4"/><path d="M16 24h5M19 21l3 3-3 3"/><circle cx="35" cy="24" r="11"/><path d="M24.0 23.7L34.7 13.0M24.9 28.4L39.4 13.9M27.2 31.8L42.8 16.2M30.6 34.1L45.1 19.6M35.3 35.0L46.0 24.3"/></>,
   one:<><path d="M18 15l6-4v27"/><path d="M16 38h16"/></>,
   extra:<><rect x="6" y="14" width="23" height="20" rx="2"/><path d="M31 24h4"/><circle cx="41" cy="24" r="5"/></>,
   back:<><path d="M40 24H14M21 17l-7 7 7 7"/><circle cx="34" cy="12" r="4"/><path d="M28 38c0-7 3-11 6-11s6 4 6 11"/></>,
   /* ante は接頭語だが、ancient のように ante だけでできている語があるので語根側にも置く（絵は PRE_BEFORE と同じ形） */
   ante:<><circle cx="10" cy="30" r="5"/><path d="M10 25V8"/><path d="M10 9h10l-3 4 3 4H10"/><circle cx="26" cy="30" r="5"/><circle cx="41" cy="30" r="5"/></>,
-  /* No.251〜350：既存の基本図形を意味に合わせて再利用 */
-  terr:G.voice,
-  cad:G.arrowR,
-  pac:G.hand,
-  marit:G.people,
+  /* No.251〜350：既存の基本図形を意味に合わせて再利用（2026-09-26 に、意味の違う絵と重なっていたものを描き直し） */
+  /* 恐れさせる：びっくりして両手を上げる人 */
+  terr:<><circle cx="20" cy="16" r="5"/><path d="M20 21v11M20 32l-6 9M20 32l6 9"/><path d="M20 24l-8-9M20 24l8-9"/><path d="M14 6l-2-3M20 5V2M26 6l2-3"/><path d="M38 8v16M38 30v.5"/></>,
+  /* 落ちる：ひらひら落ちる葉 */
+  cad:<><path d="M24 20c-8-2-10-8-8-14 7 1 10 7 8 14z"/><path d="M16 6l8 14"/><path d="M26 24c1 4-2 6 0 9s-2 5 0 8" strokeDasharray="2 3"/><path d="M6 44h36"/><path d="M36 22v14M32 32l4 4 4-4"/></>,
+  /* 穏やかにする：荒れた波が静まって平らになる */
+  pac:<><path d="M4 12c3-4 6 4 9 0s6 4 9 0 6 4 9 0 6 4 9 0"/><path d="M4 21c3-2 6 2 9 0s6 2 9 0 6 2 9 0 6 2 9 0"/><path d="M24 26v8M20 30l4 4 4-4"/><path d="M4 40h40"/></>,
+  /* 結婚した：重なる2つの指輪 */
+  marit:<><circle cx="18" cy="29" r="10"/><circle cx="30" cy="29" r="10"/><path d="M14 10l4-5 4 5-4 5z"/><path d="M18 15v4"/></>,
   /* No.151〜250 で増えた語根（その3） */
   dict:<><path d="M10 34c0-10 6-16 14-16s14 6 14 14c0 7-5 10-10 10H16l-6 6z"/><path d="M18 26h12M18 32h8"/></>,
   shar:<><path d="M24 8v20"/><path d="M14 10L24 28 34 10"/><circle cx="11" cy="36" r="5"/><circle cx="37" cy="36" r="5"/></>,
   gather:<><circle cx="24" cy="24" r="4"/><path d="M6 6l10 10M42 6L32 16M6 42l10-10M42 42L32 32"/><path d="M16 10v6h-6M32 10v6h6M16 38v-6h-6M32 38v-6h6"/></>,
   sen:<><circle cx="19" cy="10" r="5"/><path d="M19 15c-1 5 0 9 2 13l-4 12M21 28l5 12M20 20l11 1"/><path d="M33 20v20M33 20c0-3 4-3 4 0"/></>,
   quit:<><circle cx="24" cy="24" r="16"/><path d="M18 18h12v12H18z"/></>,
-  tir:<><path d="M40 24H14M20 18l-6 6 6 6"/><path d="M8 12v24"/><circle cx="34" cy="24" r="3"/></>,
+  /* 引く：ロープで箱を引っぱる人（tract と同じ） */
+  tir:<><circle cx="38" cy="10" r="4"/><path d="M38 14l-3 12M35 26l-5 14M35 26l6 14"/><path d="M37 17l-8 6"/><path d="M29 23H14"/><rect x="4" y="18" width="10" height="10" rx="1.5"/><path d="M2 40h44"/></>,
   pollut:<><path d="M24 6s10 12 10 19a10 10 0 0 1-20 0c0-7 10-19 10-19z"/><path d="M18 32l12-12M18 20l12 12"/></>,
   bloom:<><circle cx="24" cy="18" r="4"/><path d="M24 14c0-5-3-7-6-6 1-4 5-5 7-2 2-3 6-2 7 2-3-1-6 1-6 6"/><path d="M20 18c-5 0-8-2-8-5 3-2 7 0 8 5z"/><path d="M28 18c5 0 8-2 8-5-3-2-7 0-8 5z"/><path d="M24 22v18"/><path d="M24 30c-5 0-8-3-8-6 4-1 8 2 8 6z"/></>,
   earth:<><circle cx="24" cy="24" r="16"/><path d="M8 24h32"/><path d="M24 8c5 6 5 26 0 32M24 8c-5 6-5 26 0 32"/></>,
@@ -46055,15 +46198,18 @@ const PICTO_ROOT={
   lazy:<><circle cx="16" cy="20" r="5"/><path d="M6 36h28c4 0 6-3 6-6"/><path d="M10 36c0-6 3-10 8-10h8"/><path d="M34 12l3 3 3-3M36 8v7"/></>,
   wake:<><circle cx="24" cy="26" r="8"/><circle cx="24" cy="26" r="2.5"/><path d="M24 10v6M12 14l4 5M36 14l-4 5M6 26h4M38 26h4"/></>,
   element:<><circle cx="24" cy="24" r="5"/><ellipse cx="24" cy="24" rx="18" ry="7"/><ellipse cx="24" cy="24" rx="18" ry="7" transform="rotate(60 24 24)"/><ellipse cx="24" cy="24" rx="18" ry="7" transform="rotate(120 24 24)"/></>,
-  maj:<><path d="M6 40h36"/><rect x="18" y="10" width="12" height="30"/><rect x="6" y="24" width="10" height="16"/><rect x="32" y="28" width="10" height="12"/></>,
+  /* 大きい：小さな人が見上げる、大きな玉 */
+  maj:<><circle cx="8" cy="36" r="3"/><path d="M8 39v4M5 45l3-2 3 2"/><circle cx="30" cy="22" r="14"/><path d="M46 8v28M43 11l3-3 3 3M43 33l3 3 3-3" transform="translate(-2,0)"/><path d="M2 45h44"/></>,
   brill:<><path d="M14 10h20l8 10-18 20L6 20z"/><path d="M6 20h36M14 10l8 30M34 10l-8 30"/></>,
   plore:<><circle cx="18" cy="14" r="5"/><path d="M8 40c0-9 5-14 10-14s10 5 10 14"/><path d="M32 12c4 4 4 16 0 20M38 8c6 6 6 24 0 30"/></>,
   manu:<><path d="M14 30V11a2.5 2.5 0 0 1 5 0v7"/><path d="M19 18V8a2.5 2.5 0 0 1 5 0v10"/><path d="M24 18V9a2.5 2.5 0 0 1 5 0v9"/><path d="M29 18v-5a2.5 2.5 0 0 1 5 0v14c0 7-4 13-10 13s-10-6-10-13v-6"/></>,
-  choos:<><path d="M6 14h14v20H6z"/><path d="M28 14h14v20H28z"/><path d="M35 8l3 4h-6z"/><path d="M24 40l-4-5h8z"/></>,
+  /* 味わってみる：スプーンを口へ運ぶ */
+  choos:<><path d="M26 44v-6c5-1 8-6 8-12 0-7-5-13-13-13S8 19 8 26c0 3 1 5 2 7l-3 4h4v3c0 2 2 3 4 3h3v1" transform="translate(-4,0)"/><path d="M34 33l10-10"/><ellipse cx="30" cy="36" rx="4" ry="2.5" transform="rotate(-45 30 36)"/></>,
   guess:<><circle cx="24" cy="24" r="15"/><path d="M18 19c0-3 3-5 6-5s6 2 6 5c0 4-6 4-6 8"/><circle cx="24" cy="35" r="1.6"/></>,
   wonder:<><path d="M24 6l3 9 9-3-3 9 9 3-9 3 3 9-9-3-3 9-3-9-9 3 3-9-9-3 9-3-3-9 9 3z"/></>,
   seem:<><path d="M4 24s7-10 20-10 20 10 20 10"/><circle cx="24" cy="24" r="5" stroke-dasharray="3 3"/><path d="M14 34h20" stroke-dasharray="3 3"/></>,
-  focus:<><path d="M8 12l14 12L8 36"/><path d="M40 12L26 24l14 12"/><circle cx="24" cy="24" r="3"/></>,
+  /* いろり・火：組んだまきの上で燃える火 */
+  focus:<><path d="M24 26c-6-3-8-9-3-16 1 4 3 5 4 5 0-4 2-7 5-9 0 6 6 10 3 17-2 3-5 4-9 3z"/><path d="M8 40l32-8M8 32l32 8"/><path d="M4 44h40"/></>,
   land:<><path d="M4 34h40"/><path d="M10 34l10-12 7 8 5-6 8 10"/><path d="M4 40h40"/></>,
   scape:<><rect x="6" y="12" width="36" height="24" rx="2"/><path d="M6 30l10-9 7 6 6-5 13 11"/><circle cx="16" cy="19" r="2.5"/></>,
   seed:<><path d="M24 40c0-10 4-16 10-18-1 8-4 14-10 18z"/><path d="M24 40c0-10-4-16-10-18 1 8 4 14 10 18z"/><ellipse cx="24" cy="14" rx="5" ry="7"/></>,
@@ -46073,7 +46219,8 @@ const PICTO_ROOT={
   flood:<><path d="M10 40V22l14-10 14 10v18"/><path d="M4 30c5-4 10 4 15 0s10-4 15 0 5 4 10 0"/><path d="M4 38c5-4 10 4 15 0s10-4 15 0 5 4 10 0"/></>,
   silly:<><circle cx="24" cy="24" r="16"/><path d="M16 30c3 4 13 4 16 0"/><path d="M14 18l6 4-6 2M34 18l-6 4 6 2"/></>,
   ug:<><circle cx="24" cy="24" r="15"/><path d="M15 17l6 3M33 17l-6 3"/><path d="M14 31l4-3 3 3 3-3 3 3 3-3 4 3"/></>,
-  quant:<><path d="M6 40V26h8v14zM18 40V18h8v22zM30 40V10h8v30z"/></>,
+  /* いくつ：数を数える線 */
+  quant:<><path d="M8 10v28M14 10v28M20 10v28M26 10v28M4 32l26-16"/><path d="M36 10v28M42 10v28"/></>,
 
   /* No.151〜250 で増えた語根（その2） */
   lect:<><path d="M6 40h36"/><circle cx="11" cy="37" r="3"/><circle cx="37" cy="37" r="3"/><circle cx="24" cy="27" r="3"/><path d="M24 20V6M18 12l6-6 6 6"/></>,
@@ -46084,7 +46231,8 @@ const PICTO_ROOT={
   see:<><path d="M4 24s7-12 20-12 20 12 20 12-7 12-20 12S4 24 4 24z"/><circle cx="24" cy="24" r="5"/><path d="M24 29v9"/></>,
   theor:<><path d="M4 24s7-12 20-12 20 12 20 12-7 12-20 12S4 24 4 24z"/><circle cx="24" cy="24" r="5"/><path d="M24 29v9"/></>,
   lone:<><circle cx="24" cy="14" r="6"/><path d="M14 40c0-8 4-13 10-13s10 5 10 13"/><path d="M6 8v6M42 8v6"/></>,
-  have:<><path d="M8 26c0-4 3-6 7-6h18c4 0 7 2 7 6v6c0 4-3 6-7 6H15c-4 0-7-2-7-6z"/><path d="M14 20V14c0-4 4-6 10-6s10 2 10 6v6"/></>,
+  /* 持つ：棒をしっかりにぎる手（hold と同じ） */
+  have:<><path d="M8 8h32"/><path d="M10 28h6V16a3 3 0 0 1 6 0v10"/><path d="M22 20a3 3 0 0 1 6 0v6"/><path d="M28 22a3 3 0 0 1 6 0v10a10 10 0 0 1-10 10h-6a8 8 0 0 1-8-8v-6"/></>,
   long:<><path d="M6 24h36"/><path d="M6 18v12M42 18v12"/><path d="M14 20v8M24 20v8M34 20v8"/></>,
   bas:<><rect x="6" y="34" width="36" height="8" rx="1"/><rect x="14" y="20" width="20" height="12" rx="1"/><path d="M24 20V10"/></>,
   know:<><path d="M30 10c-9 0-16 6-16 14 0 5 2 7 2 11v5h12v-4h5v-6h4c2-5 3-7 3-10 0-6-4-10-10-10z"/><path d="M27 16v8M27 29v.5"/></>,
@@ -46095,22 +46243,27 @@ const PICTO_ROOT={
   nerv:<><path d="M6 24h10l4-8 5 16 5-12 4 4h8"/><circle cx="10" cy="24" r="2"/><circle cx="38" cy="24" r="2"/></>,
   tail:<><path d="M14 10L36 36"/><path d="M34 10L12 36"/><circle cx="12" cy="40" r="4"/><circle cx="36" cy="40" r="4"/></>,
   van:<><path d="M6 32h24M24 26l8 6-8 6"/><path d="M38 10v28"/><path d="M6 20h10"/></>,
-  ide:<><path d="M24 8c-7 0-12 5-12 11 0 5 3 7 4 11h16c1-4 4-6 4-11 0-6-5-11-12-11z"/><path d="M19 36h10M21 41h6"/></>,
-  fair:<><path d="M24 8v28"/><path d="M10 16h28"/><path d="M10 16L5 28h10z"/><path d="M38 16l-5 12h10z"/><path d="M16 40h16"/></>,
+  /* 見える姿：目に浮かぶ形 */
+  ide:<><path d="M4 34c6-8 14-12 20-12s14 4 20 12c-6 8-14 12-20 12S10 42 4 34z"/><circle cx="24" cy="34" r="5"/><circle cx="12" cy="10" r="5"/><path d="M24 4l6 10H18z"/><rect x="31" y="5" width="10" height="10"/></>,
+  /* 美しい・整った：形の整った花がきらりと光る */
+  fair:<><circle cx="24" cy="24" r="4"/><circle cx="24" cy="13" r="6"/><circle cx="24" cy="35" r="6"/><circle cx="13" cy="24" r="6"/><circle cx="35" cy="24" r="6"/><path d="M40 6l1 3 3 1-3 1-1 3-1-3-3-1 3-1z"/></>,
   bright:<><circle cx="24" cy="24" r="8"/><path d="M24 4v6M24 38v6M4 24h6M38 24h6M10 10l4 4M34 34l4 4M38 10l-4 4M14 34l-4 4"/></>,
   live:<><path d="M8 26c6 0 8-6 8-10 0 8 4 14 8 14s8-6 8-14c0 6 2 10 8 10"/><path d="M6 36h36"/><path d="M24 30v6"/></>,
   bear:<><circle cx="18" cy="14" r="5"/><path d="M8 40c0-10 5-16 10-16"/><rect x="24" y="12" width="16" height="14" rx="1.5"/><path d="M18 24h8"/></>,
-  own:<><path d="M10 40V20l14-11 14 11v20z"/><path d="M19 40V29h10v11"/><circle cx="24" cy="23" r="2.5"/></>,
+  /* 持っている：かぎを手ににぎる */
+  own:<><circle cx="14" cy="18" r="8"/><circle cx="14" cy="18" r="3"/><path d="M22 18h20M36 18v6M42 18v6"/><path d="M4 40h14c2 0 4-1 5-3l3-7M4 32h8"/></>,
 
   /* No.151〜250 で増えた語根 */
-  tend:<><path d="M6 24h30M31 18l6 6-6 6"/><path d="M6 14v20"/><path d="M42 14v20"/></>,
+  /* 伸ばす：ばねを両側へ引きのばす */
+  tend:<><path d="M4 24h6M40 24h4M4 24l5-5M4 24l5 5M44 24l-5-5M44 24l-5 5"/><path d="M12 24l3-6 3 12 3-12 3 12 3-12 3 12 3-6h2"/></>,
   sent:<><circle cx="24" cy="14" r="6"/><path d="M13 40c0-8 5-13 11-13s11 5 11 13"/><path d="M6 44h36"/></>,
   ject:<><circle cx="12" cy="34" r="4"/><path d="M8 30c6-14 18-20 32-20"/><path d="M34 6l6 4-4 6"/></>,
   duc:<><circle cx="12" cy="16" r="4"/><path d="M8 40c0-8 2-13 8-13"/><path d="M20 28h18M33 23l5 5-5 5"/></>,
   spect:<><path d="M4 24s7-12 20-12 20 12 20 12-7 12-20 12S4 24 4 24z"/><circle cx="24" cy="24" r="5"/><path d="M38 10l6-6"/></>,
   cept:<><path d="M10 12v14c0 8 6 14 14 14s14-6 14-14V12"/><path d="M14 20h20"/><path d="M24 4v10"/></>,
   mit:<><path d="M6 14h24v16H6z"/><path d="M6 14l12 9 12-9"/><path d="M34 22h10M39 17l5 5-5 5"/></>,
-  clude:<><rect x="10" y="14" width="28" height="24" rx="2"/><path d="M24 14V8"/><circle cx="24" cy="26" r="4"/></>,
+  /* 閉じる：扉をバタンと閉める */
+  clude:<><path d="M8 4h26v40H8z"/><path d="M8 4l14 6v34"/><path d="M34 24a14 14 0 0 1-8 12"/><path d="M26 36l1-5M26 36l5 1"/><circle cx="18" cy="26" r="1.5"/></>,
   centr:<><circle cx="24" cy="24" r="16"/><circle cx="24" cy="24" r="3"/><path d="M24 8v4M24 36v4M8 24h4M36 24h4"/></>,
   flect:<><path d="M6 38h36"/><path d="M8 10l16 26 16-26"/><path d="M33 12l7-2 1 7"/></>,
   rect:<><path d="M6 16h34M34 10l6 6-6 6"/><rect x="6" y="28" width="36" height="9" rx="1"/><path d="M12 28v4M18 28v3M24 28v4M30 28v3M36 28v4"/></>,
@@ -46119,12 +46272,16 @@ const PICTO_ROOT={
   sect:<><rect x="6" y="28" width="15" height="10"/><rect x="27" y="28" width="15" height="10"/><rect x="21" y="3" width="6" height="8" rx="1"/><path d="M21 11h6l-3 14z"/></>,
   memor:<><path d="M24 40c-9-7-16-13-16-21 0-6 4-9 8-9 3 0 6 2 8 5 2-3 5-5 8-5 4 0 8 3 8 9 0 8-7 14-16 21z"/><path d="M20 20h8"/></>,
   apt:<><path d="M6 18h14v12H6z"/><path d="M20 22h4v4h-4z"/><path d="M24 14h18v20H24z"/><path d="M28 24h10"/></>,
-  propri:<><path d="M10 40V18l14-10 14 10v22z"/><path d="M19 40V28h10v12"/><circle cx="24" cy="21" r="2.5"/></>,
+  /* 自分のもの：かぎを手ににぎる（own と同じ） */
+  propri:<><circle cx="14" cy="18" r="8"/><circle cx="14" cy="18" r="3"/><path d="M22 18h20M36 18v6M42 18v6"/><path d="M4 40h14c2 0 4-1 5-3l3-7M4 32h8"/></>,
   charact:<><path d="M10 38h28"/><path d="M14 32l10-22 10 22"/><path d="M18 24h12"/></>,
-  viv:<><path d="M24 40c-9-7-16-13-16-21 0-6 4-9 8-9 3 0 6 2 8 5 2-3 5-5 8-5 4 0 8 3 8 9 0 8-7 14-16 21z"/></>,
-  qual:<><circle cx="24" cy="24" r="16"/><path d="M19 18c0-3 2-5 5-5s5 2 5 5c0 4-5 4-5 8"/><circle cx="24" cy="34" r="1.6"/></>,
+  /* 生きる：人と、脈打つ心電図の線 */
+  viv:<><circle cx="10" cy="12" r="4"/><path d="M10 16v10M4 20l6-4 6 4M10 26l-4 8M10 26l4 8"/><path d="M4 40h8l3-6 4 10 5-18 4 14 3-6h13"/></>,
+  /* どんな：星の数で質をくらべる */
+  qual:<><rect x="4" y="28" width="10" height="12" rx="1"/><rect x="19" y="28" width="10" height="12" rx="1"/><rect x="34" y="28" width="10" height="12" rx="1"/><path d="M9 18l1.5 3 3 .5-2.2 2 .6 3-2.9-1.5-2.9 1.5.6-3-2.2-2 3-.5z"/><path d="M24 12l1.5 3 3 .5-2.2 2 .6 3-2.9-1.5-2.9 1.5.6-3-2.2-2 3-.5zM24 4v.5"/><path d="M39 6l1.5 3 3 .5-2.2 2 .6 3-2.9-1.5-2.9 1.5.6-3-2.2-2 3-.5zM39 18l1.5 3 3 .5-2.2 2 .6 3-2.9-1.5-2.9 1.5.6-3-2.2-2 3-.5z"/></>,
   pleas:<><circle cx="24" cy="24" r="16"/><path d="M16 28c3 5 13 5 16 0"/><path d="M17 19h3M28 19h3"/></>,
-  plant:<><path d="M24 42V20"/><path d="M24 26c-8 0-12-5-12-12 8 0 12 5 12 12z"/><path d="M24 30c8 0 12-5 12-12-8 0-12 5-12 12z"/><path d="M14 42h20"/></>,
+  /* 足で踏み込む：足で土を踏みしめて苗を植える */
+  plant:<><path d="M2 38h44"/><path d="M8 4h10v16l12 6c3 1 4 3 4 6H8z"/><path d="M8 32h26"/><path d="M18 22l3-3M22 24l3-3"/><path d="M14 36v-2M20 36v-2M26 36v-2" /><path d="M40 38V26M40 30c-4 0-6-3-6-6 4 0 6 3 6 6zM40 28c0-4 2-6 6-6 0 4-2 6-6 6z"/></>,
   pear:<><path d="M4 24s7-12 20-12 20 12 20 12"/><circle cx="24" cy="24" r="6"/><path d="M24 36v6M14 34l-3 5M34 34l3 5"/></>,
   main:<><path d="M10 40V20l14-10 14 10v20z"/><path d="M18 40V28h12v12"/><path d="M6 44h36"/></>,
 
@@ -46137,13 +46294,16 @@ const PICTO_ROOT={
   bor:<><path d="M8 22l16-13 16 13"/><path d="M12 22v18h24V22"/><circle cx="24" cy="27" r="3"/><path d="M19 40c0-4 2-7 5-7s5 3 5 7"/></>,
   aud:<><path d="M27 40c-7 0-12-6-12-14 0-8 5-14 12-14 5 0 9 4 9 9 0 6-7 6-7 11"/><circle cx="29" cy="31" r="1.6"/><path d="M9 18c-2 4-2 10 0 14M4 13c-3 7-3 17 0 24"/></>,
   crowd:<><circle cx="12" cy="17" r="5"/><circle cx="24" cy="14" r="5"/><circle cx="36" cy="17" r="5"/><path d="M4 40c0-7 4-11 8-11s8 4 8 11M16 40c0-8 4-12 8-12s8 4 8 12M28 40c0-7 4-11 8-11s8 4 8 11"/></>,
-  auth:<><path d="M14 42h20"/><path d="M24 42V16"/><path d="M24 26c-7 0-11-5-11-10 7 0 11 5 11 10zM24 21c0-6 4-11 10-11 0 6-4 11-10 11z"/></>,
+  /* 増やす：小さな芽が大きく育つ */
+  auth:<><path d="M10 42v-6M10 38c-3 0-4-2-4-4 3 0 4 2 4 4zM10 38c3 0 4-2 4-4-3 0-4 2-4 4z"/><path d="M34 42V16M34 26c-7 0-10-4-10-10 7 0 10 4 10 10zM34 22c7 0 10-4 10-10-7 0-10 4-10 10z"/><path d="M18 30l8-8M26 22h-5M26 22v5"/><path d="M4 42h40"/></>,
   staff:<><path d="M34 6v36"/><circle cx="34" cy="7" r="3"/><circle cx="14" cy="13" r="5"/><path d="M14 18v14M8 40l6-8 6 8M14 22l16-4"/></>,
-  clerk:<><rect x="7" y="11" width="22" height="28" rx="2"/><path d="M12 19h12M12 25h12M12 31h8"/><path d="M38 13l6 6-12 12h-6v-6z"/></>,
+  /* 聖職者：十字の入った長い衣の人と、十字の本 */
+  clerk:<><circle cx="16" cy="8" r="4.5"/><path d="M16 13L6 43h20z"/><path d="M16 19v10M12 23h8"/><rect x="30" y="16" width="14" height="20" rx="1.5"/><path d="M37 20v12M33 24h8"/></>,
   pass:<><rect x="8" y="8" width="11" height="32" rx="1"/><path d="M15 24h25M35 18l6 6-6 6"/></>,
   eld:<><circle cx="19" cy="10" r="5"/><path d="M19 15v13l-4 12M19 28l5 12M19 20l11-3"/><path d="M33 17v23"/></>,
   fem:<><circle cx="24" cy="17" r="10"/><path d="M24 27v15M17 36h14"/></>,
-  head:<><circle cx="17" cy="19" r="9"/><path d="M17 28v12"/><path d="M29 19h13M37 14l5 5-5 5"/></>,
+  /* 頭：頭のてっぺん */
+  head:<><circle cx="24" cy="28" r="12"/><path d="M19 26h.5M29 26h.5M20 33c3 2 5 2 8 0"/><path d="M24 2v10M20 8l4 4 4-4"/></>,
   follow:<><circle cx="13" cy="15" r="5"/><path d="M5 39c0-7 4-11 8-11s8 4 8 11"/><circle cx="34" cy="15" r="5"/><path d="M26 39c0-7 4-11 8-11s8 4 8 11"/><path d="M21 8h8M26 5l3 3-3 3"/></>,
   wand:<><path d="M8 40c5-5 9-3 11-9s-2-10 4-14 11 2 17-5"/><circle cx="8" cy="40" r="2.2"/><circle cx="40" cy="11" r="2.2"/></>,
   travel:<><circle cx="19" cy="10" r="4"/><path d="M19 14v14l-6 12M19 28l6 12M11 19l8-3 7 4"/><rect x="26" y="13" width="11" height="11" rx="2"/></>,
@@ -46153,7 +46313,8 @@ const PICTO_ROOT={
   face:<><circle cx="24" cy="24" r="16"/><circle cx="18" cy="20" r="1.8"/><circle cx="30" cy="20" r="1.8"/><path d="M17 29h14"/></>,
   void:<><rect x="10" y="10" width="28" height="28" rx="2" stroke-dasharray="4 4"/></>,
   solve:<><circle cx="24" cy="24" r="8"/><path d="M16 24H5M9 20l-4 4 4 4"/><path d="M32 24h11M39 20l4 4-4 4"/></>,
-  troub:<><path d="M5 17c4-4 8 4 12 0s8 4 12 0 8 4 13 0"/><path d="M5 27c4-4 8 4 12 0s8 4 12 0 8 4 13 0"/><path d="M5 37c4-4 8 4 12 0s8 4 12 0 8 4 13 0"/></>,
+  /* かき乱す：スプーンでぐるぐるかき回す */
+  troub:<><path d="M8 18h28v18a6 6 0 0 1-6 6H14a6 6 0 0 1-6-6z"/><path d="M36 22h4a4 4 0 0 1 0 8h-4"/><path d="M14 30c2-4 8-4 10 0s6 4 8 0"/><path d="M28 4l-6 26"/><path d="M12 12c2-2 4 0 6-2M24 10c2-2 4 0 6-2"/></>,
   cheer:<><circle cx="24" cy="16" r="9"/><circle cx="20" cy="14" r="1.5"/><circle cx="28" cy="14" r="1.5"/><path d="M19 19c3 3 7 3 10 0"/><path d="M24 25v10M24 29l-10-6M24 29l10-6M24 35l-6 8M24 35l6 8"/></>,
   cour:<><path d="M24 41S6 29 6 18a9 9 0 0 1 18-3 9 9 0 0 1 18 3c0 11-18 23-18 23z"/></>,
   port:<><circle cx="11" cy="10" r="4"/><path d="M11 14v13M5 19h12M11 27l-4 13M11 27l4 13"/><rect x="21" y="14" width="14" height="12" rx="1.5"/><path d="M37 20h7M41 16l4 4-4 4"/></>,
@@ -46163,9 +46324,11 @@ const PICTO_ROOT={
   take:<><rect x="25" y="6" width="15" height="11" rx="1.5"/><path d="M8 41V25l-3-5M8 25V14M14 23V10M20 23V11M26 25V16"/><path d="M8 41h18V25"/></>,
   check:<><path d="M8 31h25"/><path d="M8 31L6 13l7 6 7-12 7 12 7-6-2 18"/><path d="M26 38l5 5 12-14"/></>,
   hide:<><path d="M5 24s7-11 19-11c3 0 6 1 8 2"/><path d="M43 24s-7 11-19 11c-3 0-6-1-8-2"/><circle cx="24" cy="24" r="5"/><path d="M8 40 40 8"/></>,
-  draw:<><path d="M30 6l11 11-20 20H10V26z"/><path d="M5 43c9-5 22-9 38-7"/></>,
+  /* 引っぱる：ロープで箱を引っぱる人（tract と同じ） */
+  draw:<><circle cx="38" cy="10" r="4"/><path d="M38 14l-3 12M35 26l-5 14M35 26l6 14"/><path d="M37 17l-8 6"/><path d="M29 23H14"/><rect x="4" y="18" width="10" height="10" rx="1.5"/><path d="M2 40h44"/></>,
   join:<><circle cx="18" cy="24" r="10"/><circle cx="30" cy="24" r="10"/></>,
-  throw:<><path d="M7 40C11 24 22 13 38 10"/><circle cx="40" cy="9" r="4"/><path d="M6 29v11h11"/></>,
+  /* ねじる：2本がねじれて1本の縄になる（twist と同じ） */
+  throw:<><path d="M14 4c0 6 20 8 20 14S14 24 14 30s20 8 20 14"/><path d="M34 4c0 6-20 8-20 14s20 6 20 12-20 8-20 14"/></>,
   oper:<><circle cx="24" cy="22" r="9"/><circle cx="24" cy="22" r="3.5"/><path d="M24 7v5M24 32v5M9 22h5M34 22h5M13 11l4 4M35 11l-4 4M13 33l4-4M35 33l-4-4"/></>,
   pair:<><path d="M5 25h38"/><rect x="10" y="13" width="11" height="10" rx="1"/><rect x="26" y="13" width="12" height="10" rx="1"/><path d="M10 32h28M10 39h20"/></>,
   sew:<><path d="M35 8L15 28"/><circle cx="34" cy="9" r="2.2"/><path d="M13 30l-5 9 9-4z"/><path d="M37 12c6 7-5 10-7 16s6 9 6 9"/></>,
@@ -46176,26 +46339,33 @@ const PICTO_ROOT={
   ite:<><rect x="6" y="16" width="18" height="18" rx="2"/><path d="M29 25l5 5 9-11"/></>,
   able:<><circle cx="16" cy="12" r="5"/><path d="M6 40c0-9 4-16 10-16s10 7 10 16"/><path d="M30 26l5 5 10-12"/></>,
   pos:<><path d="M8 38h32"/><rect x="16" y="22" width="16" height="12" rx="1.5"/><path d="M24 6v10M19.5 11.5 24 16l4.5-4.5"/></>,
-  fer:<><rect x="8" y="16" width="18" height="14" rx="1.5"/><path d="M30 23h12M37 18l5 5-5 5"/></>,
-  gest:<><rect x="8" y="16" width="18" height="14" rx="1.5"/><path d="M30 23h12M37 18l5 5-5 5"/></>,
+  /* 運ぶ：箱を持って運ぶ人（port と同じ） */
+  fer:<><circle cx="11" cy="10" r="4"/><path d="M11 14v13M5 19h12M11 27l-4 13M11 27l4 13"/><rect x="21" y="14" width="14" height="12" rx="1.5"/><path d="M37 20h7M41 16l4 4-4 4"/></>,
+  /* 運ぶ：箱を持って運ぶ人（port と同じ） */
+  gest:<><circle cx="11" cy="10" r="4"/><path d="M11 14v13M5 19h12M11 27l-4 13M11 27l4 13"/><rect x="21" y="14" width="14" height="12" rx="1.5"/><path d="M37 20h7M41 16l4 4-4 4"/></>,
   press:<><path d="M40 8v32"/><path d="M6 24h16M17 19l5 5-5 5"/><path d="M28 14v20"/></>,
   claim:<><path d="M8 20v8h6l14 8V12l-14 8z"/><path d="M34 17l5-3M35 24h6M34 31l5 3"/></>,
   vis:<><path d="M4 24s7-12 20-12 20 12 20 12-7 12-20 12S4 24 4 24z"/><circle cx="24" cy="24" r="5"/></>,
   /* 見張る：盾の中の目 */
   ward:<><path d="M8 26s6-10 16-10 16 10 16 10-6 10-16 10S8 26 8 26z"/><circle cx="24" cy="26" r="4.5"/><path d="M6 14 14 8M42 14l-8-6M24 10V4"/></>,
-  grat:<><circle cx="24" cy="24" r="17"/><path d="M17 28c2 4 12 4 14 0"/><path d="M17 20.5h3M28 20.5h3"/></>,
+  /* 心地よい：うれしい贈りもの */
+  grat:<><rect x="10" y="22" width="28" height="18" rx="1.5"/><path d="M8 16h32v6H8zM24 16v24"/><path d="M24 16c-4-6-10-6-10-2s6 2 10 2c4 0 10 2 10-2s-6-4-10 2"/><path d="M40 8l-3-3a2 2 0 0 0-3 3l3 3 3-3a2 2 0 0 0-3-3"/></>,
   log:<><path d="M6 18h14a4 4 0 0 1 4 4v18a4 4 0 0 0-4-4H6z"/><path d="M42 18H28a4 4 0 0 0-4 4v18a4 4 0 0 1 4-4h14z"/><path d="M16 4h16v9h-6l-4 4v-4h-6z"/></>,
-  tip:<><circle cx="15" cy="24" r="8"/><circle cx="15" cy="24" r="3"/><path d="M26 24h14M35 19l5 5-5 5"/></>,
+  /* そっと渡す：手から相手の手へ、硬貨をそっと渡す */
+  tip:<><path d="M2 30h8l6-4h6"/><path d="M46 34h-8l-6 2h-6"/><circle cx="26" cy="16" r="5"/><circle cx="26" cy="16" r="2.5"/><path d="M14 16h4M17 13l3 3-3 3"/></>,
   cuss:<><path d="M10 38l14-14"/><rect x="20" y="8" width="18" height="10" rx="1.5" transform="rotate(45 29 13)"/><path d="M40 30l4 2M36 36l2 4M42 38l2 2"/></>,
   bla:<><path d="M16 6v18M10 6h12v18H10z"/><path d="M22 8h12a3 3 0 0 1 3 4l-3 12a5 5 0 0 1-5 4h-5l1 6a4 4 0 0 1-7 3l-1-9"/></>,
   me:G.voice, nunci:G.voice, cite:G.voice,
-  arg:<><circle cx="24" cy="24" r="7"/><path d="M24 6v6M24 36v6M6 24h6M36 24h6M11 11l4 4M33 33l4 4M37 11l-4 4M15 33l-4 4"/></>,
+  /* 白く光らせる：ぴかぴか光る銀の延べ棒 */
+  arg:<><path d="M6 36l6-12h24l6 12z"/><path d="M12 24l4 12M36 24l-4 12"/><path d="M24 4l1.5 4 4 1.5-4 1.5-1.5 4-1.5-4-4-1.5 4-1.5z"/><path d="M38 12l1 2.5 2.5 1-2.5 1-1 2.5-1-2.5-2.5-1 2.5-1zM10 12l1 2.5 2.5 1-2.5 1-1 2.5-1-2.5-2.5-1 2.5-1z"/><path d="M4 42h40"/></>,
   plain:<><path d="M6 12c4-6 7 6 11 0s7 6 11 0 7 6 10 0"/><path d="M24 20v8M19 23l5 5 5-5"/><path d="M6 38h36"/></>,
   sug:<><path d="M6 12h36"/><path d="M24 40V18M17 25l7-7 7 7"/><circle cx="24" cy="43" r="3"/></>,
   mand:<><path d="M6 28h12l6-4h8"/><rect x="30" y="14" width="12" height="10" rx="1.5"/><path d="M6 36h16l8-4"/></>,
   apo:<><circle cx="12" cy="24" r="5"/><circle cx="36" cy="24" r="5"/><path d="M19 24h10M22 20l-4 4 4 4M26 20l4 4-4 4"/></>,
-  cus:<><path d="M24 8v28M16 40h16"/><path d="M10 14h28"/><path d="M10 14v4M38 14v4"/><path d="M5 18h10l-5 10zM33 18h10l-5 10z"/></>,
-  celebr:G.people,
+  /* 原因：最初の1枚を押すとドミノが倒れていく */
+  cus:<><path d="M4 40h40"/><rect x="11" y="16" width="6" height="24" rx="1" transform="rotate(14 17 40)"/><rect x="24" y="16" width="6" height="24" rx="1"/><rect x="36" y="16" width="6" height="24" rx="1"/><path d="M2 16h7M6 13l3 3-3 3"/></>,
+  /* 大勢集まる：人が集まり、紙吹雪が舞う */
+  celebr:<><circle cx="24" cy="17" r="4.5"/><path d="M15 40c0-8 4-14 9-14s9 6 9 14"/><circle cx="10" cy="22" r="4"/><path d="M2 42c0-7 3-11 8-11 2 0 4 1 5 2"/><circle cx="38" cy="22" r="4"/><path d="M46 42c0-7-3-11-8-11-2 0-4 1-5 2"/><path d="M14 6l2 3M24 3v4M34 6l-2 3M6 11l3 2M42 11l-3 2"/></>,
   mir:<><circle cx="24" cy="24" r="17"/><circle cx="18" cy="20" r="2"/><circle cx="30" cy="20" r="2"/><circle cx="24" cy="31" r="4"/></>,
   scrib:G.write, graph:G.write,
   mun:<><circle cx="24" cy="24" r="16"/><path d="M24 8v32M8 24h32"/></>,
@@ -46207,7 +46377,8 @@ const PICTO_ROOT={
   quest:<><circle cx="20" cy="20" r="11"/><path d="M28 28l12 12"/></>,
   mater:<><circle cx="18" cy="10" r="5"/><path d="M8 40c0-10 4-24 10-24s10 14 10 24"/><circle cx="34" cy="24" r="3.5"/><path d="M28 40c0-6 3-11 6-11s6 5 6 11"/></>,
   fic:<><path d="M10 38l16-16"/><rect x="24" y="8" width="16" height="10" rx="1.5" transform="rotate(45 32 13)"/><path d="M6 42h14"/></>,
-  electr:<><path d="M27 4 12 26h11l-3 18 16-24H25z"/></>,
+  /* こはく：虫を閉じこめた樹脂の石と、こすって出る火花 */
+  electr:<><path d="M18 6c6 8 12 14 12 22a12 12 0 0 1-24 0c0-8 6-14 12-22z"/><path d="M15 28l3 2 3-2M18 30v5M16 26h4"/><path d="M38 8l-4 8h6l-4 8"/><path d="M36 32l4 2M36 38l5 0"/></>,
   vent:<><path d="M4 24h22M19 17l7 7-7 7"/>{G.person.props.children}</>,
   cover:<><path d="M10 22h28v16H10z"/><path d="M6 18h36v4H6z"/><path d="M24 4v10M19 9l5 5 5-5"/></>,
   velop:<><path d="M6 14h36v24H6z"/><path d="M6 14l18 14 18-14"/></>,
@@ -46218,7 +46389,8 @@ const PICTO_ROOT={
   prac:<><rect x="10" y="6" width="28" height="36" rx="2"/><path d="M16 16l3 3 5-5M28 17h5M16 28l3 3 5-5M28 29h5"/></>,
   chief:<><path d="M8 34 6 12l10 7 8-11 8 11 10-7-2 22z"/><path d="M8 40h32"/></>,
   hearse:<><path d="M24 4v26"/><path d="M10 30h28"/><path d="M10 30v7M17 30v7M24 30v7M31 30v7M38 30v7"/><path d="M6 43h36"/></>,
-  vol:<><path d="M24 42s-16-10-16-22a8 8 0 0 1 16-4 8 8 0 0 1 16 4c0 12-16 22-16 22z"/></>,
+  /* 望む：願いをかける流れ星（wil と同じ） */
+  vol:<><path d="M32 8l3 7 7 1-5 5 1.5 7-6.5-3.5L25.5 28 27 21l-5-5 7-1z"/><path d="M22 26L6 42M18 22L4 36M26 30L12 44"/></>,
   ton:<><path d="M18 34V10l18-4v24"/><circle cx="14" cy="34" r="4"/><circle cx="32" cy="30" r="4"/></>,
   home:<><path d="M6 22 24 8l18 14"/><path d="M11 18v22h26V18"/><path d="M20 40V28h8v12"/></>,
   work:<><rect x="6" y="16" width="36" height="24" rx="2"/><path d="M18 16v-6h12v6M6 26h36"/></>,
@@ -46228,10 +46400,12 @@ const PICTO_ROOT={
   line:<><path d="M6 24h36"/></>,
   tang:<><circle cx="20" cy="26" r="12"/><path d="M4 14h40"/><circle cx="20" cy="14" r="1.5"/></>,
   nu:<><path d="M14 34a8 8 0 0 1 0-16 11 11 0 0 1 21-2 9 9 0 0 1-1 18z"/></>,
-  tin:<><rect x="16" y="10" width="16" height="16" rx="2"/><path d="M12 20v10a6 6 0 0 0 6 6M36 20v10a6 6 0 0 1-6 6"/><path d="M8 24h8M32 24h8"/></>,
+  /* 保つ：棒をしっかりにぎり続ける手（hold と同じ） */
+  tin:<><path d="M8 8h32"/><path d="M10 28h6V16a3 3 0 0 1 6 0v10"/><path d="M22 20a3 3 0 0 1 6 0v6"/><path d="M28 22a3 3 0 0 1 6 0v10a10 10 0 0 1-10 10h-6a8 8 0 0 1-8-8v-6"/></>,
   hes:<><rect x="6" y="16" width="16" height="16"/><rect x="26" y="16" width="16" height="16"/><path d="M22 24h4"/></>,
   cis:<><circle cx="12" cy="34" r="5"/><circle cx="12" cy="14" r="5"/><path d="M16 17l26 14M16 31l26-14"/></>,
-  pol:<><path d="M6 38h36"/><path d="M10 30h16l-3-8H13z"/><path d="M34 14v8M38 10l-3 4M42 20h-6"/></>,
+  /* 磨く：布でこすってぴかぴかにする */
+  pol:<><path d="M4 40h40"/><ellipse cx="20" cy="34" rx="10" ry="4"/><path d="M14 22a10 6 0 1 1 12 0"/><path d="M26 22l-1-4M26 22l-4 0"/><path d="M38 20l1.5 4 4 1.5-4 1.5-1.5 4-1.5-4-4-1.5 4-1.5zM36 8l1 2.5 2.5 1-2.5 1-1 2.5-1-2.5-2.5-1 2.5-1z"/></>,
   clar:<><path d="M24 6s-12 14-12 22a12 12 0 0 0 24 0c0-8-12-22-12-22z"/></>,
   plaus:<><path d="M18 36 10 22l4-3 6 8V10a3 3 0 0 1 6 0v14"/><path d="M34 12l4-4M36 20h6M34 28l4 4"/></>,
   tempt:<><path d="M24 16c-4-4-14-3-14 8 0 9 6 16 10 16 2 0 3-1 4-1s2 1 4 1c4 0 10-7 10-16 0-11-10-12-14-8z"/><path d="M24 16c0-4 2-7 5-8"/></>,
@@ -46245,8 +46419,8 @@ const PICTO_ROOT={
   medic:<><path d="M19 6h10v13h13v10H29v13H19V29H6V19h13z"/></>,
   /* 締めつける：両側から押しつぶす */
   strict:<><rect x="18" y="12" width="12" height="24" rx="1.5"/><path d="M4 24h10M9 19l5 5-5 5M44 24H34M39 19l-5 5 5 5"/></>,
-  /* 囲い込む：柵から外へ */
-  erc:<><path d="M6 14v24M13 14v24M20 14v24M4 20h18M4 32h18"/><path d="M26 26h16M36 20l6 6-6 6"/></>,
+  /* 囲い込む：さくで囲った中 */
+  erc:<><rect x="8" y="12" width="32" height="28" rx="1"/><path d="M4 12h8M36 12h8M4 40h8M36 40h8M8 8v8M40 8v8M8 36v8M40 36v8M24 8v8M24 36v8M4 26h8M36 26h8"/><circle cx="24" cy="26" r="3"/></>,
   /* 息：顔から出る風 */
   breath:<><circle cx="14" cy="24" r="9"/><path d="M27 18c3-2 5 2 8 0s5-2 8 0M27 24c3-2 5 2 8 0s5-2 8 0M27 30c3-2 5 2 8 0s5-2 8 0"/></>,
   /* 渇き：空のコップとしずく */
@@ -46275,14 +46449,14 @@ const PICTO_ROOT={
   ced:<><path d="M9 32c0-4 2-7 4-7s4 3 4 7-2 6-4 6-4-2-4-6z"/><path d="M21 20c0-4 2-7 4-7s4 3 4 7-2 6-4 6-4-2-4-6z"/><path d="M32 12h10M37 7l5 5-5 5"/></>,
   /* 人々：大勢の人 */
   popul:<><circle cx="12" cy="14" r="4"/><circle cx="24" cy="14" r="4"/><circle cx="36" cy="14" r="4"/><path d="M5 30c0-5 3-8 7-8s7 3 7 8M17 30c0-5 3-8 7-8s7 3 7 8M29 30c0-5 3-8 7-8s7 3 7 8"/><path d="M6 38h36"/></>,
-  /* 生まれる：芽が出る */
-  nat:<><path d="M24 40V22"/><path d="M24 26c-6 0-10-4-10-10 6 0 10 4 10 10z"/><path d="M24 22c0-6 4-10 10-10 0 6-4 10-10 10z"/><path d="M10 40h28"/></>,
+  /* 生まれる：卵が割れて中から出てくる */
+  nat:<><path d="M24 6c-8 0-14 12-14 22 0 8 6 14 14 14s14-6 14-14C38 18 32 6 24 6z"/><path d="M10 26l6 4 5-5 5 5 5-5 6 5"/><path d="M20 20h.5M28 20h.5M22 24l2 2 2-2"/></>,
   /* 広い：左右に広がる */
   broad:<><path d="M18 24H4M9 19l-5 5 5 5M30 24h14M39 19l5 5-5 5"/><path d="M8 12h32M8 36h32"/></>,
   /* 場所：地図のピン */
   loc:<><path d="M24 42s-12-12-12-22a12 12 0 0 1 24 0c0 10-12 22-12 22z"/><circle cx="24" cy="20" r="4"/></>,
-  /* 値打ち：宝石 */
-  val:<><path d="M14 8h20l8 10-18 22L6 18z"/><path d="M6 18h36M18 8l-4 10 10 22 10-22-4-10"/></>,
+  /* 力がある：重いバーベルを持ち上げる人（might と同じ） */
+  val:<><rect x="2" y="4" width="6" height="16" rx="1"/><rect x="40" y="4" width="6" height="16" rx="1"/><path d="M8 12h32"/><circle cx="24" cy="20" r="4"/><path d="M16 12l4 12h8l4-12"/><path d="M20 24l-1 8M28 24l1 8M19 32l-5 10M29 32l5 10"/><path d="M8 44h32"/></>,
   /* 宝の倉：宝箱 */
   treas:<><rect x="8" y="20" width="32" height="20" rx="2"/><path d="M8 20c0-8 7-12 16-12s16 4 16 12"/><path d="M8 28h32"/><rect x="21" y="25" width="6" height="7" rx="1"/></>,
   /* 誓い・願い：投票箱 */
@@ -46303,14 +46477,14 @@ const PICTO_ROOT={
   fare:<><rect x="8" y="8" width="32" height="26" rx="3"/><path d="M8 22h32M24 8v14"/><circle cx="16" cy="38" r="3"/><circle cx="32" cy="38" r="3"/></>,
   /* 封をした書類 */
   bill:<><path d="M12 6h17l9 9v27H12z"/><path d="M29 6v9h9"/><path d="M17 20h12M17 26h14"/><circle cx="30" cy="35" r="4"/></>,
-  /* 行き来する：やりとりの矢印 */
-  trade:<><path d="M8 17h30M32 11l6 6-6 6M40 31H10M16 25l-6 6 6 6"/></>,
+  /* 踏み固めた道：奥へ続く、足あとのついた道 */
+  trade:<><path d="M4 44L20 4M44 44L28 4"/><path d="M14 38l2-3M22 30l2-3M18 22l2-3M26 14l2-3"/><path d="M28 38l-2-3M20 30l-2-3" transform="translate(4,0)"/></>,
   /* よい状態：親指を立てる */
   well:<><path d="M8 22h6v18H8z"/><path d="M14 22l7-13c3 0 5 2 4 6l-2 6h12a3 3 0 0 1 3 4l-4 13a3 3 0 0 1-3 2H14"/></>,
   /* 家（home と同じ絵） */
   eco:<><path d="M6 22 24 8l18 14"/><path d="M11 18v22h26V18"/><path d="M20 40V28h8v12"/></>,
-  /* 切り盛りする：きちんと並べる */
-  nom:<><path d="M6 38h36"/><rect x="9" y="26" width="8" height="12"/><rect x="20" y="20" width="8" height="18"/><rect x="31" y="14" width="8" height="24"/></>,
+  /* 決まり：きまりが書かれた巻き物 */
+  nom:<><path d="M10 6h24a4 4 0 0 1 4 4v28a4 4 0 0 0 4 4H14a4 4 0 0 1-4-4z"/><path d="M34 42a4 4 0 0 0 4-4"/><circle cx="17" cy="16" r="2.5"/><path d="M22 16h10"/><circle cx="17" cy="26" r="2.5"/><path d="M22 26h10"/></>,
   /* パン */
   pan:<><path d="M8 32c-2-8 4-18 16-18s18 10 16 18z"/><path d="M8 32v6h32v-6"/><path d="M18 20l-2 6M25 18v7M32 20l2 6"/></>,
   /* 働いて報いを得る：手に入るお金 */
@@ -46336,8 +46510,8 @@ const PICTO_ROOT={
   last:<><ellipse cx="11" cy="36" rx="4" ry="6"/><ellipse cx="20" cy="27" rx="4" ry="6"/><ellipse cx="29" cy="18" rx="4" ry="6"/><ellipse cx="38" cy="9" rx="4" ry="6" stroke-dasharray="3 3"/></>,
   /* はかりの針：天秤の指針をのぞきこむ */
   amin:<><path d="M24 8v6"/><path d="M8 14h32"/><path d="M24 14l-6 8h12z"/><path d="M8 14v8M40 14v8"/><path d="M4 22a6 6 0 0 0 8 0M36 22a6 6 0 0 0 8 0"/><path d="M16 42h16"/></>,
-  /* 狩りで得る：右肩上がりに積み上がる山 */
-  gain:<><path d="M6 42h36"/><rect x="9" y="30" width="8" height="12"/><rect x="20" y="22" width="8" height="20"/><rect x="31" y="12" width="8" height="30"/><path d="M8 10h8M12 6v8"/></>,
+  /* 狩りで得る：手に入れたものでいっぱいのかご */
+  gain:<><path d="M8 22h32l-4 20H12z"/><path d="M14 22c0-8 4-14 10-14s10 6 10 14"/><circle cx="18" cy="16" r="4"/><circle cx="28" cy="14" r="4"/><path d="M40 4v8M36 8h8"/></>,
   /* 学びのひま：本と、ゆっくり進む砂時計 */
   schol:<><path d="M20 14v22"/><path d="M20 14c-4-3-10-4-16-3v22c6-1 12 0 16 3"/><path d="M20 14c3-2 6-3 9-3"/><circle cx="35" cy="26" r="10"/><path d="M35 20v6l4 3"/></>,
   /* 境界：地面に立つ境界標と線 */
@@ -46402,8 +46576,8 @@ const PICTO_ROOT={
   pest:<><ellipse cx="24" cy="26" rx="7" ry="11"/><path d="M24 15v22M17 20h14M17 26h14M17 32h14"/><path d="M20 10l-3-5M28 10l3-5"/><path d="M17 20l-9-5M31 20l9-5M17 32l-9 5M31 32l9 5"/></>,
   /* 食べ物を与える：器にえさを注ぐ */
   feed:<><path d="M10 26h28c0 9-6 14-14 14s-14-5-14-14z"/><path d="M6 40h36"/><path d="M22 20c0-4 4-4 4-8"/><circle cx="30" cy="12" r="2"/><circle cx="36" cy="17" r="2"/><circle cx="24" cy="15" r="2"/></>,
-  /* 働く：腕まくりして力こぶ */
-  erg:<><path d="M6 42L26 22"/><path d="M24 10l14 14-6 6-14-14z"/><path d="M30 4l3 5M38 8l-4 4"/></>,
+  /* 働く：重い荷をかついで汗を流す人（labor と同じ） */
+  erg:<><circle cx="16" cy="14" r="4"/><path d="M16 18l-2 12M14 30l-5 12M14 30l6 12M15 22l8-6"/><path d="M20 12c0-6 18-8 20 0 3 8-2 12-10 12s-12-4-10-12z"/><path d="M28 6l2-3M32 6l-2-3"/><path d="M6 20c-2 1-2 3 0 4M4 14c-2 1-2 3 0 4"/></>,
   /* むさぼる：山盛りをかかえこむ */
   greed:<><path d="M13 20h22l5 22H8z"/><path d="M15 20c0-5 4-8 9-8s9 3 9 8"/><circle cx="17" cy="7" r="3"/><circle cx="24" cy="4" r="3"/><circle cx="31" cy="7" r="3"/><path d="M19 30h10"/></>,
   /* 荒々しい：かまえた盾と剣 */
@@ -46420,12 +46594,12 @@ const PICTO_ROOT={
   stub:<><path d="M4 40h40"/><ellipse cx="24" cy="24" rx="10" ry="4"/><path d="M14 24v12c0 2 4 4 10 4s10-2 10-4V24"/><ellipse cx="24" cy="24" rx="4" ry="1.5"/></>,
   /* ふくれ上がる：内から押してふくらむ */
   bold:<><path d="M10 34c-4-6-4-14 2-19s16-5 22 1 5 15-1 20"/><path d="M8 40h34"/><path d="M24 10V4M14 14l-4-4M34 14l4-4"/></>,
-  /* 罪の負い目：背中にのしかかる重い石 */
-  guilt:<><rect x="14" y="6" width="22" height="13" rx="1.5"/><circle cx="11" cy="26" r="5"/><path d="M14 28c7 1 14 0 20-6"/><path d="M18 29l-2 13M28 26l3 16"/><path d="M6 42h34"/></>,
+  /* 罪の負い目：重い荷を背負い、鎖につながれてうつむく人 */
+  guilt:<><circle cx="10" cy="22" r="3.5"/><path d="M13 24l10 4v14M23 28l-5 14M16 26l-3 8"/><rect x="16" y="8" width="18" height="16" rx="2"/><path d="M22 42h4"/><path d="M26 42c4 0 6-2 8-2"/><circle cx="38" cy="40" r="4"/></>,
   /* 傷つける：ぎざぎざの傷あと */
   noc:<><circle cx="24" cy="24" r="17"/><path d="M14 16l6 6-5 5 6 6-4 5"/><path d="M28 14l5 6-6 6 6 6-4 6"/></>,
-  /* 1つ：ただ一つの点 */
-  uni:<><circle cx="24" cy="24" r="6"/><circle cx="24" cy="24" r="16" stroke-dasharray="4 4"/><path d="M24 4v4"/></>,
+  /* 1つの：数字の1 */
+  uni:<><path d="M18 14l8-6v32"/><path d="M16 40h20"/></>,
   /* ほどよさ：ちょうど真ん中で釣り合うはかり */
   modus:<><path d="M24 8v28"/><path d="M10 14h28"/><path d="M6 36h36"/><path d="M14 14v8M34 14v8"/><path d="M10 22h8M30 22h8"/></>,
   /* 湿る：空気に浮かぶ水のつぶ */
@@ -46453,12 +46627,12 @@ const PICTO_ROOT={
   sort:<><path d="M12 20h24c0 14-2 22-4 22H16c-2 0-4-8-4-22z"/><path d="M9 16h30v4H9z"/><path d="M20 16V5M27 16V8M33 16V6"/></>,
   /* きよめた：しずくを落とすと澄んだ水になる */
   pure:<><path d="M24 3c6 9 9 13 9 17a9 9 0 0 1-18 0c0-4 3-8 9-17z"/><path d="M14 30h20l-3 13H17z"/><path d="M17 36h14"/></>,
-  /* 刈り入れる：鎌で実った穂を刈る */
-  rip:<><path d="M4 44l8-8"/><path d="M12 36C12 21 22 11 36 9"/><path d="M12 36C18 25 26 16 36 9"/><path d="M40 22v21M36 26l4 4 4-4M36 33l4 4 4-4"/></>,
+  /* 刈り入れる：実った穂と鎌 */
+  rip:<><path d="M8 44V14M14 44V18M20 44V14"/><path d="M8 14c-2-2-2-6 0-8 2 2 2 6 0 8zM14 18c-2-2-2-6 0-8 2 2 2 6 0 8zM20 14c-2-2-2-6 0-8 2 2 2 6 0 8z"/><path d="M42 14c-10-2-16 4-16 12h4c0-6 4-10 12-12z"/><path d="M28 26l6 12"/><path d="M4 44h40"/></>,
   /* さまよう：あてもなく曲がりくねる足取り */
   vag:<><path d="M6 42c9-2 4-11 11-15s13 4 17-2 0-13-6-15" stroke-dasharray="5 3"/><circle cx="6" cy="42" r="2.5"/><path d="M24 6l5 4-5 4"/></>,
-  /* 運命：転がるさいころ */
-  weird:<><rect x="8" y="8" width="32" height="32" rx="5"/><circle cx="17" cy="17" r="2.5"/><circle cx="24" cy="24" r="2.5"/><circle cx="31" cy="31" r="2.5"/></>,
+  /* 運命：糸巻きからのびる運命の糸を、はさみが断つ */
+  weird:<><rect x="2" y="14" width="8" height="14" rx="1"/><path d="M0 14h12M0 28h12"/><path d="M10 21c6-6 10 6 16 0s6-2 10 2"/><circle cx="34" cy="38" r="3.5"/><circle cx="43" cy="38" r="3.5"/><path d="M35 35l9-21M42 35l-9-21"/></>,
   /* ざらざらした：表面がぎざぎざの石 */
   rough:<><rect x="6" y="10" width="36" height="28" rx="2"/><circle cx="14" cy="18" r="1.6"/><circle cx="24" cy="16" r="1.6"/><circle cx="34" cy="19" r="1.6"/><circle cx="18" cy="26" r="1.6"/><circle cx="29" cy="25" r="1.6"/><circle cx="14" cy="32" r="1.6"/><circle cx="25" cy="33" r="1.6"/><circle cx="35" cy="30" r="1.6"/></>,
   /* 厳格な：手加減しない、きびしい顔 */
@@ -46473,8 +46647,8 @@ const PICTO_ROOT={
   rar:<><path d="M4 40h40"/><path d="M12 40V27M8 27c0-5 2-9 4-9s4 4 4 9z"/><path d="M35 40V31M31 31c0-4 2-7 4-7s4 3 4 7z"/></>,
   /* 燃える火：炎で熱した焼き印のこて */
   brand:<><path d="M4 20h14"/><path d="M18 12h10v16H18z"/><path d="M23 16v8M19 20h8"/><path d="M38 40c-5 0-8-3-8-7 0-5 4-6 4-11 0 0 6 3 6 8 0-2 1-4 2-5 2 2 4 5 4 8 0 4-3 7-8 7z"/></>,
-  /* ついて行く：後ろから一列についていく */
-  sequ:<><circle cx="10" cy="13" r="4"/><path d="M6 33c0-7 2-12 4-12s4 5 4 12"/><circle cx="24" cy="13" r="4"/><path d="M20 33c0-7 2-12 4-12s4 5 4 12"/><circle cx="38" cy="13" r="4"/><path d="M34 33c0-7 2-12 4-12s4 5 4 12"/><path d="M4 40h40"/></>,
+  /* ついて行く：前の人のあとに続いて進む */
+  sequ:<><circle cx="37" cy="10" r="3.5"/><path d="M31 24c0-5 3-8 6-8s6 3 6 8"/><circle cx="24" cy="18" r="3.5"/><path d="M18 32c0-5 3-8 6-8s6 3 6 8"/><circle cx="11" cy="26" r="3.5"/><path d="M5 40c0-5 3-8 6-8s6 3 6 8"/><path d="M28 44l12-10M40 34v5M40 34h-5"/></>,
   /* さっと奪い取る：伸びた手が物をひったくる */
   rap:<><path d="M8 40V26l-3-5M8 26V15M13 24V12M18 24V13M23 26V17"/><path d="M8 40h15V26"/><path d="M27 22h12l2 16H25z"/><path d="M30 22v-3a4 4 0 0 1 8 0v3"/><path d="M32 6l9-3M33 12l10-3"/></>,
   /* 強く押す：背中をぐいと押される */
@@ -46515,8 +46689,8 @@ const PICTO_ROOT={
   mass:<><path d="M13 25c0-7 5-11 11-11s11 4 11 11"/><path d="M6 25h36c0 10-8 15-18 15S6 35 6 25z"/><path d="M19 20c3-3 6-3 9 0"/></>,
   /* 決まり：直角をはかる定規 */
   norm:<><path d="M10 4h8v32h26v8H10z"/><path d="M18 28h8v8"/></>,
-  /* 惜しんで取っておく：予備の鍵を引き出しにしまう */
-  spar:<><circle cx="24" cy="24" r="16"/><circle cx="24" cy="24" r="7"/><path d="M24 8v4M24 36v4M8 24h4M36 24h4M13 13l3 3M35 35l-3-3M35 13l-3 3M13 35l3-3"/></>,
+  /* 惜しんで取っておく：ふたをした貯金びん */
+  spar:<><path d="M12 14h24v26a4 4 0 0 1-4 4H16a4 4 0 0 1-4-4z"/><rect x="10" y="8" width="28" height="6" rx="1"/><circle cx="20" cy="36" r="3"/><circle cx="28" cy="36" r="3"/><circle cx="24" cy="29" r="3"/><path d="M20 22h8"/></>,
   /* 似合う相手：ぴたりとかみ合う二つの片 */
   match:<><path d="M6 12h14v6a3 3 0 0 0 0 6v6H6z"/><path d="M42 12H28v6a3 3 0 0 1 0 6v6h14z"/></>,
   /* ぴたりと収まる：型の穴にすき間なく収まる */
@@ -46535,6 +46709,30 @@ const PRE_DOWN=<><path d="M24 6v28M17 27l7 7 7-7"/><path d="M8 42h32"/></>;
 const PRE_BEFORE=<><circle cx="10" cy="30" r="5"/><path d="M10 25V8"/><path d="M10 9h10l-3 4 3 4H10"/><circle cx="26" cy="30" r="5"/><circle cx="41" cy="30" r="5"/></>;
 /* 否定（in〜でない など）：禁止マーク */
 const PRE_NOT=<><circle cx="24" cy="24" r="16"/><path d="M12.7 12.7l22.6 22.6"/></>;
+/* すっかり・完全に（意味を強める com・con・de・re・per など）：半分から全部までぬりつぶされる */
+const PRE_FULL=<><circle cx="8" cy="24" r="7"/><path d="M8 17v14"/><path d="M10.9 17.6L8.0 20.5M13.6 19.8L8.0 25.4M15.0 23.4L8.0 30.4"/><path d="M16 24h5M19 21l3 3-3 3"/><circle cx="35" cy="24" r="11"/><path d="M24.0 23.7L34.7 13.0M24.9 28.4L39.4 13.9M27.2 31.8L42.8 16.2M30.6 34.1L45.1 19.6M35.3 35.0L46.0 24.3"/></>;
+/* 後ろへ（re）：後ろへ下がる人（語根 back と同じ絵） */
+const PRE_BACK=<><path d="M40 24H14M21 17l-7 7 7 7"/><circle cx="34" cy="12" r="4"/><path d="M28 38c0-7 3-11 6-11s6 4 6 11"/></>;
+/* 上に（insult・impose・insist の in）：台の上に乗る人 */
+const PRE_ON=<><rect x="8" y="28" width="32" height="14" rx="1.5"/><circle cx="24" cy="8" r="4"/><path d="M24 12v8M24 20l-4 8M24 20l4 8M24 15l-6 3M24 15l6 3"/></>;
+/* 上へ（erect の e）：上に向かって立ち上がる */
+const PRE_UP=<><path d="M24 42V10"/><path d="M12 22L24 8l12 14"/><path d="M8 44h32"/></>;
+/* 通して（per）：輪の中を通りぬける */
+const PRE_THROUGH=<><ellipse cx="24" cy="24" rx="5" ry="12"/><path d="M4 24h16M28 24h14M35 17l7 7-7 7"/></>;
+/* 逆に（develop・destroy の de など）：向かい合う矢印（語根 contra と同じ絵） */
+const PRE_REVERSE=<><path d="M4 24h16"/><path d="M15 19l5 5-5 5"/><path d="M44 24H28"/><path d="M33 19l-5 5 5 5"/><path d="M24 8v32" strokeDasharray="3 3"/></>;
+/* 接頭語は、綴りより意味で絵を選ぶ。同じ com でも「共に」と「すっかり」では絵を変える。
+   ここにない意味は、綴りごとの絵（PICTO_PREFIX）を使う */
+const PRE_BY_GLOSS=[
+  [/でない|否定/,PRE_NOT],
+  [/すっかり|完全に/,PRE_FULL],
+  [/^後ろへ$/,PRE_BACK],
+  [/^離れて$/,PRE_AWAY],
+  [/^上に$/,PRE_ON],
+  [/^上へ$/,PRE_UP],
+  [/^通して$/,PRE_THROUGH],
+  [/^逆に$/,PRE_REVERSE],
+];
 const PRE_OVER=<><rect x="17" y="26" width="14" height="14" rx="1.5"/><path d="M6 16h32M33 11l5 5-5 5"/></>;
 const PICTO_PREFIX={
   ad:PRE_TO, of:PRE_TO,
@@ -46559,16 +46757,57 @@ const PICTO_PREFIX={
 const PICTO_BY_GLOSS={
   "age|生きてきた時間":<><path d="M12 8h24M12 40h24"/><path d="M14 8c0 10 10 12 10 16s-10 6-10 16M34 8c0 10-10 12-10 16s10 6 10 16"/></>,
   "mis|誤って":<><rect x="9" y="9" width="30" height="30" rx="3"/><path d="M18 18l12 12M30 18l-12 12"/></>,
+  /* ぶら下がる：ひもの先で揺れるおもり（重さを量る pend は天びん） */
+  "pend|ぶら下がる":<><path d="M6 6h36"/><path d="M24 6v22"/><circle cx="24" cy="34" r="6"/><path d="M12 30a14 14 0 0 0 4 8M36 30a14 14 0 0 1-4 8"/></>,
+  /* 胸を叩く（complain）：こぶしで胸を叩いて嘆く */
+  "plain|胸を叩く":<><circle cx="18" cy="9" r="4.5"/><path d="M18 14v16M18 30l-5 12M18 30l5 12M18 18l6 3 2-4"/><rect x="23" y="13" width="6" height="6" rx="2"/><path d="M32 12l4-2M33 17h5M32 22l4 2"/></>,
+  /* 輪を描く（circulate）：ぐるりと輪を描く */
+  "search|輪を描く":<><path d="M38 30A15 15 0 1 1 34 13"/><path d="M34 13l1 6M34 13l-6 1"/><circle cx="24" cy="24" r="2"/></>,
+  /* しやすい（facility）：指1本で大きな箱を軽々と持ち上げる */
+  "fic|しやすい":<><rect x="10" y="4" width="28" height="18" rx="1.5"/><path d="M24 22v8"/><rect x="18" y="30" width="12" height="12" rx="4"/><path d="M18 34h4M18 38h4"/><path d="M4 28c2-2 4 0 6-2M38 30c2-2 4 0 6-2"/></>,
+  /* 治める（region・reign）：王冠をかぶった王 */
+  "reg|治める":<><path d="M16 10l3 4 5-7 5 7 3-4v7H16z"/><circle cx="24" cy="23" r="4.5"/><path d="M14 44c0-10 4-15 10-15s10 5 10 15"/><path d="M38 44V20"/><circle cx="38" cy="18" r="2.5"/></>,
+  /* 確かな（ensure）：まちがいないしるし */
+  "cert|確かな":<><circle cx="24" cy="24" r="16"/><path d="M16 24l6 6 10-12"/></>,
+  /* 守る（preserve・observe）：両手で芽を守る */
+  "serv|守る":<><path d="M24 34V24M24 28c-5 0-7-3-7-7 5 0 7 3 7 7zM24 26c0-5 3-8 8-8 0 5-3 8-8 8z"/><path d="M6 20v10c0 8 8 12 18 12s18-4 18-12V20"/><path d="M6 20l4 6M42 20l-4 6"/></>,
+  /* 覆う（protect）：かさで覆って守る */
+  "tect|覆う":<><path d="M4 22a20 16 0 0 1 40 0z"/><path d="M24 6V4M24 22v16a4 4 0 0 1-8 0"/><circle cx="34" cy="38" r="4"/><path d="M8 26l-1 3M40 26l1 3"/></>,
+  /* 酸っぱい（oxygen）：両はしのとがったレモン */
+  "eag|酸っぱい":<><path d="M4 26Q14 10 24 12Q34 10 44 26Q34 42 24 40Q14 42 4 26z"/><path d="M24 12c1-4 5-7 9-7-1 4-5 7-9 7z"/><path d="M13 24c2-4 5-6 9-6"/></>,
+  /* 飲む（poison）：飲みもの */
+  "pot|飲む":<><path d="M14 8h20l-3 34H17z"/><path d="M15 18h18"/><path d="M28 8l8-6"/><path d="M20 26h.5M26 32h.5M22 36h.5"/></>,
+  /* 突き出る（prominent）：ひとつだけ突き出た山 */
+  "mine|突き出る":<><path d="M2 42h44"/><path d="M4 42l8-10 6 6 6-30 6 30 6-8 8 12"/><path d="M24 2v2"/></>,
+  /* マント（escape）：マントをなびかせる人 */
+  "chief|マント":<><circle cx="18" cy="9" r="4.5"/><path d="M18 14v14M18 28l-4 14M18 28l5 14M18 18l6 6"/><path d="M16 14c10 0 20 6 28 22-8-2-16 0-22 4"/></>,
+  /* 同じ綴りでも意味が違うとき、ほかの語根の絵を借りる（2026-09-26） */
+  "sit|置く":PICTO_ROOT.set,
+  "abil|持つ":PICTO_ROOT.have,"abil|持ち続ける":PICTO_ROOT.have,
+  "par|整える":PICTO_ROOT.pair,"par|生み出す":PICTO_ROOT.gener,
+  "simil|一緒に":G.people,
+  "leg|法":PICTO_ROOT.jur,
+  "mun|務め":PICTO_ROOT.offic,
+  "ward|請け合う":PICTO_ROOT.pledge,
+  "ite|行く":PICTO_ROOT.ced,
+  "for|すっかり":PRE_FULL,
 };
 /* 語根・接頭語・接尾語1つぶんの絵を引く。見つからなければ null
    接尾語でも語根の絵があるものは出す（award の ward など）
-   否定の意味の接頭語（injure の in など）は「中へ」の絵ではなく禁止マークにする
-   同じ綴りでも意味が違う語根（mistake の mis と promise の mis など）は、意味でも引き分ける */
+   接頭語は意味で絵を選ぶ（PRE_BY_GLOSS。injure の in は「中へ」ではなく禁止マーク、complete の com は「すっかり」）
+   同じ綴りでも意味が違う語根（mistake の mis と promise の mis など）は、意味でも引き分ける
+   gloss が「共に／すっかり」のように並んでいるとき（語根マップから開いたとき）は、先頭の意味で選ぶ */
 function pictoFor(morph,gloss,type){
   const k=canonRoot(morph);
-  const byGloss=PICTO_BY_GLOSS[k+"|"+(gloss||"")];
-  const g=byGloss||PICTO_ROOT[k]||(type==="suffix"?null:type==="prefix"&&/でない|否定/.test(gloss||"")?PRE_NOT:PICTO_PREFIX[k]);
-  return g?{g,isRoot:!!(byGloss||PICTO_ROOT[k])}:null;
+  const g1=String(gloss||"").split("／")[0];
+  const byGloss=PICTO_BY_GLOSS[k+"|"+g1];
+  if(byGloss) return {g:byGloss,isRoot:true};
+  if(type==="prefix"){
+    const hit=PRE_BY_GLOSS.find(([re])=>re.test(g1));
+    if(hit) return {g:hit[1],isRoot:false};
+  }
+  const g=PICTO_ROOT[k]||(type==="suffix"?null:PICTO_PREFIX[k]);
+  return g?{g,isRoot:!!PICTO_ROOT[k]}:null;
 }
 
 function Pictogram({C,word:w,onTapRoot,compact=false}){
