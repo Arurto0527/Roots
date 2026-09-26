@@ -25,7 +25,6 @@
   }
   input,button,textarea,select{font-family:inherit;}
   button{-webkit-appearance:none;appearance:none;}
-  @media (prefers-color-scheme:dark){body{background:#121212;}}
   .num{font-variant-numeric:tabular-nums;letter-spacing:-0.02em;}
   .en{letter-spacing:-0.01em;}
   :focus-visible{outline:1.5px solid currentColor;outline-offset:2px;border-radius:4px;}
@@ -43884,7 +43883,7 @@ const FORMAT_META={
 const FORMAT_KEYS=["w_en_ja","w_ja_en","s_en_ja","s_ja_en"];
 
 const DEFAULT_SETTINGS={
-  name:"", dailyGoal:10, fontSize:"md", theme:"auto",
+  name:"", dailyGoal:10, fontSize:"md", theme:"light",
   timerEnabled:false, timerSeconds:20,
   soundEnabled:true, autoSpeak:true, revealSpeak:"word",
   formats:{w_en_ja:true,w_ja_en:true,s_en_ja:true,s_ja_en:true},
@@ -44376,6 +44375,41 @@ function splitMorphs(text){
   }).filter(Boolean);
 }
 
+/* 関連語の成り立ちのうち、見出し語と共通するパーツを見分ける関数を作る。
+   同じ語根でも綴りが変わることがある（assault の sault と insult の sult）ので、
+   ROOT_ALIAS でまとめた代表形が同じか、語根どうしで意味（gloss）が同じなら共通とみなす */
+function sharedPartTest(parts){
+  const canon=new Set(parts.map(p=>canonRoot(p.morph)));
+  const rootGloss=new Set(parts.filter((p,i)=>morphType(p.morph,i,parts.length,parts)==="root"&&p.gloss).map(p=>p.gloss));
+  return (m,i,ms)=>canon.has(canonRoot(m.morph))
+    ||(!!m.gloss&&rootGloss.has(m.gloss)&&morphType(m.morph,i,ms.length,ms)==="root");
+}
+/* 関連語の見出しの中で、共通するパーツがどこにあるかを探す。返り値は [{at,len,type}]
+   綴りが少し変わっていても拾えるよう、パーツの頭から（sult→sul…）、
+   だめなら語根はお尻から（spect→pect：expect）縮めながら探す */
+function sharedSpans(word,ms,isShared){
+  const low=String(word||"").toLowerCase();const out=[];let from=0,lastEnd=0;
+  ms.forEach((x,i)=>{
+    const m=x.morph.toLowerCase();const t=morphType(x.morph,i,ms.length,ms);
+    let found=-1,len=0;
+    for(let L=m.length;L>=Math.min(2,m.length)&&found<0;L--){
+      const k=low.indexOf(m.slice(0,L),from);
+      if(k>=0&&(i>0||t!=="prefix"||k===0)){found=k;len=L;}
+    }
+    if(found<0&&t!=="prefix")for(let L=m.length-1;L>=3&&found<0;L--){
+      const k=low.indexOf(m.slice(m.length-L),from);
+      if(k>=0){found=k;len=L;}
+    }
+    if(found<0)return;
+    from=found+1;
+    if(!isShared(x,i,ms))return;
+    const st=Math.max(found,lastEnd),en=found+len;
+    if(en<=st)return;
+    lastEnd=en;out.push({at:st,len:en-st,type:t});
+  });
+  return out;
+}
+
 /* 語根インデックス：同じ語根を持つ語を横断で集める（語根マップ画面で使う）。
    見出し語だけでなく、関連語の成り立ち説明に出てくる語根もすべて拾う。 */
 function buildRootIndex(words,{withAffixes=false}={}){
@@ -44859,6 +44893,19 @@ function FitBox({dep,minScale=0.72,maxScale=1,children,style}){
 /* 語の全情報を1画面ぶんにまとめたもの。学習の答え合わせ面と単語詳細で共用する。
    スクロールさせない前提なので、行間と字送りを詰めてある。 */
 /* 見出し語を語源パーツごとに色分けする。パーツの綴りが語の中に見つからない部分は黒のまま */
+/* 関連語などの見出しで、共通するパーツだけに色をつけて表示する（下の成り立ちの色とそろえる） */
+function SharedWord({C,word,ms,test}){
+  const spans=sharedSpans(word,ms,test);
+  if(!spans.length) return <>{word}</>;
+  const out=[];let p=0;
+  spans.forEach((s,i)=>{
+    if(s.at>p) out.push(word.slice(p,s.at));
+    out.push(<span key={i} style={{color:typeColor(s.type,C)}}>{word.slice(s.at,s.at+s.len)}</span>);
+    p=s.at+s.len;
+  });
+  if(p<word.length) out.push(word.slice(p));
+  return <>{out}</>;
+}
 function ColoredWord({C,word,parts,colored=true}){
   const text=String(word||"");
   if(!colored||!parts.length) return <>{text}</>;
@@ -46561,24 +46608,13 @@ function WordDetail({C,word:w,onTapRoot,speakOn=true,head=true,relatedLimit=3,on
   /* only: 表示する部分だけを並べた配列（省略時は全部）。head/meaning/tree/imagery/rootBtns/etymBody/examples/memo */
   const show=k=>!only||only.includes(k);
   const parts=parseRoots(w);
-  const focus=useMemo(()=>new Set(parts.map(r=>canonRoot(r.morph))),[w.id]);
+  const focus=useMemo(()=>sharedPartTest(parts),[w.id]);
   const related=(w.relatedWords||[]).filter(r=>!r.synonym).slice(0,relatedLimit);
   /* コラムへ飛ぶボタンに出すパーツ（接頭語・語根・接尾語すべて。同じものは1つにまとめる） */
   const rootParts=parts.map((p,i)=>({...p,type:morphType(p.morph,i,parts.length,parts)}))
     .filter((p,i,a)=>a.findIndex(x=>canonRoot(x.morph)===canonRoot(p.morph))===i);
-  const rootMorphs=parts.filter((p,i)=>morphType(p.morph,i,parts.length,parts)==="root").map(p=>p.morph.toLowerCase());
   const sep={marginTop:12,paddingTop:12,borderTop:"1px solid "+C.line};
   const label={fontSize:12,color:C.sub};
-  const relWord=word=>{
-    const low=word.toLowerCase();
-    for(const m of rootMorphs){
-      for(let L=m.length;L>=Math.min(3,m.length);L--){
-        const k=low.indexOf(m.slice(0,L));
-        if(k>=0) return <>{word.slice(0,k)}<span style={{color:C.root}}>{word.slice(k,k+L)}</span>{word.slice(k+L)}</>;
-      }
-    }
-    return word;
-  };
   return (
     <div>
       {head&&show("head")&&(
@@ -46664,7 +46700,7 @@ function WordDetail({C,word:w,onTapRoot,speakOn=true,head=true,relatedLimit=3,on
             <div key={i} style={{padding:"4px 0",borderTop:"1px solid "+C.line}}>
               <div style={{display:"flex",gap:8,alignItems:"baseline",flexWrap:"wrap"}}>
                 <Speak C={C} text={r.word} enabled={speakOn} style={{borderBottom:"none"}}>
-                  <span className="en" style={{fontSize:15,fontWeight:700,color:C.text}}>{relWord(r.word)}</span>
+                  <span className="en" style={{fontSize:15,fontWeight:700,color:C.text}}><SharedWord C={C} word={r.word} ms={splitMorphs(r.breakdown)} test={focus}/></span>
                 </Speak>
                 <span style={{fontSize:14,color:C.sub}}>{r.meaning}</span>
               </div>
@@ -46746,13 +46782,13 @@ function Breakdown({C,text,size=11,lineHeight=1.55,focus}){
         const morph=m[2].trim();
         if(!morph||/[ぁ-んァ-ヶ一-龠]/.test(morph)||morph.length>14)
           return <span key={i}>{seg}</span>;
-        /* focus が渡されているときは、見出し語と共通する語根だけを塗る。
-           全部塗ると「どこが共通なのか」がかえって読み取れなくなる。 */
-        if(focus&&!focus.has(canonRoot(morph)))
-          return <span key={i}>{seg}</span>;
         /* 成り立ち全体の並びから種類を決める（re＋ward の ward は語根、just＋ice の ice は接尾語） */
         const at=ms.findIndex(x=>x.morph===morph);
-        const col=focus?{fg:C.root}:at>=0?rootColor(morph,C,at,ms.length,ms):rootColor(morph,C);
+        /* focus（sharedPartTest で作った関数）が渡されているときは、見出し語と共通するパーツだけを塗る。
+           全部塗ると「どこが共通なのか」がかえって読み取れなくなる。 */
+        if(focus&&!(at>=0&&focus(ms[at],at,ms)))
+          return <span key={i}>{seg}</span>;
+        const col=at>=0?rootColor(morph,C,at,ms.length,ms):rootColor(morph,C);
         return (
           <span key={i}>
             {m[1]}
@@ -47005,6 +47041,8 @@ function RootSheet({C,entry,onClose,onOpenWord,onStudy,speakOn=true,z=120}){
   if(!entry)return null;
   const col=entry.type?{fg:typeColor(entry.type,C),bg:"transparent"}:rootColor(entry.morph,C);
   const kind={prefix:"接頭語",suffix:"接尾語"}[entry.type]||"語根";
+  /* 一覧の単語で、このシートの語根にあたる部分だけに色をつける */
+  const sameRoot=m=>canonRoot(m.morph)===canonRoot(entry.morph);
   /* 語根マップからこのシートを開いたときに、その語根の絵も見られるようにする */
   const pic=pictoFor(entry.morph,entry.gloss,entry.type);
   const PicBox=()=>(
@@ -47067,7 +47105,8 @@ function RootSheet({C,entry,onClose,onOpenWord,onStudy,speakOn=true,z=120}){
             <button key={"w"+w.id} onClick={()=>onOpenWord&&onOpenWord(w)}
               style={{width:"100%",textAlign:"left",background:"transparent",border:"none",cursor:"pointer",
                 padding:"12px 0",borderTop:"1px solid "+C.line,display:"flex",gap:10,alignItems:"baseline"}}>
-              <span className="en" style={{fontSize:15,fontWeight:700,color:C.text}}>{w.word}</span>
+              <span className="en" style={{fontSize:15,fontWeight:700,color:C.text}}>
+                <SharedWord C={C} word={w.word} ms={parseRoots(w)} test={sameRoot}/></span>
               <EikenTag C={C} level={w.eikenLevel} style={{alignSelf:"center"}}/>
               <span style={{fontSize:12,color:C.sub,flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{w.meaning}</span>
               <span style={{fontSize:10.5,color:C.faint,flexShrink:0}}>見出し</span>
@@ -47077,12 +47116,13 @@ function RootSheet({C,entry,onClose,onOpenWord,onStudy,speakOn=true,z=120}){
             <div key={"r"+i} style={{padding:"12px 0",borderTop:"1px solid "+C.line}}>
               <div style={{display:"flex",gap:10,alignItems:"baseline"}}>
                 <Speak C={C} text={r.word} enabled={speakOn}>
-                  <span className="en" style={{fontSize:15,fontWeight:700,color:C.text}}>{r.word}</span>
+                  <span className="en" style={{fontSize:15,fontWeight:700,color:C.text}}>
+                    <SharedWord C={C} word={r.word} ms={splitMorphs(r.breakdown)} test={sameRoot}/></span>
                 </Speak>
                 <span style={{fontSize:12,color:C.sub}}>{r.meaning}</span>
               </div>
               <div style={{marginTop:3}}><Breakdown C={C} text={r.breakdown} size={11.5} lineHeight={1.7}
-                focus={new Set([canonRoot(entry.morph)])}/></div>
+                focus={sameRoot}/></div>
             </div>
           ))}
         </div>
@@ -49769,8 +49809,8 @@ function SettingsScreen({C,settings,stats,words,earned,onChange,onReset,onTutori
 
       <div style={box} data-setbox="1">
         <div style={label}>外観</div>
-        <Seg C={C} options={[["auto","端末に合わせる"],["light","ライト"],["dark","ダーク"]]}
-          value={settings.theme||"auto"} onPick={v=>onChange({theme:v})}/>
+        <Seg C={C} options={[["light","ライト"],["dark","ダーク"]]}
+          value={settings.theme==="dark"?"dark":"light"} onPick={v=>onChange({theme:v})}/>
         <div style={{height:14}}/>
         <div style={label}>文字サイズ</div>
         <Seg C={C} options={[["sm","小"],["md","中"],["lg","大"]]}
@@ -49909,7 +49949,6 @@ function App(){
   const [settings,setSettings]=useState(DEFAULT_SETTINGS);
   const [stats,setStats]=useState(DEFAULT_STATS);
   const [earned,setEarned]=useState([]);
-  const [sysDark,setSysDark]=useState(false);
   const [sheetWord,setSheetWord]=useState(null);
   const [rootEntry,setRootEntry]=useState(null);
   const [whyWord,setWhyWord]=useState(null);   /* 「なぜこの意味？」シートに出す単語 */
@@ -49941,7 +49980,7 @@ function App(){
   const tick=useRef(null);
   const hintTimer=useRef(null);
 
-  const dark = settings.theme==="dark" || (settings.theme!=="light"&&sysDark);
+  const dark = settings.theme==="dark";  /* 端末の設定に関係なく、設定でダークを選んだときだけ */
   const C = dark?DARK:LIGHT;
 
   /* ---------- 起動時ロード（旧バージョンからの引き継ぎつき） ---------- */
@@ -50000,14 +50039,6 @@ function App(){
   },[]);
 
   /* ---------- テーマ ---------- */
-  useEffect(()=>{
-    if(!window.matchMedia)return;
-    const mq=window.matchMedia("(prefers-color-scheme: dark)");
-    setSysDark(mq.matches);
-    const h=e=>setSysDark(e.matches);
-    if(mq.addEventListener)mq.addEventListener("change",h); else if(mq.addListener)mq.addListener(h);
-    return ()=>{if(mq.removeEventListener)mq.removeEventListener("change",h);else if(mq.removeListener)mq.removeListener(h);};
-  },[]);
   useEffect(()=>{
     document.body.style.background=C.bg;
     document.body.style.color=C.text;
@@ -50620,8 +50651,7 @@ function Gate(){
   /* クラウドの記録を取り込んだときだけ 1 つ増やして、画面を作り直す目印にする */
   const [rev,setRev]=useState(0);
   const theme=(lsGet(KEY.settings)||{}).theme;
-  const sysDark=!!(window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches);
-  const C=(theme==="dark"||(theme!=="light"&&sysDark))?DARK:LIGHT;
+  const C=theme==="dark"?DARK:LIGHT;
 
   /* ログインが確認できたら、まずこの端末に残っている記録で画面を出す。
      クラウドとの同期は裏で進めるので、起動でネットを待たされない。
