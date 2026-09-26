@@ -43798,7 +43798,7 @@ const TUTORIAL_STEPS=[
    body:"すぐに答えを見ないで、3秒「意味なんだっけ」と考えよう。\nそれからカードを押すと、答えが出るよ。"},
   {target:"picto",screen:"study",face:"reveal",pass:true,mood:"teach",tap:"イラストをタップ",
    title:"イラストを見る",
-   body:"本番では、イラストの語根を押すと、その語根のコラムが開くよ。"},
+   body:"イラストの語根を押すと、その語根のコラムが開くよ。"},
   {target:"reveal-tab-2",screen:"study",face:"reveal",pass:true,mood:"teach",tap:"「例文」をタップ",
    title:"例文も見る",
    body:"答えの面は、「答え・語源・例文」の3ページに分かれているよ。"},
@@ -43819,10 +43819,11 @@ const TUTORIAL_STEPS=[
 /* 案内のあいだは単語帳の ○× をいったん空にして（○ の語は隠れないので、案内どおりに動かなくなる）、終わったら元に戻す */
 const LIST_RECALL_KEY="roots.listRecall.v16";
 const TOUR_SNAP_KEY="roots.tourRecallSnap";
+const TOUR_DIM_KEY="roots.tourDim";
 
 /* 練習モードのステップ用：本物の学習画面の部品で、predict を1語だけ見せる
    カード・タブはタップで本物と同じように動くが、採点しても記録は一切変えない */
-function TutorialDemoStudy({C,settings,face}){
+function TutorialDemoStudy({C,settings,face,onTapRoot}){
   const item=useMemo(()=>{
     const w=RAW_WORDS.find(x=>x.word==="predict")
       ||RAW_WORDS.find(x=>{try{return parseRoots(x).length>=2&&x.example;}catch(e){return false;}})||RAW_WORDS[0];
@@ -43839,7 +43840,7 @@ function TutorialDemoStudy({C,settings,face}){
         ui={{key:"tour",phase,hint,timedOut:false,timeLeft:null}}
         progress={{done:phase==="reveal"?1:0,total:1}}
         handlers={{onFlip:()=>setPhase("reveal"),onHint:()=>setHint(true),onHideHint:()=>setHint(false),
-          onGrade:noop,onExit:noop,onTapRoot:noop,canUndo:false,onUndo:noop}}/>
+          onGrade:noop,onExit:noop,onTapRoot:onTapRoot||noop,canUndo:false,onUndo:noop}}/>
     </div>
   );
 }
@@ -46958,10 +46959,10 @@ function WordSheet({C,word,onClose,onTogglePass,onToggleBookmark,onTapRoot,speak
 }
 
 /* 「なぜこの意味？」シート。語源から意味が離れている語だけに出す */
-function WhySheet({C,word:w,onClose}){
+function WhySheet({C,word:w,onClose,z=120}){
   if(!w||!w.why)return null;
   return (
-    <Overlay C={C} onClose={onClose} z={120}>
+    <Overlay C={C} onClose={onClose} z={z}>
       <div className="slideUp" style={{background:C.card,borderRadius:4,width:"100vw",maxWidth:430,
         maxHeight:"80vh",overflowY:"auto",padding:"12px 20px calc(32px + env(safe-area-inset-bottom))"}}>
         <div style={{width:36,height:4,borderRadius:4,background:C.border,margin:"0 auto 18px"}}/>
@@ -46999,7 +47000,7 @@ function WhySheet({C,word:w,onClose}){
 }
 
 /* 語根から引ける横断シート */
-function RootSheet({C,entry,onClose,onOpenWord,onStudy,speakOn=true}){
+function RootSheet({C,entry,onClose,onOpenWord,onStudy,speakOn=true,z=120}){
   if(!entry)return null;
   const col=entry.type?{fg:typeColor(entry.type,C),bg:"transparent"}:rootColor(entry.morph,C);
   const kind={prefix:"接頭語",suffix:"接尾語"}[entry.type]||"語根";
@@ -47014,7 +47015,7 @@ function RootSheet({C,entry,onClose,onOpenWord,onStudy,speakOn=true}){
     </div>
   );
   return (
-    <Overlay C={C} onClose={onClose} z={120}>
+    <Overlay C={C} onClose={onClose} z={z}>
       <div className="slideUp" style={{background:C.card,borderRadius:4,width:"100vw",maxWidth:430,
         maxHeight:"80vh",overflowY:"auto",padding:"12px 20px calc(32px + env(safe-area-inset-bottom))"}}>
         <div style={{width:36,height:4,borderRadius:4,background:C.border,margin:"0 auto 18px"}}/>
@@ -47108,6 +47109,9 @@ function TutorialOverlay({C,steps,index,onNext,onSkip,children}){
   const [hidden,setHidden]=useState(false);  /* scroll のステップで、吹き出しを一時的にどかす */
   const [pos,setPos]=useState(null);         /* 吹き出しの位置。{center:true} なら真ん中 */
   const bubble=useRef(null);
+  /* 暗幕の「暗い／明るい」。吹き出しのボタンで切りかえられ、次に開いたときも覚えておく */
+  const [dim,setDim]=useState(()=>lsGet(TOUR_DIM_KEY)!==false);
+  const toggleDim=()=>setDim(d=>{lsSet(TOUR_DIM_KEY,!d);return !d;});
   const PAD=8,GAP=12,EDGE=16;
 
   const measure=useCallback(()=>{
@@ -47201,6 +47205,7 @@ function TutorialOverlay({C,steps,index,onNext,onSkip,children}){
       if(root.current&&root.current.contains(t)&&!(t.closest&&t.closest("[data-tour-demo]")))return;
       const el=step.target?tourFind(step.target):null;
       if(el&&el.contains(t))return;
+      if(t.closest&&t.closest("[data-tour-free]"))return;  /* 案内中に開いた語源コラムなどは自由に触れる */
       e.stopPropagation();e.preventDefault();
     };
     document.addEventListener("click",on,true);
@@ -47214,7 +47219,7 @@ function TutorialOverlay({C,steps,index,onNext,onSkip,children}){
   const bubbleStyle=center
     ?{top:"50%",left:"50%",width:bw,transform:"translate(-50%,-50%)"}
     :pos?{top:pos.top,left:pos.left,width:pos.width}:{top:-9999,left:0,width:bw};
-  const shade={position:"fixed",background:"rgba(0,0,0,.72)"};
+  const shade={position:"fixed",background:dim?"rgba(0,0,0,.45)":"rgba(0,0,0,0)",transition:"background .2s"};
 
   return (
     <div ref={root} role="dialog" aria-modal="true" aria-label="使い方の案内" style={{position:"fixed",inset:0,zIndex:1000,pointerEvents:"none"}}>
@@ -47234,7 +47239,7 @@ function TutorialOverlay({C,steps,index,onNext,onSkip,children}){
           <div style={{...shade,...pe,top:r.top,left:right,right:0,height:r.height}}/>
           <div style={{position:"fixed",top:r.top,left:r.left,width:r.width,height:r.height,overflow:"hidden",pointerEvents:"none"}}>
             <div style={{position:"absolute",inset:0,borderRadius:12,border:"2px solid "+TUTORIAL_ACCENT,
-              boxShadow:"0 0 0 12px rgba(0,0,0,.72)"}}/>
+              boxShadow:dim?"0 0 0 12px rgba(0,0,0,.45)":"none"}}/>
           </div>
           <div style={{position:"fixed",top:r.top,left:r.left,width:r.width,height:r.height,borderRadius:12,
             pointerEvents:"none",animation:"tourPulse 1.4s ease-out infinite"}}/>
@@ -47273,9 +47278,12 @@ function TutorialOverlay({C,steps,index,onNext,onSkip,children}){
           </div>
         </div>
         <div style={{fontSize:14,lineHeight:1.8,color:C.text,whiteSpace:"pre-line"}}>{step.body}</div>
-        <div style={{display:"flex",alignItems:"center",gap:8,marginTop:8}}>
+        <div style={{display:"flex",alignItems:"center",columnGap:4,flexWrap:"wrap",marginTop:8}}>
           <button onClick={onSkip} style={{minHeight:56,padding:"0 8px",marginLeft:-8,border:"none",background:"transparent",
             color:C.sub,fontSize:14,cursor:"pointer",fontFamily:"inherit"}}>スキップ</button>
+          <button onClick={toggleDim} aria-pressed={!dim} style={{minHeight:56,padding:"0 8px",border:"none",
+            background:"transparent",color:C.sub,fontSize:14,cursor:"pointer",fontFamily:"inherit"}}>
+            {dim?"明るく":"暗く"}</button>
           {step.scroll&&(
             <button onClick={()=>setHidden(true)} style={{minHeight:56,padding:"0 10px",border:"none",
               background:"transparent",color:TUTORIAL_ACCENT,fontSize:14,fontWeight:700,cursor:"pointer",
@@ -47707,7 +47715,7 @@ function OnboardingScreen({C,onDone}){
               <div className="riseIn">
                 <input type="time" value={reminderTime} onChange={e=>setReminderTime(e.target.value)}
                   aria-label="リマインド時刻" className="num"
-                  style={{width:"100%",height:52,borderRadius:4,border:"1px solid "+C.border,background:C.card,
+                  style={{display:"block",width:"100%",maxWidth:"100%",boxSizing:"border-box",minWidth:0,height:52,borderRadius:4,border:"1px solid "+C.border,background:C.card,
                     color:C.text,fontSize:17,padding:"0 16px"}}/>
               </div>
             )}
@@ -50471,7 +50479,7 @@ function App(){
           onNext={tourNext}
           onSkip={()=>{lsSet(TUTORIAL_KEY,true);setTour(null);restoreRecall();if(screen==="list")setScreen("home");}}>
           {TUTORIAL_STEPS[tour]&&TUTORIAL_STEPS[tour].screen==="study"&&
-            <TutorialDemoStudy C={C} settings={settings} face={TUTORIAL_STEPS[tour].face}/>}
+            <TutorialDemoStudy C={C} settings={settings} face={TUTORIAL_STEPS[tour].face} onTapRoot={openRootFromChip}/>}
         </TutorialOverlay>
       )}
       {intro&&(
@@ -50484,14 +50492,14 @@ function App(){
         <WordSheet C={C} word={words.find(w=>w.id===sheetWord.id)||sheetWord} onClose={()=>setSheetWord(null)}
           onTogglePass={toggleManualPass} onToggleBookmark={toggleBookmark} onTapRoot={openRootFromChip}/>
       )}
-      {whyWord&&<WhySheet C={C} word={whyWord} onClose={()=>setWhyWord(null)}/>}
+      {whyWord&&<div data-tour-free="1"><WhySheet C={C} word={whyWord} onClose={()=>setWhyWord(null)} z={tour!=null?1100:120}/></div>}
       {rootEntry&&(
-        <RootSheet C={C} entry={rootEntry} onClose={()=>setRootEntry(null)}
+        <div data-tour-free="1"><RootSheet C={C} entry={rootEntry} onClose={()=>setRootEntry(null)} z={tour!=null?1100:120}
           onOpenWord={w=>{setRootEntry(null);setSheetWord(w);}}
           onStudy={screen==="study"?null:ws=>{const ids=new Set(ws.map(w=>w.id));
             /* 多い語根（re など）は、まだ覚えていない語を先にして1回20語まで */
             const p=words.filter(w=>ids.has(w.id)&&!w.manualPass).sort((a,b)=>isMastered(a)-isMastered(b)).slice(0,20);
-            setRootEntry(null);startSession(p);}}/>
+            setRootEntry(null);startSession(p);}}/></div>
       )}
       {modal&&<Modal C={C} title={modal.title} body={modal.body} actions={modal.actions} onClose={()=>setModal(null)}/>}
       {snack&&(
