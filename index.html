@@ -51302,8 +51302,39 @@ function SettingsScreen({C,settings,stats,words,earned,onChange,onReset,onTutori
           <span style={{color:C.faint,display:"inline-flex",transform:"rotate(-90deg)",flexShrink:0}}><Icon.chevron size={20}/></span>
         </button>
       ))}
+      <UpdateAppButton C={C} rowBtn={rowBtn}/>
       </>)}
     </div>
+  );
+}
+/* 設定の「最新版に更新する」。スマホに保存してあるアプリ本体（roots-app-…）を消して、
+   ネットから読み込み直す。音声の保存（roots-audio）と学習記録（localStorage）は消さない */
+function UpdateAppButton({C,rowBtn}){
+  const [busy,setBusy]=useState(false);
+  const run=async()=>{
+    if(busy)return;
+    setBusy(true);
+    try{
+      if(window.caches){
+        const keys=await caches.keys();
+        await Promise.all(keys.filter(k=>k.startsWith("roots-app-")).map(k=>caches.delete(k)));
+      }
+      if(navigator.serviceWorker&&navigator.serviceWorker.getRegistration){
+        const reg=await navigator.serviceWorker.getRegistration();
+        if(reg)await reg.update();
+      }
+    }catch(e){}
+    location.reload();
+  };
+  return (
+    <button onClick={run} disabled={busy} style={{...rowBtn,minHeight:56,cursor:busy?"default":"pointer",opacity:busy?.6:1}}>
+      <div style={{minWidth:0}}>
+        <div style={{fontSize:15,fontWeight:700,color:C.text}}>{busy?"更新しています…":"最新版に更新する"}</div>
+        <div style={{fontSize:12,color:C.sub,marginTop:3}}>新しい単語や機能が出てこないときに押してください。学習の記録は消えません</div>
+      </div>
+      <span style={{color:C.faint,display:"inline-flex",flexShrink:0}}>
+        <Svg size={20}><path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3"/><path d="M19.5 4v4.5H15"/></Svg></span>
+    </button>
   );
 }
 /* ============================================================
