@@ -60,7 +60,8 @@ const rows=[];const detail=[];
 const add=(k,v,ng)=>rows.push([k,v,!!ng]);
 
 /* ---------- 1. 見出し語の重複・id のとび ---------- */
-const byWord={};RAW.forEach(w=>{(byWord[w.word]=byWord[w.word]||[]).push(w.id);});
+/* 教科書 Lesson の語は本編と同じ見出し語があってよい（学習記録は「見出し語@7-1」で別に保存する） */
+const byWord={};RAW.filter(w=>!w.lesson).forEach(w=>{(byWord[w.word]=byWord[w.word]||[]).push(w.id);});
 const dupWord=Object.entries(byWord).filter(([,v])=>v.length>1);
 add("見出し語の重複",dupWord.length+"件",dupWord.length);
 if(dupWord.length) detail.push("【見出し語の重複】\n"+dupWord.map(([k,v])=>"  "+k+" → No."+v.join(", No.")).join("\n"));
@@ -79,7 +80,7 @@ if(dupMean.length) detail.push("【meaning の重複】\n"+dupMean.map(([k,v])=>
 /* ---------- 3. 語根まわり（コラム・ピクトグラム） ---------- */
 const missNote={},missPic={},noPic=[];
 for(const w of RAW){
-  if(w.id>=ALPHA_FROM) continue;
+  if(w.id>=ALPHA_FROM&&!w.lesson) continue;   /* α は見ない。Lesson の語は本編と同じく見る */
   const parts=app.parseRoots(w)||[];
   let hasPic=false;
   parts.forEach((p,i)=>{
@@ -101,7 +102,8 @@ if(noPic.length)                 detail.push("【絵が1つも出ない単語】
 
 /* ---------- 4. 英検レベル ---------- */
 const OKLV=["5級","4級","3級","準2級","2級","準1級","1級"];
-const noEiken=RAW.filter(w=>!EIKEN[w.word]);
+/* Lesson の国名から来た語（大文字で始まる語）は英検の級を付けない */
+const noEiken=RAW.filter(w=>!EIKEN[w.word]&&!(w.lesson&&/^[A-Z]/.test(w.word)));
 const badEiken=Object.entries(EIKEN).filter(([,v])=>!OKLV.includes(v));
 add("英検レベル未設定",noEiken.length+"件",noEiken.length);
 add("英検レベルの表記ゆれ",badEiken.length+"件",badEiken.length);
@@ -163,9 +165,15 @@ if(whyBad.length) detail.push("【なぜコラムの書式くずれ】\n  "+whyB
 if(whyDup.length) detail.push("【なぜコラムと hook の重複】\n  "+whyDup.join("\n  "));
 
 /* ---------- 6. 番号まわり ---------- */
-const alphaIds=RAW.filter(w=>w.id>=ALPHA_FROM).map(w=>w.id);
-const alphaLast=alphaIds.length&&Math.max(...alphaIds)===Math.max(...ids);
-add("Part α が末尾にあるか",alphaLast?"はい（No."+ALPHA_FROM+"〜"+Math.max(...ids)+"）":"いいえ",!alphaLast);
+const alphaIds=RAW.filter(w=>w.id>=ALPHA_FROM&&!w.lesson).map(w=>w.id);
+const lessonIds=RAW.filter(w=>w.lesson).map(w=>w.id);
+const lastMain=Math.max(...RAW.filter(w=>w.id<ALPHA_FROM).map(w=>w.id));
+/* 並びは 本編 → Part α → 教科書 Lesson */
+const alphaLast=alphaIds.length&&Math.min(...alphaIds)===lastMain+1&&
+  (lessonIds.length?Math.min(...lessonIds)===Math.max(...alphaIds)+1&&Math.max(...lessonIds)===Math.max(...ids):Math.max(...alphaIds)===Math.max(...ids));
+add("本編 → Part α → Lesson の順か",alphaLast?"はい（α No."+ALPHA_FROM+"〜"+Math.max(...alphaIds)+(lessonIds.length?"、Lesson No."+Math.min(...lessonIds)+"〜"+Math.max(...lessonIds):"")+"）":"いいえ",!alphaLast);
+if(lessonIds.length){const bl={};RAW.filter(w=>w.lesson).forEach(w=>{bl[w.lesson]=(bl[w.lesson]||0)+1;});
+  add("教科書 Lesson の語数",Object.entries(bl).map(([k,v])=>"L"+k+":"+v).join(" "),0);}
 add("ALPHA_FROM / WORDS_LAYOUT",ALPHA_FROM+" / "+LAYOUT,0);
 add("○×の保存キー / sw.js VERSION",(RECALL_KEY||"?")+" / "+(SW?SW[1]:"?"),0);
 add("本編の語数 / 全体",(ids.filter(i=>i<ALPHA_FROM).length)+" / "+RAW.length,0);

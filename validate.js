@@ -78,7 +78,8 @@ if(only){
   checkIds=new Set(ALL.filter(w=>w.id>=a&&w.id<=(b||a)).map(w=>w.id));
 }
 const TARGET=ALL.filter(w=>!checkIds||checkIds.has(w.id));
-const isAlpha=w=>w.id>=AF;
+/* 教科書 Lesson の語（lesson:"7-1" など）は α のうしろに置くが、中身は本編と同じように検査する */
+const isAlpha=w=>w.id>=AF&&!w.lesson;
 
 /* ---------- 記録用 ---------- */
 const errors=[], warns=[];
@@ -201,16 +202,19 @@ TARGET.forEach(w=>{
   if(isAlpha(w)) return;
   if(addFile&&w.part!==Math.ceil(w.id/10)) bad(w,"part","id÷10 の切り上げ＝"+Math.ceil(w.id/10)+" にする",w.part);
 });
-const mainIds=ALL.filter(w=>!isAlpha(w)).map(w=>w.id);
+const mainIds=ALL.filter(w=>!isAlpha(w)&&!w.lesson).map(w=>w.id);
+const lessonIds=ALL.filter(w=>w.lesson).map(w=>w.id);
 const alphaIds=ALL.filter(isAlpha).map(w=>w.id);
 if(alphaIds.length&&Math.min(...alphaIds)<Math.max(...mainIds))
   bad({id:Math.min(...alphaIds),word:"(α)"},"Part α の位置","α が本編より前にある","");
+if(lessonIds.length&&alphaIds.length&&Math.min(...lessonIds)<Math.max(...alphaIds))
+  bad({id:Math.min(...lessonIds),word:"(Lesson)"},"Lesson の位置","Lesson の語は Part α のうしろに置く","");
 /* α の中身が HEAD（最後のコミット）と同じか。id と part 以外を比べる */
 try{
   const headHtml=execSync("git show HEAD:index.html",{cwd:DIR,maxBuffer:1<<26}).toString();
   const headAF=alphaFromOf(headHtml);
   const strip=w=>{const {id,part,...rest}=w;return JSON.stringify(rest);};
-  const before=new Map(rawWordsOf(headHtml).filter(w=>w.id>=headAF).map(w=>[w.word,strip(w)]));
+  const before=new Map(rawWordsOf(headHtml).filter(w=>w.id>=headAF&&!w.lesson).map(w=>[w.word,strip(w)]));
   const now=new Map(ALL.filter(isAlpha).map(w=>[w.word,strip(w)]));
   before.forEach((v,k)=>{
     if(!now.has(k)) bad({id:"α",word:k},"Part α の中身","α の語がなくなっている",k);
