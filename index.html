@@ -49831,8 +49831,11 @@ function PartPicker({C,words,part,onPick}){
   );
 }
 
+/* QRコードなどで ?part=L7-1 のように開いたとき、その Part を返す（なければ null） */
+const URL_PART=(()=>{try{const v=new URLSearchParams(location.search).get("part");
+  return PART_LIST.find(x=>String(x)===v)??null;}catch(e){return null;}})();
 function ListScreen({C,words,onTogglePass,onToggleBookmark,onOpen,settings,onStudyRows}){
-  const [part,setPart]=useState(PART_LIST[0]);
+  const [part,setPart]=useState(URL_PART??PART_LIST[0]);
   const [filter,setFilter]=useState("all");
   const [q,setQ]=useState("");
   const [sort,setSort]=useState("id");
@@ -51431,7 +51434,7 @@ function App(){
     const se=lsGet(KEY.settings)||lsGet(LEGACY.settings);
     if(se){
       setSettings({...DEFAULT_SETTINGS,...se,formats:{...DEFAULT_SETTINGS.formats,...(se.formats||{})}});
-      setScreen("home");
+      setScreen(URL_PART!=null?"list":"home");
       /* すでに使っている人にも、まだ見ていなければ1回だけ出す */
       if(lsGet(TUTORIAL_KEY)!==true)setIntro(true);
     }else setScreen("auth");
