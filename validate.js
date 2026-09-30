@@ -179,8 +179,7 @@ TARGET.forEach(w=>{
   if(!POS_OK.includes(w.partOfSpeech)) bad(w,"品詞","許可された8種類から選ぶ",w.partOfSpeech);
   if(!/^\/.+\/$/.test(String(w.pronunciation||""))) bad(w,"発音","/ で始まり / で終える",w.pronunciation);
   if(w.hook&&len(w.hook)>60) bad(w,"hook：長さ","60字以内（今 "+len(w.hook)+" 字）",w.hook);
-  const isExistingReprint=baseWords.some(x=>x.word===w.word);
-  if(w.hook&&chips.length>=2&&!isExistingReprint) warn(w,"hook","語源で分解できる語に hook がある（仕様では分解できない語だけ）",w.hook);
+  /* 2026-10 の改訂で、分解できる語にも「知っている言葉への橋」としての hook を付けてよいことにした（claude/brushup-guide.md §2-3） */
   /* 語源の結論の＝の後ろと meaning */
   const eq=String(w.etymologyConclusion||"").split("＝").pop();
   const core=s=>String(s||"").split("；")[0].replace(/[～〜（）()]/g,"").replace(/[をにがとへで]/g,"");
