@@ -8,11 +8,38 @@
    つまり古い音声が残っていても、まちがった音が鳴ることはない。
    VERSION に付けてしまうと、番号を上げるたびに保存済みの音声が全部消えて、
    もう一度ダウンロードすることになるので、切り離しておく。 */
-const VERSION = "v70";
+const VERSION = "v71";
 const AUDIO_CACHE = "roots-audio";
 const APP_CACHE = "roots-app-" + VERSION;
 
-self.addEventListener("install", () => self.skipWaiting());
+/* はじめて開いたときに、アプリを動かすのに必要なものをまとめて保存しておく。
+   こうすると、一度ネットにつないで開けば、次からはネットなしでも起動できる。
+   （1つ取れなくても残りは保存する。取れなかったものは、使ったときに保存される） */
+const PRECACHE = [
+  "./",
+  "https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js",
+  "https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js",
+  "https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.26.4/babel.min.js",
+  "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js",
+  "https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap",
+  "chara/normal.png", "chara/cheer.png", "chara/teach.png", "chara/think.png",
+  "manga/chara.jpg",
+];
+
+self.addEventListener("install", (e) => {
+  self.skipWaiting();
+  e.waitUntil((async () => {
+    const cache = await caches.open(APP_CACHE);
+    await Promise.all(PRECACHE.map(async (u) => {
+      try {
+        const cross = u.startsWith("http");
+        const req = new Request(u, cross ? { mode: "no-cors" } : { cache: "no-store" });
+        const res = await fetch(req);
+        if (res.ok || res.type === "opaque") await cache.put(u, res);
+      } catch (err) {}
+    }));
+  })());
+});
 self.addEventListener("activate", (e) => {
   e.waitUntil((async () => {
     const keys = await caches.keys();
