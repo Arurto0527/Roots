@@ -8,7 +8,7 @@
    つまり古い音声が残っていても、まちがった音が鳴ることはない。
    VERSION に付けてしまうと、番号を上げるたびに保存済みの音声が全部消えて、
    もう一度ダウンロードすることになるので、切り離しておく。 */
-const VERSION = "v74";
+const VERSION = "v75";
 const AUDIO_CACHE = "roots-audio";
 const APP_CACHE = "roots-app-" + VERSION;
 
@@ -33,8 +33,12 @@ self.addEventListener("install", (e) => {
     await Promise.all(PRECACHE.map(async (u) => {
       try {
         const cross = u.startsWith("http");
-        const req = new Request(u, cross ? { mode: "no-cors" } : { cache: "no-store" });
-        const res = await fetch(req);
+        // 外の部品は、まず中身が見える形（cors）で取る。見えない形（opaque）は
+        // iPhone で1個につき数MBぶんの容量として数えられ、保存があふれる原因になるため
+        let res = null;
+        if (cross) { try { res = await fetch(u, { mode: "cors" }); } catch (err) {} }
+        if (!res || !(res.ok || res.type === "opaque"))
+          res = await fetch(new Request(u, cross ? { mode: "no-cors" } : { cache: "no-store" }));
         if (res.ok || res.type === "opaque") await cache.put(u, res);
       } catch (err) {}
     }));
@@ -70,14 +74,18 @@ self.addEventListener("fetch", (e) => {
   if (url.hostname.endsWith("supabase.co")) return;
 
   // 音声：保存してあればそれを使う。なければ取りに行って保存
+  // iPhone（Safari）は音声を「○バイト目から○バイト目まで」と少しずつ要求してくる（Range）。
+  // 丸ごと返すと再生してくれないので、要求された部分だけを切り出して返す
   if (url.pathname.includes("/audio/")) {
     e.respondWith((async () => {
       const cache = await caches.open(AUDIO_CACHE);
-      const hit = await cache.match(url.pathname);
-      if (hit) return hit;
-      const res = await fetch(url.pathname);
-      if (res.ok) cache.put(url.pathname, res.clone());
-      return res;
+      let res = await cache.match(url.pathname);
+      if (!res) {
+        res = await fetch(url.pathname);
+        if (!res.ok) return res;
+        await cache.put(url.pathname, res.clone());
+      }
+      return partial(req, res);
     })());
     return;
   }
@@ -113,6 +121,33 @@ self.addEventListener("fetch", (e) => {
     if (hit) { e.waitUntil(update); return hit; }   // 保存版があれば待たせない
     const res = await update;                       // 初回だけネットを待つ
     if (res) return res;
-    throw new Error("offline");
+    // ネットがなく、「/Roots」「/Roots/index.html」など別の書き方で開いたときも、保存版の本体を出す
+    if (req.mode === "navigate") {
+      const home = await cache.match("./");
+      if (home) return home;
+    }
+    return new Response("", { status: 504, statusText: "offline" });
   })());
 });
+
+/* Range（部分の要求）があれば、その部分だけを 206 で返す。なければそのまま返す */
+async function partial(req, res) {
+  const range = req.headers.get("range");
+  const m = range && /bytes=(\d*)-(\d*)/.exec(range);
+  if (!m) return res;
+  const buf = await res.arrayBuffer();
+  const size = buf.byteLength;
+  let start = m[1] === "" ? size - Number(m[2]) : Number(m[1]);
+  let end = m[1] !== "" && m[2] !== "" ? Number(m[2]) : size - 1;
+  start = Math.max(0, start); end = Math.min(end, size - 1);
+  if (start > end) return new Response("", { status: 416, headers: { "Content-Range": "bytes */" + size } });
+  return new Response(buf.slice(start, end + 1), {
+    status: 206,
+    headers: {
+      "Content-Type": res.headers.get("Content-Type") || "audio/mp4",
+      "Content-Range": "bytes " + start + "-" + end + "/" + size,
+      "Content-Length": String(end - start + 1),
+      "Accept-Ranges": "bytes",
+    },
+  });
+}

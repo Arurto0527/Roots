@@ -52098,72 +52098,111 @@ function SettingsScreen({C,settings,stats,words,earned,onChange,onReset,onTutori
     </div>
   );
 }
-/* 設定の「音声をまとめて保存」。今選んでいる発音（米か英）の音声を全部スマホに保存して、
-   ネットがなくても鳴るようにする。保存先は sw.js と同じ roots-audio（名前も sw.js と同じ「/…/audio/us/xxx.m4a」）。
-   すでに保存してある音声は取りに行かないので、途中で閉じても次に押せば続きから */
+/* 設定の「音声をダウンロード」。アメリカ英語・イギリス英語・両方の3つから選んで、
+   音声を全部スマホに保存し、ネットがなくても鳴るようにする。保存先は sw.js と同じ roots-audio
+   （名前も sw.js と同じ「/…/audio/us/xxx.m4a」）。すでに保存してある音声は取りに行かないので、
+   途中で閉じても次に押せば続きから。保存がすんだものは「ダウンロード済み」に変わる */
 function SaveAudioButton({C,rowBtn}){
-  const acc=getAccent();
-  const [st,setSt]=useState({busy:false,done:0,total:0,saved:null,err:0});
+  const ACCS=["us","uk"];
+  const [saved,setSaved]=useState(null);   /* {us:保存ずみの数, uk:…} */
+  const [job,setJob]=useState(null);       /* {accs:[…], done, total, err} */
   const alive=useRef(true);
-  const list=()=>{clipUrl(acc,"");return audioIndex[acc]?[...audioIndex[acc]]:[];};
-  const key=h=>new URL("audio/"+acc+"/"+h+".m4a",location.href).pathname;
-  useEffect(()=>{
-    alive.current=true;
-    (async()=>{
-      try{
-        if(!window.caches)return;
-        const cache=await caches.open("roots-audio");
-        const have=new Set((await cache.keys()).map(r=>new URL(r.url).pathname));
-        const all=list();
-        if(alive.current)setSt(s=>({...s,saved:all.filter(h=>have.has(key(h))).length,total:all.length}));
-      }catch(e){}
-    })();
-    return()=>{alive.current=false;};
-  },[acc]);
-  const run=async()=>{
-    if(st.busy||!window.caches)return;
-    try{if(navigator.storage&&navigator.storage.persist)await navigator.storage.persist();}catch(e){}
+  const list=acc=>{clipUrl(acc,"");return audioIndex[acc]?[...audioIndex[acc]]:[];};
+  const key=(acc,h)=>new URL("audio/"+acc+"/"+h+".m4a",location.href).pathname;
+  const totals={us:list("us").length,uk:list("uk").length};
+  const count=async()=>{
     const cache=await caches.open("roots-audio");
     const have=new Set((await cache.keys()).map(r=>new URL(r.url).pathname));
-    const all=list();
-    const todo=all.filter(h=>!have.has(key(h)));
+    const out={};
+    for(const acc of ACCS)out[acc]=list(acc).filter(h=>have.has(key(acc,h))).length;
+    return {have,out};
+  };
+  useEffect(()=>{
+    alive.current=true;
+    (async()=>{try{if(window.caches){const {out}=await count();if(alive.current)setSaved(out);}}catch(e){}})();
+    return()=>{alive.current=false;};
+  },[]);
+  const isDone=acc=>saved!=null&&totals[acc]>0&&saved[acc]>=totals[acc];
+  const run=async accs=>{
+    if(job||!window.caches)return;
+    try{if(navigator.storage&&navigator.storage.persist)await navigator.storage.persist();}catch(e){}
+    const cache=await caches.open("roots-audio");
+    const {have}=await count();
+    const all=accs.flatMap(acc=>list(acc).map(h=>key(acc,h)));
+    const todo=all.filter(k=>!have.has(k));
     let done=all.length-todo.length, err=0, i=0;
-    setSt({busy:true,done,total:all.length,saved:done,err:0});
+    setJob({accs,done,total:all.length,err:0});
     const worker=async()=>{
       while(alive.current&&i<todo.length){
-        const h=todo[i++];
+        const k=todo[i++];
         try{
-          const res=await fetch(key(h),{cache:"no-store"});
-          if(res.ok){await cache.put(key(h),res);done++;}else err++;
+          const res=await fetch(k,{cache:"no-store"});
+          if(res.ok){await cache.put(k,res);done++;}else err++;
         }catch(e){err++;}
-        if(alive.current&&(done+err)%20===0)setSt(s=>({...s,done,err}));
+        if(alive.current&&(done+err)%20===0)setJob(j=>j&&{...j,done,err});
       }
     };
     await Promise.all([1,2,3,4,5,6].map(worker));
-    if(alive.current)setSt({busy:false,done,total:all.length,saved:done,err});
+    if(!alive.current)return;
+    try{setSaved((await count()).out);}catch(e){}
+    setJob(null);
+    if(err)setFailed(err);
   };
-  const total=st.total||list().length;
-  const mb=Math.round(total*12.5/1024);
-  const complete=st.saved!==null&&st.saved>=total&&total>0;
-  const title=st.busy?"音声を保存しています… "+st.done.toLocaleString()+" / "+total.toLocaleString()
-    :complete?"音声は保存ずみ（オフラインで再生できます）":"音声をまとめて保存する";
-  const note=st.busy?"この画面を開いたままにしてください。閉じても、次に押せば続きから保存します"
-    :complete?ACCENTS[acc].label+"の音声 "+total.toLocaleString()+" 個をすべて保存しました"
-    :ACCENTS[acc].label+"の音声（約"+mb+"MB）を保存して、ネットがなくても鳴るようにします。Wi-Fi のときに押してください"
-      +(st.saved?"（保存ずみ "+st.saved.toLocaleString()+" / "+total.toLocaleString()+"）":"")
-      +(st.err?"。"+st.err+" 個は保存できませんでした。もう一度押すと続きを保存します":"");
-  if(!window.caches||!total)return null;
+  const [failed,setFailed]=useState(0);
+  if(!window.caches||!(totals.us||totals.uk))return null;
+  const mb=n=>Math.round(n*12.5/1024);
+  const choices=[
+    {id:"us",label:"アメリカ英語",accs:["us"]},
+    {id:"uk",label:"イギリス英語",accs:["uk"]},
+    {id:"both",label:"両方",accs:["us","uk"]},
+  ];
+  const Check=()=>(<Svg size={18}><path d="M5 12.5l4.5 4.5L19 7.5"/></Svg>);
   return (
-    <button onClick={run} disabled={st.busy||complete} style={{...rowBtn,minHeight:56,cursor:st.busy||complete?"default":"pointer"}}>
-      <div style={{minWidth:0,flex:1}}>
-        <div style={{fontSize:15,fontWeight:700,color:C.text}}>{title}</div>
-        <div style={{fontSize:12,color:C.sub,marginTop:3}}>{note}</div>
-        {st.busy&&<div style={{marginTop:8,height:6,borderRadius:4,background:C.border,overflow:"hidden"}}>
-          <div style={{width:(st.done/total*100)+"%",height:"100%",background:C.accent}}/></div>}
+    <div style={{...rowBtn,display:"block",cursor:"default"}}>
+      <div style={{display:"flex",alignItems:"center",gap:8}}>
+        <span style={{color:C.faint,display:"inline-flex",flexShrink:0}}>
+          <Svg size={20}><path d="M12 4v11"/><path d="M7 10.5 12 15.5 17 10.5"/><path d="M5 19.5h14"/></Svg></span>
+        <div style={{fontSize:15,fontWeight:700,color:C.text}}>音声をダウンロード</div>
       </div>
-      <span style={{color:C.faint,display:"inline-flex",flexShrink:0}}>
-        <Svg size={20}><path d="M12 4v11"/><path d="M7 10.5 12 15.5 17 10.5"/><path d="M5 19.5h14"/></Svg></span>
-    </button>
+      <div style={{fontSize:12,color:C.sub,marginTop:4}}>
+        {job?"この画面を開いたままにしてください。閉じても、次に押せば続きから保存します"
+          :"ダウンロードすると、ネットがなくても発音が鳴ります。Wi-Fi のときに押してください"}
+      </div>
+      {job&&<div style={{marginTop:10}}>
+        <div style={{fontSize:13,color:C.text}}>ダウンロード中… {job.done.toLocaleString()} / {job.total.toLocaleString()}</div>
+        <div style={{marginTop:6,height:6,borderRadius:4,background:C.border,overflow:"hidden"}}>
+          <div style={{width:(job.done/Math.max(1,job.total)*100)+"%",height:"100%",background:C.accent}}/></div>
+      </div>}
+      <div style={{display:"grid",gap:8,marginTop:10}}>
+        {choices.map(ch=>{
+          const done=ch.accs.every(isDone);
+          const running=job&&job.accs.join()===ch.accs.join();
+          const n=ch.accs.reduce((t,a)=>t+totals[a],0);
+          const got=saved?ch.accs.reduce((t,a)=>t+Math.min(saved[a],totals[a]),0):0;
+          const sub=done?"ダウンロード済み・オフラインで再生できます"
+            :running?"ダウンロード中…"
+            :"約"+mb(n-got)+"MB"+(got?"（"+got.toLocaleString()+" / "+n.toLocaleString()+" 保存ずみ・続きから）":"");
+          return (
+            <button key={ch.id} onClick={()=>run(ch.accs)} disabled={done||!!job}
+              style={{minHeight:56,width:"100%",textAlign:"left",display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,
+                padding:"10px 14px",borderRadius:12,fontFamily:"inherit",fontSize:16,
+                border:"1.5px solid "+(done?C.accent:C.border),
+                background:done?C.accent+"1a":"transparent",color:C.text,
+                cursor:done||job?"default":"pointer",opacity:job&&!running?.55:1}}>
+              <div style={{minWidth:0}}>
+                <div style={{fontSize:15,fontWeight:700}}>{ch.label}</div>
+                <div style={{fontSize:12,color:done?C.accent:C.sub,marginTop:2,fontWeight:done?700:400}}>{sub}</div>
+              </div>
+              <span style={{display:"inline-flex",alignItems:"center",gap:4,flexShrink:0,fontSize:13,fontWeight:700,
+                color:done?C.accent:C.faint}}>
+                {done?<><Check/>済み</>:running?"…":"ダウンロード"}</span>
+            </button>
+          );
+        })}
+      </div>
+      {failed>0&&!job&&<div style={{fontSize:12,color:C.sub,marginTop:8}}>
+        {failed}個はダウンロードできませんでした。もう一度押すと続きを保存します</div>}
+    </div>
   );
 }
 /* 設定の「最新版に更新する」。スマホに保存してあるアプリ本体（roots-app-…）を消して、
