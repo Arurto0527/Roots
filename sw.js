@@ -8,7 +8,7 @@
    つまり古い音声が残っていても、まちがった音が鳴ることはない。
    VERSION に付けてしまうと、番号を上げるたびに保存済みの音声が全部消えて、
    もう一度ダウンロードすることになるので、切り離しておく。 */
-const VERSION = "v75";
+const VERSION = "v76";
 const AUDIO_CACHE = "roots-audio";
 const APP_CACHE = "roots-app-" + VERSION;
 
@@ -59,8 +59,9 @@ self.addEventListener("activate", (e) => {
         if (res) await audio.put(req, res);
       }
     }
+    // roots-compiled はアプリ本体を変換した結果（index.html が自分で管理する）。消さない
     for (const k of keys)
-      if (k !== AUDIO_CACHE && k !== APP_CACHE) await caches.delete(k);
+      if (k !== AUDIO_CACHE && k !== APP_CACHE && k !== "roots-compiled") await caches.delete(k);
     await self.clients.claim();
   })());
 });
