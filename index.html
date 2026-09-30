@@ -51305,9 +51305,78 @@ function SettingsScreen({C,settings,stats,words,earned,onChange,onReset,onTutori
           <span style={{color:C.faint,display:"inline-flex",transform:"rotate(-90deg)",flexShrink:0}}><Icon.chevron size={20}/></span>
         </button>
       ))}
+      <SaveAudioButton C={C} rowBtn={rowBtn}/>
       <UpdateAppButton C={C} rowBtn={rowBtn}/>
       </>)}
     </div>
+  );
+}
+/* 設定の「音声をまとめて保存」。今選んでいる発音（米か英）の音声を全部スマホに保存して、
+   ネットがなくても鳴るようにする。保存先は sw.js と同じ roots-audio（名前も sw.js と同じ「/…/audio/us/xxx.m4a」）。
+   すでに保存してある音声は取りに行かないので、途中で閉じても次に押せば続きから */
+function SaveAudioButton({C,rowBtn}){
+  const acc=getAccent();
+  const [st,setSt]=useState({busy:false,done:0,total:0,saved:null,err:0});
+  const alive=useRef(true);
+  const list=()=>{clipUrl(acc,"");return audioIndex[acc]?[...audioIndex[acc]]:[];};
+  const key=h=>new URL("audio/"+acc+"/"+h+".m4a",location.href).pathname;
+  useEffect(()=>{
+    alive.current=true;
+    (async()=>{
+      try{
+        if(!window.caches)return;
+        const cache=await caches.open("roots-audio");
+        const have=new Set((await cache.keys()).map(r=>new URL(r.url).pathname));
+        const all=list();
+        if(alive.current)setSt(s=>({...s,saved:all.filter(h=>have.has(key(h))).length,total:all.length}));
+      }catch(e){}
+    })();
+    return()=>{alive.current=false;};
+  },[acc]);
+  const run=async()=>{
+    if(st.busy||!window.caches)return;
+    try{if(navigator.storage&&navigator.storage.persist)await navigator.storage.persist();}catch(e){}
+    const cache=await caches.open("roots-audio");
+    const have=new Set((await cache.keys()).map(r=>new URL(r.url).pathname));
+    const all=list();
+    const todo=all.filter(h=>!have.has(key(h)));
+    let done=all.length-todo.length, err=0, i=0;
+    setSt({busy:true,done,total:all.length,saved:done,err:0});
+    const worker=async()=>{
+      while(alive.current&&i<todo.length){
+        const h=todo[i++];
+        try{
+          const res=await fetch(key(h),{cache:"no-store"});
+          if(res.ok){await cache.put(key(h),res);done++;}else err++;
+        }catch(e){err++;}
+        if(alive.current&&(done+err)%20===0)setSt(s=>({...s,done,err}));
+      }
+    };
+    await Promise.all([1,2,3,4,5,6].map(worker));
+    if(alive.current)setSt({busy:false,done,total:all.length,saved:done,err});
+  };
+  const total=st.total||list().length;
+  const mb=Math.round(total*12.5/1024);
+  const complete=st.saved!==null&&st.saved>=total&&total>0;
+  const title=st.busy?"音声を保存しています… "+st.done.toLocaleString()+" / "+total.toLocaleString()
+    :complete?"音声は保存ずみ（オフラインで再生できます）":"音声をまとめて保存する";
+  const note=st.busy?"この画面を開いたままにしてください。閉じても、次に押せば続きから保存します"
+    :complete?ACCENTS[acc].label+"の音声 "+total.toLocaleString()+" 個をすべて保存しました"
+    :ACCENTS[acc].label+"の音声（約"+mb+"MB）を保存して、ネットがなくても鳴るようにします。Wi-Fi のときに押してください"
+      +(st.saved?"（保存ずみ "+st.saved.toLocaleString()+" / "+total.toLocaleString()+"）":"")
+      +(st.err?"。"+st.err+" 個は保存できませんでした。もう一度押すと続きを保存します":"");
+  if(!window.caches||!total)return null;
+  return (
+    <button onClick={run} disabled={st.busy||complete} style={{...rowBtn,minHeight:56,cursor:st.busy||complete?"default":"pointer"}}>
+      <div style={{minWidth:0,flex:1}}>
+        <div style={{fontSize:15,fontWeight:700,color:C.text}}>{title}</div>
+        <div style={{fontSize:12,color:C.sub,marginTop:3}}>{note}</div>
+        {st.busy&&<div style={{marginTop:8,height:6,borderRadius:4,background:C.border,overflow:"hidden"}}>
+          <div style={{width:(st.done/total*100)+"%",height:"100%",background:C.accent}}/></div>}
+      </div>
+      <span style={{color:C.faint,display:"inline-flex",flexShrink:0}}>
+        <Svg size={20}><path d="M12 4v11"/><path d="M7 10.5 12 15.5 17 10.5"/><path d="M5 19.5h14"/></Svg></span>
+    </button>
   );
 }
 /* 設定の「最新版に更新する」。スマホに保存してあるアプリ本体（roots-app-…）を消して、
