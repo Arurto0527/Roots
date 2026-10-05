@@ -51234,7 +51234,8 @@ function adminBuild(profiles,progress,logs,sessions){
 
   const per=new Map(students.map(s=>[s.user_id,{
     days:Array(14).fill(0),mins:Array(14).fill(0),week:0,weekOk:0,weekHint:0,weekSec:0,allSec:0,
-    all:0,allOk:0,lastLog:0,parts:new Map()}]));
+    all:0,allOk:0,lastLog:0,parts:new Map(),hours:Array(24).fill(0)}]));
+  const classHours=Array(24).fill(0);
   const classMins=Array(14).fill(0);
   const classParts=new Map();   /* Part ごと：{n,users:Set} */
   const wordStat=new Map();   /* 単語ごと：{n,ok,users:Set(まちがえた人)} */
@@ -51244,6 +51245,7 @@ function adminBuild(profiles,progress,logs,sessions){
     const s=per.get(l.user_id);if(!s)return;
     const t=Date.parse(l.answered_at);const d=dayIdx(t);
     s.all++;if(l.correct)s.allOk++;
+    const h=new Date(t).getHours();s.hours[h]++;classHours[h]++;
     if(t>s.lastLog)s.lastLog=t;
     if(d<14){s.days[d]++;classDays[d].add(l.user_id);}
     if(t>=weekFrom){s.week++;if(l.correct)s.weekOk++;if(l.hint_used)s.weekHint++;}
@@ -51296,7 +51298,7 @@ function adminBuild(profiles,progress,logs,sessions){
       due:ws.filter(w=>isDue(w,now)).length,
       week:s.week,weekRate,weekMin:Math.round(s.weekSec/60),
       hintRate:s.week?s.weekHint/s.week:null,
-      days:s.days,mins:s.mins.map(Math.round),allMin:Math.round(s.allSec/60),parts,
+      days:s.days,mins:s.mins.map(Math.round),allMin:Math.round(s.allSec/60),parts,hours:s.hours,mainTime:mainTime(s.hours),
       recentParts:parts.filter(x=>x.last).slice(0,5).map(x=>partName(x.part)),activeDays:s.days.slice(0,7).filter(n=>n>0).length,
       weak,reasons};
   });
@@ -51315,9 +51317,34 @@ function adminBuild(profiles,progress,logs,sessions){
       week:rows.filter(r=>r.week>0).length,
       weekAns,weekRate:weekAns?weekOk/weekAns:null,
       weekMin:rows.reduce((a,r)=>a+r.weekMin,0),
-      classDays:classDays.map(s=>s.size),classMins:classMins.map(Math.round),
+      classDays:classDays.map(s=>s.size),classMins:classMins.map(Math.round),classHours,mainTime:mainTime(classHours),
       parts:[...classParts.entries()].map(([part,v])=>({part,n:v.n,users:v.users.size}))
         .sort((a,b)=>b.users-a.users||b.n-a.n)}};
+}
+
+/* 時間帯の分け方（回答した時刻で数える） */
+const TIME_ZONES=[["朝",5,9],["昼",9,15],["夕方",15,18],["夜",18,22],["深夜",22,29]];
+function mainTime(hours){
+  const tot=hours.reduce((a,b)=>a+b,0);if(!tot)return "";
+  const z=TIME_ZONES.map(([n,a,b])=>{let c=0;for(let h=a;h<b;h++)c+=hours[h%24];return [n,c];})
+    .sort((a,b)=>b[1]-a[1])[0];
+  return z[0]+"（"+Math.round(z[1]/tot*100)+"%）";
+}
+/* 24時間の棒グラフ（左が0時、右が23時） */
+function HourBars({C,values,height=40}){
+  const m=Math.max(1,...values);
+  return (
+    <div>
+      <div style={{display:"flex",alignItems:"flex-end",gap:2,height}}>
+        {values.map((x,i)=>(
+          <div key={i} title={i+"時："+x+"回"} style={{flex:1,height:x?Math.max(3,x/m*height):2,
+            background:x?C.text:C.line,borderRadius:1}}/>
+        ))}
+      </div>
+      <div style={{display:"flex",justifyContent:"space-between",fontSize:11,color:C.faint,marginTop:4}}>
+        <span>0時</span><span>6時</span><span>12時</span><span>18時</span><span>24時</span></div>
+    </div>
+  );
 }
 
 /* 14日分の小さな棒グラフ（左が古い日、右が今日） */
@@ -51451,12 +51478,12 @@ function AdminScreen({C}){
   const fmtDay=t=>{const d=daysBetween(t,Date.now());return d===0?"今日":d===1?"昨日":d+"日前";};
 
   const exportCsv=()=>{
-    const head=["ID","メール","最後の学習","今週の回答数","今週の正答率","今週の学習時間(分)","今週学習した日数","直近"+ADMIN_DAYS+"日の学習時間(分)","取り組んだPartの数","最近やったPart",
+    const head=["ID","メール","最後の学習","今週の回答数","今週の正答率","今週の学習時間(分)","今週学習した日数","直近"+ADMIN_DAYS+"日の学習時間(分)","取り組んだPartの数","最近やったPart","よく学習する時間帯",
       "学習した語数","習得した語数","復習待ちの語数","苦手な語数","苦手な単語(上位5)"];
     const q=v=>'"'+String(v).replace(/"/g,'""')+'"';
     const lines=[head.map(q).join(",")].concat(data.rows.map(r=>[
       r.code,r.email,r.lastAt?new Date(r.lastAt).toLocaleDateString("ja-JP"):"",r.week,
-      r.weekRate==null?"":Math.round(r.weekRate*100),r.weekMin,r.activeDays,r.allMin,r.parts.length,r.recentParts.join(" / "),
+      r.weekRate==null?"":Math.round(r.weekRate*100),r.weekMin,r.activeDays,r.allMin,r.parts.length,r.recentParts.join(" / "),r.mainTime,
       r.studied,r.mastered,r.due,r.weak.length,r.weak.slice(0,5).map(w=>w.word).join(" / ")].map(q).join(",")));
     const blob=new Blob(["﻿"+lines.join("\r\n")],{type:"text/csv"});
     const a=document.createElement("a");a.href=URL.createObjectURL(blob);
@@ -51494,6 +51521,9 @@ function AdminScreen({C}){
       <DayBars C={C} values={r.days} labels/>
       <div style={{fontSize:14,fontWeight:700,color:C.text,margin:"14px 0 6px"}}>14日間の学習時間（分）</div>
       <DayBars C={C} values={r.mins} labels/>
+      <div style={{fontSize:14,fontWeight:700,color:C.text,margin:"14px 0 6px"}}>
+        学習した時間帯（直近{ADMIN_DAYS}日の回答数）{r.mainTime&&<span style={{fontWeight:400,color:C.sub}}>　いちばん多い：{r.mainTime}</span>}</div>
+      <HourBars C={C} values={r.hours}/>
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"6px 12px",fontSize:14,color:C.sub,margin:"14px 0"}}>
         <div>今週学習した日：<b style={{color:C.text}}>{r.activeDays}日</b></div>
         <div>今週の時間：<b style={{color:C.text}}>{r.weekMin}分</b></div>
@@ -51550,6 +51580,13 @@ function AdminScreen({C}){
       <div style={box}>
         <h3 style={h3}>毎日の学習時間（全員・分）</h3>
         <DayBars C={C} values={s.classMins} height={56} labels/>
+      </div>
+      <div style={box}>
+        <h3 style={h3}>学習した時間帯（全員）</h3>
+        <div style={{fontSize:13,color:C.sub,marginBottom:8,lineHeight:1.7}}>
+          直近{ADMIN_DAYS}日の回答数を時刻ごとに数えました{s.mainTime&&<>。いちばん多いのは<b style={{color:C.text}}>{s.mainTime}</b></>}<br/>
+          朝5〜9時・昼9〜15時・夕方15〜18時・夜18〜22時・深夜22〜5時</div>
+        <HourBars C={C} values={s.classHours} height={56}/>
       </div>
       <div style={box}>
         <h3 style={h3}>よく取り組まれているPart</h3>
