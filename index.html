@@ -45248,6 +45248,7 @@ const partName=p=>isLessonPart(p)?"Lesson "+p.slice(1):"Part "+p;
 const partShort=p=>isLessonPart(p)?p:String(p);
 const partRank=p=>isLessonPart(p)?2:p===ALPHA?1:0;
 const TOTAL_WORDS = RAW_WORDS.length;
+const PART_SIZE=RAW_WORDS.reduce((m,w)=>m.set(w.part,(m.get(w.part)||0)+1),new Map());
 const PART_LIST = [...new Set(RAW_WORDS.map(w=>w.part))].sort((a,b)=>partRank(a)-partRank(b)||
   (partRank(a)===2?String(a).localeCompare(String(b),"en",{numeric:true}):partRank(a)?0:a-b));
 const MAX_ID = RAW_WORDS.reduce((m,w)=>Math.max(m,w.id),1);
@@ -51232,8 +51233,10 @@ function adminBuild(profiles,progress,logs,sessions){
   const dayIdx=t=>daysBetween(t,now);   /* 0=今日 */
 
   const per=new Map(students.map(s=>[s.user_id,{
-    days:Array(14).fill(0),mins:Array(14).fill(0),week:0,weekOk:0,weekHint:0,weekSec:0,
-    all:0,allOk:0,lastLog:0}]));
+    days:Array(14).fill(0),mins:Array(14).fill(0),week:0,weekOk:0,weekHint:0,weekSec:0,allSec:0,
+    all:0,allOk:0,lastLog:0,parts:new Map()}]));
+  const classMins=Array(14).fill(0);
+  const classParts=new Map();   /* Part ごと：{n,users:Set} */
   const wordStat=new Map();   /* 単語ごと：{n,ok,users:Set(まちがえた人)} */
   const classDays=Array.from({length:14},()=>new Set());
 
@@ -51244,6 +51247,13 @@ function adminBuild(profiles,progress,logs,sessions){
     if(t>s.lastLog)s.lastLog=t;
     if(d<14){s.days[d]++;classDays[d].add(l.user_id);}
     if(t>=weekFrom){s.week++;if(l.correct)s.weekOk++;if(l.hint_used)s.weekHint++;}
+    const raw=byId.get(String(l.word_id));
+    if(raw&&raw.part!=null){
+      const pp=s.parts.get(raw.part)||{n:0,ok:0,last:0};
+      pp.n++;if(l.correct)pp.ok++;if(t>pp.last)pp.last=t;s.parts.set(raw.part,pp);
+      const cp=classParts.get(raw.part)||{n:0,users:new Set()};
+      cp.n++;cp.users.add(l.user_id);classParts.set(raw.part,cp);
+    }
     const w=wordStat.get(l.word_id)||{n:0,ok:0,users:new Set(),tried:new Set()};
     w.n++;if(l.correct)w.ok++;else w.users.add(l.user_id);w.tried.add(l.user_id);
     wordStat.set(l.word_id,w);
@@ -51251,8 +51261,9 @@ function adminBuild(profiles,progress,logs,sessions){
   sessions.forEach(x=>{
     const s=per.get(x.user_id);if(!s)return;
     const t=Date.parse(x.started_at);const d=dayIdx(t);
-    if(d<14)s.mins[d]+=x.active_seconds/60;
+    if(d<14){s.mins[d]+=x.active_seconds/60;classMins[d]+=x.active_seconds/60;}
     if(t>=weekFrom)s.weekSec+=x.active_seconds;
+    s.allSec+=x.active_seconds||0;
   });
 
   const rows=students.map(p=>{
@@ -51271,13 +51282,22 @@ function adminBuild(profiles,progress,logs,sessions){
     if(!studied.length&&!s.all)reasons.push("まだ始めていない");
     else if(away!=null&&away>=AWAY_DAYS)reasons.push(away+"日学習していない");
     if(weekRate!=null&&s.week>=10&&weekRate<LOW_RATE)reasons.push("今週の正答率が"+Math.round(weekRate*100)+"%");
+    /* Part ごとの様子：学習した語・習得した語は全期間、回答数・正答率は直近の記録から */
+    const pm=new Map();
+    const pget=k=>{if(!pm.has(k))pm.set(k,{part:k,studied:0,mastered:0,n:0,ok:0,last:0});return pm.get(k);};
+    studied.forEach(w=>{const raw=byId.get(String(w.id));if(!raw||raw.part==null)return;
+      const x=pget(raw.part);x.studied++;if(isMastered(w))x.mastered++;});
+    s.parts.forEach((v,k)=>{const x=pget(k);x.n=v.n;x.ok=v.ok;x.last=v.last;});
+    const parts=[...pm.values()].map(x=>({...x,size:PART_SIZE.get(x.part)||0}))
+      .sort((a,b)=>b.last-a.last||partRank(a.part)-partRank(b.part)||(typeof a.part==="number"&&typeof b.part==="number"?a.part-b.part:0));
     const code=(p.student_code||"").trim();
     return {id:p.user_id,code,label:code||"ID未設定",email:p.email||"",group:idGroup(code),lastAt,away,
       studied:studied.length,mastered:ws.filter(isMastered).length,
       due:ws.filter(w=>isDue(w,now)).length,
       week:s.week,weekRate,weekMin:Math.round(s.weekSec/60),
       hintRate:s.week?s.weekHint/s.week:null,
-      days:s.days,mins:s.mins,activeDays:s.days.slice(0,7).filter(n=>n>0).length,
+      days:s.days,mins:s.mins.map(Math.round),allMin:Math.round(s.allSec/60),parts,
+      recentParts:parts.filter(x=>x.last).slice(0,5).map(x=>partName(x.part)),activeDays:s.days.slice(0,7).filter(n=>n>0).length,
       weak,reasons};
   });
 
@@ -51295,7 +51315,9 @@ function adminBuild(profiles,progress,logs,sessions){
       week:rows.filter(r=>r.week>0).length,
       weekAns,weekRate:weekAns?weekOk/weekAns:null,
       weekMin:rows.reduce((a,r)=>a+r.weekMin,0),
-      classDays:classDays.map(s=>s.size)}};
+      classDays:classDays.map(s=>s.size),classMins:classMins.map(Math.round),
+      parts:[...classParts.entries()].map(([part,v])=>({part,n:v.n,users:v.users.size}))
+        .sort((a,b)=>b.users-a.users||b.n-a.n)}};
 }
 
 /* 14日分の小さな棒グラフ（左が古い日、右が今日） */
@@ -51380,6 +51402,7 @@ function AdminScreen({C}){
   const [open,setOpen]=useState(null);
   const [sort,setSort]=useState("last");
   const [loadedAt,setLoadedAt]=useState(null);
+  const [showAllParts,setShowAllParts]=useState(false);
   const unread=useFeedbackUnread(true);
 
   const load=useCallback(async()=>{
@@ -51424,14 +51447,16 @@ function AdminScreen({C}){
     return d===0?"今日":d===1?"昨日（"+md+"）":d+"日前（"+md+"）";
   };
   const pct=r=>r==null?"—":Math.round(r*100)+"%";
+  const fmtMin=m=>m>=60?Math.floor(m/60)+"時間"+(m%60)+"分":m+"分";
+  const fmtDay=t=>{const d=daysBetween(t,Date.now());return d===0?"今日":d===1?"昨日":d+"日前";};
 
   const exportCsv=()=>{
-    const head=["ID","メール","最後の学習","今週の回答数","今週の正答率","今週の学習時間(分)","今週学習した日数",
+    const head=["ID","メール","最後の学習","今週の回答数","今週の正答率","今週の学習時間(分)","今週学習した日数","直近"+ADMIN_DAYS+"日の学習時間(分)","取り組んだPartの数","最近やったPart",
       "学習した語数","習得した語数","復習待ちの語数","苦手な語数","苦手な単語(上位5)"];
     const q=v=>'"'+String(v).replace(/"/g,'""')+'"';
     const lines=[head.map(q).join(",")].concat(data.rows.map(r=>[
       r.code,r.email,r.lastAt?new Date(r.lastAt).toLocaleDateString("ja-JP"):"",r.week,
-      r.weekRate==null?"":Math.round(r.weekRate*100),r.weekMin,r.activeDays,
+      r.weekRate==null?"":Math.round(r.weekRate*100),r.weekMin,r.activeDays,r.allMin,r.parts.length,r.recentParts.join(" / "),
       r.studied,r.mastered,r.due,r.weak.length,r.weak.slice(0,5).map(w=>w.word).join(" / ")].map(q).join(",")));
     const blob=new Blob(["﻿"+lines.join("\r\n")],{type:"text/csv"});
     const a=document.createElement("a");a.href=URL.createObjectURL(blob);
@@ -51467,14 +51492,32 @@ function AdminScreen({C}){
     <div style={{borderTop:"1px solid "+C.line,marginTop:12,paddingTop:12}}>
       <div style={{fontSize:14,fontWeight:700,color:C.text,marginBottom:6}}>14日間の回答数</div>
       <DayBars C={C} values={r.days} labels/>
+      <div style={{fontSize:14,fontWeight:700,color:C.text,margin:"14px 0 6px"}}>14日間の学習時間（分）</div>
+      <DayBars C={C} values={r.mins} labels/>
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"6px 12px",fontSize:14,color:C.sub,margin:"14px 0"}}>
         <div>今週学習した日：<b style={{color:C.text}}>{r.activeDays}日</b></div>
         <div>今週の時間：<b style={{color:C.text}}>{r.weekMin}分</b></div>
+        <div>{ADMIN_DAYS}日間の時間：<b style={{color:C.text}}>{fmtMin(r.allMin)}</b></div>
+        <div>取り組んだPart：<b style={{color:C.text}}>{r.parts.length}個</b></div>
         <div>今週の正答率：<b style={{color:C.text}}>{pct(r.weekRate)}</b></div>
         <div>ヒントを見た割合：<b style={{color:C.text}}>{pct(r.hintRate)}</b></div>
         <div>習得した語：<b style={{color:C.text}}>{r.mastered}語</b></div>
         <div>復習待ち：<b style={{color:C.text}}>{r.due}語</b></div>
       </div>
+      <div style={{fontSize:14,fontWeight:700,color:C.text,marginBottom:6}}>取り組んだPart（最近やった順）</div>
+      <div style={{fontSize:12,color:C.faint,marginBottom:4,lineHeight:1.6}}>語数は今までの合計、回答数と正答率は直近{ADMIN_DAYS}日</div>
+      {r.parts.length===0
+        ?<div style={{fontSize:14,color:C.sub,marginBottom:14}}>まだありません</div>
+        :<div style={{marginBottom:14}}>{(showAllParts?r.parts:r.parts.slice(0,8)).map(x=>(
+          <div key={String(x.part)} style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8,padding:"6px 0",fontSize:15,borderBottom:"1px solid "+C.line}}>
+            <span style={{minWidth:0}}><b style={{color:C.text}}>{partName(x.part)}</b>
+              <span style={{display:"block",fontSize:12,color:C.sub}}>学習 {x.studied}/{x.size}語・習得 {x.mastered}語</span></span>
+            <span className="num" style={{color:C.sub,fontSize:13,textAlign:"right",flexShrink:0}}>
+              {x.n?<>{x.n}回・{pct(x.ok/x.n)}<br/>{fmtDay(x.last)}</>:"—"}</span>
+          </div>))}
+          {r.parts.length>8&&<button style={{...small(false),width:"100%",marginTop:8}} onClick={()=>setShowAllParts(v=>!v)}>
+            {showAllParts?"最近の8個だけ表示":"すべて表示（"+r.parts.length+"個）"}</button>}
+        </div>}
       <div style={{fontSize:14,fontWeight:700,color:C.text,marginBottom:6}}>苦手な単語（まちがいが多い順）</div>
       {r.weak.length===0
         ?<div style={{fontSize:14,color:C.sub}}>まだありません</div>
@@ -51503,6 +51546,20 @@ function AdminScreen({C}){
       <div style={box}>
         <h3 style={h3}>毎日の学習人数</h3>
         <DayBars C={C} values={s.classDays} max={s.n} height={56} labels/>
+      </div>
+      <div style={box}>
+        <h3 style={h3}>毎日の学習時間（全員・分）</h3>
+        <DayBars C={C} values={s.classMins} height={56} labels/>
+      </div>
+      <div style={box}>
+        <h3 style={h3}>よく取り組まれているPart</h3>
+        <div style={{fontSize:13,color:C.sub,marginBottom:8,lineHeight:1.7}}>直近{ADMIN_DAYS}日で、取り組んだ人が多い順です</div>
+        {s.parts.length===0?<div style={{fontSize:15,color:C.sub}}>まだデータがありません</div>
+          :s.parts.slice(0,10).map(x=>(
+            <div key={String(x.part)} style={{display:"flex",justifyContent:"space-between",alignItems:"center",minHeight:44,borderTop:"1px solid "+C.line,fontSize:15}}>
+              <b style={{color:C.text}}>{partName(x.part)}</b>
+              <span className="num" style={{fontSize:13,color:C.sub}}>{x.users}人・{x.n}回</span>
+            </div>))}
       </div>
       <div style={box}>
         <h3 style={h3}>声かけが必要な人（{need.length}人）</h3>
