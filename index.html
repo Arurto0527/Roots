@@ -52747,6 +52747,7 @@ function SettingsScreen({C,settings,stats,words,earned,onChange,onReset,onTutori
     {id:"remind",title:"通知",note:"復習リマインド"+(settings.reminderEnabled?(settings.reminderTime||"21:00"):"オフ")},
     {id:"look",title:"表示",note:"名前・外観・文字サイズ"},
     {id:"data",title:"データ",note:"ID番号・書き出し・読み込み・削除"},
+    {id:"news",title:"お知らせ・更新の履歴",note:(NOTICES[0]?NOTICES[0].title+"・":"")+"これまでに直したこと"},
     {id:"contact",title:"お問い合わせ・不具合の報告",note:"意見・要望・質問もこちらから"},
   ];
   const cur=groups.find(g=>g.id===section);
@@ -52767,6 +52768,7 @@ function SettingsScreen({C,settings,stats,words,earned,onChange,onReset,onTutori
     {title:"文字サイズ",sec:"look",words:"文字 大きさ フォント 小 中 大 見やすさ"},
     {title:"データの持ち出し",sec:"data",words:"書き出し 読み込み バックアップ 保存 機種変更 引き継ぎ エクスポート インポート"},
     {title:"学習データを削除する",sec:"data",words:"削除 リセット 初期化 消す 全部消す"},
+    {title:"お知らせ",sec:"news",words:"お知らせ 連絡 メッセージ 更新 履歴 アップデート 変更 新しい"},
     {title:"種類",sec:"contact",words:"問い合わせ 不具合 バグ 意見 要望 質問 連絡 報告 困った"},
     {title:"効果的な使い方",sec:null,words:"使い方 チュートリアル ヘルプ 説明 はじめて"},
   ];
@@ -52909,6 +52911,7 @@ function SettingsScreen({C,settings,stats,words,earned,onChange,onReset,onTutori
       </div>
 
       </>)}
+      {section==="news"&&<NewsPanel C={C} box={box}/>}
       {section==="contact"&&(
       <div style={box} data-setbox="1"><ContactBox C={C} screenHint="設定"/></div>
       )}
@@ -53803,9 +53806,51 @@ function App(){
    「閉じる」を押した id は localStorage（roots_notice_seen）に残り、次からは出ない
    ============================================================ */
 const NOTICES=[
-  {id:"2026-10-07-login-email",title:"ログインを直しました",
+  {id:"2026-10-07-login-email",date:"2026-10-07",title:"ログインを直しました",
    body:"全角の文字（＠ や ｇｍａｉｌ など）や「。」、空白が入っていて、メールアドレスを送れないことがありました。今はそのまま入力しても送れます。"},
 ];
+/* 更新の履歴（設定 › お知らせ・更新の履歴 に出す）。生徒に関係のある変更だけを、新しい順に書く */
+const CHANGELOG=[
+  {date:"2026-10-07",text:"全角の文字や「。」が入っていても、ログインのメールアドレスを送れるようにしました。"},
+  {date:"2026-10-06",text:"教科書 Lesson 6-1〜6-4 の単語帳を開ける QR コードを用意しました。"},
+  {date:"2026-10-05",text:"教科書 Lesson 6-1〜6-4（Chat with Chatbot）の単語 49語を追加しました。"},
+  {date:"2026-10-01",text:"2回目からアプリが速く起動するようになりました。"},
+  {date:"2026-10-01",text:"iPhone で音声が鳴らないことがあるのを直しました。音声のダウンロードは「アメリカ・イギリス・両方」から選べます。"},
+  {date:"2026-10-01",text:"全2344語のイメージ文・ヒント・説明と、語根コラムを、わかりやすく書き直しました。"},
+  {date:"2026-09-30",text:"設定に「音声をまとめて保存する」を追加。ネットがなくても発音を聞けます。"},
+  {date:"2026-09-30",text:"一度ネットで開けば、次からはオフラインでも起動できるようにしました。"},
+  {date:"2026-09-29",text:"設定に「最新版に更新する」ボタンを追加しました。"},
+  {date:"2026-09-29",text:"教科書 Lesson 7-1〜7-4（パパラギ）の単語 44語を追加しました。"},
+  {date:"2026-09-27",text:"語根の絵を約300個描き直し、意味ごとに見分けやすくしました。"},
+  {date:"2026-09-26",text:"学習画面の答えの面に「報告」ボタンを追加。まちがいを見つけたらその場で送れます。"},
+  {date:"2026-09-26",text:"チュートリアルを見やすく直しました。"},
+  {date:"2026-09-25",text:"単語の訳・語源・関連語のまちがいを、何回かに分けて点検して直しました。"},
+];
+function NewsPanel({C,box}){
+  const fmt=d=>{const [y,m,dd]=d.split("-");return y+"年"+(+m)+"月"+(+dd)+"日";};
+  const head={fontSize:13.5,fontWeight:700,color:C.text,marginBottom:12};
+  return (<>
+    <div style={box} data-setbox="1">
+      <div style={head}>お知らせ</div>
+      {NOTICES.length?NOTICES.map((n,i)=>(
+        <div key={n.id} style={{paddingTop:i?14:0,marginTop:i?14:0,borderTop:i?"1px solid "+C.border:"none"}}>
+          <div style={{fontSize:12,color:C.faint}}>{n.date?fmt(n.date):""}</div>
+          <div style={{fontSize:16,fontWeight:700,color:C.text,marginTop:2}}>{n.title}</div>
+          <div style={{fontSize:16,color:C.sub,lineHeight:1.7,marginTop:4}}>{n.body}</div>
+        </div>
+      )):<div style={{fontSize:16,color:C.sub}}>お知らせはありません。</div>}
+    </div>
+    <div style={box} data-setbox="1">
+      <div style={head}>更新の履歴</div>
+      {CHANGELOG.map((c,i)=>(
+        <div key={i} style={{paddingTop:i?12:0,marginTop:i?12:0,borderTop:i?"1px solid "+C.border:"none"}}>
+          <div style={{fontSize:12,color:C.faint}}>{fmt(c.date)}</div>
+          <div style={{fontSize:16,color:C.text,lineHeight:1.7,marginTop:2}}>{c.text}</div>
+        </div>
+      ))}
+    </div>
+  </>);
+}
 const NOTICE_KEY="roots_notice_seen";
 function NoticeBox({place="top"}){
   const [seen,setSeen]=useState(()=>{try{return JSON.parse(localStorage.getItem(NOTICE_KEY)||"[]");}catch(e){return [];}});
