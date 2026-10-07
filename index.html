@@ -53807,17 +53807,23 @@ function LoginScreen({C,onSignedIn}){
   const [msg,setMsg]=useState(null);
   const inputStyle={width:"100%",height:52,borderRadius:4,border:"1px solid "+C.border,background:C.card,
     color:C.text,fontSize:16,padding:"0 16px"};
-  const addr=email.trim().toLowerCase();
+  // 全角（＠・ｇｍａｉｌ など）や「。」、途中の空白が入っていても送れるように直してから使う
+  const addr=email.normalize("NFKC").replace(/[。．｡]/g,".").replace(/[\s\u200B-\u200D\uFEFF]/g,"")
+    .replace(/^mailto:/i,"").replace(/\.+$/,"").toLowerCase();
 
   const sendCode=async()=>{
     if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(addr)){setMsg({bad:true,text:"メールアドレスを正しく入力してください。"});return;}
     setBusy(true);setMsg(null);
-    const {error}=await sb.auth.signInWithOtp({email:addr,options:{shouldCreateUser:true}});
+    let error;
+    try{({error}=await sb.auth.signInWithOtp({email:addr,options:{shouldCreateUser:true}}));}
+    catch(e){error=e||new Error("network");}
     setBusy(false);
     if(error){
       const t=String(error.message||"");
       setMsg({bad:true,text:/database error|saving new user|名簿/i.test(t)
         ?"ログインできませんでした。時間をおいてもう一度試してください。"
+        :/invalid|validate|format/i.test(t)
+        ?"このメールアドレスは使えないようです。まちがいがないか確かめてください。"
         :/rate|seconds|too many/i.test(t)
         ?"少し時間をおいてから、もう一度送ってください。"
         :"コードを送れませんでした。インターネットの接続を確認してください。"});
@@ -53829,8 +53835,10 @@ function LoginScreen({C,onSignedIn}){
     const token=code.replace(/\D/g,"");
     if(token.length<6){setMsg({bad:true,text:"メールに書かれた数字をすべて入力してください。"});return;}
     setBusy(true);setMsg(null);
-    const {data,error}=await sb.auth.verifyOtp({email:addr,token,type:"email"});
-    if(error||!data.session){
+    let data,error;
+    try{({data,error}=await sb.auth.verifyOtp({email:addr,token,type:"email"}));}
+    catch(e){error=e||new Error("network");}
+    if(error||!data||!data.session){
       setBusy(false);
       setMsg({bad:true,text:"コードがちがうか、期限が切れています。もう一度ためしてください。"});
       return;
@@ -53852,7 +53860,7 @@ function LoginScreen({C,onSignedIn}){
       <div style={{height:32}}/>
       <div style={{width:"100%",maxWidth:340}}>
         {step==="email"?(<>
-          <input type="email" inputMode="email" autoComplete="email" value={email} placeholder="メールアドレス"
+          <input type="email" inputMode="email" autoComplete="email" autoCapitalize="off" autoCorrect="off" spellCheck={false} value={email} placeholder="メールアドレス"
             aria-label="メールアドレス" onChange={e=>setEmail(e.target.value)}
             onKeyDown={e=>{if(e.key==="Enter"&&!busy)sendCode();}} style={inputStyle}/>
           <Btn C={C} style={{marginTop:12}} disabled={busy} onClick={sendCode}>{busy?"送信中…":"コードを送る"}</Btn>
