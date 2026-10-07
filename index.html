@@ -46250,9 +46250,9 @@ const DEFAULT_SETTINGS={
   name:"", dailyGoal:10, fontSize:"md", theme:"light",
   timerEnabled:false, timerSeconds:20,
   soundEnabled:true, autoSpeak:true, revealSpeak:"word",
-  formats:{w_en_ja:true,w_ja_en:true,s_en_ja:true,s_ja_en:true},
+  formats:{w_en_ja:true,w_ja_en:false,s_en_ja:false,s_ja_en:false},
   reminderEnabled:false, reminderTime:"21:00",
-  version:3
+  version:4
 };
 const DEFAULT_STATS={
   streak:0,totalDays:0,masteredCount:0,overcomeCount:0,lastStudyDate:null,
@@ -50747,7 +50747,7 @@ function OnboardingScreen({C,onDone}){
    SCREEN: HOME
    1画面に収める。学習開始までのタップは1回。
    ============================================================ */
-function HomeScreen({C,settings,stats,words,cfg,setCfg,pool,onStart,onNav,resumeInfo,onResume,onDiscardResume}){
+function HomeScreen({C,settings,stats,words,cfg,setCfg,pool,onStart,onNav,resumeInfo,onResume,onDiscardResume,onSettings}){
   const [open,setOpen]=useState(false);
   const now=Date.now();
   const mastered=words.filter(isMastered).length;
@@ -50878,6 +50878,24 @@ function HomeScreen({C,settings,stats,words,cfg,setCfg,pool,onStart,onNav,resume
                 value={cfg.count||settings.dailyGoal} aria-label="この回の語数"
                 onChange={e=>setCfg({count:+e.target.value})}
                 style={{width:"100%",["--trackbg"]:C.border,["--thumb"]:C.accent}}/>
+            </div>
+            <div style={{marginTop:16}}>
+              <div style={{fontSize:12.5,color:C.sub,marginBottom:8}}>出題の方法（いくつでも選べます）</div>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}}>
+                {FORMAT_KEYS.map(key=>{
+                  const fm=settings.formats||{},on=fm[key]!==false;
+                  const only=on&&FORMAT_KEYS.filter(x=>fm[x]!==false).length<=1;
+                  return (
+                    <button key={key} aria-pressed={on}
+                      onClick={()=>{if(only)return;onSettings({formats:{...fm,[key]:!on}});}}
+                      style={{minHeight:56,borderRadius:12,cursor:only?"default":"pointer",fontSize:16,
+                        fontWeight:on?700:400,border:"1.5px solid "+(on?C.accent:C.border),
+                        background:on?C.accent:"transparent",color:on?"#fff":C.text}}>
+                      {FORMAT_META[key].label}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
         )}
@@ -52901,7 +52919,7 @@ function SettingsScreen({C,settings,stats,words,earned,onChange,onReset,onTutori
       <div style={box} data-setbox="1">
         <div style={label}>出題の向き</div>
         <div style={{fontSize:11.5,color:C.sub,lineHeight:1.75,marginBottom:12,marginTop:-6}}>
-          同じ語でも向きが変わると定着が上がります。全部オンを推奨します。
+          標準は「単語 英→日」だけです。慣れてきたら向きを増やすと、定着が上がります。ホームの「条件を変える」でも切りかえられます。
         </div>
         {FORMAT_KEYS.map((key,i)=>{
           const m=FORMAT_META[key],on=(settings.formats||{})[key]!==false;
@@ -53328,7 +53346,9 @@ function App(){
     restoreRecall();   /* 案内の途中で閉じていたら、単語帳の ○× を元に戻す */
     const se=lsGet(KEY.settings)||lsGet(LEGACY.settings);
     if(se){
-      setSettings({...DEFAULT_SETTINGS,...se,formats:{...DEFAULT_SETTINGS.formats,...(se.formats||{})}});
+      /* version 4 から出題の標準は「英→日だけ」。それより前の保存は標準に戻す */
+      setSettings((se.version||0)<4?{...DEFAULT_SETTINGS,...se,formats:{...DEFAULT_SETTINGS.formats},version:4}
+        :{...DEFAULT_SETTINGS,...se,formats:{...DEFAULT_SETTINGS.formats,...(se.formats||{})}});
       setScreen(URL_PART!=null?"list":"home");
       /* すでに使っている人にも、まだ見ていなければ1回だけ出す */
       if(lsGet(TUTORIAL_KEY)!==true)setIntro(true);
@@ -53787,7 +53807,7 @@ function App(){
       {screen==="home"&&(
         <HomeScreen C={C} settings={settings} stats={stats} words={words}
           cfg={cfg} setCfg={setCfg} pool={pool} onStart={()=>startSession()} onNav={nav}
-          resumeInfo={resumeInfo} onResume={doResume} onDiscardResume={discardResume}/>
+          resumeInfo={resumeInfo} onResume={doResume} onDiscardResume={discardResume} onSettings={changeSettings}/>
       )}
 
       {screen==="study"&&item&&(
