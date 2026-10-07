@@ -53769,6 +53769,7 @@ function App(){
           onAction={snack.onAction||doUndo} onClose={()=>setSnack(null)}
           place={screen==="study"?"top":"bottom"} bottom={withNav?76:16}/>
       )}
+      {!updateReady&&screen!=="study"&&<NoticeBox/>}
       {updateReady&&(
         /* 画面の上に出して、押すまで消さない。学習中はじゃまになるので出さない */
         screen!=="study"&&(
@@ -53792,6 +53793,39 @@ function App(){
           </div>
         </div>)
       )}
+    </div>
+  );
+}
+
+/* ============================================================
+   お知らせ（直したことを生徒に知らせる箱）
+   新しいお知らせは NOTICES のいちばん上に足す。id は毎回ちがう文字にする。
+   「閉じる」を押した id は localStorage（roots_notice_seen）に残り、次からは出ない
+   ============================================================ */
+const NOTICES=[
+  {id:"2026-10-07-login-email",title:"ログインを直しました",
+   body:"全角の文字（＠ や ｇｍａｉｌ など）や「。」、空白が入っていて、メールアドレスを送れないことがありました。今はそのまま入力しても送れます。"},
+];
+const NOTICE_KEY="roots_notice_seen";
+function NoticeBox({place="top"}){
+  const [seen,setSeen]=useState(()=>{try{return JSON.parse(localStorage.getItem(NOTICE_KEY)||"[]");}catch(e){return [];}});
+  const n=NOTICES.find(x=>!seen.includes(x.id));
+  if(!n)return null;
+  const close=()=>{const next=[...seen,n.id];setSeen(next);
+    try{localStorage.setItem(NOTICE_KEY,JSON.stringify(next));}catch(e){}};
+  return (
+    <div className={place==="top"?"snackInTop":undefined} role="status"
+      style={{position:"fixed",left:"50%",transform:"translateX(-50%)",
+        top:"calc(10px + env(safe-area-inset-top))",zIndex:890,
+        width:"min(400px,calc(100% - 24px))",background:"#534AB7",color:"#FFFFFF",
+        borderRadius:12,padding:"14px 16px",boxShadow:"0 8px 28px rgba(0,0,0,.28)"}}>
+      <div style={{fontSize:13,opacity:.85,marginBottom:2}}>お知らせ</div>
+      <div style={{fontSize:16,fontWeight:700,marginBottom:6}}>{n.title}</div>
+      <div style={{fontSize:14,lineHeight:1.7,opacity:.95,marginBottom:12}}>{n.body}</div>
+      <button onClick={close}
+        style={{width:"100%",minHeight:56,borderRadius:8,border:"none",background:"#FFFFFF",
+          color:"#534AB7",fontSize:16,fontWeight:700,cursor:"pointer",fontFamily:"inherit"}}>
+        わかった</button>
     </div>
   );
 }
@@ -53922,6 +53956,7 @@ function Gate(){
     <div style={{width:"100%",maxWidth:430,margin:"0 auto",minHeight:"100vh",display:"flex",flexDirection:"column",
       background:C.bg,color:C.text}}>
       <LoginScreen C={C} onSignedIn={enter}/>
+      <NoticeBox/>
     </div>
   );
   return <div/>;

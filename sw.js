@@ -8,7 +8,7 @@
    つまり古い音声が残っていても、まちがった音が鳴ることはない。
    VERSION に付けてしまうと、番号を上げるたびに保存済みの音声が全部消えて、
    もう一度ダウンロードすることになるので、切り離しておく。 */
-const VERSION = "v80";
+const VERSION = "v81";
 const AUDIO_CACHE = "roots-audio";
 const APP_CACHE = "roots-app-" + VERSION;
 
@@ -100,13 +100,27 @@ self.addEventListener("fetch", (e) => {
     // 裏で最新版を取りに行って保存する
     const update = (async () => {
       try {
-        // ページ本体は HTTP キャッシュを使わずに取得する
-        const res = await fetch(req, req.mode === "navigate" ? { cache: "no-store" } : undefined);
+        // ページ本体は HTTP キャッシュを使わずに取得する。
+        // 保存版の「版の目じるし」（ETag）を添えて聞き、変わっていなければ中身を送ってこない（304）。
+        // こうしないと、開くたびに約5MBの本体を丸ごとダウンロードして比べることになり、起動が重くなる
+        let res;
+        if (req.mode === "navigate") {
+          const tag = hit && hit.headers.get("ETag");
+          res = await fetch(new Request(req.url, {
+            cache: "no-store", credentials: "same-origin",
+            headers: tag ? { "If-None-Match": tag } : {},
+          }));
+          if (res.status === 304) return hit;
+        } else {
+          res = await fetch(req);
+        }
         if (res.ok || res.type === "opaque") {
           // 中身が変わっていたら、開いている画面に「新しい版がある」と知らせる
           if (hit && req.mode === "navigate") {
-            const [before, after] = await Promise.all([hit.clone().text(), res.clone().text()]);
-            if (before !== after) {
+            const a = hit.headers.get("ETag"), b = res.headers.get("ETag");
+            const changed = a && b ? a !== b
+              : (await hit.clone().text()) !== (await res.clone().text());
+            if (changed) {
               const list = await self.clients.matchAll({ type: "window" });
               for (const c of list) c.postMessage({ type: "update-ready" });
             }
