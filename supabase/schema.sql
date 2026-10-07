@@ -279,3 +279,37 @@ create policy feedback_admin_update on public.feedback
 grant insert (kind, body, email, student_code, device) on public.feedback to authenticated;
 grant select on public.feedback to authenticated;
 grant update (read_at) on public.feedback to authenticated;
+
+-- ============================================================
+-- notices：管理画面から生徒へ送るお知らせ（2026-10 追加）
+-- targets が null なら全員へ。ID番号（student_code）の配列なら、その生徒だけに見える
+-- 管理者だけが送れる・消せる
+-- ============================================================
+create table if not exists public.notices (
+  id          bigint generated always as identity primary key,
+  created_at  timestamptz not null default now(),
+  created_by  uuid default auth.uid() references auth.users(id) on delete set null,
+  title       text not null check (char_length(title) between 1 and 60),
+  body        text not null check (char_length(body) between 1 and 1000),
+  targets     text[]
+);
+create index if not exists notices_created_idx on public.notices (created_at desc);
+alter table public.notices enable row level security;
+
+drop policy if exists notices_read on public.notices;
+create policy notices_read on public.notices
+  for select to authenticated using (
+    targets is null
+    or public.is_admin()
+    or exists (select 1 from public.profiles p
+               where p.user_id = auth.uid() and p.student_code = any(notices.targets))
+  );
+drop policy if exists notices_admin_insert on public.notices;
+create policy notices_admin_insert on public.notices
+  for insert to authenticated with check (public.is_admin());
+drop policy if exists notices_admin_delete on public.notices;
+create policy notices_admin_delete on public.notices
+  for delete to authenticated using (public.is_admin());
+
+grant select, delete on public.notices to authenticated;
+grant insert (title, body, targets) on public.notices to authenticated;

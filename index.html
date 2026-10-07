@@ -52253,6 +52253,87 @@ function FeedbackInbox({C,box,small}){
   </>);
 }
 
+/* 管理画面「お知らせ」：生徒へお知らせを送る（全員 または ID番号を指定）。送ったものは消せる */
+function NoticeSender({C,box,small}){
+  const [title,setTitle]=useState("");
+  const [body,setBody]=useState("");
+  const [to,setTo]=useState("all");
+  const [codes,setCodes]=useState("");
+  const [busy,setBusy]=useState(false);
+  const [items,setItems]=useState(null);
+  const [err,setErr]=useState(null);
+  const load=useCallback(async()=>{
+    setErr(null);
+    try{
+      const {data,error}=await withTimeout(sb.from("notices").select("id,created_at,title,body,targets")
+        .order("created_at",{ascending:false}).limit(100),15000);
+      if(error)throw error;
+      setItems(data||[]);
+    }catch(e){setErr((e&&e.message)||"読み込めませんでした");}
+  },[]);
+  useEffect(()=>{load();},[load]);
+  const targets=to==="all"?null:codes.normalize("NFKC").split(/[\s,、，]+/).map(x=>x.trim().toUpperCase()).filter(Boolean);
+  const send=async()=>{
+    if(!title.trim()||!body.trim()){window.alert("見出しと本文を入れてください。");return;}
+    if(targets&&!targets.length){window.alert("送る相手のID番号を入れてください。");return;}
+    const who=targets?targets.join("、")+" の"+targets.length+"人":"生徒全員";
+    if(!window.confirm(who+"に送ります。よろしいですか？\n\n"+title.trim()))return;
+    setBusy(true);
+    try{
+      const {error}=await withTimeout(sb.from("notices").insert({title:title.trim().slice(0,60),body:body.trim().slice(0,1000),targets}),15000);
+      if(error)throw error;
+      setTitle("");setBody("");setCodes("");load();
+      window.dispatchEvent(new Event("roots-notices-changed"));
+    }catch(e){window.alert("送れませんでした："+((e&&e.message)||""));}
+    setBusy(false);
+  };
+  const remove=async it=>{
+    if(!window.confirm("「"+it.title+"」を消しますか？\n生徒の画面からも見えなくなります。"))return;
+    try{
+      const {error}=await withTimeout(sb.from("notices").delete().eq("id",it.id),15000);
+      if(error)throw error;
+      load();window.dispatchEvent(new Event("roots-notices-changed"));
+    }catch(e){window.alert("消せませんでした："+((e&&e.message)||""));}
+  };
+  const field={width:"100%",fontSize:16,borderRadius:4,border:"1px solid "+C.border,background:C.bg,
+    color:C.text,boxSizing:"border-box",fontFamily:"inherit"};
+  const fmt=t=>{const d=new Date(t);return (d.getMonth()+1)+"/"+d.getDate()+" "+d.toLocaleTimeString("ja-JP",{hour:"2-digit",minute:"2-digit"});};
+  return (<>
+    <div style={box}>
+      <div style={{fontSize:15,fontWeight:700,color:C.text,marginBottom:10}}>お知らせを送る</div>
+      <input value={title} onChange={e=>setTitle(e.target.value)} maxLength={60} placeholder="見出し（例：テスト範囲のお知らせ）"
+        aria-label="見出し" style={{...field,minHeight:56,padding:"0 14px",marginBottom:8}}/>
+      <textarea value={body} onChange={e=>setBody(e.target.value)} maxLength={1000} rows={5} placeholder="本文"
+        aria-label="本文" style={{...field,padding:"12px 14px",lineHeight:1.7,resize:"vertical",marginBottom:8}}/>
+      <div style={{display:"flex",gap:6,marginBottom:8}}>
+        {[["all","全員へ"],["some","IDを指定"]].map(([k,l])=>(
+          <button key={k} onClick={()=>setTo(k)} style={small(to===k)}>{l}</button>))}
+      </div>
+      {to==="some"&&<input value={codes} onChange={e=>setCodes(e.target.value)} placeholder="ID番号（例：H1-101, H1-102）"
+        aria-label="送る相手のID番号" autoCapitalize="characters" autoCorrect="off" spellCheck={false}
+        style={{...field,minHeight:56,padding:"0 14px",marginBottom:8}}/>}
+      <div style={{fontSize:13,color:C.sub,lineHeight:1.7,marginBottom:10}}>
+        生徒がアプリを開くと画面の上に出ます。設定の「お知らせ・更新の履歴」でも読めます。</div>
+      <Btn C={C} disabled={busy} onClick={send}>{busy?"送信中…":"送る"}</Btn>
+    </div>
+    <div style={{fontSize:13,fontWeight:700,color:C.sub,margin:"14px 2px 8px"}}>送ったお知らせ</div>
+    {err&&<div style={{...box,fontSize:14,lineHeight:1.7}}>読み込めませんでした：{err}</div>}
+    {!items&&!err&&<div style={{color:C.sub,fontSize:16}}>読み込み中…</div>}
+    {items&&items.length===0&&<div style={{fontSize:15,color:C.sub,padding:"8px 2px"}}>まだ送っていません</div>}
+    {items&&items.map(it=>(
+      <div key={it.id} style={box}>
+        <div style={{display:"flex",justifyContent:"space-between",gap:8,fontSize:13,color:C.sub,marginBottom:6}}>
+          <span style={{wordBreak:"break-all"}}>{it.targets&&it.targets.length?"宛先："+it.targets.join("、"):"全員へ"}</span>
+          <span className="num" style={{flexShrink:0}}>{fmt(it.created_at)}</span>
+        </div>
+        <div style={{fontSize:16,fontWeight:700,color:C.text}}>{it.title}</div>
+        <div style={{fontSize:16,color:C.text,lineHeight:1.7,whiteSpace:"pre-wrap",wordBreak:"break-word",marginTop:4}}>{it.body}</div>
+        <button onClick={()=>remove(it)} style={{...small(false),width:"100%",marginTop:10}}>消す</button>
+      </div>
+    ))}
+  </>);
+}
+
 function AdminScreen({C}){
   const [raw,setRaw]=useState(null);
   const [err,setErr]=useState(null);
@@ -52560,7 +52641,7 @@ function AdminScreen({C}){
               style={{...small(group===k),flex:"0 0 auto",padding:"0 14px",whiteSpace:"nowrap"}}>{l}（{n}）</button>))}
         </div>
         <div role="tablist" style={{display:"flex",gap:6,marginBottom:12}}>
-          {[["class","クラス"],["students","生徒"],["words","単語"],["inbox","問合せ"+(unread?"("+unread+")":"")]].map(([k,l])=>(
+          {[["class","クラス"],["students","生徒"],["words","単語"],["inbox","問合せ"+(unread?"("+unread+")":"")],["notice","お知らせ"]].map(([k,l])=>(
             <button key={k} role="tab" aria-selected={tab===k} style={{...pill(tab===k),fontSize:15,padding:"0 4px",
               color:k==="inbox"&&unread&&tab!==k?"#DC2626":pill(tab===k).color}} onClick={()=>setTab(k)}>{l}</button>))}
         </div>
@@ -52568,7 +52649,8 @@ function AdminScreen({C}){
         {tab==="students"&&renderStudents()}
         {tab==="words"&&renderWords()}
         {tab==="inbox"&&<FeedbackInbox C={C} box={box} small={small}/>}
-        {tab!=="inbox"&&<Btn C={C} variant="ghost" style={{marginTop:12}} onClick={exportCsv}>一覧をCSVで保存（Excel用）</Btn>}
+        {tab==="notice"&&<NoticeSender C={C} box={box} small={small}/>}
+        {tab!=="inbox"&&tab!=="notice"&&<Btn C={C} variant="ghost" style={{marginTop:12}} onClick={exportCsv}>一覧をCSVで保存（Excel用）</Btn>}
       </>)}
     </div>
   );
@@ -52747,7 +52829,7 @@ function SettingsScreen({C,settings,stats,words,earned,onChange,onReset,onTutori
     {id:"remind",title:"通知",note:"復習リマインド"+(settings.reminderEnabled?(settings.reminderTime||"21:00"):"オフ")},
     {id:"look",title:"表示",note:"名前・外観・文字サイズ"},
     {id:"data",title:"データ",note:"ID番号・書き出し・読み込み・削除"},
-    {id:"news",title:"お知らせ・更新の履歴",note:(NOTICES[0]?NOTICES[0].title+"・":"")+"これまでに直したこと"},
+    {id:"news",title:"お知らせ・更新の履歴",note:"先生からのお知らせ・これまでに直したこと"},
     {id:"contact",title:"お問い合わせ・不具合の報告",note:"意見・要望・質問もこちらから"},
   ];
   const cur=groups.find(g=>g.id===section);
@@ -53829,14 +53911,15 @@ const CHANGELOG=[
 function NewsPanel({C,box}){
   const fmt=d=>{const [y,m,dd]=d.split("-");return y+"年"+(+m)+"月"+(+dd)+"日";};
   const head={fontSize:13.5,fontWeight:700,color:C.text,marginBottom:12};
+  const notices=useNotices();
   return (<>
     <div style={box} data-setbox="1">
       <div style={head}>お知らせ</div>
-      {NOTICES.length?NOTICES.map((n,i)=>(
+      {notices.length?notices.map((n,i)=>(
         <div key={n.id} style={{paddingTop:i?14:0,marginTop:i?14:0,borderTop:i?"1px solid "+C.border:"none"}}>
-          <div style={{fontSize:12,color:C.faint}}>{n.date?fmt(n.date):""}</div>
+          <div style={{fontSize:12,color:C.faint}}>{n.date?fmt(n.date):""}{n.personal?"　あなたへ":""}</div>
           <div style={{fontSize:16,fontWeight:700,color:C.text,marginTop:2}}>{n.title}</div>
-          <div style={{fontSize:16,color:C.sub,lineHeight:1.7,marginTop:4}}>{n.body}</div>
+          <div style={{fontSize:16,color:C.sub,lineHeight:1.7,marginTop:4,whiteSpace:"pre-wrap",wordBreak:"break-word"}}>{n.body}</div>
         </div>
       )):<div style={{fontSize:16,color:C.sub}}>お知らせはありません。</div>}
     </div>
@@ -53851,10 +53934,36 @@ function NewsPanel({C,box}){
     </div>
   </>);
 }
+/* 管理画面から送ったお知らせ（Supabase の notices）。オフラインでも見られるように前回の分を保存しておく */
+const NOTICE_CACHE_KEY="roots_notices_cache";
+const ymdLocal=t=>{const d=new Date(t);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");};
+function useNotices(){
+  const [cloud,setCloud]=useState(()=>{try{return JSON.parse(localStorage.getItem(NOTICE_CACHE_KEY)||"[]");}catch(e){return [];}});
+  useEffect(()=>{
+    let alive=true;
+    const load=async()=>{
+      if(!Cloud.user)return;
+      try{
+        const {data,error}=await withTimeout(sb.from("notices").select("id,created_at,title,body,targets")
+          .order("created_at",{ascending:false}).limit(50),10000);
+        if(error||!alive)return;
+        const xs=(data||[]).map(r=>({id:"db-"+r.id,date:ymdLocal(r.created_at),at:r.created_at,
+          title:r.title,body:r.body,personal:!!(r.targets&&r.targets.length)}));
+        setCloud(xs);
+        try{localStorage.setItem(NOTICE_CACHE_KEY,JSON.stringify(xs));}catch(e){}
+      }catch(e){}
+    };
+    load();
+    window.addEventListener("roots-notices-changed",load);
+    return ()=>{alive=false;window.removeEventListener("roots-notices-changed",load);};
+  },[]);
+  return [...cloud,...NOTICES].sort((a,b)=>(b.at||b.date||"").localeCompare(a.at||a.date||""));
+}
 const NOTICE_KEY="roots_notice_seen";
 function NoticeBox({place="top"}){
   const [seen,setSeen]=useState(()=>{try{return JSON.parse(localStorage.getItem(NOTICE_KEY)||"[]");}catch(e){return [];}});
-  const n=NOTICES.find(x=>!seen.includes(x.id));
+  const all=useNotices();
+  const n=all.find(x=>!seen.includes(x.id));
   if(!n)return null;
   const close=()=>{const next=[...seen,n.id];setSeen(next);
     try{localStorage.setItem(NOTICE_KEY,JSON.stringify(next));}catch(e){}};
@@ -53864,7 +53973,7 @@ function NoticeBox({place="top"}){
         top:"calc(10px + env(safe-area-inset-top))",zIndex:890,
         width:"min(400px,calc(100% - 24px))",background:"#534AB7",color:"#FFFFFF",
         borderRadius:12,padding:"14px 16px",boxShadow:"0 8px 28px rgba(0,0,0,.28)"}}>
-      <div style={{fontSize:13,opacity:.85,marginBottom:2}}>お知らせ</div>
+      <div style={{fontSize:13,opacity:.85,marginBottom:2}}>{n.personal?"あなたへのお知らせ":"お知らせ"}</div>
       <div style={{fontSize:16,fontWeight:700,marginBottom:6}}>{n.title}</div>
       <div style={{fontSize:14,lineHeight:1.7,opacity:.95,marginBottom:12}}>{n.body}</div>
       <button onClick={close}
