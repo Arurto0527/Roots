@@ -8,7 +8,7 @@
    つまり古い音声が残っていても、まちがった音が鳴ることはない。
    VERSION に付けてしまうと、番号を上げるたびに保存済みの音声が全部消えて、
    もう一度ダウンロードすることになるので、切り離しておく。 */
-const VERSION = "v85";
+const VERSION = "v86";
 const AUDIO_CACHE = "roots-audio";
 const APP_CACHE = "roots-app-" + VERSION;
 
@@ -70,6 +70,9 @@ self.addEventListener("fetch", (e) => {
   const req = e.request;
   if (req.method !== "GET") return;
   const url = new URL(req.url);
+
+  // 授業用ページ（class/）は保存しない。いつも最新版を出す
+  if (url.pathname.includes("/class/")) return;
 
   // ログインや学習データの通信（Supabase）は保存しない
   if (url.hostname.endsWith("supabase.co")) return;
