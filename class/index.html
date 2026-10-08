@@ -96,7 +96,66 @@ function NumBox({C,value,onChange,min,max,label}){
 }
 
 /* 語源チップ（大画面用） */
+/* 語根を押すと語源コラムを開く（どの画面からでも） */
+const RootCtx=React.createContext(null);
+let ALL_ROOTS=null;
+const rootEntry=m=>{
+  if(!ALL_ROOTS)ALL_ROOTS=Object.fromEntries(buildRootIndex(RAW_WORDS,{withAffixes:true}).map(x=>[x.morph,x]));
+  return ALL_ROOTS[canonRoot(m)]||null;
+};
+function RootColumn({C,root,onClose}){
+  useEffect(()=>{
+    const h=e=>{e.stopImmediatePropagation();if(e.key==="Escape"||e.key===" "||e.key==="Enter"){e.preventDefault();onClose();}};
+    window.addEventListener("keydown",h,true);
+    return ()=>window.removeEventListener("keydown",h,true);
+  },[onClose]);
+  const note=rootNote(root.morph);
+  const ent=rootEntry(root.morph);
+  const g=pictoFor(root.morph,root.gloss,root.type);
+  const words=ent?[...ent.words.map(w=>({word:w.word,meaning:w.meaning,w})),...ent.related.map(r=>({word:r.word,meaning:r.meaning}))]:[];
+  return (
+    <div onClick={onClose} className="fadeIn" style={{position:"fixed",inset:0,background:C.overlay,zIndex:100,
+      display:"flex",alignItems:"center",justifyContent:"center",padding:40}}>
+      <div onClick={e=>e.stopPropagation()} role="dialog" aria-label={root.morph+" の語源コラム"} className="scrolly"
+        style={{background:C.bg,color:C.text,borderRadius:20,maxWidth:1200,width:"100%",maxHeight:"100%",padding:"36px 44px",
+          display:"grid",gridTemplateColumns:words.length?"minmax(0,3fr) minmax(0,2fr)":"1fr",gap:40,position:"relative"}}>
+        <button onClick={onClose} className="press" aria-label="閉じる" style={{position:"absolute",top:16,right:16,minHeight:48,
+          padding:"0 18px",fontSize:18,borderRadius:10,border:"1px solid "+C.line,background:"transparent",color:C.sub,cursor:"pointer"}}>閉じる（Esc）</button>
+        <div>
+          <div style={{display:"flex",alignItems:"center",gap:28}}>
+            {g&&<div style={{width:140,height:140,border:"1px solid "+C.line,borderRadius:18,display:"flex",alignItems:"center",
+              justifyContent:"center",flexShrink:0}}><P size={100}>{g.g}</P></div>}
+            <div>
+              <div className="en" style={{fontSize:80,fontWeight:700,color:typeColor(root.type||"root",C),lineHeight:1}}>{root.morph}</div>
+              <div style={{fontSize:32,fontWeight:700,marginTop:10}}>{root.gloss||(ent&&ent.gloss)}</div>
+            </div>
+          </div>
+          {note
+            ?<div style={{marginTop:28}}>
+               <div style={{fontSize:30,fontWeight:700,lineHeight:1.5}}>{note.title}</div>
+               <div style={{fontSize:23,color:C.sub,lineHeight:1.8,marginTop:12,whiteSpace:"pre-wrap"}}>{note.body}</div>
+             </div>
+            :<div style={{marginTop:28,fontSize:22,color:C.faint}}>この語根のコラムはまだありません。</div>}
+        </div>
+        {words.length>0&&<div>
+          <div style={{fontSize:20,color:C.sub,marginBottom:8}}>この語根を使う単語（{words.length}語）</div>
+          {words.slice(0,12).map((it,k)=>(
+            <button key={k} onClick={()=>speak(it.word)} className="press" style={{display:"flex",alignItems:"baseline",gap:18,width:"100%",
+              minHeight:56,padding:"8px 2px",border:"none",borderBottom:"1px solid "+C.line,background:"transparent",color:C.text,
+              cursor:"pointer",textAlign:"left"}}>
+              <span className="en" style={{fontSize:28,fontWeight:700}}>{it.w?<ColoredWord C={C} word={it.word} parts={parseRoots(it.w)}/>:it.word}</span>
+              <span style={{fontSize:22,color:C.sub}}>{it.meaning}</span>
+            </button>
+          ))}
+          {words.length>12&&<div style={{fontSize:18,color:C.faint,marginTop:8}}>ほか {words.length-12} 語</div>}
+        </div>}
+      </div>
+    </div>
+  );
+}
+
 function BigRoots({C,w,showGloss=true,size=1}){
+  const openRoot=React.useContext(RootCtx);
   const parts=parseRoots(w);
   if(!parts.length)return null;
   return (
@@ -106,11 +165,14 @@ function BigRoots({C,w,showGloss=true,size=1}){
         return (
           <React.Fragment key={i}>
             {i>0&&<span style={{fontSize:44*size,color:C.faint,fontWeight:700}}>＋</span>}
-            <span className="riseIn" style={{animationDelay:(i*0.12)+"s",display:"inline-flex",flexDirection:"column",
-              alignItems:"center",border:"2px solid "+C.line,borderRadius:14,padding:(14*size)+"px "+(26*size)+"px",color:col.fg}}>
+            <button className="riseIn press" onClick={e=>{e.stopPropagation();openRoot&&openRoot({morph:r.morph,gloss:r.gloss,type:morphType(r.morph,i,parts.length,parts)});}}
+              aria-label={r.morph+" の語源コラムを開く"}
+              style={{animationDelay:(i*0.12)+"s",display:"inline-flex",flexDirection:"column",position:"relative",cursor:"pointer",
+              alignItems:"center",border:"2px solid "+C.line,borderRadius:14,padding:(14*size)+"px "+(26*size)+"px",color:col.fg,background:"transparent",font:"inherit"}}>
               <span className="en" style={{fontSize:60*size,fontWeight:700,lineHeight:1.1}}>{r.morph}</span>
               {r.gloss&&<span style={{fontSize:28*size,marginTop:6,visibility:showGloss?"visible":"hidden"}}>{r.gloss}</span>}
-            </span>
+              {rootNote(r.morph)&&<span aria-hidden="true" style={{position:"absolute",top:8,right:9,width:9,height:9,borderRadius:"50%",background:col.fg,opacity:.75}}/>}
+            </button>
           </React.Fragment>
         );
       })}
@@ -184,6 +246,7 @@ function KeyHelp({C,items}){
    ============================================================ */
 const EXPLAIN_STEPS=["単語","語源","イメージ","意味","例文"];
 function ExplainScreen({C,list,onHome,onToggleDark}){
+  const openRoot=React.useContext(RootCtx);
   const [i,setI]=useState(0);
   const [step,setStep]=useState(0);
   const w=list[i];
@@ -219,7 +282,7 @@ function ExplainScreen({C,list,onHome,onToggleDark}){
           <span className="en">{w.pronunciation}</span>{w.partOfSpeech&&<>　{w.partOfSpeech}</>}
         </div>
         {step>=1&&<div className="fadeIn"><BigRoots C={C} w={w} size={step>=3?0.75:1}/></div>}
-        {step===1&&<div className="fadeIn" style={{zoom:1.15}}><Pictogram C={C} word={w}/></div>}
+        {step===1&&<div className="fadeIn" style={{zoom:1.15}}><Pictogram C={C} word={w} onTapRoot={openRoot}/></div>}
         {step===2&&imagery&&<div className="riseIn" style={{fontSize:36,lineHeight:1.6,maxWidth:1100,textAlign:"center"}}>{imagery}</div>}
         {step>=3&&<div className="riseIn" style={{fontSize:72,fontWeight:700,textAlign:"center"}}>{w.meaning}</div>}
         {step===3&&w.hook&&<div className="fadeIn" style={{fontSize:28,color:C.sub,maxWidth:1100,textAlign:"center",lineHeight:1.6}}>{w.hook}</div>}
@@ -477,12 +540,20 @@ function ClassApp(){
   const toggleDark=()=>setCfg(c=>({...c,dark:!c.dark}));
   const start=()=>{const list=wordsFor(cfg);if(list.length)setRun({mode:cfg.mode,list,sec:cfg.sec,key:Date.now()});};
   const home=()=>{stopSpeak();setRun(null);};
+  const [root,setRoot]=useState(null);
+  const closeRoot=useCallback(()=>setRoot(null),[]);
   useKeys({Escape:home,d:toggleDark,Enter:()=>{if(!run)start();}});
-  if(!run)return <SetupScreen C={C} cfg={cfg} setCfg={setCfg} onStart={start} onToggleDark={toggleDark}/>;
-  const p={C,list:run.list,onHome:home,onToggleDark:toggleDark,key:run.key};
-  if(run.mode==="quiz")return <QuizScreen {...p} sec={run.sec}/>;
-  if(run.mode==="roots")return <RootsBoard {...p}/>;
-  return <ExplainScreen {...p}/>;
+  const p=run&&{C,list:run.list,onHome:home,onToggleDark:toggleDark,key:run.key};
+  const screen=!run?<SetupScreen C={C} cfg={cfg} setCfg={setCfg} onStart={start} onToggleDark={toggleDark}/>
+    :run.mode==="quiz"?<QuizScreen {...p} sec={run.sec}/>
+    :run.mode==="roots"?<RootsBoard {...p}/>
+    :<ExplainScreen {...p}/>;
+  return (
+    <RootCtx.Provider value={setRoot}>
+      {screen}
+      {root&&<RootColumn C={C} root={root} onClose={closeRoot}/>}
+    </RootCtx.Provider>
+  );
 }
 ReactDOM.createRoot(document.getElementById("root")).render(<ClassApp/>);
 document.getElementById("boot").style.display="none";
