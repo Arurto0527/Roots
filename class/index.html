@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- 単語データ・音声・本体はひとつ上のフォルダにあるので、相対パスの基準をそろえる -->
+<base href="../">
+<title>Roots 授業用 — 語源で覚える英単語</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  *,*::before,*::after{box-sizing:border-box;}
+  html,body{margin:0;padding:0;height:100%;}
+  body{
+    background:#FFFFFF;
+    font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Helvetica,"Hiragino Sans","Noto Sans JP",Roboto,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  input,button,select{font-family:inherit;}
+  button{-webkit-appearance:none;appearance:none;}
+  .num{font-variant-numeric:tabular-nums;}
+  .en{letter-spacing:-0.01em;}
+  :focus-visible{outline:2px solid currentColor;outline-offset:3px;border-radius:6px;}
+  .press:active{opacity:.6;}
+  @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+  @keyframes riseIn{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:none;}}
+  .fadeIn{animation:fadeIn .25s ease both;}
+  .riseIn{animation:riseIn .3s cubic-bezier(.2,.7,.3,1) both;}
+  @media (prefers-reduced-motion:reduce){.fadeIn,.riseIn{animation:none !important;}}
+  #boot{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;
+    padding:32px;text-align:center;color:#595959;font-size:22px;line-height:1.8;white-space:pre-wrap;}
+  .scrolly{overflow-y:auto;}
+</style>
+</head>
+<body>
+<div id="boot">授業用 Roots を準備しています…<br><span style="font-size:16px">はじめて開くときは 10 秒ほどかかります</span></div>
+<div id="root"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+
+<!-- 授業用の画面。単語データや部品（色分け・ピクトグラム・音声）は本体の index.html から借りる -->
+<script type="text/x-roots-jsx" id="class-app">
+/* ============================================================
+   授業用 Roots（先生がプロジェクター・電子黒板に映す版）
+   ============================================================ */
+const CLASS_KEY="roots.class.v1";
+const MODES=[
+  {key:"explain",label:"語源で解く",note:"単語 → 語源の分解 → イメージ → 意味 → 例文 を1段ずつめくる"},
+  {key:"quiz",label:"クラスクイズ",note:"単語を映して、カウントダウンのあとに意味と語源を出す"},
+  {key:"roots",label:"語根まとめ",note:"1つの語根と、それを使う単語をまとめて映す"},
+];
+const LEAP_MAX=ALPHA_FROM-1;
+const LESSONS=[...new Set(RAW_WORDS.filter(w=>w.lesson).map(w=>w.part))]
+  .sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
+const DEFAULT_CLASS={mode:"explain",kind:"leap",from:1,to:10,lesson:LESSONS[0]||null,order:"seq",sec:5,dark:false};
+
+function wordsFor(cfg){
+  let list=cfg.kind==="lesson"
+    ?RAW_WORDS.filter(w=>w.part===cfg.lesson)
+    :RAW_WORDS.filter(w=>!w.lesson&&w.id>=cfg.from&&w.id<=cfg.to&&w.id<=LEAP_MAX);
+  list=[...list].sort((a,b)=>a.id-b.id);
+  return cfg.order==="random"?shuffle(list):list;
+}
+
+/* ---------- 大きな部品 ---------- */
+function BigBtn({C,children,onClick,primary,style,...rest}){
+  return (
+    <button onClick={onClick} className="press" {...rest}
+      style={{minHeight:64,padding:"0 28px",fontSize:22,fontWeight:700,borderRadius:14,cursor:"pointer",
+        border:"2px solid "+C.text,background:primary?C.text:"transparent",color:primary?C.bg:C.text,...style}}>
+      {children}
+    </button>
+  );
+}
+function Pill({C,active,children,onClick}){
+  return (
+    <button onClick={onClick} className="press"
+      style={{minHeight:56,padding:"0 22px",fontSize:20,fontWeight:700,borderRadius:999,cursor:"pointer",
+        border:"2px solid "+(active?C.text:C.line),background:active?C.text:"transparent",color:active?C.bg:C.sub}}>
+      {children}
+    </button>
+  );
+}
+function NumBox({C,value,onChange,min,max,label}){
+  return (
+    <label style={{display:"flex",alignItems:"center",gap:10,fontSize:20,color:C.sub}}>
+      {label}
+      <input type="number" value={value} min={min} max={max} className="num"
+        onChange={e=>{const v=parseInt(e.target.value,10);if(!isNaN(v))onChange(clamp(v,min,max));}}
+        style={{width:130,minHeight:56,fontSize:26,fontWeight:700,textAlign:"center",borderRadius:12,
+          border:"2px solid "+C.line,background:C.bg,color:C.text}}/>
+    </label>
+  );
+}
+
+/* 語源チップ（大画面用） */
+function BigRoots({C,w,showGloss=true,size=1}){
+  const parts=parseRoots(w);
+  if(!parts.length)return null;
+  return (
+    <div style={{display:"flex",flexWrap:"wrap",alignItems:"center",justifyContent:"center",gap:18*size}}>
+      {parts.map((r,i)=>{
+        const col=rootColor(r.morph,C,i,parts.length,parts);
+        return (
+          <React.Fragment key={i}>
+            {i>0&&<span style={{fontSize:44*size,color:C.faint,fontWeight:700}}>＋</span>}
+            <span className="riseIn" style={{animationDelay:(i*0.12)+"s",display:"inline-flex",flexDirection:"column",
+              alignItems:"center",border:"2px solid "+C.line,borderRadius:14,padding:(14*size)+"px "+(26*size)+"px",color:col.fg}}>
+              <span className="en" style={{fontSize:60*size,fontWeight:700,lineHeight:1.1}}>{r.morph}</span>
+              {r.gloss&&<span style={{fontSize:28*size,marginTop:6,visibility:showGloss?"visible":"hidden"}}>{r.gloss}</span>}
+            </span>
+          </React.Fragment>
+        );
+      })}
+    </div>
+  );
+}
+
+/* 見出し語（語根ごとに色分け） */
+function BigWord({C,w,colored,size=120}){
+  return (
+    <div className="en" style={{fontSize:size,fontWeight:700,lineHeight:1.05,textAlign:"center",wordBreak:"break-word"}}>
+      {colored?<ColoredWord C={C} word={w.word} parts={parseRoots(w)}/>:w.word}
+    </div>
+  );
+}
+
+/* 例文（見出し語を太字に） */
+function BigExample({C,w,en,ja}){
+  if(!en)return null;
+  const re=wordFormRe(w.word);
+  const bits=String(en).split(re);
+  return (
+    <div style={{textAlign:"center"}}>
+      <button onClick={()=>speak(en)} className="press" aria-label="例文を読み上げる"
+        style={{border:"none",background:"transparent",color:C.text,cursor:"pointer",padding:0,font:"inherit"}}>
+        <div className="en" style={{fontSize:40,lineHeight:1.4}}>
+          {bits.map((b,i)=>re.test(b)?<b key={i} style={{textDecoration:"underline",textUnderlineOffset:6}}>{b}</b>:b)}
+        </div>
+      </button>
+      {ja&&<div style={{fontSize:28,color:C.sub,marginTop:10,lineHeight:1.5}}>{ja}</div>}
+    </div>
+  );
+}
+
+function SpeakBtn({C,text}){
+  return (
+    <button onClick={()=>speak(text)} className="press" aria-label="発音を聞く（キー: S）"
+      style={{width:64,height:64,borderRadius:"50%",border:"2px solid "+C.line,background:"transparent",color:C.text,
+        cursor:"pointer",display:"inline-flex",alignItems:"center",justifyContent:"center"}}>
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>
+    </button>
+  );
+}
+
+/* 画面上の帯（戻る・位置・テーマ） */
+function TopBar({C,title,pos,onHome,onToggleDark}){
+  return (
+    <div style={{display:"flex",alignItems:"center",gap:16,padding:"14px 28px",borderBottom:"1px solid "+C.line}}>
+      <button onClick={onHome} className="press" style={{minHeight:48,padding:"0 18px",fontSize:18,borderRadius:10,
+        border:"1px solid "+C.line,background:"transparent",color:C.sub,cursor:"pointer"}}>← 最初の画面（Esc）</button>
+      <div style={{fontSize:20,fontWeight:700,color:C.sub}}>{title}</div>
+      <div style={{flex:1}}/>
+      {pos&&<div className="num" style={{fontSize:22,color:C.sub}}>{pos}</div>}
+      <button onClick={onToggleDark} className="press" aria-label="明るさを切りかえる（キー: D）"
+        style={{minHeight:48,padding:"0 16px",fontSize:18,borderRadius:10,border:"1px solid "+C.line,background:"transparent",
+          color:C.sub,cursor:"pointer"}}>{C.isDark?"明るく":"暗く"}（D）</button>
+    </div>
+  );
+}
+function KeyHelp({C,items}){
+  return (
+    <div style={{display:"flex",gap:28,justifyContent:"center",padding:"12px 0 16px",fontSize:17,color:C.faint,flexWrap:"wrap"}}>
+      {items.map(([k,t])=><span key={k}><b style={{border:"1px solid "+C.line,borderRadius:6,padding:"2px 8px",color:C.sub}}>{k}</b> {t}</span>)}
+    </div>
+  );
+}
+
+/* ============================================================
+   ① 語源で解く
+   ============================================================ */
+const EXPLAIN_STEPS=["単語","語源","イメージ","意味","例文"];
+function ExplainScreen({C,list,onHome,onToggleDark}){
+  const [i,setI]=useState(0);
+  const [step,setStep]=useState(0);
+  const w=list[i];
+  const next=useCallback(()=>{
+    if(step<EXPLAIN_STEPS.length-1)setStep(step+1);
+    else if(i<list.length-1){setI(i+1);setStep(0);}
+  },[i,step,list.length]);
+  const prev=useCallback(()=>{
+    if(step>0)setStep(step-1);
+    else if(i>0){setI(i-1);setStep(EXPLAIN_STEPS.length-1);}
+  },[i,step]);
+  useEffect(()=>{if(step===0)speak(w.word);},[i,step]);
+  useKeys({" ":next,ArrowRight:next,Enter:next,ArrowLeft:prev,s:()=>speak(w.word),
+    ArrowDown:()=>{if(i<list.length-1){setI(i+1);setStep(0);}},ArrowUp:()=>{if(i>0){setI(i-1);setStep(0);}}});
+  const imagery=imageryOf(w).replace(/＝[^＝]*$/,"＝？");
+  return (
+    <Frame C={C} title="語源で解く" pos={(i+1)+" / "+list.length} onHome={onHome} onToggleDark={onToggleDark}
+      keys={[["Space / →","次へ"],["←","戻る"],["↓ ↑","次の単語・前の単語"],["S","発音"]]}>
+      <div onClick={next} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",
+        gap:28,padding:"20px 48px",cursor:"pointer"}}>
+        <div style={{display:"flex",gap:8}}>
+          {EXPLAIN_STEPS.map((s,k)=>(
+            <span key={s} style={{fontSize:17,padding:"6px 14px",borderRadius:999,fontWeight:700,
+              background:k===step?C.text:"transparent",color:k===step?C.bg:k<step?C.sub:C.faint,
+              border:"1px solid "+(k<=step?C.text:C.line)}}>{s}</span>
+          ))}
+        </div>
+        <div style={{display:"flex",alignItems:"center",gap:24}} onClick={e=>e.stopPropagation()}>
+          <BigWord C={C} w={w} colored={step>=1} size={step>=3?96:130}/>
+          <SpeakBtn C={C} text={w.word}/>
+        </div>
+        <div style={{fontSize:24,color:C.sub}}>
+          <span className="en">{w.pronunciation}</span>{w.partOfSpeech&&<>　{w.partOfSpeech}</>}
+        </div>
+        {step>=1&&<div className="fadeIn"><BigRoots C={C} w={w} size={step>=3?0.75:1}/></div>}
+        {step===1&&<div className="fadeIn" style={{zoom:1.15}}><Pictogram C={C} word={w}/></div>}
+        {step===2&&imagery&&<div className="riseIn" style={{fontSize:36,lineHeight:1.6,maxWidth:1100,textAlign:"center"}}>{imagery}</div>}
+        {step>=3&&<div className="riseIn" style={{fontSize:72,fontWeight:700,textAlign:"center"}}>{w.meaning}</div>}
+        {step===3&&w.hook&&<div className="fadeIn" style={{fontSize:28,color:C.sub,maxWidth:1100,textAlign:"center",lineHeight:1.6}}>{w.hook}</div>}
+        {step===4&&<div className="riseIn" onClick={e=>e.stopPropagation()}><BigExample C={C} w={w} en={w.example} ja={w.exampleJa}/></div>}
+      </div>
+    </Frame>
+  );
+}
+
+/* ============================================================
+   ② クラスクイズ
+   ============================================================ */
+function QuizScreen({C,list,sec,onHome,onToggleDark}){
+  const [i,setI]=useState(0);
+  const [left,setLeft]=useState(sec);
+  const [shown,setShown]=useState(false);
+  const [paused,setPaused]=useState(false);
+  const w=list[i];
+  useEffect(()=>{setLeft(sec);setShown(false);speak(w.word);},[i]);
+  useEffect(()=>{
+    if(shown||paused)return;
+    if(left<=0){setShown(true);return;}
+    const t=setTimeout(()=>setLeft(l=>l-1),1000);
+    return ()=>clearTimeout(t);
+  },[left,shown,paused]);
+  const next=()=>{if(!shown){setShown(true);return;}if(i<list.length-1)setI(i+1);};
+  const prev=()=>{if(i>0)setI(i-1);};
+  useKeys({" ":next,ArrowRight:next,Enter:next,ArrowLeft:prev,s:()=>speak(w.word),p:()=>setPaused(p=>!p)});
+  const done=shown&&i===list.length-1;
+  return (
+    <Frame C={C} title="クラスクイズ" pos={(i+1)+" / "+list.length} onHome={onHome} onToggleDark={onToggleDark}
+      keys={[["Space / →","答え・次へ"],["←","前の問題"],["P","一時停止"],["S","発音"]]}>
+      <div onClick={next} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",
+        gap:36,padding:"24px 48px",cursor:"pointer"}}>
+        <div style={{display:"flex",alignItems:"center",gap:24}} onClick={e=>e.stopPropagation()}>
+          <BigWord C={C} w={w} colored={shown} size={140}/>
+          <SpeakBtn C={C} text={w.word}/>
+        </div>
+        {!shown
+          ?<div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:12}}>
+             <div className="num" style={{fontSize:120,fontWeight:700,color:left<=2?C.root:C.sub,lineHeight:1}}>{left}</div>
+             <div style={{fontSize:24,color:C.faint}}>{paused?"一時停止中（P で再開）":"意味は？　語源から考えてみよう"}</div>
+           </div>
+          :<>
+             <div className="riseIn" style={{fontSize:80,fontWeight:700,textAlign:"center"}}>{w.meaning}</div>
+             <div className="fadeIn"><BigRoots C={C} w={w} size={0.8}/></div>
+             {w.hook&&<div className="fadeIn" style={{fontSize:26,color:C.sub,maxWidth:1100,textAlign:"center",lineHeight:1.6}}>{w.hook}</div>}
+             {done&&<div style={{fontSize:26,color:C.faint}}>おわり！ Esc で最初の画面へ</div>}
+           </>}
+      </div>
+    </Frame>
+  );
+}
+
+/* ============================================================
+   ③ 語根まとめ
+   ============================================================ */
+function RootsBoard({C,list,onHome,onToggleDark}){
+  const index=useMemo(()=>buildRootIndex(list).filter(x=>x.type==="root"||x.words.length>=2),[list]);
+  const [sel,setSel]=useState(null);
+  const [hide,setHide]=useState(false);
+  const [open,setOpen]=useState({});
+  const [q,setQ]=useState("");
+  useKeys({h:()=>setHide(h=>!h)});
+  useEffect(()=>{setOpen({});},[sel,hide]);
+  const shownIdx=index.filter(x=>!q||x.morph.includes(q.toLowerCase())||x.gloss.includes(q));
+  if(!sel)return (
+    <Frame C={C} title="語根まとめ" pos={index.length+" 個の語根"} onHome={onHome} onToggleDark={onToggleDark}>
+      <div className="scrolly" style={{flex:1,padding:"24px 48px"}}>
+        <input value={q} onChange={e=>setQ(e.target.value)} placeholder="語根や意味でさがす（例: port, 運ぶ）"
+          style={{width:"100%",maxWidth:560,minHeight:56,fontSize:20,padding:"0 18px",borderRadius:12,
+            border:"2px solid "+C.line,background:C.bg,color:C.text,marginBottom:24}}/>
+        {!shownIdx.length&&<div style={{fontSize:22,color:C.sub}}>この範囲には、2語以上で使われる語根がありません。範囲を広げてみてください。</div>}
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))",gap:16}}>
+          {shownIdx.map(x=>(
+            <button key={x.morph} onClick={()=>setSel(x)} className="press"
+              style={{minHeight:96,textAlign:"left",padding:"16px 20px",borderRadius:14,border:"1px solid "+C.line,
+                background:"transparent",color:C.text,cursor:"pointer"}}>
+              <div className="en" style={{fontSize:32,fontWeight:700,color:typeColor(x.type,C)}}>{x.morph}</div>
+              <div style={{fontSize:18,color:C.sub,marginTop:4}}>{x.gloss}　<span className="num">{x.count}語</span></div>
+            </button>
+          ))}
+        </div>
+      </div>
+    </Frame>
+  );
+  const note=rootNote(sel.morph);
+  const g=pictoFor(sel.morph,sel.gloss,sel.type);
+  const items=[...sel.words.map(w=>({word:w.word,meaning:w.meaning,w})),...sel.related.map(r=>({word:r.word,meaning:r.meaning}))];
+  return (
+    <Frame C={C} title="語根まとめ" pos={sel.morph} onHome={onHome} onToggleDark={onToggleDark}
+      keys={[["H","意味をかくす・出す"],["単語をクリック","1つだけ意味を出す"]]}>
+      <div className="scrolly" style={{flex:1,padding:"24px 48px",display:"grid",gridTemplateColumns:"minmax(0,5fr) minmax(0,6fr)",gap:40}}>
+        <div>
+          <button onClick={()=>setSel(null)} className="press" style={{minHeight:48,padding:"0 18px",fontSize:18,borderRadius:10,
+            border:"1px solid "+C.line,background:"transparent",color:C.sub,cursor:"pointer",marginBottom:20}}>← 語根の一覧</button>
+          <div style={{display:"flex",alignItems:"center",gap:28}}>
+            {g&&<div style={{width:150,height:150,border:"1px solid "+C.line,borderRadius:18,display:"flex",alignItems:"center",
+              justifyContent:"center",color:C.text,flexShrink:0}}><P size={110}>{g.g}</P></div>}
+            <div>
+              <div className="en" style={{fontSize:84,fontWeight:700,color:typeColor(sel.type,C),lineHeight:1}}>{sel.morph}</div>
+              <div style={{fontSize:34,fontWeight:700,marginTop:10}}>{sel.gloss}</div>
+            </div>
+          </div>
+          {note&&<div style={{marginTop:28}}>
+            <div style={{fontSize:28,fontWeight:700,lineHeight:1.5}}>{note.title}</div>
+            <div style={{fontSize:22,color:C.sub,lineHeight:1.8,marginTop:12,whiteSpace:"pre-wrap"}}>{note.body}</div>
+          </div>}
+        </div>
+        <div>
+          <div style={{display:"flex",alignItems:"center",gap:16,marginBottom:16}}>
+            <div style={{fontSize:22,color:C.sub}}>この語根を使う単語</div>
+            <div style={{flex:1}}/>
+            <Pill C={C} active={hide} onClick={()=>setHide(h=>!h)}>{hide?"意味を出す（H）":"意味をかくす（H）"}</Pill>
+          </div>
+          <div style={{display:"flex",flexDirection:"column"}}>
+            {items.map((it,k)=>{
+              const vis=!hide||open[k];
+              return (
+                <button key={k} onClick={()=>{speak(it.word);if(hide)setOpen(o=>({...o,[k]:!o[k]}));}} className="press"
+                  style={{display:"flex",alignItems:"baseline",gap:24,minHeight:64,padding:"10px 4px",border:"none",
+                    borderBottom:"1px solid "+C.line,background:"transparent",color:C.text,cursor:"pointer",textAlign:"left"}}>
+                  <span className="en" style={{fontSize:36,fontWeight:700,minWidth:"40%"}}>
+                    {it.w?<ColoredWord C={C} word={it.word} parts={parseRoots(it.w)}/>:it.word}</span>
+                  <span style={{fontSize:28,color:vis?C.text:"transparent",background:vis?"transparent":C.fill,
+                    borderRadius:8,padding:"0 8px"}}>{it.meaning}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </Frame>
+  );
+}
+
+/* ---------- 共通 ---------- */
+function useKeys(map){
+  const ref=useRef(map);ref.current=map;
+  useEffect(()=>{
+    const h=e=>{
+      if(e.target&&/^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName))return;
+      if(e.metaKey||e.ctrlKey||e.altKey)return;
+      const f=ref.current[e.key]||ref.current[e.key.toLowerCase()];
+      if(f){e.preventDefault();f();}
+    };
+    window.addEventListener("keydown",h);
+    return ()=>window.removeEventListener("keydown",h);
+  },[]);
+}
+function Frame({C,title,pos,onHome,onToggleDark,keys,children}){
+  return (
+    <div style={{height:"100vh",display:"flex",flexDirection:"column",background:C.bg,color:C.text}}>
+      <TopBar C={C} title={title} pos={pos} onHome={onHome} onToggleDark={onToggleDark}/>
+      {children}
+      {keys&&<KeyHelp C={C} items={keys}/>}
+    </div>
+  );
+}
+
+/* ============================================================
+   最初の画面（モードと範囲をえらぶ）
+   ============================================================ */
+function SetupScreen({C,cfg,setCfg,onStart,onToggleDark}){
+  const list=wordsFor({...cfg,order:"seq"});
+  const set=p=>setCfg(c=>({...c,...p}));
+  const label={fontSize:20,fontWeight:700,color:C.sub,marginBottom:12};
+  return (
+    <div className="scrolly" style={{minHeight:"100vh",background:C.bg,color:C.text}}>
+      <div style={{maxWidth:1100,margin:"0 auto",padding:"40px 48px 60px"}}>
+        <div style={{display:"flex",alignItems:"center",gap:16}}>
+          <div>
+            <div style={{fontSize:44,fontWeight:700}}>Roots <span style={{color:C.sub,fontWeight:400}}>授業用</span></div>
+            <div style={{fontSize:20,color:C.sub,marginTop:6}}>語源で覚える英単語 ― 教室で映す画面</div>
+          </div>
+          <div style={{flex:1}}/>
+          <button onClick={onToggleDark} className="press" style={{minHeight:48,padding:"0 16px",fontSize:18,borderRadius:10,
+            border:"1px solid "+C.line,background:"transparent",color:C.sub,cursor:"pointer"}}>{C.isDark?"明るく":"暗く"}</button>
+        </div>
+
+        <div style={{marginTop:40}}>
+          <div style={label}>1. 何をする？</div>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:16}}>
+            {MODES.map(m=>{
+              const on=cfg.mode===m.key;
+              return (
+                <button key={m.key} onClick={()=>set({mode:m.key})} className="press"
+                  style={{textAlign:"left",padding:"20px 22px",minHeight:120,borderRadius:16,cursor:"pointer",
+                    border:"2px solid "+(on?C.text:C.line),background:on?C.fill:"transparent",color:C.text}}>
+                  <div style={{fontSize:26,fontWeight:700}}>{m.label}</div>
+                  <div style={{fontSize:17,color:C.sub,marginTop:8,lineHeight:1.6}}>{m.note}</div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div style={{marginTop:36}}>
+          <div style={label}>2. どの単語？</div>
+          <div style={{display:"flex",gap:12,marginBottom:16}}>
+            <Pill C={C} active={cfg.kind==="leap"} onClick={()=>set({kind:"leap"})}>LEAP の番号</Pill>
+            {LESSONS.length>0&&<Pill C={C} active={cfg.kind==="lesson"} onClick={()=>set({kind:"lesson",lesson:cfg.lesson||LESSONS[0]})}>教科書</Pill>}
+          </div>
+          {cfg.kind==="leap"
+            ?<div style={{display:"flex",alignItems:"center",gap:20,flexWrap:"wrap"}}>
+               <NumBox C={C} label="No." value={cfg.from} min={1} max={LEAP_MAX} onChange={v=>set({from:v,to:Math.max(v,cfg.to)})}/>
+               <span style={{fontSize:24,color:C.sub}}>〜</span>
+               <NumBox C={C} label="" value={cfg.to} min={1} max={LEAP_MAX} onChange={v=>set({to:v,from:Math.min(v,cfg.from)})}/>
+               <div style={{display:"flex",gap:8}}>
+                 {[10,20,50].map(n=><Pill key={n} C={C} active={cfg.to-cfg.from+1===n}
+                   onClick={()=>set({to:Math.min(LEAP_MAX,cfg.from+n-1)})}>{n}語</Pill>)}
+               </div>
+             </div>
+            :<div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
+               {LESSONS.map(l=><Pill key={l} C={C} active={cfg.lesson===l} onClick={()=>set({lesson:l})}>{partName(l)}</Pill>)}
+             </div>}
+          <div style={{fontSize:18,color:C.sub,marginTop:14}}>
+            {list.length?<>{list.length}語：<span className="en">{list.slice(0,6).map(w=>w.word).join(", ")}{list.length>6?" …":""}</span></>:"単語がありません"}
+          </div>
+        </div>
+
+        <div style={{marginTop:36,display:"flex",gap:48,flexWrap:"wrap"}}>
+          {cfg.mode!=="roots"&&<div>
+            <div style={label}>3. 順番</div>
+            <div style={{display:"flex",gap:10}}>
+              <Pill C={C} active={cfg.order==="seq"} onClick={()=>set({order:"seq"})}>番号順</Pill>
+              <Pill C={C} active={cfg.order==="random"} onClick={()=>set({order:"random"})}>シャッフル</Pill>
+            </div>
+          </div>}
+          {cfg.mode==="quiz"&&<div>
+            <div style={label}>考える時間</div>
+            <div style={{display:"flex",gap:10}}>
+              {[3,5,10,15].map(s=><Pill key={s} C={C} active={cfg.sec===s} onClick={()=>set({sec:s})}>{s}秒</Pill>)}
+            </div>
+          </div>}
+        </div>
+
+        <div style={{marginTop:44}}>
+          <BigBtn C={C} primary onClick={onStart} disabled={!list.length} style={{minWidth:280,opacity:list.length?1:.4}}>はじめる（Enter）</BigBtn>
+          <div style={{fontSize:17,color:C.faint,marginTop:14}}>
+            画面を大きくするときは F11（Mac は Control + Command + F）。授業中はキーボードの Space・← → で進められます。
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ClassApp(){
+  const [cfg,setCfg]=useState(()=>({...DEFAULT_CLASS,...(lsGet(CLASS_KEY)||{})}));
+  const [run,setRun]=useState(null);
+  const C=cfg.dark?DARK:LIGHT;
+  useEffect(()=>{lsSet(CLASS_KEY,cfg);},[cfg]);
+  useEffect(()=>{document.body.style.background=C.bg;},[C]);
+  const toggleDark=()=>setCfg(c=>({...c,dark:!c.dark}));
+  const start=()=>{const list=wordsFor(cfg);if(list.length)setRun({mode:cfg.mode,list,sec:cfg.sec,key:Date.now()});};
+  const home=()=>{stopSpeak();setRun(null);};
+  useKeys({Escape:home,d:toggleDark,Enter:()=>{if(!run)start();}});
+  if(!run)return <SetupScreen C={C} cfg={cfg} setCfg={setCfg} onStart={start} onToggleDark={toggleDark}/>;
+  const p={C,list:run.list,onHome:home,onToggleDark:toggleDark,key:run.key};
+  if(run.mode==="quiz")return <QuizScreen {...p} sec={run.sec}/>;
+  if(run.mode==="roots")return <RootsBoard {...p}/>;
+  return <ExplainScreen {...p}/>;
+}
+ReactDOM.createRoot(document.getElementById("root")).render(<ClassApp/>);
+document.getElementById("boot").style.display="none";
+</script>
+
+<script>
+  /* 本体 index.html から「単語データと部品」の部分だけ取り出して、授業用の画面とつなげて動かす。
+     変換（Babel）には時間がかかるので、一度変換した結果を保存して次から使う */
+  (function(){
+    var BABEL="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.26.4/babel.min.js";
+    var STORE="roots-class-compiled";
+    var boot=document.getElementById("boot");
+    function fail(msg){boot.style.display="flex";boot.textContent=msg;}
+    if(!window.React||!window.ReactDOM){fail("React の読み込みに失敗しました。インターネットに接続して開き直してください。");return;}
+    function run(code){var s=document.createElement("script");s.textContent=code;document.body.appendChild(s);}
+    function loadBabel(){
+      return new Promise(function(ok,ng){
+        if(window.Babel)return ok();
+        var s=document.createElement("script");s.src=BABEL;s.onload=ok;s.onerror=ng;document.head.appendChild(s);
+      });
+    }
+    fetch("index.html",{cache:"no-cache"}).then(function(r){
+      if(!r.ok)throw new Error("index.html "+r.status);
+      return r.text();
+    }).then(function(html){
+      var doc=new DOMParser().parseFromString(html,"text/html");
+      var main=doc.getElementById("roots-app");
+      var audio=doc.getElementById("roots-audio-index");
+      if(!main)throw new Error("roots-app が見つかりません");
+      if(audio){
+        var a=document.createElement("script");a.type="application/json";a.id="roots-audio-index";
+        a.textContent=audio.textContent;document.body.appendChild(a);
+      }
+      var full=main.textContent;
+      var cut=full.indexOf("\nfunction App(){");
+      if(cut<0)throw new Error("本体の形が変わりました（function App が見つかりません）");
+      var src=full.slice(0,cut)+"\n"+document.getElementById("class-app").textContent;
+      var h=0x811c9dc5;
+      for(var i=0;i<src.length;i++){h^=src.charCodeAt(i);h=Math.imul(h,0x01000193)>>>0;}
+      var name="./__class/"+h.toString(16)+"-"+src.length+".js";
+      var cacheP=window.caches?caches.open(STORE).catch(function(){return null;}):Promise.resolve(null);
+      return cacheP.then(function(c){
+        return (c?c.match(name).then(function(r){return r?r.text():null;}):Promise.resolve(null)).then(function(code){
+          if(code)return run(code);
+          return loadBabel().then(function(){
+            var out=Babel.transform(src,{compact:true,presets:[[Babel.availablePresets["react"],{runtime:"classic"}]]}).code;
+            run(out);
+            if(c)c.keys().then(function(ks){return Promise.all(ks.map(function(k){return c.delete(k);}));})
+              .then(function(){return c.put(name,new Response(out,{headers:{"Content-Type":"text/javascript"}}));}).catch(function(){});
+          });
+        });
+      });
+    }).catch(function(e){
+      fail("読み込みに失敗しました。インターネットに接続して開き直してください。\n"+(e&&e.message||e));
+    });
+  })();
+</script>
+</body>
+</html>
