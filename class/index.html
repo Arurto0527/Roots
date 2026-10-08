@@ -170,8 +170,18 @@ function useViewportScale(){
 
 /* 中身が画面に収まるように、自動で拡大・縮小する入れ物。
    プロジェクターの解像度（1024×768〜1920×1080）がまちまちでも、はみ出さずに最大の大きさで映す */
-function Fit({children,scale=1,onClick,label}){
+function Fit({children,scale=1,onClick,onSwipe,label}){
   const outer=useRef(null),inner=useRef(null);
+  /* 電子黒板・タッチパネル：左右にスワイプすると次へ・戻る */
+  const touch=useRef(null),swiped=useRef(false);
+  const down=e=>{touch.current={x:e.clientX,y:e.clientY};swiped.current=false;};
+  const up=e=>{
+    const t=touch.current;touch.current=null;
+    if(!t||!onSwipe)return;
+    const dx=e.clientX-t.x,dy=e.clientY-t.y;
+    if(Math.abs(dx)>70&&Math.abs(dx)>Math.abs(dy)*1.5){swiped.current=true;onSwipe(dx<0?1:-1);}
+  };
+  const click=e=>{if(swiped.current){swiped.current=false;return;}onClick&&onClick(e);};
   const fit=useCallback(()=>{
     const o=outer.current,n=inner.current;
     if(!o||!n)return;
@@ -198,8 +208,8 @@ function Fit({children,scale=1,onClick,label}){
     return ()=>ro.disconnect();
   },[fit]);
   return (
-    <div ref={outer} onClick={onClick} aria-label={label}
-      style={{flex:1,minHeight:0,position:"relative",overflow:"hidden",cursor:onClick?"pointer":"default"}}>
+    <div ref={outer} onClick={click} onPointerDown={down} onPointerUp={up} aria-label={label}
+      style={{flex:1,minHeight:0,position:"relative",overflow:"hidden",cursor:onClick?"pointer":"default",touchAction:"pan-y",userSelect:"none"}}>
       <div ref={inner} style={{position:"absolute",left:0,top:0,transformOrigin:"0 0",containerType:"inline-size"}}>{children}</div>
     </div>
   );
@@ -623,7 +633,7 @@ function HelpBox({onClose}){
         ))}
       </div>
       <div style={{fontSize:18,color:C.sub,marginTop:22,lineHeight:1.7}}>
-        電子黒板やタッチパネルでは、画面の下の「◀ 戻る」「次へ ▶」を押して進めます。画面のまん中を押しても次へ進みます。<br/>
+        電子黒板やタッチパネルでは、画面の下の「◀ 戻る」「次へ ▶」を押して進めます。画面のまん中を押す・左へスワイプで次へ、右へスワイプで戻ります。<br/>
         語源のチップ（右上に丸い印があるもの）を押すと、その語根のコラムが開きます。
       </div>
     </Sheet>
@@ -702,7 +712,7 @@ function ExplainScreen({run,onBack,onRun}){
       onBack={onBack} detour={run.detour} onPrev={i>0||st>0?prev:null} onNext={next}
       nextLabel={st<steps.length-1?"次へ ▶":i<list.length-1?"次の単語 ▶":"おわり ▶"}
       center={<>{stepper}{list.length>1&&<SmallBtn onClick={()=>setDrawer(true)} label="単語の一覧（キー: L）">一覧</SmallBtn>}</>}>
-      <Fit scale={A.z} onClick={next} label="押すと次へ進む">
+      <Fit scale={A.z} onClick={next} onSwipe={d=>d>0?next():prev()} label="押すと次へ進む">
         <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:24,padding:"26px 60px 30px",textAlign:"center"}}>
           <div className="num" style={{fontSize:20,fontWeight:700,color:C.sub}}>{noLabel(w)}</div>
           <div style={{display:"flex",alignItems:"center",gap:24,marginTop:-8}}>
@@ -784,7 +794,7 @@ function WordGrid({list,current,marks,onPick}){
 }
 
 /* おわりの画面（語源で解く・クイズ共通） */
-function EndScreen({title,list,marks,actions,onBack,onPrev,detour,fanfare}){
+function EndScreen({title,list,marks,actions,onBack,onPrev,detour,fanfare,dir}){
   const A=useApp();const {C}=A;
   const zc=clamp(A.z,0.8,1.4);
   useEffect(()=>{if(fanfare&&A.cfg.sound)SFX.fanfare(true);},[]);
@@ -796,6 +806,7 @@ function EndScreen({title,list,marks,actions,onBack,onPrev,detour,fanfare}){
           {marks&&marks.size>0&&<div style={{fontSize:22,color:C.sub,marginTop:6}}>★ あとで復習：{marks.size}語</div>}
           <div style={{display:"flex",gap:14,flexWrap:"wrap",margin:"24px 0 30px"}}>
             {actions.map((a,k)=><BigBtn key={a.label} primary={a.primary} onClick={a.onClick}>{a.label}{k===0?"（Enter）":""}</BigBtn>)}
+            <BigBtn onClick={()=>{const d=dir||A.cfg.dir;printSheet(list,d,"Roots 単語テスト（"+(d==="ja"?"日→英":"英→日")+"）");}}>テスト用紙を印刷</BigBtn>
             <BigBtn onClick={onBack}>{detour?"もとの画面にもどる":"最初の画面へ"}</BigBtn>
           </div>
           <Heading>今日の単語（押すと説明を開く）</Heading>
@@ -861,7 +872,7 @@ function QuizScreen({run,onBack,onRun}){
     ?{Escape:onBack,Enter:endActions[0].onClick,ArrowLeft:prev,PageUp:prev,Backspace:prev}
     :{" ":next,ArrowRight:next,PageDown:next,Enter:next,ArrowLeft:prev,PageUp:prev,Backspace:prev,Escape:onBack,
       s:()=>speak(w.word),h:()=>setHint(x=>!x),p:()=>{if(sec)setPaused(x=>!x);},m:toggleMark});
-  if(end)return <EndScreen title="クラスクイズ" fanfare list={list} marks={marks} actions={endActions} onBack={onBack} onPrev={prev} detour={run.detour}/>;
+  if(end)return <EndScreen title="クラスクイズ" fanfare dir={dir} list={list} marks={marks} actions={endActions} onBack={onBack} onPrev={prev} detour={run.detour}/>;
 
   const mk=marks.has(w.id);
   const ask=phase==="ask";
@@ -874,7 +885,7 @@ function QuizScreen({run,onBack,onRun}){
     <Frame title={"クラスクイズ　"+(dir==="en"?"英語 → 日本語":"日本語 → 英語")} pos={(i+1)+" / "+list.length+" 問"}
       progress={(i+(ask?0:1))/list.length} onBack={onBack} detour={run.detour} onPrev={i>0||!ask?prev:null} onNext={next}
       nextLabel={ask?"答え ▶":i<list.length-1?"次の問題 ▶":"おわり ▶"} center={center}>
-      <Fit scale={A.z} onClick={next} label={ask?"押すと答えを出す":"押すと次の問題へ"}>
+      <Fit scale={A.z} onClick={next} onSwipe={d=>d>0?next():prev()} label={ask?"押すと答えを出す":"押すと次の問題へ"}>
         <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:28,padding:"28px 60px 30px",textAlign:"center"}}>
           <div className="num" style={{fontSize:20,fontWeight:700,color:C.sub}}>{noLabel(w)}{mk&&<b style={{color:C.root,marginLeft:10}}>★</b>}</div>
           {dir==="en"
@@ -1050,8 +1061,53 @@ function RootsBoard({run,onBack}){
 }
 
 /* ============================================================
+   テスト用紙の印刷（問題と答えの2枚組。A4）
+   ============================================================ */
+function printSheet(list,dir,title){
+  const esc=v=>String(v==null?"":v).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  const roots=w=>parseRoots(w).map(r=>r.morph+(r.gloss?"（"+r.gloss+"）":"")).join(" ＋ ");
+  const en=dir!=="ja";
+  const qRows=list.map((w,k)=>"<tr><td class=n>"+(k+1)+"</td><td class='"+(en?"en":"ja")+"'>"+esc(en?w.word:w.meaning)+
+    (en?"":"<span class=pos>"+esc(w.partOfSpeech||"")+"</span>")+"</td><td></td></tr>").join("");
+  const aRows=list.map((w,k)=>"<tr><td class=n>"+(k+1)+"</td><td class=en>"+esc(w.word)+"</td><td class=ja>"+esc(w.meaning)+
+    "</td><td class=r>"+esc(roots(w))+"</td><td class=no>"+esc(noLabel(w))+"</td></tr>").join("");
+  const html="<!DOCTYPE html><html lang=ja><head><meta charset=UTF-8><title>"+esc(title)+"</title><style>"+
+    "@page{size:A4;margin:14mm 14mm 16mm}"+
+    "html,body{background:#fff;}body{margin:0;color:#000;font-family:'Hiragino Sans','Noto Sans JP','Yu Gothic',sans-serif;}"+
+    ".bar{padding:12px 16px;background:#f2f2f2;display:flex;gap:12px;align-items:center;font-size:15px}"+
+    ".bar button{font-size:16px;padding:10px 22px;border-radius:8px;border:2px solid #111;background:#111;color:#fff;cursor:pointer;white-space:nowrap;flex-shrink:0}"+
+    "section{padding:8mm 0}"+
+    "h1{font-size:17pt;margin:0 0 3mm}"+
+    ".meta{display:flex;gap:12mm;font-size:11pt;margin:0 0 4mm;align-items:flex-end}"+
+    ".meta span{border-bottom:1px solid #000;padding:0 2mm 1mm;min-width:28mm}"+
+    "table{width:100%;border-collapse:collapse;font-size:12.5pt}"+
+    "th,td{border:1px solid #555;padding:2.4mm 3mm;vertical-align:middle;text-align:left}"+
+    "th{background:#eee;font-size:10pt}thead{display:table-header-group}"+
+    "tr{page-break-inside:avoid}"+
+    ".n{width:9mm;text-align:center}.en{font-family:Helvetica,Arial,sans-serif;font-weight:bold}"+
+    ".pos{font-size:9pt;color:#444;margin-left:3mm;font-weight:normal}"+
+    ".r{font-size:10pt;color:#333}.no{font-size:9pt;color:#555;width:16mm}"+
+    ".q td:nth-child(2){width:42%}"+
+    ".break{page-break-before:always}"+
+    "@media print{.bar{display:none}section{padding:0}}"+
+    "</style></head><body>"+
+    "<div class=bar><button onclick='print()'>印刷する</button><span>問題（1枚目）と答え（2枚目）が出ます。答えの紙は配らずに先生が持っておく用です。</span></div>"+
+    "<section><h1>"+esc(title)+"</h1><div class=meta><span>　　組　　番</span><span style='min-width:60mm'>名前</span><span>　　／ "+list.length+"</span></div>"+
+    "<table class=q><thead><tr><th>No.</th><th>"+(en?"英単語":"意味")+"</th><th>"+(en?"意味を書こう":"英単語を書こう")+"</th></tr></thead><tbody>"+qRows+"</tbody></table></section>"+
+    "<section class=break><h1>"+esc(title)+"（答え）</h1>"+
+    "<table><thead><tr><th>No.</th><th>英単語</th><th>意味</th><th>語源</th><th>番号</th></tr></thead><tbody>"+aRows+"</tbody></table></section>"+
+    "<script>window.addEventListener('load',function(){var go=function(){setTimeout(function(){print();},300);};"+
+    "if(document.fonts&&document.fonts.ready)document.fonts.ready.then(go);else go();});<\/script></body></html>";
+  const win=window.open("","_blank");
+  if(!win){alert("新しいタブを開けませんでした。ブラウザのポップアップのブロックを外してから、もう一度押してください。");return;}
+  win.document.open();win.document.write(html);win.document.close();
+}
+
+/* ============================================================
    最初の画面（モードと範囲をえらぶ）
    ============================================================ */
+const sheetTitle=(cfg,list,dir)=>"Roots 単語テスト　"+(cfg.kind==="lesson"?partName(cfg.lesson):"No."+list[0].id+"〜"+list[list.length-1].id)+
+  "（"+(dir==="en"?"英→日":"日→英")+"）";
 function SetupScreen({onStart,onResume}){
   const A=useApp();const {C,cfg,set}=A;
   const list=wordsFor({...cfg,order:"seq"});
@@ -1152,6 +1208,15 @@ function SetupScreen({onStart,onResume}){
             {cfg.mode==="quiz"&&opt("効果音",<>
               <Pill active={cfg.sound} onClick={()=>set({sound:true})}>あり</Pill>
               <Pill active={!cfg.sound} onClick={()=>set({sound:false})}>なし</Pill></>)}
+          </div>
+        </div>
+
+        <div style={{marginTop:32}}>
+          {H(4,"テスト用紙を印刷（授業のあとの小テストに）")}
+          <div style={{display:"flex",gap:10,flexWrap:"wrap",alignItems:"center"}}>
+            <Pill disabled={!list.length} onClick={()=>printSheet(wordsFor(cfg),"en",sheetTitle(cfg,list,"en"))}>英語 → 日本語</Pill>
+            <Pill disabled={!list.length} onClick={()=>printSheet(wordsFor(cfg),"ja",sheetTitle(cfg,list,"ja"))}>日本語 → 英語</Pill>
+            <span style={{fontSize:17,color:C.sub}}>上の範囲・順番で、問題と答えの2枚を A4 で印刷します</span>
           </div>
         </div>
 
@@ -1277,7 +1342,13 @@ document.getElementById("boot").style.display="none";
       }
       var cut=full.indexOf("\nfunction App(){");
       if(cut<0)throw new Error("本体の形が変わりました（function App が見つかりません）");
-      var src=full.slice(0,cut)+"\n"+document.getElementById("class-app").textContent;
+      /* 前半の単語データ（RAW_WORDS・ROOT_NOTES）はふつうの JavaScript なので変換しないでそのまま動かす。
+         変換するのは後半の部品（JSX）だけにして、はじめて開くときの待ち時間を短くする */
+      var head=full.slice(0,cut);
+      var split=head.indexOf("\nconst {useState");
+      if(split<0)split=0;
+      run(head.slice(0,split));
+      var src=head.slice(split)+"\n"+document.getElementById("class-app").textContent;
       var h=0x811c9dc5;
       for(var i=0;i<src.length;i++){h^=src.charCodeAt(i);h=Math.imul(h,0x01000193)>>>0;}
       var name="./__class/"+h.toString(16)+"-"+src.length+".js";
