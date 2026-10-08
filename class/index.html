@@ -103,7 +103,7 @@ const rootEntry=m=>{
   if(!ALL_ROOTS)ALL_ROOTS=Object.fromEntries(buildRootIndex(RAW_WORDS,{withAffixes:true}).map(x=>[x.morph,x]));
   return ALL_ROOTS[canonRoot(m)]||null;
 };
-function RootColumn({C,root,onClose}){
+function RootColumn({C,root,onClose,onJump}){
   useEffect(()=>{
     const h=e=>{e.stopImmediatePropagation();if(e.key==="Escape"||e.key===" "||e.key==="Enter"){e.preventDefault();onClose();}};
     window.addEventListener("keydown",h,true);
@@ -139,14 +139,22 @@ function RootColumn({C,root,onClose}){
         </div>
         {words.length>0&&<div>
           <div style={{fontSize:20,color:C.sub,marginBottom:8}}>この語根を使う単語（{words.length}語）</div>
-          {words.slice(0,12).map((it,k)=>(
-            <button key={k} onClick={()=>speak(it.word)} className="press" style={{display:"flex",alignItems:"baseline",gap:18,width:"100%",
-              minHeight:56,padding:"8px 2px",border:"none",borderBottom:"1px solid "+C.line,background:"transparent",color:C.text,
-              cursor:"pointer",textAlign:"left"}}>
-              <span className="en" style={{fontSize:28,fontWeight:700}}>{it.w?<ColoredWord C={C} word={it.word} parts={parseRoots(it.w)}/>:it.word}</span>
-              <span style={{fontSize:22,color:C.sub}}>{it.meaning}</span>
-            </button>
-          ))}
+          {words.slice(0,12).map((it,k)=>{
+            /* 関連語でも、見出し語として載っていればその単語へ飛べる */
+            const target=it.w||RAW_WORDS.find(x=>x.word===it.word);
+            return (
+            <div key={k} style={{display:"flex",alignItems:"baseline",gap:18,minHeight:56,padding:"8px 2px",borderBottom:"1px solid "+C.line}}>
+              <button onClick={()=>speak(it.word)} className="press" aria-label={it.word+" の発音を聞く"}
+                style={{border:"none",background:"transparent",color:C.text,cursor:"pointer",padding:0,textAlign:"left",flexShrink:0}}>
+                <span className="en" style={{fontSize:28,fontWeight:700}}>{it.w?<ColoredWord C={C} word={it.word} parts={parseRoots(it.w)}/>:it.word}</span>
+              </button>
+              {target
+                ?<button onClick={()=>onJump(target)} className="press" aria-label={it.word+" の説明へ"}
+                   style={{border:"none",background:"transparent",color:C.sub,cursor:"pointer",padding:0,textAlign:"left",
+                     fontSize:22,textDecoration:"underline",textDecorationColor:C.line,textUnderlineOffset:5}}>{it.meaning} ›</button>
+                :<span style={{fontSize:22,color:C.sub}}>{it.meaning}</span>}
+            </div>);
+          })}
           {words.length>12&&<div style={{fontSize:18,color:C.faint,marginTop:8}}>ほか {words.length-12} 語</div>}
         </div>}
       </div>
@@ -629,7 +637,7 @@ function ClassApp(){
     <RootCtx.Provider value={setRoot}>
       {screen}
       {searching&&<SearchBox C={C} onPick={pickWord} onClose={closeSearch}/>}
-      {root&&<RootColumn C={C} root={root} onClose={closeRoot}/>}
+      {root&&<RootColumn C={C} root={root} onClose={closeRoot} onJump={w=>{setRoot(null);pickWord(w);}}/>}
     </RootCtx.Provider>
     </SearchCtx.Provider>
   );
