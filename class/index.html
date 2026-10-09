@@ -71,7 +71,7 @@ const LESSONS=[...new Set(RAW_WORDS.filter(w=>w.lesson).map(w=>w.part))]
 const LEAP_TESTS={
   23:[1019,1026,1040,1045,1075,1083,1121,1131,1164,1179,1201,1212,1257,1271,1288,1305,1318,1346,1355,1399],
   24:[1001,1007,1029,1032,1123,1132,1155,1173,1211,1226,1165,1227,1250,1295,1296,1300,1340,1350,1366,1398],
-  25:[1005,1029,1050,1059,1132,1146,1157,1169,1183,1194,1164,1178,1193,1198,1232,1337,1381,1391],   // 紙では 1157・1169 が2回出る
+  25:[1005,1029,1050,1059,1132,1145,1157,1169,1183,1194,1164,1178,1193,1198,1232,1337,1381,1391],   // 紙では 1157・1169 が2回出る。6) は◆1146 だが答えの float（1145）にする
   26:[1101,1111,1113,1116,1129,1144,1155,1163,1175,1192,1191,1245,1247,1261,1278,1296,1318,1342,1348,1389],
   27:[1001,1008,1056,1095,1106,1107,1111,1117,1132,1137,1190,1222,1248,1251,1265,1286,1297,1344,1372,1397],
 };
@@ -1478,6 +1478,7 @@ function SetupScreen({onStart,onResume}){
             <div style={{fontSize:19,color:C.sub,marginTop:4}}>語源で覚える英単語 ― 教室のプロジェクター・電子黒板に映す画面</div>
           </div>
           <div style={{flex:1}}/>
+          <Pill onClick={()=>location.reload()}>↻ 更新</Pill>
           <Tools/>
         </div>
 
@@ -1659,7 +1660,32 @@ function ClassApp(){
     </AppCtx.Provider>
   );
 }
-ReactDOM.createRoot(document.getElementById("root")).render(<ClassApp/>);
+/* 4けたの暗証番号。一度通った端末では聞かない（ページの中に番号が見えるので、かんたんな鍵） */
+const PASS_KEY="roots.class.pass";
+function PassGate(){
+  const [ok,setOk]=useState(()=>lsGet(PASS_KEY)===true);
+  const [v,setV]=useState("");const [ng,setNg]=useState(false);
+  const press=d=>{
+    if(d==="←"){setV(x=>x.slice(0,-1));setNg(false);return;}
+    const n=(v+d).slice(0,4);setV(n);setNg(false);
+    if(n.length===4){if(n==="7511"){lsSet(PASS_KEY,true);setOk(true);}else{setNg(true);setV("");}}
+  };
+  useKeys(ok?{}:Object.fromEntries([..."0123456789"].map(d=>[d,()=>press(d)]).concat([["Backspace",()=>press("←")]])));
+  if(ok)return <ClassApp/>;
+  return (
+    <div style={{height:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:20,background:"#fff",color:"#111"}}>
+      <div style={{fontSize:32,fontWeight:700}}>Roots 授業用</div>
+      <div style={{fontSize:20,color:ng?"#c00":"#555"}}>{ng?"番号がちがいます":"4けたの番号を入れてください"}</div>
+      <div className="num" style={{fontSize:44,letterSpacing:16,minHeight:56}}>{"●".repeat(v.length)+"○".repeat(4-v.length)}</div>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(3,88px)",gap:12}}>
+        {["1","2","3","4","5","6","7","8","9","","0","←"].map((d,i)=>d===""?<div key={i}/>:
+          <button key={i} className="press" onClick={()=>press(d)}
+            style={{height:72,fontSize:30,borderRadius:14,border:"2px solid #ccc",background:"#f6f6f6",cursor:"pointer"}}>{d}</button>)}
+      </div>
+    </div>
+  );
+}
+ReactDOM.createRoot(document.getElementById("root")).render(<PassGate/>);
 document.getElementById("boot").style.display="none";
 </script>
 
