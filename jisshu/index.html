@@ -155,13 +155,13 @@
   var BUCKET="jisshu";
   var NEED_PASSWORD=false;
   var MEMBERS=["仲山","柳井","内野","吉浦","神谷"];
-  /* 実習生ごとの教科と色（時間割のカードの色。黄色だけ文字を黒にする） */
+  /* 実習生ごとの教科・指導の先生・色（時間割のカードの色。黄色だけ文字を黒にする） */
   var COLORS={
-    "柳井":{subject:"国語",bg:"#DC2626",fg:"#fff"},
-    "吉浦":{subject:"数学",bg:"#1D4ED8",fg:"#fff"},
-    "神谷":{subject:"英語",bg:"#DB2777",fg:"#fff"},
-    "仲山":{subject:"公共",bg:"#FACC15",fg:"#111"},
-    "内野":{subject:"保健",bg:"#15803D",fg:"#fff"}
+    "柳井":{subject:"国語",mentor:"佐野先生",bg:"#DC2626",fg:"#fff"},
+    "吉浦":{subject:"数学",mentor:"石田先生",bg:"#1D4ED8",fg:"#fff"},
+    "神谷":{subject:"英語",mentor:"石井先生",bg:"#DB2777",fg:"#fff"},
+    "仲山":{subject:"公共",mentor:"横溝先生",bg:"#FACC15",fg:"#111"},
+    "内野":{subject:"保健",mentor:"高信先生",bg:"#15803D",fg:"#fff"}
   };
   function colorOf(n){return COLORS[n]||{subject:"",bg:"#fff",fg:"#111"};}
   var DOW="日月火水木金土";
@@ -571,7 +571,7 @@
           h("span",{text:periodTime(l.period)})),
         h("dl",{class:"info"},
           row("担当",l.teacher),row("クラス",l.class_name),row("教科",colorOf(l.teacher).subject||l.subject),row("単元",l.unit),
-          row("教室",l.room),row("指導の先生",l.mentor),row("見学メモ",l.observe_memo)),
+          row("教室",l.room),row("指導の先生",colorOf(l.teacher).mentor||l.mentor),row("見学メモ",l.observe_memo)),
         h("div",{class:"btns"},
           h("button",{class:"btn ghost",text:"この授業を直す",onclick:function(){openForm(l);}}),
           h("button",{class:"btn ghost",text:"同じコマにもう1つ授業を追加",onclick:function(){openForm(null,{day:l.day,period:l.period});}})
@@ -655,11 +655,10 @@
     var day=h("select",{class:"field"},DAYS.map(function(d){return h("option",{value:d,text:mdw(d),selected:d===v.day});}));
     var per=h("select",{class:"field"},PERIODS.filter(function(p){return !p.lunch;}).map(function(p){
       return h("option",{value:p.k,text:periodName(p.k)+"　"+periodTime(p.k),selected:p.k===v.period});}));
-    var tch=h("select",{class:"field"},MEMBERS.map(function(n){return h("option",{value:n,text:n+"（"+colorOf(n).subject+"）",selected:n===v.teacher});}));
+    var tch=h("select",{class:"field"},MEMBERS.map(function(n){return h("option",{value:n,text:n+"（"+colorOf(n).subject+"・"+colorOf(n).mentor+"）",selected:n===v.teacher});}));
     function inp(val,ph,max){return h("input",{class:"field",type:"text",value:val||"",placeholder:ph,maxlength:max});}
     var cls=inp(v.class_name,"例：2年3組",40),room=inp(v.room,"例：2-3教室、LL教室",40),
-        unit=inp(v.unit,"例：Lesson 6 Part 2",100),
-        mentor=inp(v.mentor,"例：田中先生",40);
+        unit=inp(v.unit,"例：Lesson 6 Part 2",100);
     /* 教科は担当で決まっている（COLORS）ので、入力欄は出さない */
     var res=h("input",{type:"checkbox",checked:v.is_research});
     var memo=h("textarea",{class:"field",placeholder:"例：柳井・内野が見学。後ろの席から",maxlength:500,value:v.observe_memo||""});
@@ -667,7 +666,7 @@
     var save=h("button",{class:"btn",text:lesson?"保存":"追加"});
     save.addEventListener("click",function(){
       var row={day:day.value,period:per.value,teacher:tch.value,class_name:orNull(cls.value),room:orNull(room.value),
-        subject:colorOf(tch.value).subject||null,unit:orNull(unit.value),mentor:orNull(mentor.value),is_research:res.checked,
+        subject:colorOf(tch.value).subject||null,unit:orNull(unit.value),mentor:colorOf(tch.value).mentor||null,is_research:res.checked,
         observe_memo:orNull(memo.value),updated_at:new Date().toISOString()};
       save.disabled=true;err.textContent="";
       var q=lesson?sb.from("jisshu_lessons").update(row).eq("id",lesson.id):sb.from("jisshu_lessons").insert(row);
@@ -700,7 +699,6 @@
       h("label",{class:"lb",text:"教室"}),room,
       h("label",{class:"lb",text:"単元"}),unit,
       h("label",{class:"check"},res,"研究授業"),
-      h("label",{class:"lb",text:"指導の先生"}),mentor,
       h("label",{class:"lb",text:"見学メモ"}),memo,
       err,
       h("div",{class:"btns"},save,del)
