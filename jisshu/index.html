@@ -409,7 +409,8 @@
           add(cell,h("button",{class:"chip"+(l.teacher===S.me?" mine":"")+(l.is_research?" res":""),
             onclick:function(){openLesson(l.id);}},
             h("span",{class:"nm"},l.teacher,l.is_research?h("span",{class:"rs",text:"研"}):null),
-            l.class_name?h("span",{class:"cl",text:l.class_name}):null));
+            l.class_name?h("span",{class:"cl",text:l.class_name}):null,
+            l.room?h("span",{class:"cl",text:"＠"+l.room}):null));
         });
         add(grid,cell);
       });
