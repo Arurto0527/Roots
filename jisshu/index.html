@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#FFFFFF">
+<meta name="robots" content="noindex,nofollow">
+<title>教育実習 予定表</title>
+<style>
+  :root{
+    --ink:#111111; --sub:#595959; --line:#D9D9D9; --soft:#F4F4F4; --bg:#FFFFFF;
+    --accent:#1D4ED8; --accent-soft:#EEF2FF; --danger:#B42318;
+  }
+  *,*::before,*::after{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);color:var(--ink);font-size:16px;line-height:1.6;
+    font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue","Hiragino Sans","Noto Sans JP",Roboto,sans-serif;
+    -webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;
+  }
+  input,button,select,textarea{font-family:inherit;font-size:16px;color:var(--ink);}
+  button{-webkit-appearance:none;appearance:none;cursor:pointer;background:none;border:0;padding:0;}
+  .wrap{max-width:430px;margin:0 auto;padding:calc(12px + env(safe-area-inset-top)) 16px calc(32px + env(safe-area-inset-bottom));}
+
+  /* 共通の部品 */
+  h1{font-size:22px;margin:0;line-height:1.4;}
+  h2{font-size:18px;margin:28px 0 10px;}
+  .sub{color:var(--sub);}
+  .small{font-size:14px;}
+  .btn{display:flex;align-items:center;justify-content:center;width:100%;min-height:56px;border-radius:12px;
+    border:2px solid var(--ink);background:var(--ink);color:#fff;font-weight:700;font-size:17px;padding:0 16px;}
+  .btn.ghost{background:#fff;color:var(--ink);}
+  .btn.danger{background:#fff;color:var(--danger);border-color:var(--danger);}
+  .btn:disabled{opacity:.45;cursor:default;}
+  .btns{display:flex;flex-direction:column;gap:12px;margin-top:20px;}
+  .row2{display:flex;gap:12px;}
+  .row2>*{flex:1;}
+  label.lb{display:block;font-weight:700;margin:18px 0 6px;}
+  .field{width:100%;min-height:56px;padding:12px 14px;border:2px solid var(--line);border-radius:12px;background:#fff;}
+  textarea.field{min-height:120px;resize:vertical;line-height:1.6;}
+  .field:focus{outline:none;border-color:var(--ink);}
+  .err{color:var(--danger);margin-top:12px;font-weight:700;}
+  .note{background:var(--soft);border-radius:12px;padding:12px 14px;margin-top:16px;}
+  .check{display:flex;align-items:center;gap:12px;min-height:56px;margin-top:12px;font-weight:700;}
+  .check input{width:24px;height:24px;accent-color:var(--ink);}
+
+  /* 上の帯 */
+  .top{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:56px;}
+  .me{min-height:44px;padding:0 14px;border:2px solid var(--line);border-radius:22px;font-weight:700;font-size:15px;}
+  .tabs{display:flex;gap:0;margin:8px 0 16px;border-bottom:2px solid var(--line);}
+  .tab{flex:1;min-height:52px;font-weight:700;color:var(--sub);border-bottom:3px solid transparent;margin-bottom:-2px;}
+  .tab.on{color:var(--ink);border-bottom-color:var(--ink);}
+
+  /* 週の切りかえ */
+  .week{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;}
+  .week .arrow{width:56px;min-height:48px;border:2px solid var(--line);border-radius:12px;font-size:18px;font-weight:700;}
+  .week .arrow:disabled{opacity:.3;}
+  .week .wk{text-align:center;font-weight:700;line-height:1.35;}
+  .week .wk span{display:block;font-weight:400;font-size:14px;color:var(--sub);}
+
+  /* 時間割表 */
+  .tt{display:grid;grid-template-columns:42px repeat(5,minmax(0,1fr));border-top:1px solid var(--line);border-left:1px solid var(--line);}
+  .tt>div{border-right:1px solid var(--line);border-bottom:1px solid var(--line);min-width:0;}
+  .tt .hd{text-align:center;padding:6px 0;font-weight:700;font-size:15px;line-height:1.3;background:var(--soft);}
+  .tt .hd span{display:block;font-weight:400;font-size:12px;color:var(--sub);}
+  .tt .hd.today{background:var(--accent);color:#fff;}
+  .tt .hd.today span{color:#fff;}
+  .tt .hd.off{color:#AAAAAA;}
+  .tt .pd{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4px 0;background:var(--soft);}
+  .tt .pd b{font-size:17px;line-height:1.2;}
+  .tt .pd.thin b{font-size:12px;}
+  .tt .pd i{font-style:normal;white-space:pre-line;font-size:10px;color:var(--sub);line-height:1.25;text-align:center;}
+  .tt .cell{min-height:72px;padding:3px;display:flex;flex-direction:column;gap:3px;}
+  .tt .cell.thin{min-height:48px;}
+  .tt .cell.today{background:var(--accent-soft);}
+  .tt .cell.off{background:repeating-linear-gradient(135deg,#FAFAFA 0 6px,#F0F0F0 6px 12px);}
+  .tt .lunch{grid-column:1 / -1;text-align:center;font-size:12px;color:var(--sub);background:var(--soft);padding:2px 0;}
+  .add{flex:1;min-height:40px;border-radius:8px;color:#BBBBBB;font-size:20px;}
+  .add:active{background:var(--soft);}
+  .chip{display:block;width:100%;text-align:left;border:1.5px solid var(--ink);border-radius:8px;padding:4px 5px;background:#fff;
+    min-height:40px;overflow:hidden;}
+  .chip.mine{background:var(--ink);color:#fff;}
+  .chip.res{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);}
+  .chip .nm{display:block;font-weight:700;font-size:14px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .chip .cl{display:block;font-size:11px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:.8;}
+  .chip .rs{display:inline-block;font-size:10px;font-weight:700;color:var(--accent);margin-left:2px;}
+  .chip.mine .rs{color:#C7D2FE;}
+  .legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:10px;font-size:13px;color:var(--sub);}
+  .legend i{display:inline-block;width:14px;height:14px;border-radius:4px;vertical-align:-2px;margin-right:4px;border:1.5px solid var(--ink);}
+
+  /* 授業の画面・入力の画面（上に重ねる） */
+  .ov{position:fixed;inset:0;background:#fff;overflow-y:auto;-webkit-overflow-scrolling:touch;z-index:10;}
+  .ov .bar{position:sticky;top:0;background:#fff;z-index:2;border-bottom:1px solid var(--line);}
+  .ov .bar .in{max-width:430px;margin:0 auto;padding:calc(6px + env(safe-area-inset-top)) 12px 6px;display:flex;align-items:center;gap:8px;min-height:56px;}
+  .back{min-height:44px;padding:0 10px;font-weight:700;font-size:16px;}
+  .bar .t{flex:1;font-weight:700;text-align:center;margin-right:52px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .when{font-size:20px;font-weight:700;margin-top:4px;line-height:1.4;}
+  .when span{display:block;font-size:15px;font-weight:400;color:var(--sub);}
+  .badge{display:inline-block;font-size:13px;font-weight:700;color:var(--accent);border:1.5px solid var(--accent);border-radius:6px;padding:0 6px;margin-left:6px;vertical-align:2px;}
+  dl.info{margin:14px 0 0;display:grid;grid-template-columns:96px 1fr;border-top:1px solid var(--line);}
+  dl.info dt,dl.info dd{margin:0;padding:10px 0;border-bottom:1px solid var(--line);}
+  dl.info dt{color:var(--sub);font-size:15px;}
+  dl.info dd{white-space:pre-wrap;word-break:break-word;}
+
+  /* 資料 */
+  .files{display:flex;flex-direction:column;gap:8px;}
+  .file{display:flex;align-items:stretch;border:2px solid var(--line);border-radius:12px;overflow:hidden;}
+  .file .open{flex:1;min-width:0;text-align:left;padding:10px 12px;min-height:56px;}
+  .file .open b{display:block;word-break:break-all;line-height:1.4;}
+  .file .open span{font-size:13px;color:var(--sub);}
+  .file .del{width:56px;border-left:2px solid var(--line);color:var(--danger);font-size:14px;font-weight:700;}
+  .kindtag{display:inline-block;font-size:12px;font-weight:700;border:1.5px solid var(--ink);border-radius:6px;padding:0 5px;margin-right:6px;}
+  .upl{display:flex;gap:8px;margin-top:10px;}
+  .upl select{flex:0 0 120px;}
+  .upl .btn{flex:1;}
+  .empty{color:var(--sub);padding:8px 0;}
+  .grp{font-weight:700;margin:18px 0 8px;font-size:15px;}
+  .lnk{display:block;width:100%;text-align:left;min-height:48px;padding:6px 0;color:var(--accent);font-weight:700;text-decoration:underline;}
+
+  /* フィードバック */
+  .fb{border:2px solid var(--line);border-radius:12px;padding:12px 14px;margin-top:10px;}
+  .fb .who{font-weight:700;display:flex;justify-content:space-between;gap:8px;}
+  .fb .who span{font-weight:400;font-size:13px;color:var(--sub);}
+  .fb .k{font-size:14px;font-weight:700;margin-top:8px;}
+  .fb .v{white-space:pre-wrap;word-break:break-word;}
+  .fb.mine{border-color:var(--ink);}
+  .saved{font-size:14px;color:var(--sub);margin-top:8px;min-height:22px;}
+
+  .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:#fff;
+    padding:10px 18px;border-radius:12px;font-weight:700;z-index:50;max-width:90vw;text-align:center;}
+  .center{min-height:60vh;display:flex;flex-direction:column;justify-content:center;}
+  .names{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:20px;}
+  .names .btn{font-size:20px;}
+</style>
+</head>
+<body>
+<div id="app" class="wrap"><p class="sub">読み込み中…</p></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js"></script>
+<script>
+/* ============================================================
+   教育実習 予定表（Roots/jisshu/）
+   ・5人共通のパスワード＝Supabase の共有アカウントのパスワード
+   ・予定・フィードバック・資料は Supabase に保存（supabase/jisshu.sql）
+   ・Roots 本体のログインとまざらないよう、ログイン情報は別の名前（storageKey）で保存する
+   ============================================================ */
+(function(){
+  var SUPABASE_URL="https://jidcvzmfjmlxwlazaixz.supabase.co";
+  var SUPABASE_KEY="sb_publishable_Vjo96oWVhIjWKFGIN6OMKA_keM8C011";
+  var SHARED_EMAIL="roots-jisshu@example.com";
+  var BUCKET="jisshu";
+  var MEMBERS=["仲山","柳井","内野","吉浦","神谷"];
+  var DOW="日月火水木金土";
+
+  /* 実習の週（月曜の日付）。この期間の外の日は灰色で入力できない */
+  var START="2026-10-13", END="2026-10-23";
+  var WEEKS=["2026-10-12","2026-10-19"];
+
+  /* 日課表 */
+  var PERIODS=[
+    {k:"shr",label:"SHR",s:"8:35",e:"8:45",thin:true},
+    {k:"1",label:"1",s:"8:50",e:"9:55"},
+    {k:"2",label:"2",s:"10:05",e:"11:10"},
+    {k:"3",label:"3",s:"11:20",e:"12:25"},
+    {k:"lunch",lunch:true,s:"12:25",e:"13:10"},
+    {k:"4",label:"4",s:"13:10",e:"14:15"},
+    {k:"5",label:"5",s:"14:25",e:"15:30"},
+    {k:"hr",label:"帰HR",s:"15:30",e:"",thin:true}
+  ];
+  var KINDS=["指導案","プリント","その他"];
+  var ACCEPT=".pdf,.doc,.docx,.ppt,.pptx,image/*";
+  var MAX_BYTES=50*1024*1024;
+
+  var app=document.getElementById("app");
+
+  function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v);}catch(e){return null;}}
+  /* 画面の部品を作る（入力された文字は textContent で入れるので、HTML として解釈されない） */
+  function h(tag,attrs){
+    var el=document.createElement(tag);
+    if(attrs)for(var k in attrs){
+      var v=attrs[k];
+      if(v==null||v===false)continue;
+      if(k==="class")el.className=v;
+      else if(k==="text")el.textContent=v;
+      else if(k.slice(0,2)==="on")el.addEventListener(k.slice(2),v);
+      else if(k==="value")el.value=v;
+      else if(k==="checked"||k==="disabled"||k==="selected")el[k]=!!v;
+      else el.setAttribute(k,v===true?"":v);
+    }
+    for(var i=2;i<arguments.length;i++)add(el,arguments[i]);
+    return el;
+  }
+  function add(el,c){
+    if(c==null||c===false)return;
+    if(Array.isArray(c)){c.forEach(function(x){add(el,x);});return;}
+    el.appendChild(typeof c==="string"?document.createTextNode(c):c);
+  }
+  function show(){app.textContent="";for(var i=0;i<arguments.length;i++)add(app,arguments[i]);}
+  function toast(msg){
+    var t=h("div",{class:"toast",text:msg});document.body.appendChild(t);
+    setTimeout(function(){t.remove();},2200);
+  }
+
+  /* 日付 */
+  function parseD(s){var p=s.split("-");return new Date(+p[0],+p[1]-1,+p[2]);}
+  function fmtD(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}
+  function addDays(s,n){var d=parseD(s);d.setDate(d.getDate()+n);return fmtD(d);}
+  function todayS(){return fmtD(new Date());}
+  function md(s){var d=parseD(s);return (d.getMonth()+1)+"/"+d.getDate();}
+  function mdw(s){var d=parseD(s);return md(s)+"（"+DOW[d.getDay()]+"）";}
+  function inRange(s){return s>=START&&s<=END;}
+  function periodOf(k){for(var i=0;i<PERIODS.length;i++)if(PERIODS[i].k===k)return PERIODS[i];return null;}
+  function periodName(k){var p=periodOf(k);if(!p)return k;return k==="shr"?"SHR":k==="hr"?"帰りのHR":p.label+"限";}
+  function periodTime(k){var p=periodOf(k);if(!p)return "";return p.e?p.s+"〜"+p.e:p.s+"〜";}
+  var DAYS=[];(function(){WEEKS.forEach(function(w){for(var i=0;i<5;i++){var d=addDays(w,i);if(inRange(d))DAYS.push(d);}});})();
+  function sizeText(n){if(n<1024*1024)return Math.max(1,Math.round(n/1024))+" KB";return (n/1024/1024).toFixed(1)+" MB";}
+  function timeText(iso){var d=new Date(iso);return (d.getMonth()+1)+"/"+d.getDate()+" "+d.getHours()+":"+String(d.getMinutes()).padStart(2,"0");}
+  function orNull(s){s=(s||"").trim();return s?s:null;}
+
+  if(!window.supabase){
+    show(h("div",{class:"center"},h("h1",{text:"読み込みに失敗しました"}),h("p",{class:"sub",text:"インターネットにつないで、もう一度開いてください。"})));
+    return;
+  }
+  var sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,
+    {auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false,storageKey:"roots.jisshu.auth"}});
+
+  /* ------------------------------------------------------------
+     状態
+     ------------------------------------------------------------ */
+  var S={
+    me:ls("roots.jisshu.me")||"",
+    tab:"tt",
+    week:todayS()>=WEEKS[1]?1:0,
+    lessons:[],feedback:[],files:[],
+    loaded:false
+  };
+  var stack=[];      // 上に重ねている画面（いちばん後ろが手前）
+  var channel=null;
+
+  function lessonById(id){for(var i=0;i<S.lessons.length;i++)if(S.lessons[i].id===id)return S.lessons[i];return null;}
+  function lessonsAt(day,p){
+    return S.lessons.filter(function(l){return l.day===day&&l.period===p;})
+      .sort(function(a,b){return a.created_at<b.created_at?-1:1;});
+  }
+  function filesOf(lessonId){
+    return S.files.filter(function(f){return (f.lesson_id||null)===(lessonId||null);})
+      .sort(function(a,b){return a.created_at<b.created_at?-1:1;});
+  }
+  function feedbackOf(lessonId){
+    return S.feedback.filter(function(f){return f.lesson_id===lessonId;})
+      .sort(function(a,b){return a.created_at<b.created_at?-1:1;});
+  }
+
+  /* ------------------------------------------------------------
+     はじめ：ログインしているか → 名前を選んでいるか
+     ------------------------------------------------------------ */
+  sb.auth.getSession().then(function(r){
+    var s=r.data&&r.data.session;
+    if(!s||!s.user||String(s.user.email||"").toLowerCase()!==SHARED_EMAIL){showLogin();return;}
+    afterLogin();
+  });
+
+  function showLogin(){
+    var pw=h("input",{class:"field",type:"password",autocomplete:"current-password",placeholder:"パスワード",enterkeyhint:"go"});
+    var err=h("div",{class:"err"});
+    var btn=h("button",{class:"btn",text:"入る",onclick:go});
+    pw.addEventListener("keydown",function(e){if(e.key==="Enter")go();});
+    function go(){
+      if(!pw.value){err.textContent="パスワードを入れてください";return;}
+      btn.disabled=true;err.textContent="";
+      sb.auth.signInWithPassword({email:SHARED_EMAIL,password:pw.value}).then(function(r){
+        btn.disabled=false;
+        if(r.error){
+          err.textContent=/invalid/i.test(r.error.message)?"パスワードがちがいます":"つながりませんでした。もう一度ためしてください";
+          return;
+        }
+        pw.value="";
+        afterLogin();
+      });
+    }
+    show(h("div",{class:"center"},
+      h("h1",{text:"教育実習 予定表"}),
+      h("p",{class:"sub",text:"10/13（火）〜10/23（金）"}),
+      h("label",{class:"lb",text:"実習生のパスワード"}),pw,err,
+      h("div",{class:"btns"},btn)
+    ));
+    setTimeout(function(){pw.focus();},50);
+  }
+
+  function afterLogin(){
+    if(MEMBERS.indexOf(S.me)<0){showNames(true);return;}
+    startMain();
+  }
+
+  function showNames(first){
+    var list=h("div",{class:"names"},MEMBERS.map(function(n){
+      return h("button",{class:"btn"+(n===S.me?"":" ghost"),text:n,onclick:function(){
+        S.me=n;ls("roots.jisshu.me",n);
+        if(first)startMain();else{closeTop();render();}
+      }});
+    }));
+    var body=h("div",{},
+      h("h1",{text:"あなたはだれですか？"}),
+      h("p",{class:"sub",text:"フィードバックや資料に、この名前が付きます。"}),
+      list,
+      first?null:h("div",{class:"btns"},
+        h("button",{class:"btn danger",text:"ログアウト",onclick:function(){
+          if(!confirm("ログアウトしますか？ もう一度入るにはパスワードが必要です。"))return;
+          sb.auth.signOut().then(function(){location.reload();});
+        }})
+      )
+    );
+    if(first)show(h("div",{class:"center"},body));
+    else openOverlay("名前を変える",body);
+  }
+
+  /* ------------------------------------------------------------
+     データの読みこみと、リアルタイムの受け取り
+     ------------------------------------------------------------ */
+  function loadAll(){
+    return Promise.all([
+      sb.from("jisshu_lessons").select("*"),
+      sb.from("jisshu_feedback").select("*"),
+      sb.from("jisshu_files").select("*")
+    ]).then(function(rs){
+      for(var i=0;i<3;i++)if(rs[i].error){
+        if(rs[i].error.code==="PGRST301"||/JWT/i.test(rs[i].error.message)){sb.auth.signOut().then(showLogin);return false;}
+        throw rs[i].error;
+      }
+      S.lessons=rs[0].data||[];S.feedback=rs[1].data||[];S.files=rs[2].data||[];S.loaded=true;
+      return true;
+    });
+  }
+  var reloadTimer=null;
+  function scheduleReload(){
+    clearTimeout(reloadTimer);
+    reloadTimer=setTimeout(function(){loadAll().then(function(ok){if(ok)refreshAll();}).catch(function(){});},300);
+  }
+  function subscribe(){
+    if(channel)return;
+    channel=sb.channel("jisshu-db")
+      .on("postgres_changes",{event:"*",schema:"public",table:"jisshu_lessons"},scheduleReload)
+      .on("postgres_changes",{event:"*",schema:"public",table:"jisshu_feedback"},scheduleReload)
+      .on("postgres_changes",{event:"*",schema:"public",table:"jisshu_files"},scheduleReload)
+      .subscribe();
+  }
+  /* スマホで別のアプリから戻ってきたときにも、最新にする */
+  document.addEventListener("visibilitychange",function(){if(!document.hidden&&S.loaded)scheduleReload();});
+
+  function startMain(){
+    show(h("p",{class:"sub",text:"読み込み中…"}));
+    loadAll().then(function(ok){
+      if(!ok)return;
+      render();subscribe();
+    }).catch(function(){
+      show(h("div",{class:"center"},h("h1",{text:"読み込めませんでした"}),
+        h("p",{class:"sub",text:"インターネットにつながっているか確かめてください。"}),
+        h("div",{class:"btns"},h("button",{class:"btn",text:"もう一度",onclick:startMain}))));
+    });
+  }
+  /* データが変わったとき：下の画面と、重ねている画面を描き直す */
+  function refreshAll(){
+    render();
+    stack.forEach(function(o){if(o.refresh)o.refresh();});
+  }
+
+  /* ------------------------------------------------------------
+     メインの画面（時間割 ／ 資料）
+     ------------------------------------------------------------ */
+  function render(){
+    if(!S.loaded)return;
+    var top=h("div",{class:"top"},
+      h("h1",{text:"教育実習 予定表"}),
+      h("button",{class:"me",text:S.me+" ▾",onclick:function(){showNames(false);}})
+    );
+    var tabs=h("div",{class:"tabs"},
+      h("button",{class:"tab"+(S.tab==="tt"?" on":""),text:"時間割",onclick:function(){S.tab="tt";render();}}),
+      h("button",{class:"tab"+(S.tab==="files"?" on":""),text:"資料",onclick:function(){S.tab="files";render();}})
+    );
+    show(top,tabs,S.tab==="tt"?renderTimetable():renderFilesTab());
+  }
+
+  function renderTimetable(){
+    var mon=WEEKS[S.week],today=todayS();
+    var days=[0,1,2,3,4].map(function(i){return addDays(mon,i);});
+    var week=h("div",{class:"week"},
+      h("button",{class:"arrow",text:"◀","aria-label":"前の週",disabled:S.week===0,onclick:function(){S.week--;render();}}),
+      h("div",{class:"wk"},(S.week+1)+"週目",h("span",{text:md(days[0])+"〜"+md(days[4])})),
+      h("button",{class:"arrow",text:"▶","aria-label":"次の週",disabled:S.week===WEEKS.length-1,onclick:function(){S.week++;render();}})
+    );
+    var grid=h("div",{class:"tt"});
+    add(grid,h("div",{class:"hd"}));
+    days.forEach(function(d){
+      var cls="hd"+(d===today?" today":"")+(inRange(d)?"":" off");
+      add(grid,h("div",{class:cls},DOW[parseD(d).getDay()],h("span",{text:inRange(d)?md(d):"実習前"})));
+    });
+    PERIODS.forEach(function(p){
+      if(p.lunch){add(grid,h("div",{class:"lunch",text:"昼休み "+p.s+"〜"+p.e}));return;}
+      add(grid,h("div",{class:"pd"+(p.thin?" thin":"")},h("b",{text:p.label}),h("i",{text:p.s+(p.e?"\n"+p.e:"")})));
+      days.forEach(function(d){
+        var cls="cell"+(p.thin?" thin":"")+(d===today?" today":"");
+        if(!inRange(d)){add(grid,h("div",{class:cls+" off"}));return;}
+        var ls_=lessonsAt(d,p.k);
+        var cell=h("div",{class:cls});
+        if(!ls_.length){
+          add(cell,h("button",{class:"add",text:"＋","aria-label":mdw(d)+" "+periodName(p.k)+"に授業を追加",
+            onclick:function(){openForm(null,{day:d,period:p.k});}}));
+        }
+        ls_.forEach(function(l){
+          add(cell,h("button",{class:"chip"+(l.teacher===S.me?" mine":"")+(l.is_research?" res":""),
+            onclick:function(){openLesson(l.id);}},
+            h("span",{class:"nm"},l.teacher,l.is_research?h("span",{class:"rs",text:"研"}):null),
+            l.class_name?h("span",{class:"cl",text:l.class_name}):null));
+        });
+        add(grid,cell);
+      });
+    });
+    var legend=h("div",{class:"legend"},
+      h("span",{},h("i",{style:"background:#111"}),"自分の授業"),
+      h("span",{},h("i",{style:"background:#fff"}),"ほかの人"),
+      h("span",{},h("i",{style:"border-color:#1D4ED8;background:#fff"}),"研＝研究授業"),
+      h("span",{text:"空いているコマの＋で授業を追加"})
+    );
+    return h("div",{},week,grid,legend);
+  }
+
+  function renderFilesTab(){
+    var shared=filesOf(null);
+    var withLesson=S.lessons.filter(function(l){return filesOf(l.id).length>0;})
+      .sort(function(a,b){return a.day!==b.day?(a.day<b.day?-1:1):PERIODS.indexOf(periodOf(a.period))-PERIODS.indexOf(periodOf(b.period));});
+    return h("div",{},
+      h("h2",{text:"共有の資料",style:"margin-top:4px"}),
+      h("p",{class:"sub small",text:"授業に関係ない資料（実習の手引き など）はここへ。授業の指導案やプリントは、時間割の授業を開いて入れてください。"}),
+      fileList(shared),
+      uploader(null),
+      h("h2",{text:"授業ごとの資料"}),
+      withLesson.length?withLesson.map(function(l){
+        return h("div",{},
+          h("button",{class:"lnk",text:mdw(l.day)+" "+periodName(l.period)+"　"+l.teacher+(l.class_name?"（"+l.class_name+"）":""),
+            onclick:function(){openLesson(l.id);}}),
+          fileList(filesOf(l.id)));
+      }):h("p",{class:"empty",text:"まだありません"})
+    );
+  }
+
+  /* ------------------------------------------------------------
+     上に重ねる画面（スマホの「戻る」でも閉じられるようにする）
+     ------------------------------------------------------------ */
+  function openOverlay(title,body,refresh){
+    var content=h("div",{class:"wrap",style:"padding-top:16px"},body);
+    var el=h("div",{class:"ov"},
+      h("div",{class:"bar"},h("div",{class:"in"},
+        h("button",{class:"back",text:"← 戻る",onclick:closeTop}),
+        h("div",{class:"t",text:title}))),
+      content);
+    document.body.appendChild(el);
+    var o={el:el,content:content,refresh:refresh};
+    stack.push(o);
+    document.body.style.overflow="hidden";
+    try{history.pushState({jisshu:stack.length},"");}catch(e){}
+    return o;
+  }
+  function closeTop(){if(stack.length)history.back();}
+  window.addEventListener("popstate",function(){
+    var o=stack.pop();
+    if(o){o.el.remove();if(o.onClose)o.onClose();}
+    if(!stack.length)document.body.style.overflow="";
+  });
+
+  /* ------------------------------------------------------------
+     授業の画面
+     ------------------------------------------------------------ */
+  function openLesson(id){
+    var infoBox=h("div"),filesBox=h("div"),myBox=h("div"),othersBox=h("div");
+    var o=openOverlay("授業",h("div",{},infoBox,
+      h("h2",{text:"資料"}),filesBox,
+      h("h2",{text:"フィードバック"}),
+      h("p",{class:"sub small",text:"見学しながら書いて、終わったら「保存」。5人全員が読めます。"}),
+      myBox,othersBox),refresh);
+    var my=null; // 自分の欄（入力中は描き直さない）
+
+    function refresh(){
+      var l=lessonById(id);
+      if(!l){
+        infoBox.textContent="";filesBox.textContent="";myBox.textContent="";othersBox.textContent="";
+        add(infoBox,h("p",{class:"note",text:"この授業は消されました。"}));
+        return;
+      }
+      infoBox.textContent="";
+      add(infoBox,[
+        h("div",{class:"when"},mdw(l.day)+" "+periodName(l.period),l.is_research?h("span",{class:"badge",text:"研究授業"}):null,
+          h("span",{text:periodTime(l.period)})),
+        h("dl",{class:"info"},
+          row("担当",l.teacher),row("クラス",l.class_name),row("教科",l.subject),row("単元",l.unit),
+          row("教室",l.room),row("指導の先生",l.mentor),row("見学メモ",l.observe_memo)),
+        h("div",{class:"btns"},
+          h("button",{class:"btn ghost",text:"この授業を直す",onclick:function(){openForm(l);}}),
+          h("button",{class:"btn ghost",text:"同じコマにもう1つ授業を追加",onclick:function(){openForm(null,{day:l.day,period:l.period});}})
+        )
+      ]);
+      filesBox.textContent="";
+      add(filesBox,[fileList(filesOf(id)),uploader(id)]);
+
+      var mine=null,others=[];
+      feedbackOf(id).forEach(function(f){if(f.author===S.me)mine=f;else others.push(f);});
+      if(!my||!my.dirty())renderMine(mine);
+      othersBox.textContent="";
+      if(!others.length)add(othersBox,h("p",{class:"empty",text:"ほかの人のフィードバックはまだありません"}));
+      others.forEach(function(f){
+        add(othersBox,h("div",{class:"fb"},
+          h("div",{class:"who"},f.author,h("span",{text:timeText(f.updated_at)})),
+          f.good?[h("div",{class:"k",text:"よかった点"}),h("div",{class:"v",text:f.good})]:null,
+          f.improve?[h("div",{class:"k",text:"改善点"}),h("div",{class:"v",text:f.improve})]:null));
+      });
+    }
+    function row(k,v){return v?[h("dt",{text:k}),h("dd",{text:v})]:null;}
+
+    /* 自分のフィードバック。書きかけは端末にも残すので、閉じても消えない */
+    function renderMine(saved){
+      var key="roots.jisshu.draft."+id+"."+S.me;
+      var draft=null;try{draft=JSON.parse(ls(key)||"null");}catch(e){}
+      var base={good:saved?saved.good:"",improve:saved?saved.improve:""};
+      var cur=draft||base;
+      var good=h("textarea",{class:"field",placeholder:"よかった点",value:cur.good});
+      var imp=h("textarea",{class:"field",placeholder:"改善点",value:cur.improve});
+      var status=h("div",{class:"saved",text:draft?"書きかけ（まだ保存していません）":saved?"保存ずみ "+timeText(saved.updated_at):""});
+      var btn=h("button",{class:"btn",text:"保存"});
+      var del=saved?h("button",{class:"btn danger",text:"自分のフィードバックを消す"}):null;
+      function onInput(){
+        ls(key,JSON.stringify({good:good.value,improve:imp.value}));
+        status.textContent="書きかけ（まだ保存していません）";
+      }
+      good.addEventListener("input",onInput);imp.addEventListener("input",onInput);
+      btn.addEventListener("click",function(){
+        var g=good.value.trim(),im=imp.value.trim();
+        btn.disabled=true;
+        var p;
+        if(!g&&!im){
+          p=saved?sb.from("jisshu_feedback").delete().eq("id",saved.id):Promise.resolve({});
+        }else{
+          p=sb.from("jisshu_feedback").upsert({lesson_id:id,author:S.me,good:g,improve:im,updated_at:new Date().toISOString()},
+            {onConflict:"lesson_id,author"});
+        }
+        p.then(function(r){
+          btn.disabled=false;
+          if(r&&r.error){toast("保存できませんでした");return;}
+          ls(key,null);my=null;toast("保存しました");
+          loadAll().then(function(ok){if(ok)refreshAll();});
+        });
+      });
+      if(del)del.addEventListener("click",function(){
+        if(!confirm("自分のフィードバックを消しますか？"))return;
+        sb.from("jisshu_feedback").delete().eq("id",saved.id).then(function(r){
+          if(r.error){toast("消せませんでした");return;}
+          ls(key,null);my=null;
+          loadAll().then(function(ok){if(ok)refreshAll();});
+        });
+      });
+      my={dirty:function(){return document.activeElement===good||document.activeElement===imp||ls(key)!=null;}};
+      myBox.textContent="";
+      add(myBox,h("div",{class:"fb mine"},
+        h("div",{class:"who"},S.me+"（自分）"),
+        h("div",{class:"k",text:"よかった点"}),good,
+        h("div",{class:"k",text:"改善点"}),imp,
+        status,
+        h("div",{class:"btns",style:"margin-top:8px"},btn,del)));
+    }
+    refresh();
+  }
+
+  /* ------------------------------------------------------------
+     授業を入れる・直す画面
+     ------------------------------------------------------------ */
+  function openForm(lesson,preset){
+    var v=lesson||{day:preset.day,period:preset.period,teacher:S.me,is_research:false};
+    var day=h("select",{class:"field"},DAYS.map(function(d){return h("option",{value:d,text:mdw(d),selected:d===v.day});}));
+    var per=h("select",{class:"field"},PERIODS.filter(function(p){return !p.lunch;}).map(function(p){
+      return h("option",{value:p.k,text:periodName(p.k)+"　"+periodTime(p.k),selected:p.k===v.period});}));
+    var tch=h("select",{class:"field"},MEMBERS.map(function(n){return h("option",{value:n,text:n,selected:n===v.teacher});}));
+    function inp(val,ph,max){return h("input",{class:"field",type:"text",value:val||"",placeholder:ph,maxlength:max});}
+    var cls=inp(v.class_name,"例：2年3組",40),room=inp(v.room,"例：2-3教室、LL教室",40),
+        sub=inp(v.subject,"例：英語コミュニケーションⅡ",40),unit=inp(v.unit,"例：Lesson 6 Part 2",100),
+        mentor=inp(v.mentor,"例：田中先生",40);
+    var res=h("input",{type:"checkbox",checked:v.is_research});
+    var memo=h("textarea",{class:"field",placeholder:"例：柳井・内野が見学。後ろの席から",maxlength:500,value:v.observe_memo||""});
+    var err=h("div",{class:"err"});
+    var save=h("button",{class:"btn",text:lesson?"保存":"追加"});
+    save.addEventListener("click",function(){
+      var row={day:day.value,period:per.value,teacher:tch.value,class_name:orNull(cls.value),room:orNull(room.value),
+        subject:orNull(sub.value),unit:orNull(unit.value),mentor:orNull(mentor.value),is_research:res.checked,
+        observe_memo:orNull(memo.value),updated_at:new Date().toISOString()};
+      save.disabled=true;err.textContent="";
+      var q=lesson?sb.from("jisshu_lessons").update(row).eq("id",lesson.id):sb.from("jisshu_lessons").insert(row);
+      q.then(function(r){
+        save.disabled=false;
+        if(r.error){err.textContent="保存できませんでした。もう一度ためしてください";return;}
+        loadAll().then(function(ok){if(ok)refreshAll();});
+        closeTop();toast(lesson?"保存しました":"追加しました");
+      });
+    });
+    var del=lesson?h("button",{class:"btn danger",text:"この授業を消す",onclick:function(){
+      var nF=filesOf(lesson.id).length,nB=feedbackOf(lesson.id).length;
+      var msg="この授業を消しますか？"+(nF||nB?"\nこの授業のフィードバック（"+nB+"件）と資料（"+nF+"件）も消えます。":"");
+      if(!confirm(msg))return;
+      var paths=filesOf(lesson.id).map(function(f){return f.path;});
+      (paths.length?sb.storage.from(BUCKET).remove(paths):Promise.resolve({})).then(function(){
+        return sb.from("jisshu_lessons").delete().eq("id",lesson.id);
+      }).then(function(r){
+        if(r.error){toast("消せませんでした");return;}
+        loadAll().then(function(ok){if(ok)refreshAll();});
+        /* この画面と、その下の授業の画面をまとめて閉じる */
+        closeTop();setTimeout(closeTop,50);toast("消しました");
+      });
+    }}):null;
+    openOverlay(lesson?"授業を直す":"授業を追加",h("div",{},
+      h("label",{class:"lb",text:"日付"}),day,
+      h("label",{class:"lb",text:"時限"}),per,
+      h("label",{class:"lb",text:"担当"}),tch,
+      h("label",{class:"lb",text:"クラス"}),cls,
+      h("label",{class:"lb",text:"教室"}),room,
+      h("label",{class:"lb",text:"教科"}),sub,
+      h("label",{class:"lb",text:"単元"}),unit,
+      h("label",{class:"check"},res,"研究授業"),
+      h("label",{class:"lb",text:"指導の先生"}),mentor,
+      h("label",{class:"lb",text:"見学メモ"}),memo,
+      err,
+      h("div",{class:"btns"},save,del)
+    ));
+  }
+
+  /* ------------------------------------------------------------
+     資料（PDF・画像・Word・PowerPoint）
+     ------------------------------------------------------------ */
+  function fileList(list){
+    if(!list.length)return h("p",{class:"empty",text:"まだありません"});
+    return h("div",{class:"files"},list.map(function(f){
+      return h("div",{class:"file"},
+        h("button",{class:"open",onclick:function(){openFile(f);}},
+          h("b",{},h("span",{class:"kindtag",text:f.kind}),f.name),
+          h("span",{text:f.uploaded_by+"・"+timeText(f.created_at)+"・"+sizeText(f.size)})),
+        f.uploaded_by===S.me?h("button",{class:"del",text:"消す","aria-label":f.name+" を消す",onclick:function(){delFile(f);}}):null);
+    }));
+  }
+  function isOffice(name){return /\.(docx?|pptx?)$/i.test(name);}
+  function openFile(f){
+    /* 先に空のタブを開いておく（あとから開くと、iPhone でブロックされる） */
+    var w=null;try{w=window.open("","_blank");}catch(e){}
+    var opt=isOffice(f.name)?{download:f.name}:undefined;
+    sb.storage.from(BUCKET).createSignedUrl(f.path,3600,opt).then(function(r){
+      if(r.error||!r.data){if(w)w.close();toast("開けませんでした");return;}
+      if(w)w.location.href=r.data.signedUrl;else location.href=r.data.signedUrl;
+    });
+  }
+  function delFile(f){
+    if(!confirm("「"+f.name+"」を消しますか？"))return;
+    sb.storage.from(BUCKET).remove([f.path]).then(function(){
+      return sb.from("jisshu_files").delete().eq("id",f.id);
+    }).then(function(r){
+      if(r.error){toast("消せませんでした");return;}
+      toast("消しました");
+      loadAll().then(function(ok){if(ok)refreshAll();});
+    });
+  }
+  function uploader(lessonId){
+    var kind=h("select",{class:"field","aria-label":"資料の種類"},KINDS.map(function(k){
+      return h("option",{value:k,text:k,selected:k===(lessonId?"指導案":"その他")});}));
+    var input=h("input",{type:"file",accept:ACCEPT,multiple:true,style:"display:none"});
+    var btn=h("button",{class:"btn ghost",text:"＋ ファイルを入れる",onclick:function(){input.click();}});
+    input.addEventListener("change",function(){
+      var files=Array.prototype.slice.call(input.files||[]);input.value="";
+      if(!files.length)return;
+      var big=files.filter(function(f){return f.size>MAX_BYTES;});
+      if(big.length){toast("50MB より大きいファイルは入れられません");return;}
+      btn.disabled=true;
+      var done=0;
+      btn.textContent="入れています… 0/"+files.length;
+      files.reduce(function(p,file){
+        return p.then(function(){
+          return uploadOne(file,lessonId,kind.value).then(function(){done++;btn.textContent="入れています… "+done+"/"+files.length;});
+        });
+      },Promise.resolve()).then(function(){
+        toast("入れました");
+      }).catch(function(){
+        toast("入れられませんでした（"+done+"/"+files.length+" 件は完了）");
+      }).then(function(){
+        btn.disabled=false;btn.textContent="＋ ファイルを入れる";
+        loadAll().then(function(ok){if(ok)refreshAll();});
+      });
+    });
+    return h("div",{class:"upl"},kind,btn,input);
+  }
+  function uploadOne(file,lessonId,kind){
+    var m=/\.([A-Za-z0-9]{1,6})$/.exec(file.name);
+    var ext=m?m[1].toLowerCase():"bin";
+    var uid=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2);
+    var path=(lessonId||"shared")+"/"+uid+"."+ext;
+    return sb.storage.from(BUCKET).upload(path,file,{contentType:file.type||"application/octet-stream",upsert:false}).then(function(r){
+      if(r.error)throw r.error;
+      return sb.from("jisshu_files").insert({lesson_id:lessonId,path:path,name:file.name.slice(0,200),kind:kind,
+        size:file.size,mime:file.type||null,uploaded_by:S.me});
+    }).then(function(r){
+      if(r.error){sb.storage.from(BUCKET).remove([path]);throw r.error;}
+    });
+  }
+})();
+</script>
+</body>
+</html>

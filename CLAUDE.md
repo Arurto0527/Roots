@@ -16,6 +16,10 @@
   - 本体と同じ名前の関数・定数を授業用で作らない（`Overlay` がぶつかったことがある）
   - スマホ版の 430px ルールは対象外。sw.js の保存対象からも外してある（`/class/` はいつも最新版）
 - `class/join/index.html` … 「みんなで四択」の生徒用ページ（スマホ）。Supabase のリアルタイム配信だけを使い、データベースには何も保存しない
+- `jisshu/index.html` … 教育実習（2026-10-13〜10-23）の予定表。実習生5人用。公開URL の `/jisshu/`。本体とは独立（React・Babel なし）
+  - 5人共通のパスワード＝Supabase の共有アカウント `roots-jisshu@example.com` のパスワード。ログイン情報は `roots.jisshu.auth` に保存（本体のログインとまざらない）
+  - 表 `jisshu_lessons`・`jisshu_feedback`・`jisshu_files` と Storage の `jisshu` バケット。作り方は `supabase/jisshu.sql`
+  - sw.js の保存対象から外してある
 
 ## 音声のしくみ
 - ファイル名 = 英文（前後の空白を除く）の FNV-1a 32bit ハッシュ（UTF-16 の charCodeAt で計算）を8桁の16進数にしたもの
