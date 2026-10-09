@@ -128,6 +128,12 @@
   .idea .st button{min-height:44px;padding:0 12px;border:2px solid var(--line);border-radius:10px;font-size:14px;font-weight:700;}
   .idea .st .del{color:var(--danger);}
   .donetag{display:inline-block;font-size:12px;font-weight:700;color:#fff;background:#15803D;border-radius:6px;padding:0 6px;margin-left:6px;}
+  .kanten{margin-top:8px;border:2px solid var(--line);border-radius:10px;background:var(--soft);}
+  .kanten summary{min-height:44px;display:flex;align-items:center;padding:0 12px;font-weight:700;font-size:15px;cursor:pointer;}
+  .kanten ol{margin:0;padding:0 12px 12px 34px;font-size:15px;}
+  .kanten li{margin-top:6px;}
+  .kanten li b{display:block;}
+  .kanten li span{display:block;color:var(--sub);font-size:14px;line-height:1.5;}
   .saved{font-size:14px;color:var(--sub);margin-top:8px;min-height:22px;}
 
   .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:#fff;
@@ -639,6 +645,7 @@
       myBox.textContent="";
       add(myBox,h("div",{class:"fb mine"},
         h("div",{class:"who"},S.me+"（自分）"),
+        kantenBox(),
         h("div",{class:"k",text:"よかった点"}),good,
         h("div",{class:"k",text:"改善点"}),imp,
         status,
@@ -719,6 +726,30 @@
         f.uploaded_by===S.me?h("button",{class:"del",text:"消す","aria-label":f.name+" を消す",onclick:function(){delFile(f);}}):null);
     }));
   }
+  /* 授業参観での観察の観点（配布プリントより）。フィードバックに迷ったときに開く */
+  var KANTEN=[
+    ["導入の仕方","生徒がどう反応したかにも着目する。"],
+    ["導入・展開・まとめという授業のプロセス","授業の構成（導入、展開、まとめ）を意識して見る。"],
+    ["終末の授業のまとめ方","実習生の授業はまとめがうまくいかないことが多い。ほかの先生のまとめ方を研究する。"],
+    ["教員の発問の仕方、指名の仕方",""],
+    ["板書の仕方","黒板をどう使っているか。例：3つに分けて使う、色チョークの使い方など。"],
+    ["教員の話の仕方、指示の出し方、説明の仕方、間の取り方",""],
+    ["教科書活用の仕方",""],
+    ["ノート指導の仕方","生徒のノートのとり方にも着目する。"],
+    ["教員がどのようにして生徒の理解度を確認しているか",""],
+    ["机間指導の仕方","授業者が机間指導を始めたら、後ろで立っているのではなく、必要に応じて机間指導をする。そのときに気づくことがある。"],
+    ["教育機器の活用の仕方",""],
+    ["つまずいている生徒の指導の仕方",""],
+    ["評価の仕方",""]
+  ];
+  function kantenBox(){
+    return h("details",{class:"kanten"},
+      h("summary",{text:"観点（迷ったときに）"}),
+      h("ol",{},KANTEN.map(function(k){
+        return h("li",{},h("b",{text:k[0]}),k[1]?h("span",{text:k[1]}):null);
+      })));
+  }
+
   /* 入れたあとで「指導案／プリント／その他」を直す */
   function kindPicker(f){
     var sel=h("select",{class:"kindsel","aria-label":f.name+" の種類"},KINDS.map(function(k){return h("option",{value:k,text:k,selected:k===f.kind});}));
