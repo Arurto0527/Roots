@@ -45,6 +45,9 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<!-- みんなで四択：リアルタイム通信（Supabase）と QR コード -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 
 <!-- 授業用の画面。単語データや部品（色分け・ピクトグラム・音声）は本体の index.html から借りる -->
 <script type="text/x-roots-jsx" id="class-app">
@@ -58,6 +61,7 @@ const MODES=[
   {key:"explain",label:"語源で解く",note:"単語 → 語源 → イメージ → 意味 → 例文 と、1段ずつめくって説明する"},
   {key:"quiz",label:"クラスクイズ",note:"単語を映して、考える時間のあとに答えを出す。全員で声に出して答える"},
   {key:"roots",label:"語根まとめ",note:"範囲に出てくる語根を選び、その語根を使う単語をまとめて見せる"},
+  {key:"live",label:"みんなで四択",note:"生徒が QR コードからスマホで参加。四択に答えて、点数と上位5人を映す"},
 ];
 const MODE_LABEL=Object.fromEntries(MODES.map(m=>[m.key,m.label]));
 const LEAP_MAX=ALPHA_FROM-1;
@@ -68,7 +72,7 @@ const WORD_BY_EN=new Map();
 RAW_WORDS.forEach(w=>{const k=w.word.toLowerCase();if(!WORD_BY_EN.has(k))WORD_BY_EN.set(k,w);});
 const SIZE_STEPS=[0.8,0.9,1,1.1,1.25,1.4,1.6];
 const DEFAULT_CLASS={mode:"explain",kind:"leap",from:1,to:10,lesson:LESSONS[0]||null,order:"seq",
-  sec:5,dir:"en",sound:true,autoSpeak:true,scale:1,dark:false};
+  sec:5,liveSec:20,dir:"en",sound:true,autoSpeak:true,scale:1,dark:false};
 
 function wordsFor(cfg){
   const lo=Math.min(cfg.from,cfg.to),hi=Math.max(cfg.from,cfg.to);
@@ -510,7 +514,7 @@ function RootColumn({root,onClose}){
           <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:6,marginTop:56}}>
             <Heading>この語根を使う単語（{heads.length}語）</Heading>
             <div style={{flex:1}}/>
-            {heads.length>=2&&<SmallBtn onClick={quiz}>この単語でクイズ（Q）</SmallBtn>}
+            {heads.length>=2&&!A.locked&&<SmallBtn onClick={quiz}>この単語でクイズ（Q）</SmallBtn>}
           </div>
           {heads.map(w=><WordRow key={w.id} en={w.word} meaning={w.meaning} w={w} size={28}/>)}
           {ent.related.length>0&&<>
@@ -613,6 +617,7 @@ const HELP=[
   ["語源で解く",[["Space / → / Enter","次へ（プレゼン用リモコンの「次」でも進みます）"],["← / BackSpace","戻る"],["↓ / ↑","次の単語・前の単語"],["1〜6","その段へとぶ（画面下の段の番号）"],["S","単語の発音"],["E","例文を読み上げる"],["W","なぜこの意味？"],["L","単語の一覧"]]],
   ["クラスクイズ",[["Space / →","答えを出す・次の問題"],["←","前の問題"],["H","ヒント（語源）"],["P","一時停止"],["M","★ あとで復習に印をつける"],["S","発音"]]],
   ["語根まとめ",[["→ / ←","次の語根・前の語根"],["H","意味をかくす・出す"],["Q","この語根の単語でクイズ"]]],
+  ["みんなで四択",[["Space / →","はじめる・答えを出す・ランキング・次の問題"],["Esc","やめる（部屋が閉じます）"]]],
 ];
 function HelpBox({onClose}){
   const {C}=useApp();
@@ -1060,6 +1065,335 @@ function RootsBoard({run,onBack}){
   );
 }
 
+
+/* ============================================================
+   ④ みんなで四択（生徒はスマホで class/join/ を開いて参加）
+   通信は Supabase のリアルタイム配信だけを使う（データベースには何も保存しない）
+   ・先生 → 生徒：roots-live-コード（問題・答え・順位を配る）
+   ・生徒 → 先生：roots-live-コード-in（参加・回答。生徒は部屋に入らずに送るので、ほかの生徒には届かない）
+   ============================================================ */
+const LIVE_COLORS=[{bg:"#D7263D",shape:"▲"},{bg:"#1E6FD9",shape:"◆"},{bg:"#A16207",shape:"●"},{bg:"#276749",shape:"■"}];
+const LIVE_MAX=60;   // 参加できる人数の上限（いたずらで名前を大量に送られたとき用）
+const newRoomCode=()=>String(1000+Math.floor(Math.random()*9000));
+let LIVE_SB=null;
+const liveClient=()=>{
+  if(!LIVE_SB&&window.supabase)LIVE_SB=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,
+    {auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false,storageKey:"roots.live.host"}});
+  return LIVE_SB;
+};
+/* 四択の選択肢。まちがいの選択肢は、なるべく同じ品詞・同じ範囲の単語から選ぶ */
+function liveChoices(w,dir,pool){
+  const key=x=>String(dir==="en"?x.meaning:x.word||"").trim();
+  const ans=key(w);
+  const pos=String(w.partOfSpeech||"").slice(0,2);
+  const seen=new Set([ans]),wrong=[];
+  const take=list=>{for(const x of list){if(wrong.length>=3)return;const k=key(x);if(!k||seen.has(k))continue;seen.add(k);wrong.push(k);}};
+  const others=pool.filter(x=>x.id!==w.id);
+  take(shuffle(others.filter(x=>String(x.partOfSpeech||"").slice(0,2)===pos)));
+  take(shuffle(others));
+  if(wrong.length<3)take(shuffle(RAW_WORDS.filter(x=>x.id!==w.id&&String(x.partOfSpeech||"").slice(0,2)===pos)));
+  if(wrong.length<3)take(shuffle(RAW_WORDS.filter(x=>x.id!==w.id)));
+  const choices=shuffle([ans,...wrong]);
+  return {choices,correct:choices.indexOf(ans)};
+}
+function buildLive(list,dir){
+  const leap=RAW_WORDS.filter(x=>!x.lesson&&x.id<=LEAP_MAX);
+  return list.map(w=>{
+    const near=list.length>=8?list:[...list,...leap.filter(x=>Math.abs(x.id-w.id)<=60)];
+    return {w,prompt:dir==="en"?w.word:w.meaning,...liveChoices(w,dir,near)};
+  });
+}
+function QRCode({text,size=360}){
+  const svg=useMemo(()=>{
+    try{
+      const q=qrcode(0,"M");q.addData(text);q.make();
+      return q.createSvgTag({cellSize:4,margin:2,scalable:true}).replace(/(width|height)="[^"]*"/g,'$1="100%"');
+    }catch(e){return "";}
+  },[text]);
+  return <div aria-label={"参加用の QR コード："+text} role="img"
+    style={{width:size,height:size,background:"#fff",padding:10,borderRadius:16,border:"1px solid #ddd",flexShrink:0}}
+    dangerouslySetInnerHTML={{__html:svg}}/>;
+}
+function ChoiceTile({k,text,count,state,size=40}){
+  /* state: "ask"（問題中）／"ok"（正解）／"ng"（不正解） */
+  const {C}=useApp();
+  const c=LIVE_COLORS[k];
+  return (
+    <div style={{background:c.bg,color:"#fff",borderRadius:16,minHeight:110,padding:"16px 24px",display:"flex",alignItems:"center",gap:18,
+      opacity:state==="ng"?0.32:1,outline:state==="ok"?"8px solid "+C.text:"none",outlineOffset:5,textAlign:"left",position:"relative"}}>
+      <span aria-hidden="true" style={{fontSize:size*0.9,lineHeight:1,flexShrink:0}}>{c.shape}</span>
+      <span style={{fontSize:size,fontWeight:700,lineHeight:1.25,flex:1,minWidth:0,wordBreak:"break-word"}}>{text}</span>
+      {count!=null&&<span className="num" style={{fontSize:size*0.9,fontWeight:700,flexShrink:0}}>{count}人</span>}
+      {state==="ok"&&<span style={{position:"absolute",top:-18,right:18,fontSize:size*0.6,fontWeight:700,background:"#fff",color:c.bg,
+        border:"3px solid "+c.bg,borderRadius:999,padding:"0 14px"}}>✓ 正解</span>}
+    </div>
+  );
+}
+function WordPeek({w,onClose}){
+  const {C}=useApp();
+  return (
+    <Sheet onClose={onClose} width={1100} label={w.word+" の説明"}>
+      <div style={{display:"flex",alignItems:"center",gap:20,paddingRight:150,flexWrap:"wrap"}}>
+        <div className="en" style={{fontSize:72,fontWeight:700}}><ColoredWord C={C} word={w.word} parts={parseRoots(w)}/></div>
+        <SpeakBtn text={w.word}/>
+      </div>
+      <div style={{fontSize:40,fontWeight:700,margin:"10px 0 22px"}}>{w.meaning}</div>
+      <BigRoots w={w} size={0.75}/>
+      {(w.hook||imageryOf(w))&&<div style={{fontSize:26,lineHeight:1.6,marginTop:22,borderLeft:"5px solid "+C.root,paddingLeft:20}}>{w.hook||imageryOf(w)}</div>}
+      {w.example&&<div style={{marginTop:24}}><BigExample w={w} en={w.example} ja={w.exampleJa} size={30}/></div>}
+    </Sheet>
+  );
+}
+function LiveScreen({run,onBack}){
+  const A=useApp();const {C,cfg}=A;
+  const dur=(run.sec||20)*1000,dir=run.dir==="ja"?"ja":"en";
+  const [qs,setQs]=useState(()=>buildLive(run.list,dir));
+  const [code,setCode]=useState(newRoomCode);
+  const [phase,setPhase]=useState("lobby");
+  const [qi,setQi]=useState(0);
+  const [left,setLeft]=useState(dur);
+  const [conn,setConn]=useState("connecting");
+  const [,bump]=useState(0);const rerender=()=>bump(x=>x+1);
+  const players=useRef(new Map());   // pid → {name, key, score, last:{ok,g}}（key は本人だけが知っている合言葉。配らない）
+  const answers=useRef(new Map());   // pid → {choice, t}（いまの問題）
+  const kicked=useRef(new Set());
+  const stats=useRef([]);            // 問題ごとの答えの分布
+  const startAt=useRef(0);
+  const S=useRef({phase:"lobby",qi:0,counts:null,qs,game:1});   // game：「もう一度」で増やす（問題の番号を回ごとに別にする）
+  S.current.qs=qs;
+  const out=useRef(null),resendT=useRef(null),tickT=useRef(-1);
+  const joinUrl=new URL("class/join/?c="+code,document.baseURI).href;
+
+  const ranked=()=>[...players.current.entries()].map(([pid,p])=>({pid,...p})).sort((a,b)=>b.score-a.score||a.name.localeCompare(b.name));
+  const resMap=()=>{
+    const res={};let rank=0,prev=null;
+    ranked().forEach((p,k)=>{if(p.score!==prev){rank=k+1;prev=p.score;}const l=p.last||{ok:-1,g:0};res[p.pid]=[l.ok,l.g,p.score,rank];});
+    return res;
+  };
+  const top5=()=>ranked().slice(0,5).map(p=>({name:p.name,score:p.score}));
+  const payload=()=>{
+    const st=S.current,q=st.qs[st.qi];
+    const b={phase:st.phase,code,n:st.qi+1,total:st.qs.length,dir,players:players.current.size};
+    if(q&&(st.phase==="question"||st.phase==="reveal"||st.phase==="rank"))
+      Object.assign(b,{qid:st.game+":"+st.qi,prompt:q.prompt,pos:q.w.partOfSpeech||"",choices:q.choices});
+    if(st.phase==="question")Object.assign(b,{endsIn:Math.max(0,dur-(Date.now()-startAt.current)),dur});
+    if(st.phase==="reveal"||st.phase==="rank"||st.phase==="end"){b.res=resMap();if(q&&st.phase!=="end")b.correct=q.correct;}
+    if(st.phase==="reveal")b.counts=st.counts;
+    if(st.phase==="rank"||st.phase==="end")b.top=top5();
+    return b;
+  };
+  const send=()=>{const ch=out.current;if(ch)ch.send({type:"broadcast",event:"state",payload:payload()}).catch(()=>{});};
+  const resendSoon=()=>{clearTimeout(resendT.current);resendT.current=setTimeout(send,700);};   // 参加が重なったときはまとめて1回だけ送る
+
+  useEffect(()=>{
+    const sbc=liveClient();
+    if(!sbc){setConn("error");return;}
+    let alive=true,ok=0;
+    const onSub=s=>{
+      if(!alive)return;
+      if(s==="SUBSCRIBED"){ok++;if(ok>=2){setConn("ok");send();}}
+      else if(s==="CHANNEL_ERROR"||s==="TIMED_OUT")setConn("error");
+    };
+    const inCh=sbc.channel("roots-live-"+code+"-in",{config:{broadcast:{self:false}}})
+      .on("broadcast",{event:"join"},({payload:p})=>{
+        if(!p||typeof p.pid!=="string"||typeof p.key!=="string"||kicked.current.has(p.pid))return;
+        let name=String(p.name||"").replace(/\s+/g," ").trim().slice(0,10)||"なまえなし";
+        const pl=players.current.get(p.pid);
+        if(pl){if(pl.key!==p.key)return;}          // 他人の pid を名のる参加は受けつけない
+        else if(players.current.size>=LIVE_MAX)return;
+        /* 同じ名前がいたら (2)(3)… をつけて見分けられるようにする */
+        const taken=new Set([...players.current.entries()].filter(([id])=>id!==p.pid).map(([,x])=>x.name));
+        if(taken.has(name)){let k=2;while(taken.has(name+"("+k+")"))k++;name=name+"("+k+")";}
+        if(pl)pl.name=name;else players.current.set(p.pid,{name,key:p.key,score:0,last:null});
+        rerender();resendSoon();
+      })
+      .on("broadcast",{event:"answer"},({payload:p})=>{
+        const st=S.current;
+        const pl=p&&players.current.get(p.pid);
+        if(!pl||pl.key!==p.key||st.phase!=="question"||p.qid!==st.game+":"+st.qi||answers.current.has(p.pid))return;
+        const c=Number(p.choice);
+        if(!(c>=0&&c<=3))return;
+        answers.current.set(p.pid,{choice:c,t:Date.now()-startAt.current});
+        rerender();
+      });
+    /* 同じ参加コードの部屋がほかの教室で動いていないか確かめる。
+       動いている部屋は "hostcheck" に "taken" と答えるので、答えが来たら別のコードに変える */
+    const outCh=sbc.channel("roots-live-"+code,{config:{broadcast:{self:false}}})
+      .on("broadcast",{event:"hostcheck"},()=>{if(alive&&checked.current)outCh.send({type:"broadcast",event:"taken",payload:{code}}).catch(()=>{});})
+      .on("broadcast",{event:"taken"},()=>{if(alive&&!checked.current){alive=false;setConn("connecting");setCode(newRoomCode());}});
+    const checked={current:false};
+    inCh.subscribe(onSub);
+    outCh.subscribe(s=>{
+      if(s==="SUBSCRIBED"&&alive){
+        outCh.send({type:"broadcast",event:"hostcheck",payload:{}}).catch(()=>{});
+        setTimeout(()=>{if(alive){checked.current=true;onSub("SUBSCRIBED");}},1500);
+      }else onSub(s);
+    });
+    out.current=outCh;
+    return ()=>{
+      const wasLive=checked.current;
+      alive=false;clearTimeout(resendT.current);
+      (wasLive?outCh.send({type:"broadcast",event:"state",payload:{phase:"closed",code}}):Promise.resolve()).catch(()=>{}).finally(()=>{
+        sbc.removeChannel(inCh);sbc.removeChannel(outCh);
+      });
+    };
+  },[code]);
+  /* クイズの途中で、うっかりページを閉じたり再読み込みしたりしないように確かめる */
+  useEffect(()=>{
+    if(phase==="lobby"||phase==="end")return;
+    const h=e=>{e.preventDefault();e.returnValue="";};
+    window.addEventListener("beforeunload",h);
+    return ()=>window.removeEventListener("beforeunload",h);
+  },[phase]);
+
+  const kick=pid=>{
+    players.current.delete(pid);kicked.current.add(pid);rerender();
+    if(out.current)out.current.send({type:"broadcast",event:"kick",payload:{pid}}).catch(()=>{});
+  };
+  const go=(ph,extra={})=>{S.current={...S.current,phase:ph,...extra};if(extra.qi!=null)setQi(extra.qi);setPhase(ph);send();};
+  const startQ=i=>{answers.current=new Map();startAt.current=Date.now();tickT.current=-1;setLeft(dur);go("question",{qi:i,counts:null});};
+  const reveal=()=>{
+    const st=S.current,q=st.qs[st.qi];
+    if(st.phase!=="question")return;
+    const counts=[0,0,0,0];let okN=0;
+    players.current.forEach((pl,pid)=>{
+      const a=answers.current.get(pid);
+      if(!a){pl.last={ok:-1,g:0};return;}
+      counts[a.choice]++;
+      const okk=a.choice===q.correct;
+      const g=okk?Math.round(1000*(1-0.5*Math.min(1,a.t/dur))):0;   // 正解は 500〜1000 点。早いほど高い
+      if(okk)okN++;
+      pl.score+=g;pl.last={ok:okk?1:0,g};
+    });
+    stats.current[st.qi]={w:q.w,ok:okN,answered:answers.current.size,n:players.current.size};
+    if(cfg.sound)tone([[660,0,.18],[880,.16,.32]],.12);
+    go("reveal",{counts});
+  };
+  useEffect(()=>{
+    if(phase!=="question")return;
+    const iv=setInterval(()=>{
+      const l=Math.max(0,dur-(Date.now()-startAt.current));
+      setLeft(l);
+      const sec=Math.ceil(l/1000);
+      if(cfg.sound&&sec>0&&sec<=3&&tickT.current!==sec){tickT.current=sec;tone([[1000,0,.07]],.05);}
+      const n=players.current.size;
+      if(l<=0||(n>0&&answers.current.size>=n)){clearInterval(iv);reveal();}
+    },200);
+    return ()=>clearInterval(iv);
+  },[phase,qi]);
+  const next=()=>{
+    if(phase==="lobby"){if(qs.length)startQ(0);}
+    else if(phase==="question")reveal();
+    else if(phase==="reveal")go("rank");
+    else if(phase==="rank"){if(qi<qs.length-1)startQ(qi+1);else{if(cfg.sound)SFX.fanfare(true);go("end");}}
+  };
+  const again=()=>{
+    players.current.forEach(p=>{p.score=0;p.last=null;});
+    stats.current=[];
+    const nq=buildLive(cfg.order==="random"?shuffle(run.list):run.list,dir);
+    setQs(nq);S.current.qs=nq;setQi(0);go("lobby",{qi:0,qs:nq,game:S.current.game+1});
+  };
+  const quit=()=>{if(phase==="lobby"||phase==="end"||window.confirm("みんなで四択を終わりにしますか？（生徒の画面も終了します）"))onBack();};
+  useKeys({" ":next,ArrowRight:next,PageDown:next,Enter:next,Escape:quit});
+
+  const n=players.current.size;
+  const q=qs[qi];
+  const nextLabel=phase==="lobby"?"はじめる ▶":phase==="question"?"答えを出す ▶":phase==="reveal"?"ランキング ▶":phase==="rank"?(qi<qs.length-1?"次の問題 ▶":"結果発表 ▶"):"";
+  const pos=phase==="lobby"||phase==="end"?"参加 "+n+"人":"第"+(qi+1)+"問 / "+qs.length+"　参加 "+n+"人";
+  const connMsg=conn==="ok"?null:conn==="error"
+    ?"通信につながりません。インターネットの接続を確かめて、最初の画面からやり直してください。"
+    :"通信の準備をしています…";
+
+  let body;
+  if(phase==="lobby")body=(
+    <div style={{display:"flex",alignItems:"center",gap:56,padding:"30px 60px",justifyContent:"center"}}>
+      <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:14}}>
+        <QRCode text={joinUrl} size={380}/>
+        <div className="en" style={{fontSize:18,color:C.sub,maxWidth:420,textAlign:"center",wordBreak:"break-all"}}>{joinUrl}</div>
+      </div>
+      <div style={{maxWidth:760,minWidth:420}}>
+        <div style={{fontSize:26,fontWeight:700,color:C.sub,whiteSpace:"nowrap"}}>スマホのカメラで QR コードを読み取ろう</div>
+        <div style={{display:"flex",alignItems:"baseline",gap:18,marginTop:10}}>
+          <span style={{fontSize:28,color:C.sub,whiteSpace:"nowrap"}}>参加コード</span>
+          <span className="num" style={{fontSize:120,fontWeight:700,letterSpacing:"0.08em",lineHeight:1}}>{code}</span>
+        </div>
+        <div style={{fontSize:22,color:C.sub,marginTop:10,lineHeight:1.6}}>ニックネームを入れて参加してね（本名でなくてOK。上位5人は画面に名前が出ます）</div>
+        <div style={{fontSize:30,fontWeight:700,marginTop:26}}>参加 {n}人</div>
+        <div style={{display:"flex",flexWrap:"wrap",gap:10,marginTop:12,maxHeight:300,overflow:"hidden"}}>
+          {[...players.current.entries()].map(([pid,p])=>(
+            <span key={pid} className="fadeIn" style={{display:"inline-flex",alignItems:"center",gap:4,fontSize:22,fontWeight:700,
+              border:"2px solid "+C.line,borderRadius:999,padding:"4px 6px 4px 18px"}}>
+              {p.name}
+              <button onClick={e=>{stop(e);kick(pid);}} className="press" aria-label={p.name+" を外す"} title="この名前を外す"
+                style={{width:48,height:48,borderRadius:"50%",border:"none",background:"transparent",color:C.sub,cursor:"pointer",fontSize:22}}>×</button>
+            </span>
+          ))}
+          {!n&&<span style={{fontSize:22,color:C.sub}}>まだだれも参加していません</span>}
+        </div>
+        <div style={{fontSize:17,color:C.sub,marginTop:14}}>ふさわしくない名前は × で外せます。授業中はこのページを再読み込みしないでね（参加者と点数が消えます）。{qs.length}問・1問 {dur/1000}秒・{dir==="en"?"英語 → 日本語":"日本語 → 英語"}</div>
+      </div>
+    </div>
+  );
+  else if(phase==="question"||phase==="reveal")body=(
+    <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:26,padding:"26px 60px 30px",width:"100%"}}>
+      {dir==="en"
+        ?<div style={{display:"flex",alignItems:"center",gap:24}}><BigWord w={q.w} colored={phase==="reveal"} size={124}/><SpeakBtn text={q.w.word}/></div>
+        :<div style={{textAlign:"center"}}><div style={{fontSize:84,fontWeight:700,lineHeight:1.25}}>{q.w.meaning}</div>
+           {q.w.partOfSpeech&&<div style={{fontSize:24,color:C.sub}}>{q.w.partOfSpeech}</div>}</div>}
+      {phase==="question"
+        ?<div style={{display:"flex",alignItems:"center",gap:30}}>
+           <div className="num" style={{fontSize:96,fontWeight:700,lineHeight:1,color:left<=3000?C.root:C.text,minWidth:130,textAlign:"center"}}>{Math.ceil(left/1000)}</div>
+           <div style={{fontSize:34,fontWeight:700,color:C.sub}}>回答 <span className="num" style={{color:C.text}}>{answers.current.size}</span> / {n}人</div>
+         </div>
+        :<div style={{fontSize:34,fontWeight:700}}>正解 <span className="num">{stats.current[qi]?stats.current[qi].ok:0}</span> / {n}人
+           {stats.current[qi]&&n>0&&<span style={{color:C.sub,fontWeight:400}}>（{Math.round(stats.current[qi].ok/n*100)}%）</span>}</div>}
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:18,width:"100%",maxWidth:1500}}>
+        {q.choices.map((t,k)=><ChoiceTile key={k} k={k} text={t}
+          count={phase==="reveal"&&S.current.counts?S.current.counts[k]:null}
+          state={phase==="question"?"ask":k===q.correct?"ok":"ng"}/>)}
+      </div>
+      {phase==="reveal"&&<div className="fadeIn" style={{display:"flex",flexDirection:"column",alignItems:"center",gap:16}}>
+        {dir==="ja"&&<div style={{display:"flex",alignItems:"center",gap:20}}><BigWord w={q.w} colored size={84}/><SpeakBtn text={q.w.word}/></div>}
+        <BigRoots w={q.w} size={0.7}/>
+        {(q.w.hook||imageryOf(q.w))&&<div style={{fontSize:26,lineHeight:1.6,maxWidth:1300,borderLeft:"5px solid "+C.root,padding:"4px 0 4px 20px",textAlign:"left"}}>{q.w.hook||imageryOf(q.w)}</div>}
+      </div>}
+    </div>
+  );
+  else if(phase==="rank"||phase==="end"){
+    const tops=ranked().slice(0,5);
+    const hard=stats.current.filter(Boolean).filter(x=>x.n>0).sort((a,b)=>a.ok/a.n-b.ok/b.n).slice(0,5);
+    body=(
+      <div style={{display:"flex",gap:60,padding:"30px 60px",justifyContent:"center",alignItems:"flex-start",width:"100%"}}>
+        <div style={{flex:"1 1 620px",maxWidth:820}}>
+          <div style={{fontSize:phase==="end"?60:48,fontWeight:700,marginBottom:20}}>{phase==="end"?"結果発表！":"ランキング"}</div>
+          {!tops.length&&<div style={{fontSize:26,color:C.sub}}>参加者がいません</div>}
+          {tops.map((p,k)=>(
+            <div key={p.pid} className="riseIn" style={{animationDelay:(phase==="end"?(4-k)*0.35:k*0.08)+"s",display:"flex",alignItems:"center",gap:24,
+              padding:"14px 24px",marginBottom:12,borderRadius:16,border:"2px solid "+(k===0?C.root:C.line),background:k===0?C.fill:"transparent"}}>
+              <span className="num" style={{fontSize:44,fontWeight:700,minWidth:110,whiteSpace:"nowrap",color:k===0?C.root:C.text}}>{k+1}位</span>
+              <span style={{fontSize:40,fontWeight:700,flex:1,minWidth:0,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{p.name}</span>
+              <span className="num" style={{fontSize:36,fontWeight:700}}>{p.score}点</span>
+            </div>
+          ))}
+        </div>
+        {phase==="end"&&hard.length>0&&<div style={{flex:"1 1 480px",maxWidth:620}}>
+          <Heading>まちがいが多かった単語（押すと説明）</Heading>
+          {hard.map(x=><WordRow key={x.w.id} en={x.w.word} w={x.w} meaning={x.w.meaning+"　正解 "+Math.round(x.ok/x.n*100)+"%"} size={30}/>)}
+        </div>}
+      </div>
+    );
+  }
+  return (
+    <Frame title={"みんなで四択　参加コード "+code} pos={pos} progress={phase==="lobby"?null:phase==="end"?1:(qi+(phase==="question"?0:1))/qs.length}
+      onBack={quit} backLabel="やめる" onNext={phase==="end"?undefined:next} nextLabel={nextLabel}
+      center={phase==="end"
+        ?<><SmallBtn onClick={again}>同じ単語でもう一度（参加者はそのまま）</SmallBtn><SmallBtn onClick={onBack}>終わる</SmallBtn></>
+        :connMsg&&<span style={{fontSize:18,fontWeight:700,color:conn==="error"?C.root:C.sub}}>{connMsg}</span>}>
+      <Fit scale={A.z}>{body}</Fit>
+    </Frame>
+  );
+}
+
 /* ============================================================
    テスト用紙の印刷（問題と答えの2枚組。A4）
    ============================================================ */
@@ -1144,7 +1478,7 @@ function SetupScreen({onStart,onResume}){
 
         <div style={{marginTop:30}}>
           {H(1,"何をする？")}
-          <div style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:16}}>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(240px,1fr))",gap:16}}>
             {MODES.map(m=>{
               const on=cfg.mode===m.key;
               return (
@@ -1196,16 +1530,18 @@ function SetupScreen({onStart,onResume}){
             {cfg.mode!=="roots"&&opt("順番",<>
               <Pill active={cfg.order==="seq"} onClick={()=>set({order:"seq"})}>番号順</Pill>
               <Pill active={cfg.order==="random"} onClick={()=>set({order:"random"})}>シャッフル</Pill></>)}
-            {cfg.mode==="quiz"&&opt("向き",<>
+            {(cfg.mode==="quiz"||cfg.mode==="live")&&opt("向き",<>
               <Pill active={cfg.dir==="en"} onClick={()=>set({dir:"en"})}>英語 → 日本語</Pill>
               <Pill active={cfg.dir==="ja"} onClick={()=>set({dir:"ja"})}>日本語 → 英語</Pill></>)}
             {cfg.mode==="quiz"&&opt("考える時間",<>
               {[3,5,10,15].map(s=><Pill key={s} active={cfg.sec===s} onClick={()=>set({sec:s})}>{s}秒</Pill>)}
               <Pill active={!cfg.sec} onClick={()=>set({sec:0})}>なし</Pill></>)}
-            {cfg.mode!=="roots"&&opt("発音",<>
+            {cfg.mode==="live"&&opt("答える時間",<>
+              {[10,20,30].map(s=><Pill key={s} active={cfg.liveSec===s} onClick={()=>set({liveSec:s})}>{s}秒</Pill>)}</>)}
+            {cfg.mode!=="roots"&&cfg.mode!=="live"&&opt("発音",<>
               <Pill active={cfg.autoSpeak} onClick={()=>set({autoSpeak:true})}>自動で流す</Pill>
               <Pill active={!cfg.autoSpeak} onClick={()=>set({autoSpeak:false})}>流さない</Pill></>)}
-            {cfg.mode==="quiz"&&opt("効果音",<>
+            {(cfg.mode==="quiz"||cfg.mode==="live")&&opt("効果音",<>
               <Pill active={cfg.sound} onClick={()=>set({sound:true})}>あり</Pill>
               <Pill active={!cfg.sound} onClick={()=>set({sound:false})}>なし</Pill></>)}
           </div>
@@ -1255,7 +1591,7 @@ function ClassApp(){
     const list=wordsFor(cfg);
     if(!list.length)return;
     stopSpeak();
-    setStack([newRun({mode:cfg.mode,list,sec:cfg.sec,dir:cfg.dir})]);
+    setStack([newRun({mode:cfg.mode,list,sec:cfg.mode==="live"?cfg.liveSec:cfg.sec,dir:cfg.dir})]);
   };
   const resume=()=>{const l=loadLast();if(l){stopSpeak();setStack([newRun(l)]);}};
   const back=()=>{stopSpeak();setStack(s=>s.slice(0,-1));};
@@ -1277,9 +1613,12 @@ function ClassApp(){
     const k=SIZE_STEPS.reduce((b,v,j)=>Math.abs(v-c.scale)<Math.abs(SIZE_STEPS[b]-c.scale)?j:b,0);
     return {...c,scale:SIZE_STEPS[clamp(k+d,0,SIZE_STEPS.length-1)]};
   });
-  const A={C,cfg,set,z:vs*cfg.scale,fs,busy:!!ov,
+  /* みんなで四択の最中は、ほかの画面へ移ると部屋が閉じてしまうので、単語は重ねた画面でだけ見せる */
+  const locked=!!run&&run.mode==="live";
+  const A={C,cfg,set,z:vs*cfg.scale,fs,busy:!!ov,locked,
     openRoot:root=>setOv({t:"root",root}),openSearch:()=>setOv({t:"search"}),openHelp:()=>setOv({t:"help"}),
-    jumpWord:w=>pushRun({mode:"explain",list:[w]}),pushRun,savePos,toggleFS,
+    jumpWord:w=>locked?setOv({t:"peek",w}):pushRun({mode:"explain",list:[w]}),
+    pushRun:r=>{if(!locked)pushRun(r);},savePos,toggleFS,
     toggleDark:()=>set({dark:!cfg.dark}),bigger:()=>step(1),smaller:()=>step(-1)};
   useKeys({"/":A.openSearch,"?":A.openHelp,d:A.toggleDark,f:toggleFS,"+":A.bigger,"=":A.bigger,";":A.bigger,"-":A.smaller,
     b:()=>setOv({t:"black"}),".":()=>setOv({t:"black"})});
@@ -1288,6 +1627,7 @@ function ClassApp(){
   const screen=!run?<SetupScreen onStart={start} onResume={resume}/>
     :run.mode==="quiz"?<QuizScreen {...p}/>
     :run.mode==="roots"?<RootsBoard {...p}/>
+    :run.mode==="live"?<LiveScreen {...p}/>
     :<ExplainScreen {...p}/>;
   return (
     <AppCtx.Provider value={A}>
@@ -1296,6 +1636,7 @@ function ClassApp(){
       {ov&&ov.t==="search"&&<SearchBox onClose={close}/>}
       {ov&&ov.t==="help"&&<HelpBox onClose={close}/>}
       {ov&&ov.t==="black"&&<Blackout onClose={close}/>}
+      {ov&&ov.t==="peek"&&<WordPeek w={ov.w} onClose={close}/>}
     </AppCtx.Provider>
   );
 }

@@ -10,6 +10,12 @@
   - `<script type="application/json" id="roots-audio-index">` は音声ファイルの一覧（自動生成なので手で書き換えない）
 - `audio/us/*.m4a`, `audio/uk/*.m4a` … 収録済みの発音（Piper で作成）。**開かない・読まない・変更しない**
 - `sw.js` … オフライン用の保存係（Service Worker）
+- `class/index.html` … 授業用（先生がプロジェクター・電子黒板に映すパソコン画面）。公開URL の `/class/`
+  - 開くときに本体 index.html の roots-app を読みこみ、`\nconst {useState` より前（単語データ）はそのまま実行、
+    そこから `\nfunction App(){` の手前までの部品と授業用の JSX だけを Babel で変換して動かす。**この2行の目印を変えると授業用が動かなくなる**
+  - 本体と同じ名前の関数・定数を授業用で作らない（`Overlay` がぶつかったことがある）
+  - スマホ版の 430px ルールは対象外。sw.js の保存対象からも外してある（`/class/` はいつも最新版）
+- `class/join/index.html` … 「みんなで四択」の生徒用ページ（スマホ）。Supabase のリアルタイム配信だけを使い、データベースには何も保存しない
 
 ## 音声のしくみ
 - ファイル名 = 英文（前後の空白を除く）の FNV-1a 32bit ハッシュ（UTF-16 の charCodeAt で計算）を8桁の16進数にしたもの

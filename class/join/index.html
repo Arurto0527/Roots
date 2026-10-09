@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#FFFFFF">
+<title>Roots みんなで四択</title>
+<meta name="description" content="授業中に先生の画面の四択クイズに参加するページ">
+<style>
+  *,*::before,*::after{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:#FFFFFF;color:#111111;font-size:16px;line-height:1.6;
+    font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue","Hiragino Sans","Noto Sans JP",Roboto,sans-serif;
+    -webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent;
+  }
+  input,button{font-family:inherit;font-size:16px;}
+  button{-webkit-appearance:none;appearance:none;cursor:pointer;}
+  .wrap{max-width:430px;margin:0 auto;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;
+    padding:calc(16px + env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom));}
+  .head{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:14px;color:#595959;min-height:28px;}
+  .brand{font-weight:700;color:#111;}
+  h1{font-size:26px;margin:24px 0 8px;line-height:1.35;}
+  .sub{color:#595959;}
+  label{display:block;font-weight:700;margin:20px 0 8px;}
+  .field{width:100%;min-height:56px;padding:0 16px;border:2px solid #C8C8C8;border-radius:12px;background:#fff;color:#111;font-size:20px;}
+  .field:focus{outline:none;border-color:#111;}
+  .code{font-size:30px;letter-spacing:.3em;text-align:center;font-variant-numeric:tabular-nums;}
+  .btn{width:100%;min-height:56px;border-radius:14px;border:2px solid #111;background:#111;color:#fff;font-weight:700;font-size:18px;margin-top:24px;}
+  .btn.ghost{background:#fff;color:#111;}
+  .btn:disabled{opacity:.4;}
+  .note{font-size:14px;color:#595959;margin-top:12px;}
+  .err{color:#B42318;font-weight:700;margin-top:12px;min-height:24px;}
+  .center{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;gap:10px;}
+  .big{font-size:28px;font-weight:700;line-height:1.35;}
+  .huge{font-size:72px;font-weight:700;line-height:1;}
+  .prompt{font-size:28px;font-weight:700;text-align:center;margin:18px 0 6px;line-height:1.3;word-break:break-word;}
+  .prompt.en{font-size:36px;letter-spacing:-0.01em;}
+  .pos{text-align:center;color:#595959;font-size:14px;}
+  .timer{height:8px;border-radius:4px;background:#E0E0E0;overflow:hidden;margin:14px 0 16px;}
+  .timer i{display:block;height:100%;background:#111;transform-origin:left;}
+  .choices{display:grid;gap:12px;flex:1;align-content:start;}
+  .choice{display:flex;align-items:center;gap:14px;width:100%;min-height:76px;padding:12px 18px;border:none;border-radius:16px;color:#fff;
+    font-size:20px;font-weight:700;text-align:left;line-height:1.3;}
+  .choice .s{font-size:26px;width:30px;text-align:center;flex-shrink:0;}
+  .choice:active{transform:scale(.98);}
+  .chosen{outline:4px solid #111;outline-offset:3px;}
+  .pill{display:inline-block;padding:4px 14px;border-radius:999px;background:#F5F5F5;font-weight:700;}
+  .top{width:100%;margin-top:18px;text-align:left;}
+  .top div{display:flex;gap:12px;padding:10px 4px;border-bottom:1px solid #E0E0E0;font-size:18px;}
+  .top b{width:44px;flex-shrink:0;}
+  .top span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .me{background:#FFF7E6;}
+  .ok{color:#1F7A45;}
+  .ng{color:#B42318;}
+  @keyframes pop{0%{transform:scale(.6);opacity:0}70%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
+  .pop{animation:pop .35s ease-out both;}
+  @media (prefers-reduced-motion:reduce){.pop{animation:none;}}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"><div class="center"><div class="sub">読み込んでいます…</div></div></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js"></script>
+<script>
+/* ============================================================
+   Roots みんなで四択（生徒用）
+   先生の画面（class/ の「みんなで四択」）とリアルタイム配信でつながる。
+   名前と答えはどこにも保存しない（先生のパソコンの画面の中だけで集計する）
+   ============================================================ */
+(function(){
+  var SUPABASE_URL="https://jidcvzmfjmlxwlazaixz.supabase.co";
+  var SUPABASE_KEY="sb_publishable_Vjo96oWVhIjWKFGIN6OMKA_keM8C011";
+  var COLORS=[{bg:"#D7263D",s:"▲"},{bg:"#1E6FD9",s:"◆"},{bg:"#A16207",s:"●"},{bg:"#276749",s:"■"}];
+  var app=document.getElementById("app");
+
+  function ls(k,v){try{if(v===undefined)return localStorage.getItem(k);if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v);}catch(e){return null;}}
+  function newPid(){return "p"+Math.random().toString(36).slice(2,10)+Date.now().toString(36).slice(-4);}
+  /* 画面の部品を作る（名前などは textContent で入れるので、HTML として解釈されない） */
+  function h(tag,attrs){
+    var el=document.createElement(tag);
+    if(attrs)for(var k in attrs){
+      if(k==="class")el.className=attrs[k];
+      else if(k==="text")el.textContent=attrs[k];
+      else if(k==="style")el.setAttribute("style",attrs[k]);
+      else if(k.slice(0,2)==="on")el.addEventListener(k.slice(2),attrs[k]);
+      else el.setAttribute(k,attrs[k]);
+    }
+    for(var i=2;i<arguments.length;i++){var c=arguments[i];if(c==null||c===false)continue;el.appendChild(typeof c==="string"?document.createTextNode(c):c);}
+    return el;
+  }
+  function show(){app.textContent="";for(var i=0;i<arguments.length;i++)if(arguments[i])app.appendChild(arguments[i]);}
+
+  if(!window.supabase){
+    show(h("div",{class:"center"},h("div",{class:"big",text:"読み込みに失敗しました"}),h("div",{class:"sub",text:"インターネットにつないで、もう一度 QR コードを読み取ってね"})));
+    return;
+  }
+  var sbc=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,
+    {auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false,storageKey:"roots.live.guest"}});
+
+  var params=new URLSearchParams(location.search);
+  var code=String(params.get("c")||ls("roots.live.code")||"").replace(/\D/g,"").slice(0,4);
+  var name=ls("roots.live.name")||"";
+  var pid=ls("roots.live.pid")||newPid();ls("roots.live.pid",pid);
+  /* 合言葉：先生にだけ送る。ほかの生徒には配られないので、他人になりすまして答えることができない */
+  var key=ls("roots.live.key")||newPid();ls("roots.live.key",key);
+  var ch=null,inCh=null,state=null,joined=false,answer={qid:null,choice:null},waitT=null,timerT=null,deadline=0;
+
+  function sendIn(event,payload){
+    if(!inCh)inCh=sbc.channel("roots-live-"+code+"-in");
+    return inCh.send({type:"broadcast",event:event,payload:payload}).catch(function(){});
+  }
+  function leaveRoom(){
+    if(ch){try{sbc.removeChannel(ch);}catch(e){}}
+    if(inCh){try{sbc.removeChannel(inCh);}catch(e){}}
+    ch=null;inCh=null;joined=false;state=null;clearTimeout(waitT);clearInterval(timerT);
+  }
+
+  /* ---------- 参加 ---------- */
+  function entry(msg){
+    leaveRoom();
+    var codeIn=h("input",{class:"field code",inputmode:"numeric",autocomplete:"off",maxlength:"4",placeholder:"0000","aria-label":"参加コード（4けた）"});
+    codeIn.value=code;
+    var nameIn=h("input",{class:"field",maxlength:"10",autocomplete:"nickname",placeholder:"例：ルーツ","aria-label":"ニックネーム"});
+    nameIn.value=name;
+    var err=h("div",{class:"err",role:"alert",text:msg||""});
+    var go=h("button",{class:"btn",type:"submit",text:"参加する"});
+    var form=h("form",{onsubmit:function(e){
+      e.preventDefault();
+      var c=String(codeIn.value).replace(/[０-９]/g,function(d){return String.fromCharCode(d.charCodeAt(0)-0xFEE0);}).replace(/\D/g,"");
+      var n=String(nameIn.value).replace(/\s+/g," ").trim();
+      if(c.length!==4){err.textContent="参加コードは先生の画面に出ている4けたの数字です";codeIn.focus();return;}
+      if(!n){err.textContent="ニックネームを入れてね";nameIn.focus();return;}
+      code=c;name=n.slice(0,10);ls("roots.live.code",code);ls("roots.live.name",name);
+      join();
+    }},
+      h("label",{text:"参加コード（先生の画面の4けた）"}),codeIn,
+      h("label",{text:"ニックネーム（10文字まで）"}),nameIn,
+      h("div",{class:"note",text:"本名でなくてOK。上位5人に入ると先生の画面に名前が出ます。"}),
+      err,go);
+    show(h("div",{class:"head"},h("span",{class:"brand",text:"Roots"}),h("span",{text:"みんなで四択"})),
+      h("h1",{text:"クイズに参加しよう"}),
+      h("div",{class:"sub",text:"先生の画面の四択に、このスマホで答えます。"}),
+      form);
+    if(!code)codeIn.focus();else if(!name)nameIn.focus();
+  }
+  function join(){
+    leaveRoom();
+    show(h("div",{class:"center"},h("div",{class:"big",text:"つないでいます…"}),h("div",{class:"sub",text:"参加コード "+code})));
+    ch=sbc.channel("roots-live-"+code,{config:{broadcast:{self:false}}})
+      .on("broadcast",{event:"state"},function(m){onState(m.payload);})
+      .on("broadcast",{event:"kick"},function(m){
+        if(m.payload&&m.payload.pid===pid){
+          pid=newPid();ls("roots.live.pid",pid);key=newPid();ls("roots.live.key",key);name="";ls("roots.live.name",null);
+          entry("先生がこの名前を外しました。ちがうニックネームで参加しなおしてね");
+        }
+      });
+    ch.subscribe(function(s){
+      if(s==="SUBSCRIBED"){
+        joined=true;
+        sendIn("join",{pid:pid,key:key,name:name});
+        clearTimeout(waitT);
+        waitT=setTimeout(function(){if(!state)entry("先生の画面が見つかりませんでした。参加コードを確かめてね");},8000);
+      }else if((s==="CHANNEL_ERROR"||s==="TIMED_OUT")&&!state){
+        entry("つながりませんでした。インターネットの接続を確かめてね");
+      }
+    });
+  }
+  /* スマホを閉じて戻ってきたときは、先生に今の画面をもう一度送ってもらう */
+  document.addEventListener("visibilitychange",function(){
+    if(document.visibilityState==="visible"&&joined)sendIn("join",{pid:pid,key:key,name:name});
+  });
+
+  /* ---------- 先生からの知らせ ---------- */
+  function onState(st){
+    if(!st||st.code!==code)return;
+    clearTimeout(waitT);
+    state=st;
+    if(st.phase==="question"){deadline=Date.now()+(st.endsIn||0);if(answer.qid!==st.qid)answer={qid:null,choice:null};}
+    render();
+  }
+  function header(){
+    return h("div",{class:"head"},h("span",{class:"brand",text:name}),
+      h("span",{text:state&&state.phase!=="lobby"&&state.phase!=="end"?"第"+state.n+"問 / "+state.total:"参加コード "+code}));
+  }
+  function promptEl(){
+    return [h("div",{class:"prompt"+(state.dir==="en"?" en":""),text:state.prompt||""}),
+      state.dir==="ja"&&state.pos?h("div",{class:"pos",text:state.pos}):null];
+  }
+  function myRes(){return state.res&&state.res[pid]||null;}
+  function render(){
+    clearInterval(timerT);
+    var st=state;
+    if(!st)return;
+    if(st.phase==="closed"){
+      leaveRoom();
+      show(header(),h("div",{class:"center"},h("div",{class:"big",text:"クイズは終わりました"}),h("div",{class:"sub",text:"おつかれさま！"}),
+        h("button",{class:"btn ghost",text:"別のクイズに参加する",onclick:function(){entry();}})));
+      return;
+    }
+    if(st.phase==="lobby"){
+      show(header(),h("div",{class:"center"},h("div",{class:"huge pop",text:"✓"}),h("div",{class:"big",text:"参加しました！"}),
+        h("div",{class:"sub",text:"先生がはじめるまで待ってね"}),h("div",{class:"pill",text:"いま "+(st.players||1)+"人"})));
+      return;
+    }
+    if(st.phase==="question"){
+      var p=promptEl();
+      if(answer.qid===st.qid){
+        var c=COLORS[answer.choice];
+        show(header(),p[0],p[1],h("div",{class:"center"},
+          h("div",{class:"choice chosen",style:"background:"+c.bg+";max-width:320px;justify-content:center"},h("span",{class:"s",text:c.s}),st.choices[answer.choice]),
+          h("div",{class:"big",style:"margin-top:16px",text:"回答しました"}),h("div",{class:"sub",text:"みんなの回答を待っています"})));
+        return;
+      }
+      var bar=h("i");
+      var list=h("div",{class:"choices"});
+      st.choices.forEach(function(t,k){
+        list.appendChild(h("button",{class:"choice",style:"background:"+COLORS[k].bg,"aria-label":"選択肢 "+(k+1)+"："+t,onclick:function(){choose(k);}},
+          h("span",{class:"s","aria-hidden":"true",text:COLORS[k].s}),t));
+      });
+      show(header(),p[0],p[1],h("div",{class:"timer","aria-hidden":"true"},bar),list);
+      var dur=st.dur||20000;
+      var tick=function(){var l=Math.max(0,deadline-Date.now());bar.style.transform="scaleX("+(l/dur)+")";};
+      tick();timerT=setInterval(tick,200);
+      return;
+    }
+    if(st.phase==="reveal"){
+      var r=myRes(),ok=r&&r[0]===1,none=!r||r[0]===-1;
+      var correct=st.choices&&st.correct!=null?st.choices[st.correct]:"";
+      show(header(),h("div",{class:"center"},
+        h("div",{class:"huge pop "+(ok?"ok":"ng"),text:ok?"○":none?"―":"×"}),
+        h("div",{class:"big",text:ok?"正解！ +"+r[1]+"点":none?"時間切れ":"ざんねん"}),
+        h("div",{class:"sub",text:"答え"}),
+        h("div",{class:"choice",style:"background:"+COLORS[st.correct].bg+";max-width:340px"},h("span",{class:"s",text:COLORS[st.correct].s}),correct),
+        r?h("div",{class:"pill",style:"margin-top:14px",text:"合計 "+r[2]+"点・"+r[3]+"位"}):null,
+        h("div",{class:"note",text:"先生の画面で語源を確かめよう"})));
+      return;
+    }
+    if(st.phase==="rank"||st.phase==="end"){
+      var me=myRes();
+      var top=h("div",{class:"top"});
+      (st.top||[]).forEach(function(t,k){
+        top.appendChild(h("div",{class:me&&me[3]===k+1&&t.name===name?"me":""},h("b",{text:(k+1)+"位"}),h("span",{text:t.name}),h("em",{style:"font-style:normal;font-weight:700",text:t.score+"点"})));
+      });
+      show(header(),h("div",{class:"center"},
+        h("div",{class:"sub",text:st.phase==="end"?"結果発表":"いまの順位"}),
+        me?h("div",{class:"huge pop",text:me[3]+"位"}):null,
+        me?h("div",{class:"big",text:me[2]+"点"}):h("div",{class:"big",text:"次の問題から参加できます"}),
+        top,
+        st.phase==="end"?h("div",{class:"note",text:"おつかれさま！ 先生の画面を見てね"}):null));
+      return;
+    }
+  }
+  function choose(k){
+    if(!state||state.phase!=="question"||answer.qid===state.qid)return;
+    if(Date.now()>deadline+500)return;
+    answer={qid:state.qid,choice:k};
+    try{navigator.vibrate&&navigator.vibrate(30);}catch(e){}
+    sendIn("answer",{pid:pid,key:key,qid:state.qid,choice:k});
+    render();
+  }
+
+  /* QR コードから来たとき（コードあり）で、名前も覚えていれば、そのまま参加画面を出す */
+  entry();
+})();
+</script>
+</body>
+</html>
