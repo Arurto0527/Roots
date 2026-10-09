@@ -100,3 +100,21 @@ create policy jisshu_storage_insert on storage.objects
 drop policy if exists jisshu_storage_delete on storage.objects;
 create policy jisshu_storage_delete on storage.objects
   for delete to authenticated using (bucket_id = 'jisshu' and public.is_jisshu());
+
+-- 意見箱（予定表ページへの「ここを直してほしい」）（2026-10-09 追加）
+create table if not exists public.jisshu_ideas (
+  id         uuid primary key default gen_random_uuid(),
+  author     text not null check (char_length(author) between 1 and 20),
+  body       text not null check (char_length(body) between 1 and 2000),
+  done       boolean not null default false,
+  created_at timestamptz not null default now()
+);
+alter table public.jisshu_ideas enable row level security;
+drop policy if exists jisshu_ideas_all on public.jisshu_ideas;
+create policy jisshu_ideas_all on public.jisshu_ideas
+  for all to authenticated using (public.is_jisshu()) with check (public.is_jisshu());
+grant select, insert, update, delete on public.jisshu_ideas to authenticated;
+do $$
+begin
+  begin alter publication supabase_realtime add table public.jisshu_ideas; exception when duplicate_object then null; end;
+end $$;
