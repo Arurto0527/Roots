@@ -67,15 +67,29 @@ const MODE_LABEL=Object.fromEntries(MODES.map(m=>[m.key,m.label]));
 const LEAP_MAX=ALPHA_FROM-1;
 const LESSONS=[...new Set(RAW_WORDS.filter(w=>w.lesson).map(w=>w.part))]
   .sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
+/* LEAP 小テスト（学校の紙の小テスト。◆の番号＝出題される LEAP の番号。問題の順のまま） */
+const LEAP_TESTS={
+  23:[1019,1026,1040,1045,1075,1083,1121,1131,1164,1179,1201,1212,1257,1271,1288,1305,1318,1346,1355,1399],
+  24:[1001,1007,1029,1032,1123,1132,1155,1173,1211,1226,1165,1227,1250,1295,1296,1300,1340,1350,1366,1398],
+  25:[1005,1029,1050,1059,1132,1146,1157,1169,1183,1194,1164,1178,1193,1198,1232,1337,1381,1391],   // 紙では 1157・1169 が2回出る
+  26:[1101,1111,1113,1116,1129,1144,1155,1163,1175,1192,1191,1245,1247,1261,1278,1296,1318,1342,1348,1389],
+  27:[1001,1008,1056,1095,1106,1107,1111,1117,1132,1137,1190,1222,1248,1251,1265,1286,1297,1344,1372,1397],
+};
+const TEST_NOS=Object.keys(LEAP_TESTS).map(Number);
+const testName=n=>"LEAP 小テスト 第"+n+"回";
 const WORD_BY_ID=new Map(RAW_WORDS.map(w=>[w.id,w]));
 const WORD_BY_EN=new Map();
 RAW_WORDS.forEach(w=>{const k=w.word.toLowerCase();if(!WORD_BY_EN.has(k))WORD_BY_EN.set(k,w);});
 const SIZE_STEPS=[0.8,0.9,1,1.1,1.25,1.4,1.6];
-const DEFAULT_CLASS={mode:"explain",kind:"leap",from:1,to:10,lesson:LESSONS[0]||null,order:"seq",
+const DEFAULT_CLASS={mode:"explain",kind:"leap",from:1,to:10,lesson:LESSONS[0]||null,test:TEST_NOS[0],order:"seq",
   sec:5,liveSec:20,dir:"en",sound:true,autoSpeak:true,scale:1,dark:false};
 
 function wordsFor(cfg){
   const lo=Math.min(cfg.from,cfg.to),hi=Math.max(cfg.from,cfg.to);
+  if(cfg.kind==="test"){
+    const list=(LEAP_TESTS[cfg.test]||[]).map(id=>WORD_BY_ID.get(id)).filter(w=>w&&!w.lesson);
+    return cfg.order==="random"?shuffle(list):list;
+  }
   let list=cfg.kind==="lesson"
     ?RAW_WORDS.filter(w=>w.part===cfg.lesson)
     :RAW_WORDS.filter(w=>!w.lesson&&w.id>=lo&&w.id<=hi&&w.id<=LEAP_MAX);
@@ -1440,7 +1454,7 @@ function printSheet(list,dir,title){
 /* ============================================================
    最初の画面（モードと範囲をえらぶ）
    ============================================================ */
-const sheetTitle=(cfg,list,dir)=>"Roots 単語テスト　"+(cfg.kind==="lesson"?partName(cfg.lesson):"No."+list[0].id+"〜"+list[list.length-1].id)+
+const sheetTitle=(cfg,list,dir)=>"Roots 単語テスト　"+(cfg.kind==="lesson"?partName(cfg.lesson):cfg.kind==="test"?testName(cfg.test):"No."+list[0].id+"〜"+list[list.length-1].id)+
   "（"+(dir==="en"?"英→日":"日→英")+"）";
 function SetupScreen({onStart,onResume}){
   const A=useApp();const {C,cfg,set}=A;
@@ -1498,6 +1512,7 @@ function SetupScreen({onStart,onResume}){
           <div style={{display:"flex",gap:12,marginBottom:16}}>
             <Pill active={cfg.kind==="leap"} onClick={()=>set({kind:"leap"})}>LEAP の番号</Pill>
             {LESSONS.length>0&&<Pill active={cfg.kind==="lesson"} onClick={()=>set({kind:"lesson",lesson:cfg.lesson||LESSONS[0]})}>教科書</Pill>}
+            <Pill active={cfg.kind==="test"} onClick={()=>set({kind:"test",test:LEAP_TESTS[cfg.test]?cfg.test:TEST_NOS[0]})}>小テスト</Pill>
           </div>
           {cfg.kind==="leap"
             ?<div style={{display:"flex",alignItems:"center",gap:16,flexWrap:"wrap"}}>
@@ -1511,6 +1526,10 @@ function SetupScreen({onStart,onResume}){
                  <Pill onClick={()=>shift(-1)} disabled={lo<=1}>◀ 前の{size}語</Pill>
                  <Pill onClick={()=>shift(1)} disabled={hi>=LEAP_MAX}>次の{size}語 ▶</Pill>
                </div>
+             </div>
+            :cfg.kind==="test"
+            ?<div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
+               {TEST_NOS.map(n=><Pill key={n} active={cfg.test===n} onClick={()=>set({test:n})}>第{n}回</Pill>)}
              </div>
             :<div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
                {LESSONS.map(l=><Pill key={l} active={cfg.lesson===l} onClick={()=>set({lesson:l})}>{partName(l)}</Pill>)}
