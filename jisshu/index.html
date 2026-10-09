@@ -47,6 +47,9 @@
   /* 上の帯 */
   .top{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:56px;}
   .me{min-height:44px;padding:0 14px;border:2px solid var(--line);border-radius:22px;font-weight:700;font-size:15px;}
+  .acts{display:flex;gap:8px;margin-top:4px;}
+  .acts button{flex:1;min-height:44px;border:2px solid var(--line);border-radius:22px;font-weight:700;font-size:15px;position:relative;}
+  .acts .badge{display:inline-block;min-width:20px;height:20px;line-height:20px;border-radius:10px;background:var(--danger);color:#fff;font-size:12px;margin-left:6px;padding:0 5px;}
   .tabs{display:flex;gap:0;margin:8px 0 16px;border-bottom:2px solid var(--line);}
   .tab{flex:1;min-height:52px;font-weight:700;color:var(--sub);border-bottom:3px solid transparent;margin-bottom:-2px;}
   .tab.on{color:var(--ink);border-bottom-color:var(--ink);}
@@ -251,7 +254,7 @@
     me:ls("roots.jisshu.me")||"",
     tab:"tt",
     week:todayS()>=WEEKS[1]?1:0,
-    lessons:[],feedback:[],files:[],ideas:[],ideaDraft:"",
+    lessons:[],feedback:[],files:[],ideas:[],notices:[],ideaDraft:"",noticeDraft:"",
     loaded:false
   };
   var stack=[];      // 上に重ねている画面（いちばん後ろが手前）
@@ -343,14 +346,16 @@
       sb.from("jisshu_lessons").select("*"),
       sb.from("jisshu_feedback").select("*"),
       sb.from("jisshu_files").select("*"),
-      sb.from("jisshu_ideas").select("*")
+      sb.from("jisshu_ideas").select("*"),
+      sb.from("jisshu_notices").select("*")
     ]).then(function(rs){
       for(var i=0;i<3;i++)if(rs[i].error){
         if(rs[i].error.code==="PGRST301"||/JWT/i.test(rs[i].error.message)){sb.auth.signOut().then(NEED_PASSWORD?showLogin:startMain);return false;}
         throw rs[i].error;
       }
       S.lessons=rs[0].data||[];S.feedback=rs[1].data||[];S.files=rs[2].data||[];S.loaded=true;
-      S.ideas=rs[3].error?[]:(rs[3].data||[]);   // 意見箱が使えなくても、時間割は出す
+      S.ideas=rs[3].error?[]:(rs[3].data||[]);
+      S.notices=rs[4].error?[]:(rs[4].data||[]);   // 意見箱が使えなくても、時間割は出す
       return true;
     });
   }
@@ -366,6 +371,7 @@
       .on("postgres_changes",{event:"*",schema:"public",table:"jisshu_feedback"},scheduleReload)
       .on("postgres_changes",{event:"*",schema:"public",table:"jisshu_files"},scheduleReload)
       .on("postgres_changes",{event:"*",schema:"public",table:"jisshu_ideas"},scheduleReload)
+      .on("postgres_changes",{event:"*",schema:"public",table:"jisshu_notices"},scheduleReload)
       .subscribe();
   }
   /* スマホで別のアプリから戻ってきたときにも、最新にする */
@@ -400,12 +406,21 @@
       h("h1",{text:"教育実習 予定表"}),
       h("button",{class:"me",text:S.me+" ▾",onclick:function(){showNames(false);}})
     );
+    var unread=unreadNotices();
+    var acts=h("div",{class:"acts"},
+      h("button",{text:"↻ 更新",onclick:function(e){
+        var b=e.currentTarget;b.disabled=true;
+        loadAll().then(function(ok){b.disabled=false;if(ok){refreshAll();toast("最新にしました");}})
+          .catch(function(){b.disabled=false;toast("つながりませんでした");});
+      }}),
+      h("button",{onclick:openNotices},"お知らせ",unread?h("span",{class:"badge",text:String(unread)}):null)
+    );
     var tabs=h("div",{class:"tabs"},
       h("button",{class:"tab"+(S.tab==="tt"?" on":""),text:"時間割",onclick:function(){S.tab="tt";render();}}),
       h("button",{class:"tab"+(S.tab==="files"?" on":""),text:"資料",onclick:function(){S.tab="files";render();}}),
       h("button",{class:"tab"+(S.tab==="ideas"?" on":""),text:"意見箱",onclick:function(){S.tab="ideas";render();}})
     );
-    show(top,tabs,S.tab==="tt"?renderTimetable():S.tab==="files"?renderFilesTab():renderIdeasTab());
+    show(top,acts,tabs,S.tab==="tt"?renderTimetable():S.tab==="files"?renderFilesTab():renderIdeasTab());
   }
 
   function renderTimetable(){
@@ -473,6 +488,57 @@
           fileList(filesOf(l.id)));
       }):h("p",{class:"empty",text:"まだありません"})
     );
+  }
+
+  /* ------------------------------------------------------------
+     お知らせ（5人への連絡。まだ見ていない数を赤い丸で出す）
+     ------------------------------------------------------------ */
+  function unreadNotices(){
+    var seen=ls("roots.jisshu.noticeSeen")||"";
+    return S.notices.filter(function(n){return n.author!==S.me&&n.created_at>seen;}).length;
+  }
+  function markNoticesSeen(){
+    var last="";S.notices.forEach(function(n){if(n.created_at>last)last=n.created_at;});
+    if(last)ls("roots.jisshu.noticeSeen",last);
+  }
+  function openNotices(){
+    var ta=h("textarea",{class:"field",placeholder:"例：明日の朝は8:15に職員室集合です",maxlength:2000,value:S.noticeDraft});
+    ta.addEventListener("input",function(){S.noticeDraft=ta.value;});
+    var err=h("div",{class:"err"});
+    var send=h("button",{class:"btn",text:"お知らせを出す",onclick:function(){
+      var body=ta.value.trim();
+      if(!body){err.textContent="書いてから出してください";return;}
+      send.disabled=true;err.textContent="";
+      sb.from("jisshu_notices").insert({author:S.me,body:body}).then(function(r){
+        send.disabled=false;
+        if(r.error){err.textContent="出せませんでした。もう一度ためしてください";return;}
+        S.noticeDraft="";ta.value="";ta.blur();toast("お知らせを出しました");
+        loadAll().then(function(ok){if(ok)refreshAll();});
+      });
+    }});
+    var listBox=h("div");
+    function fill(){
+      markNoticesSeen();
+      listBox.textContent="";
+      var list=S.notices.slice().sort(function(a,b){return a.created_at<b.created_at?1:-1;});
+      if(!list.length){add(listBox,h("p",{class:"empty",text:"まだありません"}));return;}
+      add(listBox,list.map(function(n){
+        return h("div",{class:"fb idea"+(n.author===S.me?" mine":"")},
+          h("div",{class:"who"},n.author,h("span",{text:timeText(n.created_at)})),
+          h("div",{class:"v",text:n.body}),
+          n.author===S.me?h("div",{class:"st"},h("button",{class:"del",text:"消す",onclick:function(){
+            if(!confirm("このお知らせを消しますか？"))return;
+            sb.from("jisshu_notices").delete().eq("id",n.id).then(function(r){
+              if(r.error){toast("消せませんでした");return;}
+              loadAll().then(function(ok){if(ok)refreshAll();});
+            });
+          }})):null);
+      }));
+    }
+    fill();
+    var o=openOverlay("お知らせ",h("div",{},listBox,
+      h("h2",{text:"お知らせを出す"}),ta,err,h("div",{class:"btns"},send)),fill);
+    o.onClose=function(){render();};
   }
 
   /* ------------------------------------------------------------

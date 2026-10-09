@@ -118,3 +118,20 @@ do $$
 begin
   begin alter publication supabase_realtime add table public.jisshu_ideas; exception when duplicate_object then null; end;
 end $$;
+
+-- お知らせ（5人への連絡）（2026-10-09 追加）
+create table if not exists public.jisshu_notices (
+  id         uuid primary key default gen_random_uuid(),
+  author     text not null check (char_length(author) between 1 and 20),
+  body       text not null check (char_length(body) between 1 and 2000),
+  created_at timestamptz not null default now()
+);
+alter table public.jisshu_notices enable row level security;
+drop policy if exists jisshu_notices_all on public.jisshu_notices;
+create policy jisshu_notices_all on public.jisshu_notices
+  for all to authenticated using (public.is_jisshu()) with check (public.is_jisshu());
+grant select, insert, update, delete on public.jisshu_notices to authenticated;
+do $$
+begin
+  begin alter publication supabase_realtime add table public.jisshu_notices; exception when duplicate_object then null; end;
+end $$;

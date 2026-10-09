@@ -24,10 +24,15 @@ drop policy if exists jisshu_ideas_open on public.jisshu_ideas;
 create policy jisshu_ideas_open on public.jisshu_ideas
   for all to anon using (true) with check (true);
 
+drop policy if exists jisshu_notices_open on public.jisshu_notices;
+create policy jisshu_notices_open on public.jisshu_notices
+  for all to anon using (true) with check (true);
+
 grant select, insert, update, delete on public.jisshu_lessons  to anon;
 grant select, insert, update, delete on public.jisshu_feedback to anon;
 grant select, insert, update, delete on public.jisshu_files    to anon;
 grant select, insert, update, delete on public.jisshu_ideas    to anon;
+grant select, insert, update, delete on public.jisshu_notices  to anon;
 
 drop policy if exists jisshu_storage_open_read on storage.objects;
 create policy jisshu_storage_open_read on storage.objects
@@ -46,10 +51,12 @@ create policy jisshu_storage_open_delete on storage.objects
 -- drop policy if exists jisshu_feedback_open on public.jisshu_feedback;
 -- drop policy if exists jisshu_files_open    on public.jisshu_files;
 -- drop policy if exists jisshu_ideas_open    on public.jisshu_ideas;
+-- drop policy if exists jisshu_notices_open  on public.jisshu_notices;
 -- revoke select, insert, update, delete on public.jisshu_lessons  from anon;
 -- revoke select, insert, update, delete on public.jisshu_feedback from anon;
 -- revoke select, insert, update, delete on public.jisshu_files    from anon;
 -- revoke select, insert, update, delete on public.jisshu_ideas    from anon;
+-- revoke select, insert, update, delete on public.jisshu_notices  from anon;
 -- drop policy if exists jisshu_storage_open_read   on storage.objects;
 -- drop policy if exists jisshu_storage_open_insert on storage.objects;
 -- drop policy if exists jisshu_storage_open_delete on storage.objects;
