@@ -52259,15 +52259,23 @@ function HourBars({C,values,height=40}){
 }
 
 /* 14日分の小さな棒グラフ（左が古い日、右が今日） */
-function DayBars({C,values,max,height=36,labels}){
+function DayBars({C,values,max,height=36,labels,unit}){
   const m=Math.max(1,max!=null?max:Math.max(...values));
   const v=[...values].reverse();
+  const [sel,setSel]=useState(null); /* unit があるときだけ、タップした日の数字を出す */
+  const dayLabel=i=>{const ago=v.length-1-i;const d=new Date();d.setDate(d.getDate()-ago);
+    return (d.getMonth()+1)+"/"+d.getDate()+(ago===0?"（今日）":"");};
   return (
     <div>
+      {unit&&<div style={{fontSize:14,minHeight:22,color:sel!=null?C.text:C.faint,marginBottom:4}}>
+        {sel!=null?<>{dayLabel(sel)}：<b>{v[sel]}</b>{unit}</>:"棒をタップすると数字が出ます"}</div>}
       <div style={{display:"flex",alignItems:"flex-end",gap:3,height}}>
         {v.map((x,i)=>(
-          <div key={i} title={x+""} style={{flex:1,height:x?Math.max(3,x/m*height):2,
-            background:x?C.text:C.line,borderRadius:1}}/>
+          <div key={i} title={x+""} onClick={unit?()=>setSel(sel===i?null:i):undefined}
+            style={{flex:1,height:"100%",display:"flex",alignItems:"flex-end",cursor:unit?"pointer":undefined}}>
+            <div style={{width:"100%",height:x?Math.max(3,x/m*height):2,
+              background:sel===i?C.root:(x?C.text:C.line),borderRadius:1}}/>
+          </div>
         ))}
       </div>
       {labels&&<div style={{display:"flex",justifyContent:"space-between",fontSize:11,color:C.faint,marginTop:4}}>
@@ -52567,11 +52575,11 @@ function AdminScreen({C}){
       </div>
       <div style={box}>
         <h3 style={h3}>毎日の学習人数</h3>
-        <DayBars C={C} values={s.classDays} max={s.n} height={56} labels/>
+        <DayBars C={C} values={s.classDays} max={s.n} height={56} labels unit="人"/>
       </div>
       <div style={box}>
         <h3 style={h3}>毎日の学習時間（全員・分）</h3>
-        <DayBars C={C} values={s.classMins} height={56} labels/>
+        <DayBars C={C} values={s.classMins} height={56} labels unit="分"/>
       </div>
       <div style={box}>
         <h3 style={h3}>学習した時間帯（全員）</h3>
