@@ -54186,6 +54186,8 @@ function LoginScreen({C,onSignedIn}){
 }
 
 /* ログインしているか確かめてから App を出す */
+/* 自分のパソコンで動かしているときだけ true。公開URLでは必ず false */
+const IS_LOCAL_DEV=["localhost","127.0.0.1","[::1]"].includes(location.hostname);
 function Gate(){
   const [state,setState]=useState("loading");
   const [uid,setUid]=useState(null);
@@ -54205,7 +54207,12 @@ function Gate(){
     if(hasLocal){setUid(user.id);setState("app");return Promise.resolve();}
     return sync.then(()=>{setUid(user.id);setState("app");});
   };
+  /* 確認用の入口。自分のパソコンで開いたとき（localhost）だけ使える。
+     ログインせずに画面を見るためのもので、クラウドとは同期しない（Cloud.user を空のままにする）。
+     アドレスに ?dev=1 を付けると、ボタンを押さずにそのまま入る */
+  const enterDev=()=>{setUid("dev-local");setState("app");};
   useEffect(()=>{
+    if(IS_LOCAL_DEV&&/[?&]dev=1/.test(location.search)){enterDev();return;}
     if(!sb){
       window.__ROOTS_BOOT_ERROR__("ログインの部品を読み込めませんでした。インターネットに接続して開き直してください。");
       return;
@@ -54225,6 +54232,11 @@ function Gate(){
     <div style={{width:"100%",maxWidth:430,margin:"0 auto",minHeight:"100vh",display:"flex",flexDirection:"column",
       background:C.bg,color:C.text}}>
       <LoginScreen C={C} onSignedIn={enter}/>
+      {IS_LOCAL_DEV&&<div style={{padding:"0 20px 24px"}}>
+        <button onClick={enterDev} style={{width:"100%",minHeight:56,fontSize:16,fontWeight:700,borderRadius:14,
+          border:"2px dashed "+C.faint,background:"transparent",color:C.sub,cursor:"pointer"}}>
+          確認用で入る（このパソコンだけ・同期なし）</button>
+      </div>}
       <NoticeBox/>
     </div>
   );
