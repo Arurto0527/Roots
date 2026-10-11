@@ -52252,11 +52252,12 @@ function useBarPick(){
 }
 function BarCol({C,x,m,height,on,onClick,title}){
   return (
-    <div title={title} onClick={onClick}
-      style={{flex:1,height:"100%",display:"flex",alignItems:"flex-end",cursor:onClick?"pointer":undefined}}>
-      <div style={{width:"100%",height:x?Math.max(3,x/m*height):2,
-        background:on?C.root:(x?C.text:C.line),borderRadius:1}}/>
-    </div>
+    <button type="button" title={title} onClick={onClick} disabled={!onClick} aria-label={title}
+      style={{flex:1,minWidth:0,height:"100%",display:"flex",alignItems:"flex-end",padding:0,margin:0,
+        border:"none",background:"transparent",cursor:onClick?"pointer":"default",touchAction:"manipulation"}}>
+      <span style={{display:"block",width:"100%",height:x?Math.max(3,x/m*height):2,
+        background:on?C.root:(x?C.text:C.line),borderRadius:1,pointerEvents:"none"}}/>
+    </button>
   );
 }
 
