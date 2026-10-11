@@ -46528,8 +46528,11 @@ const GRADES=[
   {g:2,key:"good", label:"覚えた",  tone:"ok"},
 ];
 
-function nextInterval(w,grade){
+function nextInterval(w,grade,fast){
   let {ef,interval,reps}=w;
+  /* 特例：はじめて出た語に一発で正解 → 次は1週間後。そこでも正解なら習得（21日）にする */
+  if(grade>=2&&fast&&reps===0) return {ef, interval:7, reps:1, lapse:false};
+  if(grade>=2&&reps===1&&interval>=7&&w.fastTrack) return {ef, interval:MASTER_INTERVAL, reps:2, lapse:false};
   if(grade===0)  return {ef:Math.max(1.3,ef-0.2), interval:0,  reps:0,      lapse:true};
   if(grade===1)  return {ef:Math.max(1.3,ef-0.15),interval:1,  reps:reps+1, lapse:false};
   if(grade===2){
@@ -46542,14 +46545,15 @@ function nextInterval(w,grade){
 
 /* 1語ぶんの学習状態を更新する。
    同じ日に何度正解しても correctCount は1日1回しか増えない（連打で「習得」にならない） */
-function applyGrade(w,grade,now){
-  const r=nextInterval(w,grade);
+function applyGrade(w,grade,now,fast){
+  const r=nextInterval(w,grade,fast);
   const day=dayKey(now);
   const sameDay=w.lastGradedDay===day;
   const correct=grade>=2;
   return {
     ...w,
     ef:r.ef, interval:r.interval, reps:r.reps,
+    fastTrack: (grade>=2&&fast&&w.reps===0)?true:(r.reps===1&&w.fastTrack&&grade>=2)?true:false,
     lapses:w.lapses+(r.lapse?1:0),
     due: r.interval===0 ? addDays(now,1) : addDays(now,r.interval),
     correctCount: (correct&&!sameDay)?w.correctCount+1:w.correctCount,
@@ -51230,7 +51234,7 @@ function StudyScreen({C,item,ui,settings,progress,handlers}){
 /* ============================================================
    SCREEN: RESULT
    ============================================================ */
-function ResultScreen({C,log,newBadges,stats,earned,message,words,onReplay,onHome,onReviewWrong,onOpenWord}){
+function ResultScreen({C,log,newBadges,stats,earned,message,words,onReplay,onHome,onReviewWrong,onOpenWord,onFixGrade,canFix}){
   /* 同じ語を複数回やり直したぶんは1語として数える */
   const uniq=useMemo(()=>{
     const m=new Map();
@@ -51321,7 +51325,8 @@ function ResultScreen({C,log,newBadges,stats,earned,message,words,onReplay,onHom
       {wrong.length>0&&(
         <div style={{background:C.card,border:"1px solid "+C.border,borderRadius:4,padding:18,marginBottom:14}}>
           <div style={{fontSize:11.5,color:C.bad,fontWeight:700,marginBottom:12}}>つまずいた語（{wrong.length}）</div>
-          {wrong.slice(0,6).map(x=>{
+          <div style={{maxHeight:320,overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
+          {wrong.map(x=>{
             const w=words.find(y=>y.id===x.id);if(!w)return null;
             return (
               <button key={x.id} onClick={()=>onOpenWord(w)}
@@ -51333,9 +51338,45 @@ function ResultScreen({C,log,newBadges,stats,earned,message,words,onReplay,onHom
               </button>
             );
           })}
+          </div>
           <Btn C={C} variant="ghost" style={{marginTop:14,minHeight:46,fontSize:13.5}} onClick={onReviewWrong}>
             <Icon.repeat size={17}/>この{wrong.length}語だけもう一度
           </Btn>
+        </div>
+      )}
+
+      {/* 今回の単語ぜんぶ。押しまちがえたら ○× を直せる */}
+      {total>0&&(
+        <div style={{background:C.card,border:"1px solid "+C.border,borderRadius:4,padding:18,marginBottom:14}}>
+          <div style={{fontSize:11.5,color:C.faint,fontWeight:700,marginBottom:4}}>今回の単語（{total}）</div>
+          <div style={{fontSize:12,color:C.sub,marginBottom:10,lineHeight:1.6}}>押しまちがえた語は ○ / × で直せます</div>
+          <div style={{maxHeight:360,overflowY:"auto",WebkitOverflowScrolling:"touch"}}>
+          {uniq.map(x=>{
+            const w=words.find(y=>y.id===x.id);if(!w)return null;
+            const ok=x.grade>=2&&x.tries===1;
+            const fix=canFix&&canFix(x.id);
+            const Mark=({on,good})=>(
+              <button onClick={()=>{if(fix&&on!==true)onFixGrade(x.id,good);}} disabled={!fix}
+                aria-label={w.word+(good?" を正解にする":" を不正解にする")} aria-pressed={on}
+                style={{width:44,minHeight:44,borderRadius:4,flexShrink:0,cursor:fix?"pointer":"default",
+                  border:"1px solid "+(on?(good?C.ok:C.bad):C.line),
+                  background:on?(good?C.ok:C.bad):"transparent",color:on?"#fff":C.faint,
+                  fontSize:18,fontWeight:700,opacity:fix||on?1:.4}}>{good?"○":"×"}</button>
+            );
+            return (
+              <div key={x.id} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 0",borderTop:"1px solid "+C.line}}>
+                <button onClick={()=>onOpenWord(w)}
+                  style={{flex:1,minWidth:0,textAlign:"left",background:"transparent",border:"none",cursor:"pointer",
+                    padding:"6px 0",display:"flex",gap:8,alignItems:"baseline"}}>
+                  <span className="en" style={{fontSize:16,fontWeight:700,color:C.text}}>{w.word}</span>
+                  <span style={{fontSize:13,color:C.sub,flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{w.meaning}</span>
+                </button>
+                <Mark on={ok} good={true}/>
+                <Mark on={!ok} good={false}/>
+              </div>
+            );
+          })}
+          </div>
         </div>
       )}
 
@@ -53329,6 +53370,8 @@ function App(){
   const [newBadges,setNewBadges]=useState([]);
   const [resultMsg,setResultMsg]=useState("");
   const undoRef=useRef(null);
+  /* この回で採点する前の、語ごとの状態（結果画面で○×を直すときに使う） */
+  const preRef=useRef({});
   const tick=useRef(null);
   const hintTimer=useRef(null);
 
@@ -53513,7 +53556,10 @@ function App(){
     undoRef.current={words,queue,log,stats};
     SFX[grade>=2?"correct":"wrong"](settings.soundEnabled!==false);
     haptic(grade>=2?10:[8,36,8]);
-    const nw=words.map(w=>w.id===item.word.id?applyGrade(w,grade,now):w);
+    const cur=words.find(w=>w.id===item.word.id);
+    if(cur&&!preRef.current[cur.id]) preRef.current={...preRef.current,[cur.id]:cur};
+    const fast=queue[0].firstTry&&!!cur&&cur.reps===0&&!cur.lapses&&!cur.incorrectCount;
+    const nw=words.map(w=>w.id===item.word.id?applyGrade(w,grade,now,fast):w);
     const entry={id:item.word.id,format:item.format,firstTry:queue[0].firstTry,grade,at:now};
     Cloud.log({...entry,hint:uiSafe.hint});
     const nl=[...log,entry];
@@ -53538,7 +53584,7 @@ function App(){
      呼ぶ側から渡せるようにしておく（渡されなければ今の sessionTotal を使う） */
   const saveSession=useCallback((q,l,at,total)=>{
     if(!q.length){lsDel(KEY.session);return;}
-    lsSet(KEY.session,{queue:q,log:l,at:at||Date.now(),total:total??sessionTotal,layout:WORDS_LAYOUT});
+    lsSet(KEY.session,{queue:q,log:l,at:at||Date.now(),total:total??sessionTotal,layout:WORDS_LAYOUT,pre:preRef.current});
   },[sessionTotal]);
 
   /* ---------- セッション終了 ---------- */
@@ -53581,11 +53627,27 @@ function App(){
       return;
     }
     const q=makeQueue(p,settings);
+    preRef.current={};
     setQueue(q);setLog([]);setSessionTotal(q.length);setNewBadges([]);
     undoRef.current=null;setCanUndo(false);setSnack(null);
     saveSession(q,[],Date.now(),q.length);
     setScreen("study");
   },[pool,settings,saveSession]);
+
+  /* 結果画面で○×を直す。この回の前の状態から、その語を「1回で○／×」として付け直す */
+  const fixGrade=useCallback((id,ok)=>{
+    const pre=preRef.current[id];
+    if(!pre)return;
+    const now=Date.now(),grade=ok?2:0;
+    const fast=ok&&pre.reps===0&&!pre.lapses&&!pre.incorrectCount;
+    const at=(log.find(x=>x.id===id)||{}).at||now;
+    const fmt=(log.find(x=>x.id===id)||{}).format;
+    const i0=log.findIndex(x=>x.id===id);
+    const nl=log.filter((x,i)=>x.id!==id||i===i0).map((x,i)=>x.id===id?{id,format:fmt,firstTry:true,grade,at,fixed:true}:x);
+    const nw=words.map(w=>w.id===id?applyGrade(pre,grade,now,fast):w);
+    setWords(nw);setLog(nl);
+    persist(nw,settings,stats,earned);
+  },[log,words,settings,stats,earned,persist]);
 
   const replayWrong=useCallback(()=>{
     const ids=[...new Set(log.filter(x=>x.grade===0).map(x=>x.id))];
@@ -53615,6 +53677,7 @@ function App(){
     const d=resumeInfo&&resumeInfo.data;
     if(!d)return;
     setQueue(d.queue);setLog(d.log||[]);setSessionTotal(d.total||d.queue.length+(d.log||[]).length);
+    preRef.current=d.pre||{};
     setResumeInfo(null);setNewBadges([]);undoRef.current=null;
     setScreen("study");
   },[resumeInfo]);
@@ -53840,7 +53903,8 @@ function App(){
         <ResultScreen C={C} log={log} newBadges={newBadges} stats={stats} earned={earned}
           message={resultMsg} words={words} onReplay={()=>startSession()}
           onHome={()=>{setQueue([]);setLog([]);setScreen("home");}}
-          onReviewWrong={replayWrong} onOpenWord={setSheetWord}/>
+          onReviewWrong={replayWrong} onOpenWord={setSheetWord}
+          onFixGrade={fixGrade} canFix={id=>!!preRef.current[id]}/>
       )}
 
       {screen==="list"&&(
