@@ -53259,106 +53259,175 @@ function SettingsScreen({C,settings,stats,words,earned,onChange,onReset,onTutori
    音声を全部スマホに保存し、ネットがなくても鳴るようにする。保存先は sw.js と同じ roots-audio
    （名前も sw.js と同じ「/…/audio/us/xxx.m4a」）。すでに保存してある音声は取りに行かないので、
    途中で閉じても次に押せば続きから。保存がすんだものは「ダウンロード済み」に変わる */
-function SaveAudioButton({C,rowBtn}){
-  const ACCS=["us","uk"];
-  const [saved,setSaved]=useState(null);   /* {us:保存ずみの数, uk:…} */
-  const [job,setJob]=useState(null);       /* {accs:[…], done, total, err} */
-  const alive=useRef(true);
-  const list=acc=>{clipUrl(acc,"");return audioIndex[acc]?[...audioIndex[acc]]:[];};
-  const key=(acc,h)=>new URL("audio/"+acc+"/"+h+".m4a",location.href).pathname;
-  const totals={us:list("us").length,uk:list("uk").length};
-  const count=async()=>{
+/* 音声のダウンロード係。設定画面を閉じても止まらないよう、画面（React）の外に1つだけ置く。
+   画面はここの様子（state）を見て表示するだけ。アプリ自体を閉じたら止まり、次に押せば続きから */
+const AudioDL={
+  state:{saved:null,job:null,msg:null},   /* saved:{us,uk 保存ずみの数} job:{accs,phase,done,total,err} msg:{ok,text} */
+  subs:new Set(),stopFlag:false,
+  set(p){AudioDL.state={...AudioDL.state,...p};AudioDL.subs.forEach(f=>f(AudioDL.state));},
+  sub(f){AudioDL.subs.add(f);return()=>AudioDL.subs.delete(f);},
+  list(acc){clipUrl(acc,"");return audioIndex[acc]?[...audioIndex[acc]]:[];},
+  key(acc,h){return new URL("audio/"+acc+"/"+h+".m4a",location.href).pathname;},
+  async count(){
     const cache=await caches.open("roots-audio");
     const have=new Set((await cache.keys()).map(r=>new URL(r.url).pathname));
     const out={};
-    for(const acc of ACCS)out[acc]=list(acc).filter(h=>have.has(key(acc,h))).length;
+    for(const acc of ["us","uk"])out[acc]=AudioDL.list(acc).filter(h=>have.has(AudioDL.key(acc,h))).length;
     return {have,out};
-  };
-  useEffect(()=>{
-    alive.current=true;
-    (async()=>{try{if(window.caches){const {out}=await count();if(alive.current)setSaved(out);}}catch(e){}})();
-    return()=>{alive.current=false;};
-  },[]);
-  const isDone=acc=>saved!=null&&totals[acc]>0&&saved[acc]>=totals[acc];
-  const run=async accs=>{
-    if(job||!window.caches)return;
-    try{if(navigator.storage&&navigator.storage.persist)await navigator.storage.persist();}catch(e){}
-    const cache=await caches.open("roots-audio");
-    const {have}=await count();
-    const all=accs.flatMap(acc=>list(acc).map(h=>key(acc,h)));
+  },
+  async refresh(){try{if(window.caches&&!AudioDL.state.job)AudioDL.set({saved:(await AudioDL.count()).out});}catch(e){}},
+  stop(){AudioDL.stopFlag=true;},
+  async run(accs){
+    if(AudioDL.state.job||!window.caches)return;
+    if(!navigator.onLine){AudioDL.set({msg:{ok:false,text:"ネットにつながっていません。Wi-Fi につないでから押してください"}});return;}
+    AudioDL.stopFlag=false;
+    /* 押したらすぐ画面を変える（数えるのにスマホだと数秒かかるため） */
+    AudioDL.set({msg:null,job:{accs,phase:"prep",done:0,total:0,err:0}});
+    /* 「消さないで」のお願い。ブラウザによっては返事がこないので 1.5 秒で先へ進む */
+    try{if(navigator.storage&&navigator.storage.persist)
+      await Promise.race([navigator.storage.persist(),new Promise(r=>setTimeout(r,1500))]);}catch(e){}
+    let cache,have;
+    try{cache=await caches.open("roots-audio");({have}=await AudioDL.count());}
+    catch(e){AudioDL.set({job:null,msg:{ok:false,text:"この端末では保存できませんでした（ブラウザの容量がいっぱいかもしれません）"}});return;}
+    const all=accs.flatMap(acc=>AudioDL.list(acc).map(h=>AudioDL.key(acc,h)));
     const todo=all.filter(k=>!have.has(k));
     let done=all.length-todo.length, err=0, i=0;
-    setJob({accs,done,total:all.length,err:0});
+    AudioDL.set({job:{accs,phase:"run",done,total:all.length,err:0}});
     const worker=async()=>{
-      while(alive.current&&i<todo.length){
+      while(!AudioDL.stopFlag&&i<todo.length){
         const k=todo[i++];
         try{
           const res=await fetch(k,{cache:"no-store"});
           if(res.ok){await cache.put(k,res);done++;}else err++;
         }catch(e){err++;}
-        if(alive.current&&(done+err)%20===0)setJob(j=>j&&{...j,done,err});
+        if((done+err)%5===0)AudioDL.set({job:{...AudioDL.state.job,done,err}});
       }
     };
     await Promise.all([1,2,3,4,5,6].map(worker));
-    if(!alive.current)return;
-    try{setSaved((await count()).out);}catch(e){}
-    setJob(null);
-    if(err)setFailed(err);
-  };
-  const [failed,setFailed]=useState(0);
+    let saved=AudioDL.state.saved;
+    try{saved=(await AudioDL.count()).out;}catch(e){}
+    const msg=AudioDL.stopFlag?{ok:false,text:"とちゅうで止めました（"+done.toLocaleString()+" / "+all.length.toLocaleString()+"）。もう一度押すと続きから保存します"}
+      :err?{ok:false,text:err.toLocaleString()+"個は保存できませんでした。ネットを確かめて、もう一度押すと続きから保存します"}
+      :{ok:true,text:"保存できました！ネットがなくても発音が鳴ります"};
+    AudioDL.set({job:null,saved,msg});
+  },
+};
+const useAudioDL=()=>{
+  const [st,setSt]=useState(AudioDL.state);
+  useEffect(()=>AudioDL.sub(setSt),[]);
+  return st;
+};
+/* ダウンロード中に、どの画面でも上に出す小さな帯。押すと何もしない（見るだけ） */
+function AudioDLBar({C}){
+  const {job,msg}=useAudioDL();
+  const [showMsg,setShowMsg]=useState(false);
+  useEffect(()=>{if(msg){setShowMsg(true);const t=setTimeout(()=>setShowMsg(false),5000);return()=>clearTimeout(t);}},[msg]);
+  if(!job&&!(showMsg&&msg))return null;
+  const pct=job&&job.total?Math.floor(job.done/job.total*100):0;
+  return (
+    <div style={{position:"fixed",top:"calc(env(safe-area-inset-top) + 8px)",left:"50%",transform:"translateX(-50%)",
+      width:"calc(100% - 32px)",maxWidth:398,zIndex:900,pointerEvents:"none",
+      background:C.card||C.bg,border:"1.5px solid "+C.accent,borderRadius:12,padding:"8px 12px",
+      boxShadow:"0 4px 14px rgba(0,0,0,.12)",fontSize:14,fontWeight:700,color:C.text}}>
+      {job?<>
+        <div style={{display:"flex",justifyContent:"space-between",gap:8}}>
+          <span>{job.phase==="prep"?"音声の保存を準備中…":"音声を保存中（裏で続きます）"}</span>
+          {job.phase==="run"&&<span style={{color:C.accent}}>{pct}%</span>}
+        </div>
+        <div style={{marginTop:6,height:6,borderRadius:4,background:C.border,overflow:"hidden"}}>
+          <div style={{width:Math.max(3,pct)+"%",height:"100%",background:C.accent,transition:"width .3s"}}/></div>
+      </>:<span style={{color:msg.ok?C.accent:C.text}}>{msg.text}</span>}
+    </div>
+  );
+}
+/* 設定の「音声をダウンロード」。アメリカ英語・イギリス英語・両方から選んで、音声を全部スマホに保存する。
+   保存先は sw.js と同じ roots-audio。保存ずみの音声は取りに行かないので、途中で止めても次は続きから。
+   実際の保存は AudioDL がするので、この画面を閉じても止まらない */
+function SaveAudioButton({C,rowBtn}){
+  const {saved,job,msg}=useAudioDL();
+  useEffect(()=>{AudioDL.refresh();},[]);
+  const totals={us:AudioDL.list("us").length,uk:AudioDL.list("uk").length};
+  const isDone=acc=>saved!=null&&totals[acc]>0&&saved[acc]>=totals[acc];
+  const run=accs=>AudioDL.run(accs);
   if(!window.caches||!(totals.us||totals.uk))return null;
-  const mb=n=>Math.round(n*12.5/1024);
+  const mb=n=>Math.max(1,Math.round(n*12.5/1024));
+  const mine=getAccent();
+  const other=mine==="us"?"uk":"us";
+  const NAME={us:"アメリカ英語",uk:"イギリス英語"};
   const choices=[
-    {id:"us",label:"アメリカ英語",accs:["us"]},
-    {id:"uk",label:"イギリス英語",accs:["uk"]},
+    {id:mine,label:NAME[mine],accs:[mine],tag:"いま使っている発音"},
+    {id:other,label:NAME[other],accs:[other]},
     {id:"both",label:"両方",accs:["us","uk"]},
   ];
-  const Check=()=>(<Svg size={18}><path d="M5 12.5l4.5 4.5L19 7.5"/></Svg>);
+  const Check=({size=18})=>(<Svg size={size}><path d="M5 12.5l4.5 4.5L19 7.5"/></Svg>);
+  const pct=job&&job.total?Math.floor(job.done/job.total*100):0;
+  const head=saved==null?"確かめています…"
+    :isDone(mine)?NAME[mine]+"は保存ずみ"
+    :"まだ保存していません";
   return (
     <div style={{...rowBtn,display:"block",cursor:"default"}}>
       <div style={{display:"flex",alignItems:"center",gap:8}}>
-        <span style={{color:C.faint,display:"inline-flex",flexShrink:0}}>
-          <Svg size={20}><path d="M12 4v11"/><path d="M7 10.5 12 15.5 17 10.5"/><path d="M5 19.5h14"/></Svg></span>
-        <div style={{fontSize:15,fontWeight:700,color:C.text}}>音声をダウンロード</div>
+        <span style={{color:C.accent,display:"inline-flex",flexShrink:0}}>
+          <Svg size={22}><path d="M12 4v11"/><path d="M7 10.5 12 15.5 17 10.5"/><path d="M5 19.5h14"/></Svg></span>
+        <div style={{fontSize:16,fontWeight:700,color:C.text}}>音声をダウンロード</div>
       </div>
-      <div style={{fontSize:12,color:C.sub,marginTop:4}}>
-        {job?"この画面を開いたままにしてください。閉じても、次に押せば続きから保存します"
-          :"ダウンロードすると、ネットがなくても発音が鳴ります。Wi-Fi のときに押してください"}
+      <div style={{fontSize:13,fontWeight:700,marginTop:4,color:saved&&isDone(mine)?C.accent:C.sub}}>{head}</div>
+      <div style={{fontSize:14,color:C.sub,marginTop:6,lineHeight:1.6}}>
+        保存しておくと、ネットがなくても発音が鳴ります。容量が大きいので <b style={{color:C.text}}>Wi-Fi のとき</b>に押してください。
       </div>
-      {job&&<div style={{marginTop:10}}>
-        <div style={{fontSize:13,color:C.text}}>ダウンロード中… {job.done.toLocaleString()} / {job.total.toLocaleString()}</div>
-        <div style={{marginTop:6,height:6,borderRadius:4,background:C.border,overflow:"hidden"}}>
-          <div style={{width:(job.done/Math.max(1,job.total)*100)+"%",height:"100%",background:C.accent}}/></div>
+
+      {job&&<div style={{marginTop:12,padding:"12px 14px",borderRadius:12,background:C.accent+"14",border:"1.5px solid "+C.accent}}>
+        <div style={{display:"flex",alignItems:"baseline",justifyContent:"space-between",gap:8}}>
+          <div style={{fontSize:15,fontWeight:700,color:C.text}}>
+            {job.phase==="prep"?"準備しています…":job.accs.map(a=>NAME[a]).join("・")+"を保存中"}</div>
+          {job.phase==="run"&&<div style={{fontSize:20,fontWeight:800,color:C.accent}}>{pct}%</div>}
+        </div>
+        <div style={{marginTop:8,height:10,borderRadius:6,background:C.border,overflow:"hidden"}}>
+          <div style={{width:(job.phase==="prep"?3:Math.max(3,pct))+"%",height:"100%",background:C.accent,transition:"width .3s"}}/></div>
+        <div style={{fontSize:13,color:C.sub,marginTop:6}}>
+          {job.phase==="prep"?"保存ずみの音声を数えています。少し待ってください"
+            :job.done.toLocaleString()+" / "+job.total.toLocaleString()+" 個。ほかの画面に移っても続きます（アプリを閉じると止まり、次は続きから）"}</div>
+        <button onClick={()=>AudioDL.stop()} disabled={job.phase!=="run"}
+          style={{marginTop:10,width:"100%",minHeight:56,borderRadius:12,fontFamily:"inherit",fontSize:16,fontWeight:700,
+            border:"1.5px solid "+C.border,background:C.bg,color:C.text,cursor:"pointer",opacity:job.phase==="run"?1:.5}}>
+          やめる（続きはあとから）</button>
       </div>}
-      <div style={{display:"grid",gap:8,marginTop:10}}>
+
+      {msg&&!job&&<div style={{marginTop:12,padding:"12px 14px",borderRadius:12,fontSize:14,fontWeight:700,lineHeight:1.6,
+        display:"flex",gap:8,alignItems:"flex-start",
+        background:msg.ok?C.accent+"1a":"transparent",border:"1.5px solid "+(msg.ok?C.accent:C.border),
+        color:msg.ok?C.accent:C.text}}>
+        {msg.ok&&<span style={{display:"inline-flex",flexShrink:0,marginTop:2}}><Check size={20}/></span>}{msg.text}</div>}
+
+      {!job&&<div style={{display:"grid",gap:10,marginTop:12}}>
         {choices.map(ch=>{
           const done=ch.accs.every(isDone);
-          const running=job&&job.accs.join()===ch.accs.join();
           const n=ch.accs.reduce((t,a)=>t+totals[a],0);
           const got=saved?ch.accs.reduce((t,a)=>t+Math.min(saved[a],totals[a]),0):0;
-          const sub=done?"ダウンロード済み・オフラインで再生できます"
-            :running?"ダウンロード中…"
-            :"約"+mb(n-got)+"MB"+(got?"（"+got.toLocaleString()+" / "+n.toLocaleString()+" 保存ずみ・続きから）":"");
+          const sub=saved==null?"確かめています…"
+            :done?"保存ずみ・ネットがなくても鳴ります"
+            :"約"+mb(n-got)+"MB"+(got?"・"+Math.floor(got/n*100)+"%まで保存ずみ":"");
           return (
-            <button key={ch.id} onClick={()=>run(ch.accs)} disabled={done||!!job}
-              style={{minHeight:56,width:"100%",textAlign:"left",display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,
-                padding:"10px 14px",borderRadius:12,fontFamily:"inherit",fontSize:16,
-                border:"1.5px solid "+(done?C.accent:C.border),
-                background:done?C.accent+"1a":"transparent",color:C.text,
-                cursor:done||job?"default":"pointer",opacity:job&&!running?.55:1}}>
-              <div style={{minWidth:0}}>
-                <div style={{fontSize:15,fontWeight:700}}>{ch.label}</div>
-                <div style={{fontSize:12,color:done?C.accent:C.sub,marginTop:2,fontWeight:done?700:400}}>{sub}</div>
+            <div key={ch.id} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 12px",borderRadius:12,
+              border:"1.5px solid "+(done?C.accent:C.border),background:done?C.accent+"12":"transparent"}}>
+              <div style={{minWidth:0,flex:1}}>
+                <div style={{fontSize:16,fontWeight:700,color:C.text}}>{ch.label}</div>
+                {ch.tag&&<div style={{fontSize:12,fontWeight:700,color:C.accent,marginTop:2}}>{ch.tag}</div>}
+                <div style={{fontSize:13,color:done?C.accent:C.sub,marginTop:2,fontWeight:done?700:400}}>{sub}</div>
               </div>
-              <span style={{display:"inline-flex",alignItems:"center",gap:4,flexShrink:0,fontSize:13,fontWeight:700,
-                color:done?C.accent:C.faint}}>
-                {done?<><Check/>済み</>:running?"…":"ダウンロード"}</span>
-            </button>
+              {done
+                ?<span style={{display:"inline-flex",alignItems:"center",gap:4,flexShrink:0,fontSize:15,fontWeight:700,color:C.accent,padding:"0 6px"}}>
+                  <Check/>済み</span>
+                :<button onClick={()=>run(ch.accs)} disabled={saved==null}
+                  style={{flexShrink:0,minHeight:56,minWidth:112,padding:"0 16px",borderRadius:12,fontFamily:"inherit",fontSize:16,fontWeight:700,
+                    border:"none",cursor:"pointer",opacity:saved==null?.5:1,
+                    background:ch.tag?C.accent:"transparent",color:ch.tag?"#fff":C.accent,
+                    boxShadow:ch.tag?"none":"inset 0 0 0 1.5px "+C.accent}}>
+                  {got?"続きを保存":"保存する"}</button>}
+            </div>
           );
         })}
-      </div>
-      {failed>0&&!job&&<div style={{fontSize:12,color:C.sub,marginTop:8}}>
-        {failed}個はダウンロードできませんでした。もう一度押すと続きを保存します</div>}
+      </div>}
     </div>
   );
 }
@@ -54296,7 +54365,7 @@ function Gate(){
     if(state!=="loading"){const b=document.getElementById("boot");if(b)b.style.display="none";}
   },[state]);
 
-  if(state==="app")return <App key={uid+":"+rev}/>;
+  if(state==="app")return <><App key={uid+":"+rev}/><AudioDLBar C={C}/></>;
   if(state==="login")return (
     <div style={{width:"100%",maxWidth:430,margin:"0 auto",minHeight:"100vh",display:"flex",flexDirection:"column",
       background:C.bg,color:C.text}}>
