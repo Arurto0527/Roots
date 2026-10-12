@@ -351,6 +351,11 @@ function BigRoots({w,size=1}){
     </div>
   );
 }
+/* 見出し語の横に出す発音記号 */
+function ClassPron({w,size=28}){
+  const {C}=useApp();
+  return w.pronunciation?<span className="en" style={{fontSize:size,color:C.sub,whiteSpace:"nowrap"}}>{w.pronunciation}</span>:null;
+}
 function BigWord({w,colored,size=130}){
   const {C}=useApp();
   /* 長い単語は折り返さずに、画面の幅に収まる大きさまで小さくする（cqw は Fit の幅に対する割合） */
@@ -565,6 +570,7 @@ function WhyBox({w,onClose}){
       <div style={{fontSize:20,fontWeight:700,color:C.root}}>なぜこの意味？</div>
       <div style={{display:"flex",alignItems:"baseline",gap:24,marginTop:8,flexWrap:"wrap",paddingRight:140}}>
         <div className="en" style={{fontSize:64,fontWeight:700}}><ColoredWord C={C} word={w.word} parts={parseRoots(w)}/></div>
+        <ClassPron w={w} size={30}/>
         <div style={{fontSize:36,fontWeight:700}}>{w.meaning}</div>
       </div>
       {w.etymologyConclusion&&<div style={{fontSize:26,fontWeight:700,lineHeight:1.6,marginTop:18}}>{w.etymologyConclusion}</div>}
@@ -736,10 +742,11 @@ function ExplainScreen({run,onBack,onRun}){
           <div className="num" style={{fontSize:20,fontWeight:700,color:C.sub}}>{noLabel(w)}</div>
           <div style={{display:"flex",alignItems:"center",gap:24,marginTop:-8}}>
             <BigWord w={w} colored={st>=1} size={big?136:key==="meaning"?108:key==="more"?64:84}/>
+            <ClassPron w={w} size={key==="more"?24:32}/>
             <SpeakBtn text={w.word}/>
           </div>
-          {key!=="more"&&<div style={{fontSize:24,color:C.sub,marginTop:-10}}>
-            <span className="en">{w.pronunciation}</span>{w.partOfSpeech&&<span>　{w.partOfSpeech}</span>}
+          {key!=="more"&&w.partOfSpeech&&<div style={{fontSize:24,color:C.sub,marginTop:-10}}>
+            {w.partOfSpeech}
           </div>}
           {at("roots")&&<BigRoots w={w} size={key==="roots"?1:key==="image"?0.85:key==="more"?0.5:0.68}/>}
           {key==="roots"&&<div className="fadeIn" style={{zoom:1.2}} onClick={stop}><Pictogram C={C} word={w} onTapRoot={A.openRoot}/></div>}
@@ -910,6 +917,7 @@ function QuizScreen({run,onBack,onRun}){
           {dir==="en"
             ?<div style={{display:"flex",alignItems:"center",gap:24,marginTop:-8}}>
                <BigWord w={w} colored={!ask} size={ask?150:120}/>
+               <ClassPron w={w} size={ask?36:32}/>
                <SpeakBtn text={w.word}/>
              </div>
             :<div style={{marginTop:-8}}>
@@ -935,8 +943,7 @@ function QuizScreen({run,onBack,onRun}){
                {dir==="en"
                  ?<div className="riseIn" style={{fontSize:96,fontWeight:700,lineHeight:1.25}}>{w.meaning}</div>
                  :<div className="riseIn" style={{display:"flex",flexDirection:"column",alignItems:"center",gap:8}}>
-                    <div style={{display:"flex",alignItems:"center",gap:24}}><BigWord w={w} colored size={136}/><SpeakBtn text={w.word}/></div>
-                    <div className="en" style={{fontSize:26,color:C.sub}}>{w.pronunciation}</div>
+                    <div style={{display:"flex",alignItems:"center",gap:24}}><BigWord w={w} colored size={136}/><ClassPron w={w} size={34}/><SpeakBtn text={w.word}/></div>
                   </div>}
                <div className="fadeIn"><BigRoots w={w} size={0.75}/></div>
                {(w.hook||imageryOf(w))&&<div className="fadeIn" style={{fontSize:28,lineHeight:1.6,maxWidth:1150,
@@ -1149,6 +1156,7 @@ function WordPeek({w,onClose}){
     <Sheet onClose={onClose} width={1100} label={w.word+" の説明"}>
       <div style={{display:"flex",alignItems:"center",gap:20,paddingRight:150,flexWrap:"wrap"}}>
         <div className="en" style={{fontSize:72,fontWeight:700}}><ColoredWord C={C} word={w.word} parts={parseRoots(w)}/></div>
+        <ClassPron w={w} size={32}/>
         <SpeakBtn text={w.word}/>
       </div>
       <div style={{fontSize:40,fontWeight:700,margin:"10px 0 22px"}}>{w.meaning}</div>
@@ -1351,7 +1359,7 @@ function LiveScreen({run,onBack}){
   else if(phase==="question"||phase==="reveal")body=(
     <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:26,padding:"26px 60px 30px",width:"100%"}}>
       {dir==="en"
-        ?<div style={{display:"flex",alignItems:"center",gap:24}}><BigWord w={q.w} colored={phase==="reveal"} size={124}/><SpeakBtn text={q.w.word}/></div>
+        ?<div style={{display:"flex",alignItems:"center",gap:24}}><BigWord w={q.w} colored={phase==="reveal"} size={124}/><ClassPron w={q.w} size={32}/><SpeakBtn text={q.w.word}/></div>
         :<div style={{textAlign:"center"}}><div style={{fontSize:84,fontWeight:700,lineHeight:1.25}}>{q.w.meaning}</div>
            {q.w.partOfSpeech&&<div style={{fontSize:24,color:C.sub}}>{q.w.partOfSpeech}</div>}</div>}
       {phase==="question"
