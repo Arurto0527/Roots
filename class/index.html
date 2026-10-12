@@ -897,7 +897,8 @@ function QuizScreen({run,onBack,onRun}){
   useKeys(end
     ?{Escape:onBack,Enter:endActions[0].onClick,ArrowLeft:prev,PageUp:prev,Backspace:prev}
     :{" ":next,ArrowRight:next,PageDown:next,Enter:next,ArrowLeft:prev,PageUp:prev,Backspace:prev,Escape:onBack,
-      s:()=>speak(w.word),h:()=>setHint(x=>!x),p:()=>{if(sec)setPaused(x=>!x);},m:toggleMark});
+      s:()=>speak(w.word),h:()=>setHint(x=>!x),p:()=>{if(sec)setPaused(x=>!x);},m:toggleMark,
+      e:()=>{if(phase==="answer")A.jumpWord(w);}});
   if(end)return <EndScreen title="クラスクイズ" fanfare dir={dir} list={list} marks={marks} actions={endActions} onBack={onBack} onPrev={prev} detour={run.detour}/>;
 
   const mk=marks.has(w.id);
@@ -906,6 +907,7 @@ function QuizScreen({run,onBack,onRun}){
     {ask&&<SmallBtn onClick={()=>setHint(x=>!x)} active={hint} label="ヒント（キー: H）">ヒント（H）</SmallBtn>}
     {ask&&sec>0&&<SmallBtn onClick={()=>setPaused(x=>!x)} active={paused} label="一時停止（キー: P）">{paused?"再開（P）":"一時停止（P）"}</SmallBtn>}
     <SmallBtn onClick={toggleMark} active={mk} label="あとで復習に印をつける（キー: M）">★ あとで復習（M）</SmallBtn>
+    {!ask&&<SmallBtn onClick={()=>A.jumpWord(w)} label="この単語の例文・説明を見る（キー: E）">例文・説明を見る（E）</SmallBtn>}
   </>;
   return (
     <Frame title={"クラスクイズ　"+(dir==="en"?"英語 → 日本語":"日本語 → 英語")} pos={(i+1)+" / "+list.length+" 問"}
