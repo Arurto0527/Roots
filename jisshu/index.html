@@ -263,8 +263,11 @@
   function lessonById(id){for(var i=0;i<S.lessons.length;i++)if(S.lessons[i].id===id)return S.lessons[i];return null;}
   function lessonsAt(day,p){
     return S.lessons.filter(function(l){return l.day===day&&l.period===p;})
-      .sort(function(a,b){return a.created_at<b.created_at?-1:1;});
+      .sort(function(a,b){var d=subjRank(a)-subjRank(b);return d?d:(a.created_at<b.created_at?-1:1);});
   }
+  /* 同じコマに授業が複数あるときは、いつも 国語→数学→英語→公共→保健 の順に並べる */
+  var SUBJECT_ORDER=["国語","数学","英語","公共","保健"];
+  function subjRank(l){var i=SUBJECT_ORDER.indexOf(colorOf(l.teacher).subject||l.subject);return i<0?SUBJECT_ORDER.length:i;}
   function filesOf(lessonId){
     return S.files.filter(function(f){return (f.lesson_id||null)===(lessonId||null);})
       .sort(function(a,b){return a.created_at<b.created_at?-1:1;});
