@@ -52083,16 +52083,23 @@ const ADMIN_DAYS=28;      /* 何日前までの記録を読むか */
 const AWAY_DAYS=3;        /* この日数以上あいたら「声かけ」 */
 const LOW_RATE=0.6;       /* 今週の正答率がこれ未満なら「声かけ」 */
 
-/* Supabase は1回に1000件までしか返さないので、分けて全部読む */
-async function sbFetchAll(make){
-  const out=[];const step=1000;
-  for(let from=0;;from+=step){
-    const {data,error}=await make().range(from,from+step-1);
-    if(error)throw error;
-    out.push(...(data||[]));
-    if(!data||data.length<step)return out;
+/* Supabase は1回に1000件までしか返さないので、分けて全部読む。
+   1回ずつ順番に読むと記録が増えたとき遅すぎるので、6回ぶんずつ同時に読む */
+async function sbFetchAll(make,onPage){
+  const out=[];const step=1000;const par=6;
+  for(let from=0;;from+=step*par){
+    const res=await Promise.all(Array.from({length:par},(_,i)=>
+      make().range(from+i*step,from+(i+1)*step-1)));
+    for(const {data,error} of res){
+      if(error)throw error;
+      out.push(...(data||[]));
+      if(!data||data.length<step){onPage&&onPage(out.length);return out;}
+    }
+    onPage&&onPage(out.length);
   }
 }
+/* 一度読んだ管理データを覚えておく（タブを切りかえて戻ったとき、すぐ表示する） */
+let adminCache=null;
 
 /* ID を「頭の英字」と「番号（数）」に分ける。H001 と H0001 は同じ番号とみなす */
 const idParts=c=>{const x=String(c||"").toUpperCase().match(/^([A-Z]+)0*(\d+)$/);return x?{pre:x[1],num:+x[2]}:null;};
@@ -52441,31 +52448,34 @@ function NoticeSender({C,box,small}){
 }
 
 function AdminScreen({C}){
-  const [raw,setRaw]=useState(null);
+  const [raw,setRaw]=useState(adminCache&&adminCache.raw);
   const [err,setErr]=useState(null);
+  const [loading,setLoading]=useState(0);   /* 読みこんだ記録の件数（読みこみ中だけ1以上） */
   const [group,setGroup]=useState("all");   /* all / "" (ID未設定) / グループ名 */
   const [query,setQuery]=useState("");
   const [tab,setTab]=useState("class");
   const [open,setOpen]=useState(null);
   const [sort,setSort]=useState("last");
-  const [loadedAt,setLoadedAt]=useState(null);
+  const [loadedAt,setLoadedAt]=useState(adminCache&&adminCache.at);
   const [showAllParts,setShowAllParts]=useState(false);
   const unread=useFeedbackUnread(true);
 
   const load=useCallback(async()=>{
-    setErr(null);
+    setErr(null);setLoading(1);
     try{
       const since=new Date(startOfDay(Date.now())-ADMIN_DAYS*DAY).toISOString();
       const [p,g,l,s]=await withTimeout(Promise.all([
         sbFetchAll(()=>sb.from("profiles").select("user_id,student_code,role,email").order("user_id")),
         sbFetchAll(()=>sb.from("progress").select("user_id,words,updated_at").order("user_id")),
         sbFetchAll(()=>sb.from("study_logs").select("user_id,word_id,correct,hint_used,answered_at")
-          .gte("answered_at",since).order("answered_at").order("id")),
+          .gte("answered_at",since).order("answered_at").order("id"),n=>setLoading(Math.max(1,n))),
         sbFetchAll(()=>sb.from("study_sessions").select("user_id,started_at,active_seconds")
           .gte("started_at",since).order("started_at").order("id")),
-      ]),30000);
-      setRaw({p,g,l,s});setLoadedAt(Date.now());
+      ]),90000);
+      const at=Date.now();adminCache={raw:{p,g,l,s},at};
+      setRaw({p,g,l,s});setLoadedAt(at);
     }catch(e){setErr((e&&e.message)||"読み込めませんでした");}
+    setLoading(0);
   },[]);
   useEffect(()=>{load();},[load]);
 
@@ -52781,12 +52791,13 @@ function AdminScreen({C}){
           background:"transparent",color:C.sub,fontSize:14,cursor:"pointer"}}>更新</button>
       </div>
       <div style={{fontSize:12,color:C.faint,marginBottom:12}}>
+        {loading?"最新の記録を読みこみ中…"+(loading>1?"（"+loading+"件）":"")+"　":""}
         {loadedAt?"読み込んだ時刻："+new Date(loadedAt).toLocaleTimeString("ja-JP",{hour:"2-digit",minute:"2-digit"}):""}
         {"　「今週」は今日を含む7日間"}
       </div>
 
       {err&&<div style={{...box,fontSize:14,lineHeight:1.7}}>読み込めませんでした：{err}<br/>通信を確認して「更新」を押してください</div>}
-      {!data&&!err&&<div style={{color:C.sub,fontSize:16}}>読み込み中…</div>}
+      {!data&&!err&&<div style={{color:C.sub,fontSize:16}}>読み込み中…{loading>1&&"（学習記録 "+loading+"件）"}</div>}
 
       {data&&(<>
         <input value={query} onChange={e=>setQuery(e.target.value)} placeholder="ID・メールで検索（例：H1-100 / U001, U003）"
