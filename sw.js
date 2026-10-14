@@ -9,9 +9,10 @@
    VERSION に付けてしまうと、番号を上げるたびに保存済みの音声が全部消えて、
    もう一度ダウンロードすることになるので、切り離しておく。
    ただし音声を同じファイル名のまま作り直したとき（2026-10 に Piper → Kokoro）は、
-   AUDIO_CACHE の名前を変える。古い名前の保存は activate でまるごと消える。 */
-const VERSION = "v98";
-const AUDIO_CACHE = "roots-voice-kokoro";
+   AUDIO_CACHE の名前を変える。古い名前の保存は activate でまるごと消える。
+   （roots-voice-kokoro は音声を入れ替える前に公開してしまい、Piper の音が入りうるので -2 にした） */
+const VERSION = "v99";
+const AUDIO_CACHE = "roots-voice-kokoro-2";
 const APP_CACHE = "roots-app-" + VERSION;
 
 /* はじめて開いたときに、アプリを動かすのに必要なものをまとめて保存しておく。

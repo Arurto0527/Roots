@@ -53313,7 +53313,7 @@ const AudioDL={
   list(acc){clipUrl(acc,"");return audioIndex[acc]?[...audioIndex[acc]]:[];},
   key(acc,h){return new URL("audio/"+acc+"/"+h+".m4a",location.href).pathname;},
   async count(){
-    const cache=await caches.open("roots-voice-kokoro");
+    const cache=await caches.open("roots-voice-kokoro-2");
     const have=new Set((await cache.keys()).map(r=>new URL(r.url).pathname));
     const out={};
     for(const acc of ["us","uk"])out[acc]=AudioDL.list(acc).filter(h=>have.has(AudioDL.key(acc,h))).length;
@@ -53331,7 +53331,7 @@ const AudioDL={
     try{if(navigator.storage&&navigator.storage.persist)
       await Promise.race([navigator.storage.persist(),new Promise(r=>setTimeout(r,1500))]);}catch(e){}
     let cache,have;
-    try{cache=await caches.open("roots-voice-kokoro");({have}=await AudioDL.count());}
+    try{cache=await caches.open("roots-voice-kokoro-2");({have}=await AudioDL.count());}
     catch(e){AudioDL.set({job:null,msg:{ok:false,text:"この端末では保存できませんでした（ブラウザの容量がいっぱいかもしれません）"}});return;}
     const all=accs.flatMap(acc=>AudioDL.list(acc).map(h=>AudioDL.key(acc,h)));
     const todo=all.filter(k=>!have.has(k));
