@@ -10,7 +10,7 @@
    もう一度ダウンロードすることになるので、切り離しておく。
    ただし音声を同じファイル名のまま作り直したとき（2026-10 に Piper → Kokoro）は、
    AUDIO_CACHE の名前を変える。古い名前の保存は activate でまるごと消える。 */
-const VERSION = "v97";
+const VERSION = "v98";
 const AUDIO_CACHE = "roots-voice-kokoro";
 const APP_CACHE = "roots-app-" + VERSION;
 

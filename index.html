@@ -52098,8 +52098,8 @@ async function sbPage(make,from,to,onRetry){
     await new Promise(ok=>setTimeout(ok,Math.min(15000,1500*n)));
   }
 }
-async function sbFetchAll(make,onPage,onRetry){
-  const out=[];const step=1000;const par=6;
+async function sbFetchAll(make,onPage,onRetry,step=1000){
+  const out=[];const par=6;
   for(let from=0;;from+=step*par){
     const res=await Promise.all(Array.from({length:par},(_,i)=>
       sbPage(make,from+i*step,from+(i+1)*step-1,onRetry)));
@@ -52466,6 +52466,7 @@ function AdminScreen({C}){
   const [loading,setLoading]=useState(0);   /* 読みこんだ記録の件数（読みこみ中だけ1以上） */
   const [total,setTotal]=useState(0);       /* 読みこむ学習記録の全部の件数（わかれば） */
   const [retry,setRetry]=useState(0);       /* 通信をやり直している回数 */
+  const [stage,setStage]=useState("");      /* 学習記録のほかに読んでいるもの */
   const [group,setGroup]=useState("all");   /* all / "" (ID未設定) / グループ名 */
   const [query,setQuery]=useState("");
   const [tab,setTab]=useState("class");
@@ -52476,7 +52477,7 @@ function AdminScreen({C}){
   const unread=useFeedbackUnread(true);
 
   const load=useCallback(async()=>{
-    setErr(null);setLoading(1);setTotal(0);setRetry(0);
+    setErr(null);setLoading(1);setTotal(0);setRetry(0);setStage("");
     try{
       const since=new Date(startOfDay(Date.now())-ADMIN_DAYS*DAY).toISOString();
       /* 先に件数だけ数えて、ダウンロードのように「何％」を出す（数えられなくても読みこみは続ける） */
@@ -52485,7 +52486,8 @@ function AdminScreen({C}){
       const onRetry=n=>setRetry(n);
       const [p,g,l,s]=await Promise.all([
         sbFetchAll(()=>sb.from("profiles").select("user_id,student_code,role,email").order("user_id"),null,onRetry),
-        sbFetchAll(()=>sb.from("progress").select("user_id,words,updated_at").order("user_id"),null,onRetry),
+        sbFetchAll(()=>sb.from("progress").select("user_id,words,updated_at").order("user_id"),
+          n=>setStage("単語の記録 "+n+"人分"),onRetry,50),   /* 1人分が大きいので50人ずつ */
         sbFetchAll(()=>sb.from("study_logs").select("user_id,word_id,correct,hint_used,answered_at")
           .gte("answered_at",since).order("answered_at").order("id"),n=>{setLoading(Math.max(1,n));setRetry(0);},onRetry),
         sbFetchAll(()=>sb.from("study_sessions").select("user_id,started_at,active_seconds")
@@ -52824,6 +52826,7 @@ function AdminScreen({C}){
             <div style={{height:"100%",width:(pc!=null?pc:Math.min(90,loading/500))+"%",background:C.accent,transition:"width .4s"}}/></div>
           <div className="num" style={{fontSize:13,color:C.sub,marginTop:8,lineHeight:1.7}}>
             {loading>1?loading.toLocaleString()+(total?" / "+total.toLocaleString():"")+" 件":"準備中…"}
+            {stage&&"　"+stage}
             {retry>0&&"　通信が遅いので、やり直しています（"+retry+"回目）"}<br/>
             時間がかかっても最後まで読みこみます。この画面のまま待ってください</div>
         </div>;})()}
