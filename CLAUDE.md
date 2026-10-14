@@ -8,7 +8,7 @@
 - `index.html` … アプリ本体。修正するのはほぼこのファイルだけ
   - `<script type="text/babel">` の中に React のコード（JSX）と単語データが入っている
   - `<script type="application/json" id="roots-audio-index">` は音声ファイルの一覧（自動生成なので手で書き換えない）
-- `audio/us/*.m4a`, `audio/uk/*.m4a` … 収録済みの発音（Piper で作成）。**開かない・読まない・変更しない**
+- `audio/us/*.m4a`, `audio/uk/*.m4a` … 収録済みの発音（Kokoro で作成）。**開かない・読まない・変更しない**
 - `sw.js` … オフライン用の保存係（Service Worker）
 - `class/index.html` … 授業用（先生がプロジェクター・電子黒板に映すパソコン画面）。公開URL の `/class/`
   - 開くときに本体 index.html の roots-app を読みこみ、`\nconst {useState` より前（単語データ）はそのまま実行、
@@ -60,11 +60,14 @@
   - `hook`（答え合わせ画面に出る一言）と**同じ内容を書かない**。重複は `node check-all.js` が見つける
 - 新しい語根が増えたら、`ROOT_NOTES`（語源コラム）と `PICTO_ROOT`（ピクトグラム）も足す。別綴りは `ROOT_ALIAS` でまとめる
 
-## 音声の作り方（Piper）
-- `pip install piper-tts` ＋ 声のモデル `en_US-lessac-high`（米）/ `en_GB-cori-high`（英）
-- **`ESPEAK_DATA_PATH` には「espeak-ng-data フォルダを含む親フォルダ」を指定する**（発音データの場所が固定されていて、そのままでは動かない）
-- wav で作って `afconvert -f m4af -d aac@22050 -b 64000 -c 1` で m4a にする（既存の音声と同じ形式）
-- 必要な英文は「見出し語・例文2つ・関連語」。作ったら `roots-audio-index` を作り直す
+## 音声の作り方（Kokoro。2026-10 に Piper から変更）
+- 道具は `~/roots-tts`（Git の外）。Python 3.12 の `.venv` に kokoro・misaki・mlx-whisper が入っている
+  - `extract.js` → `texts.json`（英文とハッシュ）／`gen.py us|uk [short]` → `stage/<us|uk>/`／`check.py` で Whisper 聞き取りチェック
+- 声: 米 `af_heart`、英 `bm_fable`（英の女性 bf_emma は語尾に「イ」が付きやすく不採用）
+- 3語以下の短い音声は「Next word: ○○.」で読ませて単語部分だけ切り出す（単独で読ませると出だしがにごる）
+- 動詞・形容詞の見出し語は品詞に合わせた読みにする（gen.py の prepare）。読みの指定は gen.py の `FIX`
+- m4a は `afconvert -f m4af -d aac@22050 -b 64000 -c 1`。作ったら `roots-audio-index` を作り直す
+- **同じファイル名のまま作り直したときは、sw.js の `AUDIO_CACHE` の名前を変える**（変えないとスマホに古い音が残る）
 
 ## sw.js の決まり（2026-09 に変更）
 - 音声の保存（`AUDIO_CACHE`）は `VERSION` と切り離してある。**`VERSION` を上げても音声は消えない**
