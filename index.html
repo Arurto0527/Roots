@@ -52085,11 +52085,24 @@ const LOW_RATE=0.6;       /* 今週の正答率がこれ未満なら「声かけ
 
 /* Supabase は1回に1000件までしか返さないので、分けて全部読む。
    1回ずつ順番に読むと記録が増えたとき遅すぎるので、6回ぶんずつ同時に読む */
-async function sbFetchAll(make,onPage){
+/* 1ページずつ、失敗したら少し待って何度でもやり直す（時間がかかっても最後まで読む）。
+   onRetry は「やり直し中」を画面に出すため */
+async function sbPage(make,from,to,onRetry){
+  for(let n=1;;n++){
+    try{
+      const r=await withTimeout(make().range(from,to),60000);
+      if(!r.error)return r;
+      if(n>=8)throw r.error;
+    }catch(e){if(n>=8)throw e;}
+    onRetry&&onRetry(n);
+    await new Promise(ok=>setTimeout(ok,Math.min(15000,1500*n)));
+  }
+}
+async function sbFetchAll(make,onPage,onRetry){
   const out=[];const step=1000;const par=6;
   for(let from=0;;from+=step*par){
     const res=await Promise.all(Array.from({length:par},(_,i)=>
-      make().range(from+i*step,from+(i+1)*step-1)));
+      sbPage(make,from+i*step,from+(i+1)*step-1,onRetry)));
     for(const {data,error} of res){
       if(error)throw error;
       out.push(...(data||[]));
@@ -52451,6 +52464,8 @@ function AdminScreen({C}){
   const [raw,setRaw]=useState(adminCache&&adminCache.raw);
   const [err,setErr]=useState(null);
   const [loading,setLoading]=useState(0);   /* 読みこんだ記録の件数（読みこみ中だけ1以上） */
+  const [total,setTotal]=useState(0);       /* 読みこむ学習記録の全部の件数（わかれば） */
+  const [retry,setRetry]=useState(0);       /* 通信をやり直している回数 */
   const [group,setGroup]=useState("all");   /* all / "" (ID未設定) / グループ名 */
   const [query,setQuery]=useState("");
   const [tab,setTab]=useState("class");
@@ -52461,17 +52476,21 @@ function AdminScreen({C}){
   const unread=useFeedbackUnread(true);
 
   const load=useCallback(async()=>{
-    setErr(null);setLoading(1);
+    setErr(null);setLoading(1);setTotal(0);setRetry(0);
     try{
       const since=new Date(startOfDay(Date.now())-ADMIN_DAYS*DAY).toISOString();
-      const [p,g,l,s]=await withTimeout(Promise.all([
-        sbFetchAll(()=>sb.from("profiles").select("user_id,student_code,role,email").order("user_id")),
-        sbFetchAll(()=>sb.from("progress").select("user_id,words,updated_at").order("user_id")),
+      /* 先に件数だけ数えて、ダウンロードのように「何％」を出す（数えられなくても読みこみは続ける） */
+      withTimeout(sb.from("study_logs").select("id",{count:"exact",head:true}).gte("answered_at",since),30000)
+        .then(r=>{if(r&&r.count)setTotal(r.count);}).catch(()=>{});
+      const onRetry=n=>setRetry(n);
+      const [p,g,l,s]=await Promise.all([
+        sbFetchAll(()=>sb.from("profiles").select("user_id,student_code,role,email").order("user_id"),null,onRetry),
+        sbFetchAll(()=>sb.from("progress").select("user_id,words,updated_at").order("user_id"),null,onRetry),
         sbFetchAll(()=>sb.from("study_logs").select("user_id,word_id,correct,hint_used,answered_at")
-          .gte("answered_at",since).order("answered_at").order("id"),n=>setLoading(Math.max(1,n))),
+          .gte("answered_at",since).order("answered_at").order("id"),n=>{setLoading(Math.max(1,n));setRetry(0);},onRetry),
         sbFetchAll(()=>sb.from("study_sessions").select("user_id,started_at,active_seconds")
-          .gte("started_at",since).order("started_at").order("id")),
-      ]),90000);
+          .gte("started_at",since).order("started_at").order("id"),null,onRetry),
+      ]);
       const at=Date.now();adminCache={raw:{p,g,l,s},at};
       setRaw({p,g,l,s});setLoadedAt(at);
     }catch(e){setErr((e&&e.message)||"読み込めませんでした");}
@@ -52797,7 +52816,17 @@ function AdminScreen({C}){
       </div>
 
       {err&&<div style={{...box,fontSize:14,lineHeight:1.7}}>読み込めませんでした：{err}<br/>通信を確認して「更新」を押してください</div>}
-      {!data&&!err&&<div style={{color:C.sub,fontSize:16}}>読み込み中…{loading>1&&"（学習記録 "+loading+"件）"}</div>}
+      {!data&&!err&&(()=>{
+        const pc=total?Math.min(99,Math.floor(loading/total*100)):null;
+        return <div style={box}>
+          <div style={{fontSize:16,color:C.text,marginBottom:10}}>学習記録をダウンロード中…{pc!=null?pc+"%":""}</div>
+          <div style={{height:10,borderRadius:5,background:C.border,overflow:"hidden"}}>
+            <div style={{height:"100%",width:(pc!=null?pc:Math.min(90,loading/500))+"%",background:C.accent,transition:"width .4s"}}/></div>
+          <div className="num" style={{fontSize:13,color:C.sub,marginTop:8,lineHeight:1.7}}>
+            {loading>1?loading.toLocaleString()+(total?" / "+total.toLocaleString():"")+" 件":"準備中…"}
+            {retry>0&&"　通信が遅いので、やり直しています（"+retry+"回目）"}<br/>
+            時間がかかっても最後まで読みこみます。この画面のまま待ってください</div>
+        </div>;})()}
 
       {data&&(<>
         <input value={query} onChange={e=>setQuery(e.target.value)} placeholder="ID・メールで検索（例：H1-100 / U001, U003）"
@@ -53281,7 +53310,7 @@ const AudioDL={
   list(acc){clipUrl(acc,"");return audioIndex[acc]?[...audioIndex[acc]]:[];},
   key(acc,h){return new URL("audio/"+acc+"/"+h+".m4a",location.href).pathname;},
   async count(){
-    const cache=await caches.open("roots-audio");
+    const cache=await caches.open("roots-voice-kokoro");
     const have=new Set((await cache.keys()).map(r=>new URL(r.url).pathname));
     const out={};
     for(const acc of ["us","uk"])out[acc]=AudioDL.list(acc).filter(h=>have.has(AudioDL.key(acc,h))).length;
@@ -53299,7 +53328,7 @@ const AudioDL={
     try{if(navigator.storage&&navigator.storage.persist)
       await Promise.race([navigator.storage.persist(),new Promise(r=>setTimeout(r,1500))]);}catch(e){}
     let cache,have;
-    try{cache=await caches.open("roots-audio");({have}=await AudioDL.count());}
+    try{cache=await caches.open("roots-voice-kokoro");({have}=await AudioDL.count());}
     catch(e){AudioDL.set({job:null,msg:{ok:false,text:"この端末では保存できませんでした（ブラウザの容量がいっぱいかもしれません）"}});return;}
     const all=accs.flatMap(acc=>AudioDL.list(acc).map(h=>AudioDL.key(acc,h)));
     const todo=all.filter(k=>!have.has(k));

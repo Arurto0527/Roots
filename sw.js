@@ -7,9 +7,11 @@
    音声のファイル名は英文から計算した名前なので、英文を変えれば別の名前になる。
    つまり古い音声が残っていても、まちがった音が鳴ることはない。
    VERSION に付けてしまうと、番号を上げるたびに保存済みの音声が全部消えて、
-   もう一度ダウンロードすることになるので、切り離しておく。 */
-const VERSION = "v95";
-const AUDIO_CACHE = "roots-audio";
+   もう一度ダウンロードすることになるので、切り離しておく。
+   ただし音声を同じファイル名のまま作り直したとき（2026-10 に Piper → Kokoro）は、
+   AUDIO_CACHE の名前を変える。古い名前の保存は activate でまるごと消える。 */
+const VERSION = "v97";
+const AUDIO_CACHE = "roots-voice-kokoro";
 const APP_CACHE = "roots-app-" + VERSION;
 
 /* はじめて開いたときに、アプリを動かすのに必要なものをまとめて保存しておく。
@@ -47,18 +49,7 @@ self.addEventListener("install", (e) => {
 self.addEventListener("activate", (e) => {
   e.waitUntil((async () => {
     const keys = await caches.keys();
-    /* 古い版で作った音声の保存（roots-audio-v6 など）が残っていれば、
-       中身を新しい保存場所へ引き継いでから消す（もう一度ダウンロードしなくてよくする） */
-    const audio = await caches.open(AUDIO_CACHE);
-    for (const k of keys) {
-      if (k === AUDIO_CACHE || !k.startsWith("roots-audio-")) continue;
-      const old = await caches.open(k);
-      for (const req of await old.keys()) {
-        if (await audio.match(req)) continue;
-        const res = await old.match(req);
-        if (res) await audio.put(req, res);
-      }
-    }
+    /* 前の声（Piper）の保存 roots-audio などは引き継がずに消す（下の削除でまとめて消える） */
     // roots-compiled はアプリ本体を変換した結果（index.html が自分で管理する）。消さない
     for (const k of keys)
       if (k !== AUDIO_CACHE && k !== APP_CACHE && k !== "roots-compiled") await caches.delete(k);
