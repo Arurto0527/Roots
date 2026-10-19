@@ -10,10 +10,14 @@
    もう一度ダウンロードすることになるので、切り離しておく。
    ただし音声を同じファイル名のまま作り直したとき（2026-10 に Piper → Kokoro）は、
    AUDIO_CACHE の名前を変える。古い名前の保存は activate でまるごと消える。
-   （roots-voice-kokoro は音声を入れ替える前に公開してしまい、Piper の音が入りうるので -2 にした） */
-const VERSION = "v99";
+   （roots-voice-kokoro は音声を入れ替える前に公開してしまい、Piper の音が入りうるので -2 にした）
+   何本かだけ作り直したときは、名前は変えずに REDONE に「us/ハッシュ」を足す。
+   保存済みの中からその音声だけを消して取り直すので、ほかの音声はダウンロードし直さなくてよい */
+const VERSION = "v100";
 const AUDIO_CACHE = "roots-voice-kokoro-2";
 const APP_CACHE = "roots-app-" + VERSION;
+/* 2026-10-19 聞き取りチェックで聞きまちがえられた短い音声を作り直した56本 */
+const REDONE = ["uk/0c0b271c","uk/1c7bfef8","uk/2288b25b","uk/281ba64e","uk/28fcb92f","uk/2e48d9ed","uk/348f1364","uk/3e6d42ef","uk/43e36503","uk/45afe178","uk/49473311","uk/5045bcac","uk/50cac900","uk/62b2d6da","uk/6a0f559a","uk/702ecbd1","uk/78f4b947","uk/864f3222","uk/8827595f","uk/88ad264a","uk/89b29c10","uk/8f09b003","uk/9b76c143","uk/a694e261","uk/aa25504e","uk/aad0a14e","uk/ae7f4d1c","uk/af1eb592","uk/b26fac7d","uk/c487c2fe","uk/c5f847a1","uk/c77ae4a0","uk/caeda9d9","uk/d608551f","uk/d81a37a2","uk/d8dfb383","uk/dc7b77f2","uk/de776945","uk/e52b80e0","uk/e8311335","uk/eda17c15","uk/ef92fe2b","uk/fb6f4827","uk/fed68570","us/019fb038","us/2669fe9e","us/49504791","us/56cad272","us/676712b6","us/6bfbd198","us/6c97732c","us/985fcc5f","us/a947e23c","us/b3dcff8f","us/b8736ad5","us/d81a37a2"];
 
 /* はじめて開いたときに、アプリを動かすのに必要なものをまとめて保存しておく。
    こうすると、一度ネットにつないで開けば、次からはネットなしでも起動できる。
@@ -55,6 +59,17 @@ self.addEventListener("activate", (e) => {
     for (const k of keys)
       if (k !== AUDIO_CACHE && k !== APP_CACHE && k !== "roots-compiled") await caches.delete(k);
     await self.clients.claim();
+    // 作り直した音声だけ、保存してあれば消して新しい音を取り直す（ネットがなければ消すだけ。次に鳴らすとき取りに行く）
+    try {
+      const audio = await caches.open(AUDIO_CACHE);
+      const redo = new Set(REDONE.map((x) => "/audio/" + x + ".m4a"));
+      for (const r of await audio.keys()) {
+        const p = new URL(r.url).pathname;
+        if (!redo.has(p.slice(p.lastIndexOf("/audio/")))) continue;
+        await audio.delete(r);
+        try { const res = await fetch(p, { cache: "reload" }); if (res.ok) await audio.put(p, res); } catch (err) {}
+      }
+    } catch (err) {}
   })());
 });
 
