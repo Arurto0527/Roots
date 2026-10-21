@@ -13,11 +13,11 @@
    （roots-voice-kokoro は音声を入れ替える前に公開してしまい、Piper の音が入りうるので -2 にした）
    何本かだけ作り直したときは、名前は変えずに REDONE に「us/ハッシュ」を足す。
    保存済みの中からその音声だけを消して取り直すので、ほかの音声はダウンロードし直さなくてよい */
-const VERSION = "v100";
+const VERSION = "v101";
 const AUDIO_CACHE = "roots-voice-kokoro-2";
 const APP_CACHE = "roots-app-" + VERSION;
 /* 2026-10-19 聞き取りチェックで聞きまちがえられた短い音声を作り直した56本 */
-const REDONE = ["uk/0c0b271c","uk/1c7bfef8","uk/2288b25b","uk/281ba64e","uk/28fcb92f","uk/2e48d9ed","uk/348f1364","uk/3e6d42ef","uk/43e36503","uk/45afe178","uk/49473311","uk/5045bcac","uk/50cac900","uk/62b2d6da","uk/6a0f559a","uk/702ecbd1","uk/78f4b947","uk/864f3222","uk/8827595f","uk/88ad264a","uk/89b29c10","uk/8f09b003","uk/9b76c143","uk/a694e261","uk/aa25504e","uk/aad0a14e","uk/ae7f4d1c","uk/af1eb592","uk/b26fac7d","uk/c487c2fe","uk/c5f847a1","uk/c77ae4a0","uk/caeda9d9","uk/d608551f","uk/d81a37a2","uk/d8dfb383","uk/dc7b77f2","uk/de776945","uk/e52b80e0","uk/e8311335","uk/eda17c15","uk/ef92fe2b","uk/fb6f4827","uk/fed68570","us/019fb038","us/2669fe9e","us/49504791","us/56cad272","us/676712b6","us/6bfbd198","us/6c97732c","us/985fcc5f","us/a947e23c","us/b3dcff8f","us/b8736ad5","us/d81a37a2"];
+const REDONE = ["uk/0c0b271c","uk/1c7bfef8","uk/2288b25b","uk/281ba64e","uk/28fcb92f","uk/2e48d9ed","uk/348f1364","uk/3e6d42ef","uk/43e36503","uk/45afe178","uk/49473311","uk/5045bcac","uk/50cac900","uk/62b2d6da","uk/6a0f559a","uk/702ecbd1","uk/78f4b947","uk/864f3222","uk/8827595f","uk/88ad264a","uk/89b29c10","uk/8f09b003","uk/9b76c143","uk/a694e261","uk/aa25504e","uk/aad0a14e","uk/ae7f4d1c","uk/af1eb592","uk/b26fac7d","uk/c487c2fe","uk/c5f847a1","uk/c77ae4a0","uk/caeda9d9","uk/d608551f","uk/d81a37a2","uk/d8dfb383","uk/dc7b77f2","uk/de776945","uk/e52b80e0","uk/e8311335","uk/eda17c15","uk/ef92fe2b","uk/fb6f4827","uk/fed68570","us/019fb038","us/2669fe9e","us/49504791","us/56cad272","us/676712b6","us/6bfbd198","us/6c97732c","us/985fcc5f","us/a947e23c","us/b3dcff8f","us/b8736ad5","us/d81a37a2","us/074c76c2","us/11bd3353","us/2cb41ebc","us/3197f49c","us/599b0f6d","us/61da8eed","us/666cfa4d","us/6a0f559a","us/6dda4e1a","us/763e0219","us/852dc331","us/a17256c6","us/b7188846","us/c20c8395","us/c242f5b7","us/d5021bfa","us/d596d9e1","us/e052c162","us/ec0486f5","us/f73e1580","uk/074c76c2","uk/11bd3353","uk/2cb41ebc","uk/3197f49c","uk/599b0f6d","uk/61da8eed","uk/666cfa4d","uk/6dda4e1a","uk/763e0219","uk/852dc331","uk/a17256c6","uk/b7188846","uk/c20c8395","uk/c242f5b7","uk/d5021bfa","uk/d596d9e1","uk/e052c162","uk/ec0486f5","uk/f73e1580"];
 
 /* はじめて開いたときに、アプリを動かすのに必要なものをまとめて保存しておく。
    こうすると、一度ネットにつないで開けば、次からはネットなしでも起動できる。
