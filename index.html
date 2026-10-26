@@ -54357,7 +54357,7 @@ function NoticeBox({place="top"}){
   const [seen,setSeen]=useState(()=>{try{return JSON.parse(ROOTS_STORE.getItem(NOTICE_KEY)||"[]");}catch(e){return [];}});
   const all=useNotices();
   const n=all.find(x=>!seen.includes(x.id));
-  if(!n)return null;
+  if(!n||IS_DEMO)return null;   /* お知らせは生徒向けなので、お試し版では出さない */
   const close=()=>{const next=[...seen,n.id];setSeen(next);
     try{ROOTS_STORE.setItem(NOTICE_KEY,JSON.stringify(next));}catch(e){}};
   return (
