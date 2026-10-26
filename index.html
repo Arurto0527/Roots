@@ -46445,6 +46445,7 @@ const Cloud={
 
   /* 1回答ごとの記録（取り消しできるよう、送るのは少しあと） */
   log(entry){
+    if(IS_DEMO){Cloud.demoAnswers=(Cloud.demoAnswers||0)+1;return;}
     const box=lsGet("roots.outbox.v1")||[];
     box.push({id:uuid(),word_id:String(entry.id),mode:entry.format,grade:entry.grade,
       correct:entry.grade>=2,first_try:!!entry.firstTry,hint_used:!!entry.hint,
@@ -46452,6 +46453,7 @@ const Cloud={
     lsSet("roots.outbox.v1",box);
   },
   unlog(){
+    if(IS_DEMO){Cloud.demoAnswers=Math.max(0,(Cloud.demoAnswers||0)-1);return;}
     const box=lsGet("roots.outbox.v1")||[];
     box.pop();lsSet("roots.outbox.v1",box);
   },
@@ -46470,6 +46472,7 @@ const Cloud={
   },
 
   async flush(){
+    if(IS_DEMO)return Cloud.demoPing();
     if(!sb||!Cloud.user||!navigator.onLine)return;
     const box=lsGet("roots.outbox.v1")||[];
     if(box.length){
@@ -46492,6 +46495,18 @@ const Cloud={
       }catch(e){}
     }
     if(Cloud.pushTimer)Cloud.push();
+  },
+
+  /* お試し版：開いた回数・使った時間・答えた数だけを送る（名前などは送らない）。
+     visitor は端末ごとのランダムな番号で、同じ人が何回開いたかを数えるためのもの */
+  async demoPing(){
+    if(!sb||!Cloud.sessionId||!navigator.onLine)return;
+    let vid=null;
+    try{vid=window.localStorage.getItem("roots.demo.vid");
+      if(!vid){vid=uuid();window.localStorage.setItem("roots.demo.vid",vid);}}catch(e){vid=Cloud.demoVid||(Cloud.demoVid=uuid());}
+    const act=Cloud.active+(Cloud.visibleSince?Date.now()-Cloud.visibleSince:0);
+    try{await sb.rpc("demo_ping",{p_id:Cloud.sessionId,p_visitor:vid,p_started:new Date(Cloud.sessionStart).toISOString(),
+      p_active:Math.round(act/1000),p_answers:Cloud.demoAnswers||0});}catch(e){}
   },
 
   async signOut(){
@@ -52387,6 +52402,79 @@ function FeedbackInbox({C,box,small}){
 }
 
 /* 管理画面「お知らせ」：生徒へお知らせを送る（全員 または ID番号を指定）。送ったものは消せる */
+/* 管理：お試し版（?demo=1）の利用状況。表 demo_visits（作り方は supabase/demo.sql） */
+function DemoStats({C,box,small}){
+  const [rows,setRows]=useState(null);
+  const [err,setErr]=useState(null);
+  const [days,setDays]=useState(30);
+  const load=useCallback(async()=>{
+    setErr(null);setRows(null);
+    try{
+      const since=new Date(startOfDay(Date.now())-(days-1)*DAY).toISOString();
+      const xs=await sbFetchAll(()=>sb.from("demo_visits").select("id,visitor,started_at,active_seconds,answers")
+        .gte("started_at",since).order("started_at").order("id"));
+      setRows(xs);
+    }catch(e){setErr((e&&e.message)||"読み込めませんでした");}
+  },[days]);
+  useEffect(()=>{load();},[load]);
+  const fmtMin=sec=>{const m=Math.round(sec/60);return m>=60?Math.floor(m/60)+"時間"+(m%60)+"分":m+"分";};
+  const h3={fontSize:16,fontWeight:700,color:C.text,margin:"0 0 10px"};
+  const Stat=({label,value})=>(
+    <div style={{flex:"1 1 45%",border:"1px solid "+C.border,borderRadius:4,padding:"12px 14px"}}>
+      <div style={{fontSize:13,color:C.sub}}>{label}</div>
+      <div className="num" style={{fontSize:22,fontWeight:700,color:C.text,marginTop:4}}>{value}</div>
+    </div>);
+  let body=null;
+  if(err)body=<div style={box}><p style={{fontSize:16,color:"#DC2626",margin:0}}>{err}</p>
+    <p style={{fontSize:14,color:C.sub}}>表がまだないときは supabase/demo.sql を実行してください。</p></div>;
+  else if(!rows)body=<div style={box}><p style={{fontSize:16,color:C.sub,margin:0}}>読み込んでいます…</p></div>;
+  else{
+    const sec=rows.reduce((a,r)=>a+r.active_seconds,0);
+    const ans=rows.reduce((a,r)=>a+r.answers,0);
+    const people=new Set(rows.map(r=>r.visitor)).size;
+    const byDay=new Map();
+    rows.forEach(r=>{const k=dayKey(new Date(r.started_at).getTime());
+      const d=byDay.get(k)||{n:0,v:new Set(),sec:0,ans:0};d.n++;d.v.add(r.visitor);d.sec+=r.active_seconds;d.ans+=r.answers;byDay.set(k,d);});
+    const list=[...byDay.entries()].sort((a,b)=>b[0].localeCompare(a[0]));
+    const td={padding:"8px 4px",borderTop:"1px solid "+C.border,fontSize:14,textAlign:"right"};
+    body=<>
+      <div style={box}>
+        <h3 style={h3}>直近{days}日のまとめ</h3>
+        <div style={{display:"flex",flexWrap:"wrap",gap:8}}>
+          <Stat label="アクセス数" value={rows.length+"回"}/>
+          <Stat label="人数（端末の数）" value={people+"人"}/>
+          <Stat label="合計の利用時間" value={fmtMin(sec)}/>
+          <Stat label="1回あたりの平均" value={rows.length?fmtMin(sec/rows.length):"—"}/>
+          <Stat label="答えた単語の数" value={ans+"語"}/>
+          <Stat label="1回あたりの平均" value={rows.length?Math.round(ans/rows.length)+"語":"—"}/>
+        </div>
+      </div>
+      <div style={box}>
+        <h3 style={h3}>日ごと</h3>
+        {list.length===0?<p style={{fontSize:16,color:C.sub,margin:0}}>まだ記録がありません</p>:
+        <table style={{width:"100%",borderCollapse:"collapse",color:C.text}}>
+          <thead><tr style={{color:C.sub,fontSize:13}}>
+            <th style={{textAlign:"left",fontWeight:400}}>日付</th><th style={{textAlign:"right",fontWeight:400}}>回数</th>
+            <th style={{textAlign:"right",fontWeight:400}}>人数</th><th style={{textAlign:"right",fontWeight:400}}>時間</th>
+            <th style={{textAlign:"right",fontWeight:400}}>回答</th></tr></thead>
+          <tbody>{list.map(([k,d])=>(<tr key={k}>
+            <td style={{...td,textAlign:"left"}}>{k.slice(5).replace("-","/")}</td><td style={td}>{d.n}</td>
+            <td style={td}>{d.v.size}</td><td style={td}>{fmtMin(d.sec)}</td><td style={td}>{d.ans}</td></tr>))}</tbody>
+        </table>}
+      </div>
+    </>;
+  }
+  return <>
+    <div style={{display:"flex",gap:8,marginBottom:10}}>
+      {[7,30,90].map(n=><button key={n} style={small(days===n)} onClick={()=>setDays(n)}>{n}日</button>)}
+      <button style={small(false)} onClick={load}>更新</button>
+    </div>
+    {body}
+    <p style={{fontSize:13,color:C.sub,lineHeight:1.7}}>お試し版のアドレス：https://arurto0527.github.io/Roots/?demo=1<br/>
+      時間は画面を見ていた時間だけを数えています。人数は端末ごとに数えます。</p>
+  </>;
+}
+
 function NoticeSender({C,box,small}){
   const [title,setTitle]=useState("");
   const [body,setBody]=useState("");
@@ -52849,7 +52937,7 @@ function AdminScreen({C}){
               style={{...small(group===k),flex:"0 0 auto",padding:"0 14px",whiteSpace:"nowrap"}}>{l}（{n}）</button>))}
         </div>
         <div role="tablist" style={{display:"flex",gap:6,marginBottom:12}}>
-          {[["class","クラス"],["students","生徒"],["words","単語"],["inbox","問合せ"+(unread?"("+unread+")":"")],["notice","お知らせ"]].map(([k,l])=>(
+          {[["class","クラス"],["students","生徒"],["words","単語"],["inbox","問合せ"+(unread?"("+unread+")":"")],["notice","お知らせ"],["demo","お試し"]].map(([k,l])=>(
             <button key={k} role="tab" aria-selected={tab===k} style={{...pill(tab===k),fontSize:15,padding:"0 4px",
               color:k==="inbox"&&unread&&tab!==k?"#DC2626":pill(tab===k).color}} onClick={()=>setTab(k)}>{l}</button>))}
         </div>
@@ -52858,6 +52946,7 @@ function AdminScreen({C}){
         {tab==="words"&&renderWords()}
         {tab==="inbox"&&<FeedbackInbox C={C} box={box} small={small}/>}
         {tab==="notice"&&<NoticeSender C={C} box={box} small={small}/>}
+        {tab==="demo"&&<DemoStats C={C} box={box} small={small}/>}
         {tab!=="inbox"&&tab!=="notice"&&<Btn C={C} variant="ghost" style={{marginTop:12}} onClick={exportCsv}>一覧をCSVで保存（Excel用）</Btn>}
       </>)}
     </div>
