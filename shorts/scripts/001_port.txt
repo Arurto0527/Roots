@@ -1,0 +1,14 @@
+# 型: ①カタカナ語（試作）
+# 語根: port
+# メモ: 語源は Etymonline で確認できるものだけ（report＝re＋portare「運び戻す」、portable＝portare＋-able、porter＝portator「運ぶ人」）
+[0.0-3.0] {hook} 英単語の覚え方、語源で一発
+[3.0-5.5] {hook think} 実はもう\n知ってる単語がある
+[5.5-8.5] {root port} port は「運ぶ」
+[8.5-11.0] {kata ポーター porter port(運ぶ)+er(人)} 荷物を運ぶ人
+[11.0-13.5] {kata ポータブル portable port(運ぶ)+able(できる)} 持ち運べる
+[13.5-16.5] {kata レポート report re(もとへ)+port(運ぶ)} 情報を持ち帰る＝報告
+[16.5-19.5] {word support} 下から運ぶ＝支える
+[19.5-22.5] {word import} 中へ運ぶ＝輸入する
+[22.5-26.0] {word transportation} 越えて運ぶ＝輸送
+[26.0-30.0] {summary} port＝運ぶ、で全部わかる
+[30.0-33.0] {hook cheer} カタカナから\n覚えれば一発

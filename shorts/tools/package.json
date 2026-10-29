@@ -1,0 +1,6 @@
+{
+  "name": "roots-shorts-tools",
+  "private": true,
+  "description": "index.html から単語データとピクトグラムを取り出す道具（node extract_assets.js）",
+  "dependencies": { "@babel/standalone": "7.26.4" }
+}
