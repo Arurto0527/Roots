@@ -46277,7 +46277,7 @@ const DEFAULT_SETTINGS={
 };
 const DEFAULT_STATS={
   streak:0,totalDays:0,masteredCount:0,overcomeCount:0,lastStudyDate:null,
-  history:{}, rootsSeen:0, totalAnswers:0, totalFirstTry:0
+  history:{}, rootsSeen:0, totalAnswers:0, totalFirstTry:0, freeze:0
 };
 
 const KEY={words:"roots.words.v2",settings:"roots.settings.v2",stats:"roots.stats.v2",
@@ -50794,7 +50794,56 @@ function OnboardingScreen({C,onDone}){
    SCREEN: HOME
    1画面に収める。学習開始までのタップは1回。
    ============================================================ */
-function HomeScreen({C,settings,stats,words,cfg,setCfg,pool,onStart,onNav,resumeInfo,onResume,onDiscardResume,onSettings}){
+/* 連続日数のしくみ（おやすみ券）
+   7日続けるごとに券を1枚（最大2枚）。1日だけ休んだときは、次に学習した日に券を1枚使って連続をつなぐ */
+const FREEZE_MAX=2;
+const STREAK_GOALS=[3,5,7,14,30,50,100,200,365];
+/* いまも続いている連続日数（昨日までに学習していなければ 0。券で救える1日休みは続いている扱い） */
+function liveStreak(st,now){
+  const t=now||Date.now(),last=st.lastStudyDate;
+  if(!last)return 0;
+  if(last===dayKey(t)||last===dayKey(t-DAY))return st.streak||0;
+  if(last===dayKey(t-2*DAY)&&(st.freeze||0)>0)return st.streak||0;
+  return 0;
+}
+/* 開いた日数の記録（学習データとは別。消えても困らない） */
+const VISIT_KEY="roots.visits.v1";
+const WELCOME_WORDS=["今日もえらい！","今日も来てくれてえらい！","開いただけで、もう一歩前進！","今日もコツコツ、えらい！","その1回が力になる！"];
+
+function WelcomeSheet({C,info,onStart,onClose}){
+  const {days,streak,studiedToday,rest,freeze,useFreeze}=info;
+  const next=STREAK_GOALS.find(g=>g>streak);
+  return (
+    <Overlay C={C} onClose={onClose} align="center" z={130}>
+      <div className="popIn" style={{background:C.card,borderRadius:4,width:"min(360px,90vw)",padding:"28px 22px 18px",textAlign:"center"}}>
+        <div style={{fontSize:22,fontWeight:700,color:C.text,lineHeight:1.4}}>{info.word}</div>
+        <div style={{display:"flex",justifyContent:"center",gap:28,margin:"22px 0 18px"}}>
+          <div>
+            <div style={{fontSize:14,color:C.sub}}>開いた日</div>
+            <div><span className="num" style={{fontSize:40,fontWeight:700,color:C.accent}}>{days}</span><span style={{fontSize:16,color:C.text}}>日目</span></div>
+          </div>
+          <div>
+            <div style={{fontSize:14,color:C.sub}}>連続で学習</div>
+            <div><span className="num" style={{fontSize:40,fontWeight:700,color:streak>0?C.warn:C.faint}}>{streak}</span><span style={{fontSize:16,color:C.text}}>日</span></div>
+          </div>
+        </div>
+        <div style={{fontSize:16,color:C.sub,lineHeight:1.7,marginBottom:20}}>
+          {studiedToday?"今日の学習はもう済んでいます。この調子！"
+            :useFreeze?"昨日はおやすみでした。今日学習すると、おやすみ券を1枚使って連続がつながります"
+            :streak>0?"今日も学習すると "+(streak+1)+"日連続"+(next&&next-streak===1?"（目標達成！）":"")+"。5問だけでもOK"
+            :"今日から連続記録をはじめよう。5問だけでもOK"}
+          {freeze>0&&<div style={{fontSize:14,marginTop:6}}>おやすみ券 {freeze}枚</div>}
+        </div>
+        <div style={{display:"flex",flexDirection:"column",gap:8}}>
+          {!studiedToday&&rest>0&&<Btn C={C} onClick={onStart}>5問だけやる</Btn>}
+          <Btn C={C} variant={!studiedToday&&rest>0?"ghost":"primary"} onClick={onClose}>{studiedToday||!rest?"とじる":"あとで"}</Btn>
+        </div>
+      </div>
+    </Overlay>
+  );
+}
+
+function HomeScreen({C,settings,stats,words,cfg,setCfg,pool,onStart,onQuick,onNav,resumeInfo,onResume,onDiscardResume,onSettings}){
   const [open,setOpen]=useState(false);
   const now=Date.now();
   const mastered=words.filter(isMastered).length;
@@ -50822,6 +50871,13 @@ function HomeScreen({C,settings,stats,words,cfg,setCfg,pool,onStart,onNav,resume
       borderRadius:4,padding:"7px 11px",whiteSpace:"nowrap"}}>{label} <span className="num">{value}</span></span>
   );
   const pct=Math.round(mastered/Math.max(1,words.length)*100);
+  /* 「あと少し」：今日の目標までの残り語数と、次の連続日数の目標 */
+  const goal=settings.dailyGoal||10;
+  const goalLeft=Math.max(0,goal-(todayDone?todayDone.count:0));
+  const streakNow=liveStreak(stats);
+  const studiedToday=stats.lastStudyDate===todayKey();
+  const nextStreak=STREAK_GOALS.find(g=>g>streakNow);
+  const streakLeft=nextStreak?nextStreak-streakNow:0;
 
   return (
     <div style={{flex:1,padding:"18px 20px 96px",display:"flex",flexDirection:"column"}} className="riseIn">
@@ -50837,7 +50893,7 @@ function HomeScreen({C,settings,stats,words,cfg,setCfg,pool,onStart,onNav,resume
           style={{display:"flex",alignItems:"center",gap:6,background:"transparent",border:"none",cursor:"pointer",
             color:C.text,padding:"4px 0"}}>
           <Icon.clock size={18}/>
-          <span className="num" style={{fontSize:20,fontWeight:700}}>{stats.streak}</span>
+          <span className="num" style={{fontSize:20,fontWeight:700}}>{liveStreak(stats)}</span>
           <span style={{fontSize:14,color:C.sub}}>日</span>
         </button>
       </div>
@@ -50864,6 +50920,20 @@ function HomeScreen({C,settings,stats,words,cfg,setCfg,pool,onStart,onNav,resume
         </div>
         <div style={{fontSize:16,color:C.sub,marginTop:10,lineHeight:1.5}}>{summary}</div>
 
+        <div style={{marginTop:12,display:"flex",flexDirection:"column",gap:6}}>
+          <div style={{fontSize:16,fontWeight:700,color:goalLeft?C.text:C.accent}}>
+            {goalLeft?"今日の目標まで あと "+goalLeft+"語":"今日の目標 "+goal+"語 達成！"}
+          </div>
+          {nextStreak&&(
+            <div style={{fontSize:14,color:C.sub}}>
+              {studiedToday
+                ?"あと "+streakLeft+"日で "+nextStreak+"日連続"
+                :"今日やれば "+(streakNow+1)+"日連続"+(streakLeft===1?"（"+nextStreak+"日の目標達成）":"")}
+              {(stats.freeze||0)>0&&<span>　おやすみ券 {stats.freeze}枚</span>}
+            </div>
+          )}
+        </div>
+
         <div style={{display:"flex",gap:8,margin:"14px 0 16px",flexWrap:"wrap"}}>
           <Chip3 label="復習どき" value={dueCount} strong/>
           <Chip3 label="未着手" value={newCount}/>
@@ -50875,6 +50945,9 @@ function HomeScreen({C,settings,stats,words,cfg,setCfg,pool,onStart,onNav,resume
           style={{opacity:pool.length?1:.45,cursor:pool.length?"pointer":"not-allowed"}}>
           {!pool.length?"いま出せる語がありません":aheadOfSchedule?"前倒しで復習する":"学習をはじめる"}
         </Btn>
+        {pool.length>5&&(
+          <Btn C={C} variant="ghost" onClick={onQuick} style={{marginTop:8}}>1分だけ・5問やる</Btn>
+        )}
         <button data-tour="home-mode" onClick={()=>setOpen(!open)} aria-expanded={open}
           style={{width:"100%",minHeight:56,background:"transparent",border:"none",cursor:"pointer",
             color:C.sub,fontSize:16,display:"flex",alignItems:"center",justifyContent:"center",gap:4}}>
@@ -53608,6 +53681,19 @@ function App(){
   const [screen,setScreen]=useState("loading");
   const [tour,setTour]=useState(null);   /* 吹き出し案内の何番目か（null＝出していない） */
   const [intro,setIntro]=useState(false); /* はじめての体験（unpredictable）を出しているか */
+  /* その日はじめてホームを開いたら、あいさつ（今日もえらい・開いた日数）を出す。案内中・お試し版では出さない */
+  useEffect(()=>{
+    if(screen!=="home"||intro||tour!==null||IS_DEMO)return;
+    const today=todayKey();
+    const v=lsGet(VISIT_KEY);
+    if(v&&v.last===today)return;
+    const days=(v?v.days:(stats.totalDays||0))+1;
+    lsSet(VISIT_KEY,{last:today,days});
+    const fr=stats.freeze||0;
+    setWelcome({days,word:WELCOME_WORDS[days%WELCOME_WORDS.length],
+      streak:liveStreak(stats),studiedToday:stats.lastStudyDate===today,rest:pool.length,
+      freeze:fr,useFreeze:fr>0&&stats.lastStudyDate===dayKey(Date.now()-2*DAY)});
+  },[screen,intro,tour]);
   /* 案内をはじめる前の単語帳の ○× を TOUR_SNAP_KEY に預けておき、終わったら戻す。
      途中でページを開き直しても、次に開いたときに戻す */
   const restoreRecall=useCallback(()=>{
@@ -53634,6 +53720,7 @@ function App(){
   const [rootEntry,setRootEntry]=useState(null);
   const [whyWord,setWhyWord]=useState(null);   /* 「なぜこの意味？」シートに出す単語 */
   const [modal,setModal]=useState(null);
+  const [welcome,setWelcome]=useState(null);
   const [snack,setSnack]=useState(null);
   /* 新しい版が出たときの帯。押すまで消えない（5秒で消えると、初めての人が見のがすため） */
   const [updateReady,setUpdateReady]=useState(false);
@@ -53892,7 +53979,12 @@ function App(){
     st.history=hist;
     if(st.lastStudyDate!==today){
       const y=dayKey(Date.now()-DAY);
-      st={...st,streak:st.lastStudyDate===y?st.streak+1:1,totalDays:st.totalDays+1,lastStudyDate:today};
+      const y2=dayKey(Date.now()-2*DAY);
+      let freeze=st.freeze||0,streak=1;
+      if(st.lastStudyDate===y)streak=st.streak+1;
+      else if(st.lastStudyDate===y2&&freeze>0){freeze--;streak=st.streak+1;}  /* おやすみ券を使う */
+      if(streak%7===0)freeze=Math.min(FREEZE_MAX,freeze+1);                     /* 7日ごとに券を1枚 */
+      st={...st,streak,freeze,totalDays:st.totalDays+1,lastStudyDate:today};
     }
     const fresh=BADGES.filter(b=>!earned.includes(b.id)&&b.cond(st)).map(b=>b.id);
     const all=[...earned,...fresh];
@@ -54176,7 +54268,7 @@ function App(){
 
       {screen==="home"&&(
         <HomeScreen C={C} settings={settings} stats={stats} words={words}
-          cfg={cfg} setCfg={setCfg} pool={pool} onStart={()=>startSession()} onNav={nav}
+          cfg={cfg} setCfg={setCfg} pool={pool} onStart={()=>startSession()} onQuick={()=>startSession(pool.slice(0,5))} onNav={nav}
           resumeInfo={resumeInfo} onResume={doResume} onDiscardResume={discardResume} onSettings={changeSettings}/>
       )}
 
@@ -54239,6 +54331,8 @@ function App(){
             const p=words.filter(w=>ids.has(w.id)&&!w.manualPass).sort((a,b)=>isMastered(a)-isMastered(b)).slice(0,20);
             setRootEntry(null);startSession(p);}}/>
       )}
+      {welcome&&screen==="home"&&<WelcomeSheet C={C} info={welcome}
+        onStart={()=>{setWelcome(null);startSession(pool.slice(0,5));}} onClose={()=>setWelcome(null)}/>}
       {modal&&<Modal C={C} title={modal.title} body={modal.body} actions={modal.actions} onClose={()=>setModal(null)}/>}
       {snack&&(
         <Snackbar C={C} text={snack.text} actionLabel={snack.action}
