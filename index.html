@@ -45997,6 +45997,8 @@ const LIGHT={
   warn:"#111111",warnSoft:"#F5F5F5",
   bad:"#111111",badSoft:"#F5F5F5",
   pre:"#2F5D9E",root:"#B5652B",suf:"#4F7A5E",
+  /* 差し色（淡い紫）：今いる場所・レベルのしるし。文字は濃い紫、下じきは淡い紫 */
+  brand:"#534AB7",brandSoft:"#EEEDFE",
   overlay:"rgba(0,0,0,.4)",
   shadow:"none",
   isDark:false
@@ -46010,6 +46012,7 @@ const DARK={
   warn:"#F2F2F2",warnSoft:"#1C1C1C",
   bad:"#F2F2F2",badSoft:"#1C1C1C",
   pre:"#7FA3D6",root:"#E09A5F",suf:"#8DB89B",
+  brand:"#C9C3FF",brandSoft:"#2A2650",
   overlay:"rgba(0,0,0,.6)",
   shadow:"none",
   isDark:true
@@ -46125,7 +46128,9 @@ const freshState=()=>({
 /* ============================================================
    TUTORIAL（はじめての人への案内）
    ① IntroLesson … unpredictable を分解して、語源で意味を当てる体験（全画面）
-   ② TUTORIAL_STEPS … そのあと本物の画面で「使い方2つ」をやってみる吹き出し案内。光っている場所をタップすると次へ進む
+   ② TUTORIAL_STEPS … そのあと練習用のカードで1語だけやってみる吹き出し案内。光っている場所をタップすると次へ進む
+   ③ LIST_TOUR_STEPS … 単語帳をはじめて開いたときだけ出す、「意味を隠す → ○× → × だけもう一度」の案内
+   （2026-10 に「長い」という感想をもらい、23ステップ → ②7＋③5 に分けて短くした）
    ・target … 光らせる部品の data-tour の名前（配列なら、見つかった最初のもの）。null は画面の真ん中に出す
    ・screen … その説明をどの画面で出すか（study は、タップで動く練習用カード。記録は変えない）
    ・face   … study のとき、はじめに見せる面（ask＝問題、reveal＝答え）
@@ -46138,79 +46143,45 @@ const freshState=()=>({
 const TUTORIAL_KEY="roots.tutorialDone";
 const TUTORIAL_ACCENT="#534AB7";
 const TUTORIAL_STEPS=[
-  /* --- 使い方1：単語帳でチェック --- */
-  {target:"nav-list",screen:"home",pass:true,mood:"cheer",tap:"下の「単語帳」をタップ",
-   title:"使い方1　単語帳でチェック",
-   body:"いちばんかんたんな使い方から、やってみよう。"},
-  {target:"list-part",screen:"list",pass:true,mood:"normal",tap:"プルダウンをタップ",
-   title:"範囲を選ぶ",
-   body:"ここで、覚えたい範囲（Part）を選べるよ。"},
-  {target:"list-part-grid",need:"button",screen:"list",pass:true,mood:"normal",tap:"Part をひとつタップ",
-   title:"どれでもいいよ",
-   body:"テスト範囲に合わせて選ぼう。"},
-  {target:"list-hide",screen:"list",pass:true,mood:"teach",tap:"「意味を隠す」をタップ",
-   title:"意味を隠す",
-   body:"意味が隠れて、英語だけが並ぶよ。"},
+  {target:"home-start",screen:"home",pass:false,mood:"cheer",
+   title:"学習をはじめる",
+   body:"ふだんはここを押すと、今日の単語が出てくるよ。\n今は練習用のカードで試してみよう（記録には残らない）。"},
+  {target:"card",screen:"study",face:"ask",pass:true,mood:"think",tap:"カードをタップ",
+   title:"まず思い出す",
+   body:"すぐに答えを見ないで、3秒考えよう。\nそれからカードを押すと、答えが出るよ。"},
+  {target:"picto",screen:"study",face:"reveal",pass:true,mood:"teach",tap:"イラストをタップ",
+   title:"語根を押すとコラムが開く",
+   body:"イラストの語根を押すと、その語根を使う仲間の単語が見られるよ。"},
+  {target:"reveal-tab-2",screen:"study",face:"reveal",pass:true,mood:"teach",tap:"「例文」をタップ",
+   title:"例文も見られる",
+   body:"答えの面は「答え・語源・例文」の3ページあるよ。"},
+  {target:"reveal-examples",screen:"study",face:"reveal",pass:false,scroll:true,mood:"teach",
+   title:"英文を押すと発音が聞ける",
+   body:"英文をタップすると、発音が聞けるよ。やってみて。"},
+  {target:"buttons",screen:"study",face:"reveal",pass:true,mood:"think",tap:"どちらかをタップ",
+   title:"覚えた？ もう一度？",
+   body:"少しでも迷ったら「もう一度」。あとでまた出てくるよ。"},
+  {target:null,screen:"home",mood:"cheer",title:"これでおしまい！",
+   body:"あとは「学習をはじめる」を押すだけ。毎日同じ時間に開くと続けやすいよ。\n下の「単語帳」は、開いたときに使い方を少しだけ案内するね。"},
+];
+/* 単語帳をはじめて開いたときの案内。○× は案内のあいだだけ空にして、終わったら戻す */
+const LIST_TOUR_KEY="roots.listTourDone";
+const LIST_TOUR_STEPS=[
+  {target:"list-hide",screen:"list",pass:true,mood:"cheer",tap:"「意味を隠す」をタップ",
+   title:"単語帳の使い方",
+   body:"テスト前のチェックにぴったりの使い方だよ。まず意味を隠そう。"},
   {target:"list-meaning",screen:"list",pass:true,mood:"think",tap:"隠れた所をタップ",
    title:"思い出してから見る",
-   body:"まず意味を思い出してみて。\nそれから、隠れた所を押して答えを見よう。"},
+   body:"意味を思い出してから、隠れた所を押して答えを見よう。"},
   {target:"list-col",need:'[data-tour="list-recall"] button',screen:"list",pass:true,mood:"teach",tap:"○か×をタップ",
    title:"○か×をつける",
    body:"わかったら ○、わからなかったら ×。\n（練習だから、あとで元に戻しておくよ）"},
   {target:"list-hide",screen:"list",pass:true,mood:"normal",tap:"「意味を隠し中」をタップ",
-   title:"いったん全部見せる",
-   body:"1周したら、ここを押していったん全部見せる。"},
+   title:"1周したら、いったん全部見せる",
+   body:"ここを押すと、全部の意味が見えるよ。"},
   {target:"list-hide",screen:"list",pass:true,mood:"cheer",tap:"もう一度タップ",
    title:"× だけがもう一度隠れる",
-   body:"もう一度押すと、○ をつけた単語は隠れず、× とまだの単語だけが隠れるよ。\nこれをくり返すと、効率よく覚えられる。"},
-  {target:"list-col",need:'[data-tour="list-word"]',screen:"list",pass:true,mood:"teach",tap:"英単語をタップ",
-   title:"覚えにくい単語は開く",
-   body:"× にした単語は、また意味が隠れたね。\n覚えにくい単語は、英単語を押すと、その単語の画面が開くよ。"},
-  {target:"wordsheet-body",screen:"list",pass:false,scroll:true,mood:"teach",
-   title:"語源を「フック」にする",
-   body:"語源や絵が見られるよ。指で上下に動かして読んでみて。\n覚えるときの「引っかかり（フック）」にしよう。"},
-  {target:"wordsheet-close",screen:"list",pass:true,mood:"normal",tap:"×をタップして閉じる",
-   title:"閉じて次へ",
-   body:"右上の × で閉じられるよ。"},
-
-  /* --- 使い方2：練習モード --- */
-  {target:"nav-home",screen:"list",pass:true,mood:"cheer",tap:"下の「ホーム」をタップ",
-   title:"使い方2　練習モード",
-   body:"次は、カードで1語ずつしっかり覚える使い方。"},
-  {target:"home-mode",screen:"home",pass:true,mood:"normal",tap:"「条件を変える」をタップ",
-   title:"範囲を決める",
-   body:"まず、やりたい範囲を決めよう。"},
-  {target:"seg-range",screen:"home",pass:true,mood:"normal",tap:"「範囲から」をタップ",
-   title:"範囲から",
-   body:"「範囲から」を選ぶと、番号や Part で範囲を決められるよ。"},
-  {target:"home-range",screen:"home",pass:false,scroll:true,mood:"teach",
-   title:"ここで範囲を決める",
-   body:"Part を選んだり、＋−で番号を変えたりして、やりたい範囲を決めてみよう。\n決めたら「次へ」。"},
-  {target:"home-start",screen:"home",pass:false,mood:"cheer",tap:"「学習をはじめる」をタップ",
-   title:"学習をはじめる",
-   body:"範囲が決まったら、ここを押す。\n今回は練習用のカードで試してみよう（記録には残らない）。"},
-  {target:"card",screen:"study",face:"ask",pass:true,mood:"think",tap:"カードをタップ",
-   title:"まず思い出す",
-   body:"すぐに答えを見ないで、3秒「意味なんだっけ」と考えよう。\nそれからカードを押すと、答えが出るよ。"},
-  {target:"picto",screen:"study",face:"reveal",pass:true,mood:"teach",tap:"イラストをタップ",
-   title:"イラストを見る",
-   body:"イラストの語根を押すと、その語根のコラムが開くよ。"},
-  {target:"reveal-tab-2",screen:"study",face:"reveal",pass:true,mood:"teach",tap:"「例文」をタップ",
-   title:"例文も見る",
-   body:"答えの面は、「答え・語源・例文」の3ページに分かれているよ。"},
-  {target:"reveal-examples",screen:"study",face:"reveal",pass:false,scroll:true,mood:"teach",
-   title:"英文を押すと発音が聞ける",
-   body:"英文をタップすると、発音が聞けるよ。やってみて。\nその単語との接点を、どんどん増やそう。"},
-  {target:"buttons",screen:"study",face:"reveal",pass:true,mood:"think",tap:"どちらかをタップ",
-   title:"覚えた？ もう一度？",
-   body:"覚えたら「覚えた」。自信がなければ「もう一度」を押すと、あとでまた出てくるよ。"},
-
-  /* --- 設定・しめくくり --- */
-  {target:"nav-settings",screen:"home",pass:true,mood:"normal",tap:"下の「設定」をタップ",
-   title:"最後に設定",
-   body:"出題のしかたや発音（アメリカ／イギリス）なども、ここで変えられるよ。あとでチェックしてみてね。"},
-  {target:null,screen:"settings",mood:"cheer",title:"これでおしまい！",
-   body:"・毎日同じ時間に開く（寝る前や朝の電車）\n・少しでも迷ったら「もう一度」\n・覚えにくい単語は、語源や例文で接点を増やす\n\n先生からID番号をもらった人は、設定の「データ」で入力してね。この案内は「チュートリアルをもう一度見る」からいつでも見られるよ。"},
+   body:"もう一度押すと、× とまだの単語だけが隠れるよ。くり返すと効率よく覚えられる。\n覚えにくい単語は、英単語を押すと語源が見られるよ。"},
 ];
 /* 案内のあいだは単語帳の ○× をいったん空にして（○ の語は隠れないので、案内どおりに動かなくなる）、終わったら元に戻す */
 const LIST_RECALL_KEY="roots.listRecall.v16";
@@ -50455,22 +50426,17 @@ const INTRO_FAMILY=[
   {pre:"",root:"dict",post:"ate",ja:"書き取らせる；指図する"},
 ];
 const INTRO_DAYS=["今日","1日後","3日後","1週間後","3週間後"];
-/* 使い方2つ（くわしくは、このあと本物の画面で案内する） */
-const INTRO_HOWTO=[
-  {title:"単語帳でチェック",tag:"いちばんかんたん"},
-  {title:"練習モード",tag:"しっかり覚える"},
-];
 function IntroLesson({C,name,onDone,onSkip}){
   const [step,setStep]=useState(0);
   const [opened,setOpened]=useState([]);     /* ひらいたパーツの番号 */
   const [pick,setPick]=useState(null);       /* 選んだ答えの番号 */
   const [day,setDay]=useState(0);            /* 「覚えた」を押した回数 */
-  const LAST=7;
+  const LAST=6;
   const who=name&&name!=="あなた"?name:"";
   const col=k=>C[k];
   const box=useRef(null);
   const next=()=>{setStep(s=>Math.min(LAST,s+1));try{box.current.scrollTo(0,0);}catch(e){}};
-  const moods=["cheer","teach","think","think","cheer","teach","normal","cheer"];
+  const moods=["cheer","teach","think","think","cheer","teach","cheer"];
   const says=[
     (who?who+"、":"")+"ようこそ！ ぼくはルーツくん。\nいきなりだけど、この単語の意味わかる？",
     "長い単語は、パーツに分けられるんだ。\n色は3つの役わりを表しているよ。",
@@ -50478,8 +50444,7 @@ function IntroLesson({C,name,onDone,onSkip}){
     "パーツの意味をつなげると、どうなる？",
     "dict（言う）を覚えると、ほかの単語もまとめて読めるよ。",
     "最後に、覚え方のしくみ。\n「覚えた」を押すほど、次に出てくる日が遠くなるんだ。",
-    "語源で読むコツはわかったね！\nここからは、アプリの使い方。使い方は2つあるよ。",
-    (who?who+"、":"")+"準備OK！\nここからは本物の画面で、光っている所を押しながら、2つの使い方をやってみよう。",
+    (who?who+"、":"")+"語源で読むコツはわかったね！\n最後に、練習用のカードで1回だけやってみよう。",
   ];
   const Word=({dim})=>(
     <div className="en" style={{fontSize:34,fontWeight:700,letterSpacing:"-0.01em",textAlign:"center",
@@ -50503,7 +50468,7 @@ function IntroLesson({C,name,onDone,onSkip}){
     );
   };
   const legend=[["pre","青","接頭語","向きや打ち消しを足す"],["root","オレンジ","語根","意味の中心"],["suf","緑","接尾語","品詞を決める"]];
-  const canNext=[true,true,opened.length>=INTRO_PARTS.length,pick!=null,true,day>=2,true,true][step];
+  const canNext=[true,true,opened.length>=INTRO_PARTS.length,pick!=null,true,day>=2,true][step];
   const btnLabel=[
     "わからない…",
     "次へ",
@@ -50511,7 +50476,6 @@ function IntroLesson({C,name,onDone,onSkip}){
     pick==null?"答えを選んでね":"次へ",
     "次へ",
     day>=2?"次へ":"「覚えた」を押してみよう",
-    "次へ",
     "やってみる",
   ][step];
   return (
@@ -50640,27 +50604,11 @@ function IntroLesson({C,name,onDone,onSkip}){
           </>)}
 
           {step===6&&(
-            <div style={{display:"flex",flexDirection:"column",gap:10}}>
-              {INTRO_HOWTO.map((h,i)=>(
-                <div key={i} style={{display:"flex",alignItems:"center",gap:14,padding:"16px 14px",
-                  border:"1px solid "+C.line,borderRadius:10}}>
-                  <span className="num" style={{width:36,height:36,borderRadius:18,background:TUTORIAL_ACCENT,color:"#FFFFFF",
-                    display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,fontWeight:700,flexShrink:0}}>{i+1}</span>
-                  <div>
-                    <div style={{fontSize:16,fontWeight:700}}>{h.title}</div>
-                    <div style={{fontSize:14,color:C.sub,marginTop:2}}>{h.tag}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {step===7&&(
             <div style={{textAlign:"center",marginTop:12}}>
               <Word/>
               <div style={{fontSize:16,marginTop:6}}>予測できない</div>
               <div style={{marginTop:22,padding:"14px",borderRadius:10,background:C.sunken,fontSize:16,lineHeight:1.7,textAlign:"left"}}>
-                ここでやったことは記録には残らないよ。<br/>案内の途中で単語帳につけた ○× も、終わったら元に戻すね。</div>
+                ここでやったことは記録には残らないよ。<br/>光っている所を押して進んでね。</div>
             </div>
           )}
         </div>
@@ -50717,10 +50665,11 @@ function BottomNav({C,screen,onNav}){
         const on=screen===id;
         return (
           <button key={id} data-tour={"nav-"+id} onClick={()=>onNav(id)} aria-current={on?"page":undefined}
-            style={{flex:1,padding:"14px 0 16px",background:"transparent",border:"none",cursor:"pointer",
-              color:on?C.text:C.faint,fontSize:13,fontWeight:on?700:400}}
+            style={{flex:1,minHeight:56,padding:"8px 4px 10px",background:"transparent",border:"none",cursor:"pointer",
+              color:on?C.brand:C.faint,fontSize:13,fontWeight:on?700:400}}
             aria-label={id==="admin"&&unread?label+"（未読のお問い合わせ "+unread+"件）":undefined}>
-            <span style={{position:"relative",display:"inline-block"}}>
+            <span style={{position:"relative",display:"inline-block",padding:"7px 10px",borderRadius:999,
+              background:on?C.brandSoft:"transparent",transition:"background .15s"}}>
               {label}
               {id==="admin"&&unread>0&&<span className="num" style={{position:"absolute",top:-8,right:-18,minWidth:18,height:18,
                 padding:"0 5px",borderRadius:9,background:"#DC2626",color:"#fff",fontSize:11,fontWeight:700,
@@ -50949,9 +50898,15 @@ function HomeScreen({C,settings,stats,words,cfg,setCfg,pool,onStart,onQuick,onNa
         paddingBottom:18,borderBottom:"1px solid "+C.line}}>
         <div style={{minWidth:0}}>
           <div style={{fontSize:16,fontWeight:700,color:C.text}}>{settings.name||"あなた"}</div>
-          <div style={{fontSize:14,color:C.sub,marginTop:3}}>
-            {level.label}{nl?<span>　次まで {nl.min-mastered}語</span>:null}
+          <div style={{display:"flex",alignItems:"center",gap:8,marginTop:6,flexWrap:"wrap"}}>
+            <span style={{fontSize:16,fontWeight:700,color:C.brand,background:C.brandSoft,
+              borderRadius:999,padding:"4px 12px"}}>{level.label}</span>
+            {nl&&<span style={{fontSize:13,color:C.sub}}>「{nl.label}」まで あと<span className="num">{nl.min-mastered}</span>語</span>}
           </div>
+          {nl&&(()=>{const lo=level.min,r=Math.min(1,Math.max(0,(mastered-lo)/Math.max(1,nl.min-lo)));
+            return <div style={{marginTop:8,width:180,maxWidth:"100%",height:6,borderRadius:3,background:C.brandSoft,overflow:"hidden"}}
+              role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(r*100)} aria-label={"次のレベルまでの進み具合"}>
+              <div style={{width:(r*100)+"%",height:"100%",background:C.brand,borderRadius:3}}/></div>;})()}
         </div>
         <button onClick={()=>onNav("stats")} aria-label="学習記録を見る"
           style={{display:"flex",alignItems:"center",gap:6,background:"transparent",border:"none",cursor:"pointer",
@@ -53744,6 +53699,9 @@ function UpdateAppButton({C,rowBtn}){
 function App(){
   const [screen,setScreen]=useState("loading");
   const [tour,setTour]=useState(null);   /* 吹き出し案内の何番目か（null＝出していない） */
+  const [tourSet,setTourSet]=useState("main"); /* main＝はじめの案内／list＝単語帳の案内 */
+  const tourSteps=tourSet==="list"?LIST_TOUR_STEPS:TUTORIAL_STEPS;
+  const tourDoneKey=tourSet==="list"?LIST_TOUR_KEY:TUTORIAL_KEY;
   const [intro,setIntro]=useState(false); /* はじめての体験（unpredictable）を出しているか */
   /* その日はじめてホームを開いたら、あいさつ（今日もえらい・開いた日数）を出す。案内中・お試し版では出さない */
   useEffect(()=>{
@@ -53770,12 +53728,26 @@ function App(){
   const tourNext=useCallback(()=>{
     setTour(t=>{
       if(t==null)return null;
-      if(t>=TUTORIAL_STEPS.length-1){lsSet(TUTORIAL_KEY,true);restoreRecall();return null;}
-      const nx=TUTORIAL_STEPS[t+1];
+      if(t>=tourSteps.length-1){lsSet(tourDoneKey,true);restoreRecall();return null;}
+      const nx=tourSteps[t+1];
       if(nx.screen!=="study")setScreen(nx.screen);
       return t+1;
     });
-  },[restoreRecall]);
+  },[restoreRecall,tourSteps,tourDoneKey]);
+  /* 前の版で長い案内（単語帳の説明つき）を見終えた人には、単語帳の案内を出さない。この読み替えは1回だけ */
+  useEffect(()=>{
+    if(lsGet("roots.listTourMigrated")===true)return;
+    if(lsGet(TUTORIAL_KEY)===true)lsSet(LIST_TOUR_KEY,true);
+    lsSet("roots.listTourMigrated",true);
+  },[]);
+  /* 単語帳をはじめて開いたら、単語帳の案内を出す（はじめの案内を見終えたあと） */
+  useEffect(()=>{
+    if(screen!=="list"||tour!==null||intro)return;
+    if(lsGet(TUTORIAL_KEY)!==true||lsGet(LIST_TOUR_KEY)===true)return;
+    if(!lsGet(TOUR_SNAP_KEY))lsSet(TOUR_SNAP_KEY,{v:lsGet(LIST_RECALL_KEY)||null});
+    lsDel(LIST_RECALL_KEY);
+    setTourSet("list");setTour(0);
+  },[screen,tour,intro]);
   const [words,setWords]=useState(INITIAL_WORDS);
   const [settings,setSettings]=useState(DEFAULT_SETTINGS);
   const [stats,setStats]=useState(DEFAULT_STATS);
@@ -54360,7 +54332,7 @@ function App(){
       {screen==="settings"&&(
         <SettingsScreen C={C} settings={settings} stats={stats} words={words} earned={earned}
           onChange={changeSettings} onReset={resetAll} onTutorial={()=>nav("tutorial")}
-          onReplayTour={()=>{lsSet(TUTORIAL_KEY,false);setScreen("home");window.scrollTo(0,0);setIntro(true);}}
+          onReplayTour={()=>{lsSet(TUTORIAL_KEY,false);lsSet(LIST_TOUR_KEY,false);setScreen("home");window.scrollTo(0,0);setIntro(true);}}
           onExport={doExport} onImport={doImport} notice={notice}/>
       )}
       {screen==="admin"&&<AdminScreen C={C}/>}
@@ -54369,16 +54341,16 @@ function App(){
       {withNav&&<BottomNav C={C} screen={screen} onNav={nav}/>}
 
       {tour!=null&&(
-        <TutorialOverlay C={C} steps={TUTORIAL_STEPS} index={Math.min(tour,TUTORIAL_STEPS.length-1)}
+        <TutorialOverlay key={tourSet} C={C} steps={tourSteps} index={Math.min(tour,tourSteps.length-1)}
           onNext={tourNext}
-          onSkip={()=>{lsSet(TUTORIAL_KEY,true);setTour(null);restoreRecall();if(screen==="list")setScreen("home");}}>
-          {TUTORIAL_STEPS[tour]&&TUTORIAL_STEPS[tour].screen==="study"&&
-            <TutorialDemoStudy C={C} settings={settings} face={TUTORIAL_STEPS[tour].face} onTapRoot={openRootFromChip}/>}
+          onSkip={()=>{lsSet(tourDoneKey,true);setTour(null);restoreRecall();}}>
+          {tourSteps[tour]&&tourSteps[tour].screen==="study"&&
+            <TutorialDemoStudy C={C} settings={settings} face={tourSteps[tour].face} onTapRoot={openRootFromChip}/>}
         </TutorialOverlay>
       )}
       {intro&&(
         <IntroLesson C={C} name={settings.name}
-          onDone={()=>{if(!lsGet(TOUR_SNAP_KEY))lsSet(TOUR_SNAP_KEY,{v:lsGet(LIST_RECALL_KEY)||null});lsDel(LIST_RECALL_KEY);setIntro(false);setScreen("home");window.scrollTo(0,0);setTour(0);}}
+          onDone={()=>{setIntro(false);setScreen("home");window.scrollTo(0,0);setTourSet("main");setTour(0);}}
           onSkip={()=>{lsSet(TUTORIAL_KEY,true);setIntro(false);}}/>
       )}
 
