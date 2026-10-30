@@ -329,8 +329,8 @@ def plan_timing(cuts, voice):
         nxt = cuts[i + 1]["start"] if i + 1 < len(cuts) else c["end"]
         c["dur"] = max(0.5, nxt - c["start"])
     for c in cuts:
-        if c["kind"] in ("summary", "pairsum") and c["dur"] < 3.0:
-            warn(f"{c['line']}行目のまとめ画面が3秒より短いので、3秒にのばしました")
+        if c["kind"] in ("summary", "pairsum", "count") and c["dur"] < 3.0:
+            warn(f"{c['line']}行目の{'カウントダウン' if c['kind'] == 'count' else 'まとめ画面'}が3秒より短いので、3秒にのばしました")
             c["dur"] = 3.0
     t = 0.0
     for c in cuts:
@@ -508,9 +508,14 @@ def word_block(img, d, w, top, show_parts=True, word_size=140):
 def scene_word(ctx, c):
     img, d = base(ctx.number)
     name = c["arg"].split()[0] if c["arg"] else ""
-    w = find_word(name) or {"word": name, "meaning": "", "parts": [], "eiken": ""}
-    ctx.words.append(w)
-    chip(d, f"受験単語 {len(ctx.words)}", CX, 400, TYPE_COLOR["root"], size=36, filled=True)
+    # 前の場面（ペアや推理）ですでに出た語なら、同じ番号のまま使う
+    prev = next((i for i, x in enumerate(ctx.words) if x["word"].lower() == name.lower()), None)
+    if prev is None:
+        w = find_word(name) or {"word": name, "meaning": "", "parts": [], "eiken": ""}
+        ctx.words.append(w)
+        prev = len(ctx.words) - 1
+    w = ctx.words[prev]
+    chip(d, f"受験単語 {prev + 1}", CX, 400, TYPE_COLOR["root"], size=36, filled=True)
     word_block(img, d, w, 440)
     telop(d, c["text"])
     return img
@@ -573,6 +578,239 @@ def scene_summary(ctx, c):
     return img
 
 
+# ---------------------------------------------------------------- 型② 雑学（意外な語源の話）
+def get_word(ctx, c):
+    name = c["arg"].split()[0] if c["arg"] else (ctx.words[-1]["word"] if ctx.words else "")
+    if ctx.words and ctx.words[-1]["word"].lower() == name.lower():
+        return ctx.words[-1]
+    w = find_word(name) or {"word": name, "meaning": "", "parts": [], "eiken": ""}
+    ctx.words.append(w)
+    return w
+
+
+def part_cells(img, d, parts, top, cell_max=250, plus=True):
+    """語源パーツを、ピクトグラムの箱＋色つきの文字＋意味で横に並べる。下のはしの y を返す"""
+    parts = parts[:4]
+    if not parts:
+        return top
+    n = len(parts)
+    gap = 70 if plus else 30
+    cell = min(cell_max, (CONTENT_W - gap * (n - 1)) // n)
+    x = CX - (cell * n + gap * (n - 1)) / 2
+    bottom = top
+    for i, p in enumerate(parts):
+        rounded(d, (x, top, x + cell, top + cell), 22, outline=TYPE_COLOR[p["type"]], width=5)
+        pic = picto_image(p.get("picto"), int(cell * 0.72), TYPE_COLOR[p["type"]])
+        if pic is None:
+            fs = font(min(64, int(cell * 0.5)), "black")
+            d.text((x + cell / 2, top + cell / 2), p["morph"], font=fs, fill=TYPE_COLOR[p["type"]], anchor="mm")
+        else:
+            paste_center(img, pic, x + cell / 2, top + cell / 2)
+        fm2 = font(48 if cell > 200 else 40, "black")
+        d.text((x + cell / 2, top + cell + 46), p["morph"], font=fm2, fill=TYPE_COLOR[p["type"]], anchor="mm")
+        fg, gl, glh = fit_text(p["gloss"] or TYPE_LABEL[p["type"]], cell + 40, 90, 38, 26, max_lines=2, weight="medium",
+                               where="（パーツの意味）")
+        bottom = max(bottom, draw_lines(d, gl, fg, glh, x + cell / 2, top + cell + 80, SUB))
+        if plus and i < n - 1:
+            d.text((x + cell + gap / 2, top + cell / 2), "＋", font=font(56, "black"), fill=SUB, anchor="mm")
+        x += cell + gap
+    return bottom
+
+
+def scene_trivia(ctx, c):
+    """{trivia danger} 単語を大きく出して「意外な語源」"""
+    img, d = base(ctx.number)
+    w = get_word(ctx, c)
+    chip(d, "意外な語源", CX, 400, ACCENT, size=40, filled=True)
+    f = colored_font([(w["word"], None)], CONTENT_W - 40, 190)
+    d.text((CX, 600), w["word"], font=f, fill=TEXT, anchor="mm")
+    fm, ml, mlh = fit_text(w["meaning"].split("；")[0], CONTENT_W - 60, 110, 72, 44, max_lines=1, where="（意味）")
+    draw_lines(d, ml, fm, mlh, CX, 720, SUB)
+    paste_center(img, chara(c["arg"].split()[1] if len(c["arg"].split()) > 1 else "think", 300), CX, 1030)
+    telop(d, c["text"])
+    return img
+
+
+def scene_origin(ctx, c):
+    """{origin danger} もとの意味（語源パーツとピクトグラム）"""
+    img, d = base(ctx.number)
+    w = get_word(ctx, c)
+    chip(d, "もともとの意味は…", CX, 400, TYPE_COLOR["root"], size=40, filled=True)
+    segs = split_colored(w["word"], w["parts"])
+    fe = colored_font(segs, CONTENT_W - 40, 150)
+    draw_colored(d, segs, fe, CX, 560)
+    part_cells(img, d, w["parts"], 690, cell_max=300)
+    telop(d, c["text"])
+    return img
+
+
+def scene_reveal(ctx, c):
+    """{reveal danger} もとの意味 → 今の意味"""
+    img, d = base(ctx.number)
+    w = get_word(ctx, c)
+    roots = [p for p in w["parts"] if p["type"] == "root"] or w["parts"]
+    then = "＋".join(p["gloss"] for p in roots if p["gloss"]) or "？"
+    segs = split_colored(w["word"], w["parts"])
+    draw_colored(d, segs, colored_font(segs, CONTENT_W - 40, 120), CX, 380)
+    # 昔
+    rounded(d, (LEFT + 40, 470, SAFE_RIGHT - 40, 680), 28, outline=LINE, width=4)
+    d.text((LEFT + 80, 520), "むかし", font=font(36, "bold"), fill=SUB, anchor="lm")
+    fa, la, lha = fit_text(then, CONTENT_W - 160, 110, 76, 44, max_lines=1, where="（もとの意味）")
+    draw_lines(d, la, fa, lha, CX, 560, TYPE_COLOR["root"])
+    d.text((CX, 760), "▼", font=font(80, "black"), fill=ACCENT, anchor="mm")
+    # 今
+    rounded(d, (LEFT + 40, 840, SAFE_RIGHT - 40, 1110), 28, fill=ACCENT_SOFT, outline=ACCENT, width=5)
+    d.text((LEFT + 80, 890), "いま", font=font(36, "bold"), fill=ACCENT, anchor="lm")
+    fb, lb, lhb = fit_text(w["meaning"].split("；")[0], CONTENT_W - 160, 150, 110, 56, max_lines=1, weight="black",
+                           where="（今の意味）")
+    draw_lines(d, lb, fb, lhb, CX, 940, TEXT)
+    if w.get("eiken"):
+        chip(d, "英検" + w["eiken"], CX, 1170, ACCENT, size=32)
+    telop(d, c["text"])
+    return img
+
+
+# ---------------------------------------------------------------- 型③ 推理（カウントダウン→分解→正解）
+def scene_quiz(ctx, c):
+    """{quiz interrupt} 単語だけ出して「意味わかる？」"""
+    img, d = base(ctx.number)
+    w = get_word(ctx, c)
+    chip(d, "語源で推理", CX, 400, ACCENT, size=40, filled=True)
+    f = colored_font([(w["word"], None)], CONTENT_W - 40, 180)
+    d.text((CX, 620), w["word"], font=f, fill=TEXT, anchor="mm")
+    d.text((CX, 780), "この意味、わかる？", font=font(72, "black"), fill=ACCENT, anchor="mm")
+    paste_center(img, chara(c["arg"].split()[1] if len(c["arg"].split()) > 1 else "think", 280), CX, 1060)
+    telop(d, c["text"])
+    return img
+
+
+def scene_count(ctx, c):
+    """{count interrupt} 3・2・1 のカウントダウン（1秒ずつ数字が変わる）。3枚の絵を返す"""
+    w = get_word(ctx, c)
+    frames = []
+    for k in (3, 2, 1):
+        img, d = base(ctx.number)
+        f = colored_font([(w["word"], None)], CONTENT_W - 40, 130)
+        d.text((CX, 440), w["word"], font=f, fill=TEXT, anchor="mm")
+        r = 230
+        d.ellipse((CX - r, 830 - r, CX + r, 830 + r), outline=ACCENT, width=14)
+        # 残り時間の弧（数字が減るほど短く）
+        d.arc((CX - r, 830 - r, CX + r, 830 + r), -90, -90 + 360 * k / 3, fill=ACCENT, width=28)
+        d.text((CX, 830), str(k), font=font(300, "black"), fill=ACCENT, anchor="mm")
+        telop(d, c["text"])
+        frames.append(img)
+    return frames
+
+
+def scene_split(ctx, c):
+    """{split interrupt} 分解してヒント"""
+    img, d = base(ctx.number)
+    w = get_word(ctx, c)
+    chip(d, "分解すると…", CX, 400, TYPE_COLOR["root"], size=40, filled=True)
+    segs = split_colored(w["word"], w["parts"])
+    draw_colored(d, segs, colored_font(segs, CONTENT_W - 40, 150), CX, 560)
+    part_cells(img, d, w["parts"], 690, cell_max=300)
+    telop(d, c["text"])
+    return img
+
+
+def scene_answer(ctx, c):
+    """{answer interrupt} 正解（意味・英検級・パーツ）"""
+    img, d = base(ctx.number)
+    w = get_word(ctx, c)
+    chip(d, "正解", CX, 400, "#2E7D4F", size=44, filled=True)
+    word_block(img, d, w, 440)
+    telop(d, c["text"])
+    return img
+
+
+# ---------------------------------------------------------------- 型④ ペア（左右分割で比べる）
+def pair_words(ctx, c):
+    names = c["arg"].split()[:2]
+    if len(names) < 2:
+        warn(f"{c['line']}行目: pair は {{pair 単語1 単語2}} と2語書きます")
+        names = (names + ["?", "?"])[:2]
+    out = []
+    for nm in names:
+        w = next((x for x in ctx.words if x["word"].lower() == nm.lower()), None)
+        if w is None:
+            w = find_word(nm) or {"word": nm, "meaning": "", "parts": [], "eiken": ""}
+            ctx.words.append(w)
+        out.append(w)
+    ctx.pair = out
+    return out
+
+
+PAIR_GAP = 90
+HALF = (CONTENT_W - PAIR_GAP) // 2   # 左右それぞれの幅（385px）
+
+
+def short_meaning(w):
+    """「～より先に起こる，先行する」→「～より先に起こる」（せまい所用）"""
+    return re.split(r"[；，,]", w["meaning"])[0].strip()
+
+
+def pair_column(img, d, w, x0, top, highlight):
+    cx = x0 + HALF / 2
+    rounded(d, (x0, top, x0 + HALF, 1200), 28, outline=highlight, width=5)
+    segs = split_colored(w["word"], w["parts"])
+    draw_colored(d, segs, colored_font(segs, HALF - 40, 96, min_size=48), cx, top + 80)
+    y = top + 160
+    for p in w["parts"][:3]:
+        pic = picto_image(p.get("picto"), 120, TYPE_COLOR[p["type"]])
+        rounded(d, (cx - 70, y, cx + 70, y + 140), 18, outline=LINE, width=3)
+        if pic is not None:
+            paste_center(img, pic, cx, y + 70)
+        else:
+            d.text((cx, y + 70), p["morph"], font=font(48, "black"), fill=TYPE_COLOR[p["type"]], anchor="mm")
+        label = f"{p['morph']}＝{p['gloss'] or TYPE_LABEL[p['type']]}"
+        fl, ll, lhl = fit_text(label, HALF - 30, 60, 40, 26, max_lines=1, where="（ペアのパーツ）")
+        draw_lines(d, ll, fl, lhl, cx, y + 150, TYPE_COLOR[p["type"]])
+        y += 150 + lhl + 20
+    rounded(d, (x0 + 20, 1060, x0 + HALF - 20, 1180), 20, fill=ACCENT_SOFT)
+    fm, ml, mlh = fit_text(short_meaning(w), HALF - 70, 100, 52, 30, max_lines=2, weight="black", one_line_min=32,
+                           where="（ペアの意味）")
+    draw_lines(d, ml, fm, mlh, cx, 1120 - mlh * len(ml) / 2, TEXT)
+
+
+def scene_pair(ctx, c):
+    """{pair precede proceed} 左右に2語を並べて比べる"""
+    img, d = base(ctx.number)
+    a, b = pair_words(ctx, c)
+    d.text((CX, 380), "似てる2語、どう違う？", font=font(56, "black"), fill=ACCENT, anchor="mm")
+    pair_column(img, d, a, LEFT, 440, TYPE_COLOR["prefix"])
+    pair_column(img, d, b, LEFT + HALF + PAIR_GAP, 440, TYPE_COLOR["prefix"])
+    d.text((CX, 820), "vs", font=font(44, "black"), fill=SUB, anchor="mm")
+    telop(d, c["text"])
+    return img
+
+
+def scene_pairsum(ctx, c):
+    """{pairsum} 1行まとめ（3秒以上止める）"""
+    img, d = base(ctx.number)
+    pair = getattr(ctx, "pair", None) or (ctx.words[-2:] if len(ctx.words) >= 2 else [])
+    chip(d, "まとめ", CX, 400, ACCENT, size=40, filled=True)
+    y = 520
+    for w in pair:
+        segs = split_colored(w["word"], w["parts"])
+        fe = colored_font(segs, 420, 84, min_size=48)
+        x = LEFT + 30
+        for s, t in segs:
+            d.text((x, y), s, font=fe, fill=TYPE_COLOR.get(t, TEXT), anchor="lm")
+            x += text_w(s, fe)
+        fr, rl, rlh = fit_text(short_meaning(w), SAFE_RIGHT - max(x + 30, 520), 70, 46, 28, max_lines=1,
+                               where="（まとめの意味）")
+        d.text((SAFE_RIGHT - 10, y), rl[0], font=fr, fill=SUB, anchor="rm")
+        y += 130
+    d.line((LEFT + 20, y - 30, SAFE_RIGHT - 20, y - 30), fill=LINE, width=3)
+    # 1行まとめは大きく（テロップの文をそのまま使う）
+    f, lines, lh = fit_text(c["text"], CONTENT_W - 40, 1150 - y, 96, 52, max_lines=3, weight="black",
+                            where="（1行まとめ）")
+    draw_lines(d, lines, f, lh, CX, y + 20, TEXT)
+    paste_center(img, chara("cheer", 240), CX, 1330)
+    return img
+
+
 def scene_end(ctx):
     img = Image.new("RGB", (W, H), ACCENT)
     d = ImageDraw.Draw(img)
@@ -584,14 +822,18 @@ def scene_end(ctx):
 
 
 SCENES = {"hook": scene_hook, "text": scene_text, "root": scene_root, "kata": scene_kata,
-          "word": scene_word, "summary": scene_summary}
+          "word": scene_word, "summary": scene_summary,
+          "trivia": scene_trivia, "origin": scene_origin, "reveal": scene_reveal,
+          "quiz": scene_quiz, "count": scene_count, "split": scene_split, "answer": scene_answer,
+          "pair": scene_pair, "pairsum": scene_pairsum}
 
-# 型ごとに使える場面（2晩目以降に増やす）
+# 型ごとにふだん使う場面
+COMMON = {"hook", "text", "root", "word"}
 TYPE_SCENES = {
-    1: {"hook", "text", "root", "kata", "word", "summary"},
-    2: {"hook", "text", "root", "word", "summary"},
-    3: {"hook", "text", "root", "word", "summary"},
-    4: {"hook", "text", "root", "word", "summary"},
+    1: COMMON | {"kata", "summary"},
+    2: COMMON | {"trivia", "origin", "reveal", "summary"},
+    3: COMMON | {"quiz", "count", "split", "answer", "summary"},
+    4: COMMON | {"pair", "pairsum"},
 }
 
 
@@ -609,7 +851,11 @@ def render(args):
             kind = "text"
         elif kind not in allowed:
             warn(f"{c['line']}行目: 型{args.type}では「{kind}」はふだん使いません")
-        frames.append((SCENES[kind](ctx, c), c["dur"]))
+        out = SCENES[kind](ctx, c)
+        if isinstance(out, list):   # カウントダウンなど、1カットの中で絵が変わる場面
+            frames += [(im, c["dur"] / len(out)) for im in out]
+        else:
+            frames.append((out, c["dur"]))
     frames.append((scene_end(ctx), END_CARD_SEC))
     video_len = sum(d for _, d in frames)
     if not (30 <= video_len <= 45):
@@ -637,11 +883,12 @@ def render(args):
     t_end = 0.0
     for im, dur in frames:
         t_end += dur
+        cut_fade = fade_n if dur >= 0.9 else 0   # とても短いカットはフェードなしで切りかえる
         n = round(t_end * FPS) - written   # ずれがたまらないよう、終わりの時刻から数える
         raw = im.tobytes()
         for i in range(n):
-            if prev is not None and i < fade_n:
-                proc.stdin.write(Image.blend(prev, im, (i + 1) / (fade_n + 1)).tobytes())
+            if prev is not None and i < cut_fade:
+                proc.stdin.write(Image.blend(prev, im, (i + 1) / (cut_fade + 1)).tobytes())
             else:
                 proc.stdin.write(raw)
         written += n

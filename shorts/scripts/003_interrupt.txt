@@ -1,0 +1,12 @@
+# 型: ③推理（試作）
+# 語根: rupt
+# メモ: interrupt＝inter（間）＋rupt（破る）、erupt＝e（外へ）＋rupt（破る）。アプリのデータどおり
+[0.0-3.0] {hook} 知らない単語も\n語源で推理できる
+[3.0-6.0] {quiz interrupt} これ、読める？
+[6.0-9.0] {count interrupt} 3秒で考えて！
+[9.0-13.0] {split interrupt} inter＝間、rupt＝破る
+[13.0-16.5] {text think} 間に入って、流れを破る…？
+[16.5-20.5] {answer interrupt} 正解は「中断する」
+[20.5-24.5] {word erupt} 外へ破る＝噴火する
+[24.5-28.5] {summary} rupt＝破る、で推理できる
+[28.5-31.5] {hook cheer} 分解すれば\n初めて見ても大丈夫

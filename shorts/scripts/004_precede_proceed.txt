@@ -1,0 +1,11 @@
+# 型: ④ペア（試作）
+# 語根: ced
+# メモ: precede＝pre（先に）＋ced（行く）、proceed＝pro（前へ）＋ceed（行く）。アプリのデータどおり
+[0.0-3.0] {hook think} precede と proceed、\n区別できる？
+[3.0-8.0] {pair precede proceed} どっちも ced＝「行く」
+[8.0-11.5] {text think} ちがうのは、頭の部分だけ
+[11.5-15.5] {word precede} pre＝先に。先に行く＝先行する
+[15.5-19.5] {word proceed} pro＝前へ。前へ行く＝進む
+[19.5-23.0] {text} 光は音より先に届く＝precede
+[23.0-27.0] {pairsum} 先に pre、前へ pro
+[27.0-30.5] {hook cheer} 頭の意味で\nもう迷わない

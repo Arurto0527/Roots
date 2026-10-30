@@ -35,7 +35,28 @@ python3 shorts/render.py --script 台本.txt --voice 録音.m4a --type 1 --numbe
 | summary | `{summary}` | ここまでに出た語根・カタカナ語・受験単語のまとめ（3秒以上止める） |
 | text | `{text}` | テロップだけ（ルーツくん） |
 
-型②雑学・③推理・④ペアの専用画面は準備中（DEVLOG.md を見てください）。
+### 型②雑学（意外な語源）
+| 場面 | 書き方 | 画面 |
+|---|---|---|
+| trivia | `{trivia danger}` | 「意外な語源」＋単語を大きく＋今の意味＋ルーツくん |
+| origin | `{origin danger}` | もともとの意味（語源パーツの色分け・ピクトグラム） |
+| reveal | `{reveal danger}` | 「むかし（語根の意味）」▼「いま（今の意味）」 |
+
+### 型③推理（カウントダウン→分解→正解）
+| 場面 | 書き方 | 画面 |
+|---|---|---|
+| quiz | `{quiz interrupt}` | 単語だけ（色なし）＋「この意味、わかる？」 |
+| count | `{count interrupt}` | 3・2・1 のカウントダウン（1秒ずつ。3秒より短いと3秒にのばす） |
+| split | `{split interrupt}` | 分解（色分け＋パーツの絵と意味） |
+| answer | `{answer interrupt}` | 「正解」＋意味・英検級・パーツ |
+
+### 型④ペア（左右で比べる）
+| 場面 | 書き方 | 画面 |
+|---|---|---|
+| pair | `{pair precede proceed}` | 左右に2語。パーツの絵と意味、下に今の意味 |
+| pairsum | `{pairsum}` | 2語の一覧＋テロップの文を大きく（1行まとめ。3秒以上止める） |
+
+試作の台本: `scripts/001_port.txt`（①）・`002_danger.txt`（②）・`003_interrupt.txt`（③）・`004_precede_proceed.txt`（④）
 
 ## データの作り直し（アプリの単語が増えたとき）
 ```
