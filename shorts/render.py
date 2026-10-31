@@ -79,6 +79,96 @@ def text_w(s, f):
     return f.getlength(s)
 
 
+# ---------------------------------------------------------------- 文字の位置をすべて記録して、はみ出しを調べる
+# 1枚の絵（カット）に書いた文字の四すみを全部メモしておき、
+#   ・安全領域（上220px・下420px・右160px）に入っていないか
+#   ・画面の左はしから出ていないか
+#   ・ほかの文字と重なっていないか
+# を自動で調べる。はみ出しそうな文字は、その場で少しずつ小さくして入れる。
+CHECK_LOG = []          # 全カットの記録（--report で JSON に書き出す）
+_cur = {"items": None, "group": 0, "name": ""}
+SHRINK_MIN_RATIO = 0.6  # 元の大きさの6割までは小さくしてよい
+
+
+def begin_frame(name):
+    _cur["items"] = []
+    _cur["name"] = name
+    CHECK_LOG.append({"cut": name, "items": _cur["items"], "problems": []})
+
+
+def new_group():
+    """色分けした英単語のように、何回かに分けて1語を書くときは同じ組にする（重なりチェックから外す）"""
+    _cur["group"] += 1
+    return _cur["group"]
+
+
+def out_of_safe(b, pad=2):
+    x0, y0, x1, y1 = b
+    why = []
+    if y0 < SAFE_TOP - pad:
+        why.append(f"上の安全領域（y<{SAFE_TOP}）")
+    if y1 > SAFE_BOTTOM + pad:
+        why.append(f"下の安全領域（y>{SAFE_BOTTOM}）")
+    if x1 > SAFE_RIGHT + pad:
+        why.append(f"右の安全領域（x>{SAFE_RIGHT}）")
+    if x0 < 20 - pad:
+        why.append("画面の左はし")
+    return why
+
+
+class CheckedDraw:
+    """ImageDraw のかわり。text() のときに位置を記録し、安全領域から出る文字は小さくする"""
+
+    def __init__(self, d, safe=True):
+        self._d = d
+        self.safe = safe   # エンドカードなど、全面の絵でも文字は安全領域に入れる
+
+    def __getattr__(self, k):
+        return getattr(self._d, k)
+
+    def text(self, xy, s, font=None, fill=None, anchor=None, group=None, shrink=True, **kw):
+        f = font
+        b = self._d.textbbox(xy, s, font=f, anchor=anchor)
+        if shrink and self.safe and out_of_safe(b) and hasattr(f, "font_variant"):
+            size0 = f.size
+            sz = size0
+            while out_of_safe(b) and sz - 2 >= max(20, size0 * SHRINK_MIN_RATIO):
+                sz -= 2
+                f = f.font_variant(size=sz)
+                b = self._d.textbbox(xy, s, font=f, anchor=anchor)
+            if sz != size0:
+                print(f"  ↳ {_cur['name']}: 「{s}」を {size0}px→{sz}px に小さくしました（安全領域に入れるため）",
+                      file=sys.stderr)
+        self._d.text(xy, s, font=f, fill=fill, anchor=anchor, **kw)
+        if _cur["items"] is not None and s.strip():
+            _cur["items"].append({"text": s, "box": [round(v) for v in b], "size": getattr(f, "size", 0),
+                                  "group": group})
+        return f
+
+
+def check_frame(rec):
+    """1カット分の記録を調べて、問題を rec["problems"] に入れる"""
+    items = rec["items"]
+    for it in items:
+        why = out_of_safe(it["box"])
+        if why:
+            rec["problems"].append(f"「{it['text']}」が{'・'.join(why)}に入っています {it['box']}")
+    for i in range(len(items)):
+        for j in range(i + 1, len(items)):
+            a, b = items[i], items[j]
+            if a["group"] is not None and a["group"] == b["group"]:
+                continue
+            ax0, ay0, ax1, ay1 = a["box"]
+            bx0, by0, bx1, by1 = b["box"]
+            iw, ih = min(ax1, bx1) - max(ax0, bx0), min(ay1, by1) - max(ay0, by0)
+            if iw <= 0 or ih <= 0:
+                continue
+            small = min((ax1 - ax0) * (ay1 - ay0), (bx1 - bx0) * (by1 - by0)) or 1
+            if iw * ih / small > 0.15:
+                rec["problems"].append(f"「{a['text']}」と「{b['text']}」が重なっています")
+    return rec["problems"]
+
+
 # ---------------------------------------------------------------- データ（index.html から取り出したもの）
 def load_data():
     wpath = os.path.join(HERE, "data", "words.json")
@@ -204,16 +294,20 @@ def fit_text(s, max_w, max_h, size, min_size, max_lines=3, weight="bold", spacin
                 return f, chunks, lh
             sz -= 4
     sz = size
+    floor = max(24, int(min_size * 0.7))   # ふつうの最小より小さくしてでも、まず枠に入れる
     while True:
         f = font(sz, weight)
         lines = wrap(s, f, max_w)
         lh = int(sz * spacing)
         widest = max((text_w(l, f) for l in lines), default=0)
-        if (len(lines) <= max_lines and lh * len(lines) <= max_h and widest <= max_w) or sz <= min_size:
-            if len(lines) > max_lines or lh * len(lines) > max_h or widest > max_w:
-                warn(f"文字が枠に入りきりません{where}: 「{s}」")
+        ok = len(lines) <= max_lines and lh * len(lines) <= max_h and widest <= max_w
+        if ok or sz <= floor:
+            if not ok:
+                warn(f"文字が枠に入りきりません{where}: 「{s}」（{sz}pxまで小さくしても入らないので、台本を短くしてください）")
+            elif sz < min_size:
+                warn(f"文字が多いので {sz}px まで小さくしました{where}: 「{s}」（読みにくければ台本を短く）")
             return f, lines, lh
-        sz -= 4
+        sz -= 2 if sz <= min_size else 4
 
 
 def draw_lines(d, lines, f, lh, cx, top, fill, align="center", x_left=None):
@@ -246,21 +340,41 @@ def split_colored(word, parts):
     return segs
 
 
+def draw_segs(d, segs, f, x, cy, default=TEXT):
+    """色分けした1語を左から書く（1語まとめて大きさをそろえる）。右はしの x を返す"""
+    g = new_group()
+    word = "".join(s for s, _ in segs)
+    # 1語全体で安全領域に入るか調べ、入らなければ語全体を小さくする（パーツごとに大きさが変わらないように）
+    size0 = f.size
+    while x + text_w(word, f) > SAFE_RIGHT and f.size - 2 >= max(20, size0 * SHRINK_MIN_RATIO):
+        f = f.font_variant(size=f.size - 2)
+    if f.size != size0:
+        print(f"  ↳ {_cur['name']}: 「{word}」を {size0}px→{f.size}px に小さくしました（安全領域に入れるため）",
+              file=sys.stderr)
+    for s, t in segs:
+        d.text((x, cy), s, font=f, fill=TYPE_COLOR.get(t, default), anchor="lm", group=g, shrink=False)
+        x += text_w(s, f)
+    return x
+
+
 def draw_colored(d, segs, f, cx, cy, default=TEXT):
     total = sum(text_w(s, f) for s, _ in segs)
-    x = cx - total / 2
-    for s, t in segs:
-        d.text((x, cy), s, font=f, fill=TYPE_COLOR.get(t, default), anchor="lm")
-        x += text_w(s, f)
+    while cx + total / 2 > SAFE_RIGHT and f.size > 24:   # まん中ぞろえで右に出るなら小さく
+        f = f.font_variant(size=f.size - 2)
+        total = sum(text_w(s, f) for s, _ in segs)
+    return draw_segs(d, segs, f, cx - total / 2, cy, default)
 
 
 def colored_font(segs, max_w, size, min_size=40):
     word = "".join(s for s, _ in segs)
     sz = size
-    while sz > min_size and text_w(word, font(sz, "black")) > max_w:
-        sz -= 4
+    floor = max(24, int(min_size * 0.7))
+    while sz > floor and text_w(word, font(sz, "black")) > max_w:
+        sz -= 4 if sz > min_size else 2
     if text_w(word, font(sz, "black")) > max_w:
         warn(f"英単語が横にはみ出します: {word}")
+    elif sz < min_size:
+        warn(f"英単語が長いので {sz}px まで小さくしました: {word}")
     return font(sz, "black")
 
 
@@ -313,18 +427,137 @@ def ffprobe_duration(path):
     return float(out)
 
 
-def plan_timing(cuts, voice):
-    """各カットの長さを決める。録音があれば、録音の長さを文字数に比例して配分する"""
+HOLD_KINDS = ("summary", "pairsum", "count")   # 3秒以上止める場面
+HOLD_SEC = 3.0
+MIN_CUT_SEC = 0.6
+
+
+def detect_silences(path, noise_db=-35, min_sec=0.2):
+    """録音の中の「間（無音）」を探す。[(始め, 終わり), ...] を返す"""
+    out = subprocess.run(["ffmpeg", "-hide_banner", "-nostats", "-i", path, "-af",
+                          f"silencedetect=noise={noise_db}dB:d={min_sec}", "-f", "null", "-"],
+                         capture_output=True, text=True).stderr
+    sil, start = [], None
+    for line in out.splitlines():
+        m = re.search(r"silence_start: (-?[\d.]+)", line)
+        if m:
+            start = max(0.0, float(m.group(1)))
+        m = re.search(r"silence_end: ([\d.]+)", line)
+        if m and start is not None:
+            sil.append((start, float(m.group(1))))
+            start = None
+    if start is not None:
+        sil.append((start, ffprobe_duration(path)))
+    return sil
+
+
+def choose_bounds(weights, silences, total):
+    """カットの区切りを、録音の「間」から選ぶ（いちばん自然な組み合わせを全部の行まとめて探す）。
+    ・前の区切りから見て、残りの文字数の割合で「このへんのはず」という時刻を出す
+    ・その時刻に近いほど、また間が長いほど（行と行の間は、文の中の息つぎより長い）よい
+    ・近くに間がなければ、見当どおりの時刻で区切る（少しだけ減点）"""
+    m = len(weights) - 1                     # 区切りの数
+    if m <= 0:
+        return [0.0, total], 0
+    sw_suffix = [sum(weights[i:]) for i in range(len(weights))]
+    cands = [((a + b) / 2, b - a) for a, b in silences]
+    INF = float("inf")
+    # best[i] = {時刻: (合計の減点, 前の時刻, 間に合わせたか)}
+    best = [{0.0: (0.0, None, False)}]
+    for i in range(1, m + 1):
+        cur = {}
+        for tp, (cost, _, _) in best[i - 1].items():
+            rest = total - tp
+            g = tp + rest * weights[i - 1] / sw_suffix[i - 1]   # このへんのはず
+            sigma = max(0.8, 0.35 * rest * weights[i - 1] / sw_suffix[i - 1])
+            opts = [(g, 3.0, False)]                            # 間がないときは見当どおり（減点3）
+            for mid, ln in cands:
+                if abs(mid - g) <= 3 * sigma:
+                    opts.append((mid, -2.0 * min(ln, 1.0) / 0.5, True))
+            for t, bonus, snap in opts:
+                # 前の区切りから MIN_CUT_SEC 以上・残りの行にも MIN_CUT_SEC ずつ残す
+                if t < tp + MIN_CUT_SEC or t > total - MIN_CUT_SEC * (m - i + 1):
+                    continue
+                c = cost + ((t - g) / sigma) ** 2 + bonus
+                key = round(t, 3)
+                if c < cur.get(key, (INF,))[0]:
+                    cur[key] = (c, tp, snap)
+        if not cur:   # どうしても置けないときは、文字数の割合どおり
+            acc, out = 0.0, [0.0]
+            for wgt in weights[:-1]:
+                acc += wgt
+                out.append(total * acc / sum(weights))
+            return out + [total], 0
+        # 候補が増えすぎないよう、よいものだけ残す
+        best.append(dict(sorted(cur.items(), key=lambda kv: kv[1][0])[:60]))
+    t = min(best[m], key=lambda k: best[m][k][0])
+    out, snapped = [], 0
+    for i in range(m, 0, -1):
+        c, tp, snap = best[i][t]
+        out.append(t)
+        snapped += snap
+        t = tp
+    return [0.0] + out[::-1] + [total], snapped
+
+
+def plan_voice(cuts, voice, sync="chars"):
+    """録音に合わせて、各カットが録音のどこからどこまでかを決める。
+    1) 文字数（--sync script なら台本の目安秒数）の割合で、区切りの時刻の見当をつける
+    2) 区切りの近くに「間（無音）」があれば、そのまん中に区切りを合わせる（声の途中で画面が変わらないように）
+    3) まとめ・カウントダウンは、声が短くても3秒止める（そのぶん録音に無音をはさむので、ずれない）"""
+    total = ffprobe_duration(voice)
+    if sync == "script":
+        weights = [max(0.1, c["end"] - c["start"]) for c in cuts]
+    elif sync == "mix":
+        ch = [count_chars(c["text"]) for c in cuts]
+        sc = [max(0.1, c["end"] - c["start"]) for c in cuts]
+        weights = [a / sum(ch) + b / sum(sc) for a, b in zip(ch, sc)]
+    else:
+        weights = [count_chars(c["text"]) for c in cuts]
+    sw = sum(weights)
+    sil = detect_silences(voice)
+    # 録音の最初と最後の無音は、カットの区切りに使わない（最初のカット・最後のカットに入れる）
+    inner = [(a, b) for a, b in sil if a > 0.05 and b < total - 0.05]
+    bounds, snapped = choose_bounds(weights, inner, total)
+    print(f"録音 {total:.1f}秒・見つけた間 {len(inner)}か所・区切り {len(bounds) - 2}か所のうち {snapped}か所を間に合わせました",
+          file=sys.stderr)
+    if len(bounds) - 2 > 0 and snapped < (len(bounds) - 2) / 2:
+        warn("録音の「間」があまり見つかりません。行と行のあいだを少し空けて読むと、画面と声がよく合います")
+    t = 0.0
+    for i, c in enumerate(cuts):
+        a, b = bounds[i], bounds[i + 1]
+        c["a0"], c["a1"] = a, b
+        c["dur"] = b - a
+        c["pad"] = 0.0
+        if c["kind"] in HOLD_KINDS and c["dur"] < HOLD_SEC:
+            c["pad"] = HOLD_SEC - c["dur"]   # 声のあとに無音をはさんで止める
+            c["dur"] = HOLD_SEC
+        if c["dur"] < MIN_CUT_SEC:
+            warn(f"{c['line']}行目のカットが {c['dur']:.2f}秒しかありません（録音とテロップの量が合っていないかも）")
+        c["t0"] = t
+        t += c["dur"]
+    return t
+
+
+def build_voice_track(cuts, voice, out_path):
+    """カットごとに録音を切り出し、止める場面には無音をはさんでつなぎ直す"""
+    parts, labels = [], []
+    for i, c in enumerate(cuts):
+        f = f"[0:a]atrim=start={c['a0']:.4f}:end={c['a1']:.4f},asetpts=PTS-STARTPTS"
+        if c["pad"] > 0:
+            f += f",apad=pad_dur={c['pad']:.4f}"
+        parts.append(f + f"[a{i}]")
+        labels.append(f"[a{i}]")
+    graph = ";".join(parts) + ";" + "".join(labels) + f"concat=n={len(cuts)}:v=0:a=1[out]"
+    subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", voice, "-filter_complex", graph, "-map", "[out]",
+                    "-ar", "44100", "-ac", "1", out_path], check=True)
+    return out_path
+
+
+def plan_timing(cuts, voice, sync="chars"):
+    """各カットの長さを決める。録音があれば録音に合わせる（plan_voice）"""
     if voice:
-        total = ffprobe_duration(voice)
-        chars = [count_chars(c["text"]) for c in cuts]
-        s = sum(chars)
-        t = 0.0
-        for c, n in zip(cuts, chars):
-            c["dur"] = total * n / s
-            c["t0"] = t
-            t += c["dur"]
-        return total
+        return plan_voice(cuts, voice, sync)
     for i, c in enumerate(cuts):
         nxt = cuts[i + 1]["start"] if i + 1 < len(cuts) else c["end"]
         c["dur"] = max(0.5, nxt - c["start"])
@@ -345,7 +578,7 @@ TELOP_BOX = (LEFT, 1250, SAFE_RIGHT, 1480)
 
 def base(number):
     img = Image.new("RGB", (W, H), BG)
-    d = ImageDraw.Draw(img)
+    d = CheckedDraw(ImageDraw.Draw(img))
     # 左上ラベル「Roots #001」（上220pxの外＝y=236 から）
     label = f"Roots #{number:03d}"
     f = font(40, "bold")
@@ -552,10 +785,7 @@ def scene_summary(ctx, c):
             word = "".join(s for s, _ in segs)
             while text_w(word, fe) > 470 and fe.size > 40:
                 fe = font(fe.size - 4, "black")
-            x = LEFT + 20
-            for s, t in segs:
-                d.text((x, y + 44), s, font=fe, fill=TYPE_COLOR.get(t, TEXT), anchor="lm")
-                x += text_w(s, fe)
+            x = draw_segs(d, segs, fe, LEFT + 20, y + 44)
             fr = font(44, "bold")
             r = right
             while text_w(r, fr) > SAFE_RIGHT - max(x + 30, 560) and len(r) > 1:
@@ -688,7 +918,10 @@ def scene_count(ctx, c):
     """{count interrupt} 3・2・1 のカウントダウン（1秒ずつ数字が変わる）。3枚の絵を返す"""
     w = get_word(ctx, c)
     frames = []
+    name = _cur["name"]
     for k in (3, 2, 1):
+        if k != 3:   # 数字ごとに別の絵として調べる
+            begin_frame(f"{name}（{k}）")
         img, d = base(ctx.number)
         f = colored_font([(w["word"], None)], CONTENT_W - 40, 130)
         d.text((CX, 440), w["word"], font=f, fill=TEXT, anchor="mm")
@@ -794,10 +1027,7 @@ def scene_pairsum(ctx, c):
     for w in pair:
         segs = split_colored(w["word"], w["parts"])
         fe = colored_font(segs, 420, 84, min_size=48)
-        x = LEFT + 30
-        for s, t in segs:
-            d.text((x, y), s, font=fe, fill=TYPE_COLOR.get(t, TEXT), anchor="lm")
-            x += text_w(s, fe)
+        x = draw_segs(d, segs, fe, LEFT + 30, y)
         fr, rl, rlh = fit_text(short_meaning(w), SAFE_RIGHT - max(x + 30, 520), 70, 46, 28, max_lines=1,
                                where="（まとめの意味）")
         d.text((SAFE_RIGHT - 10, y), rl[0], font=fr, fill=SUB, anchor="rm")
@@ -813,7 +1043,7 @@ def scene_pairsum(ctx, c):
 
 def scene_end(ctx):
     img = Image.new("RGB", (W, H), ACCENT)
-    d = ImageDraw.Draw(img)
+    d = CheckedDraw(ImageDraw.Draw(img))
     paste_center(img, chara("cheer", 360), CX, 640)
     d.text((CX, 960), "Rootsで英単語", font=font(110, "black"), fill="#FFFFFF", anchor="mm")
     d.line((CX - 300, 1060, CX + 300, 1060), fill="#FFFFFF", width=4)
@@ -838,10 +1068,30 @@ TYPE_SCENES = {
 
 
 # ---------------------------------------------------------------- 動画にする
+def run_checks(report_path=None):
+    """全カットの文字の位置を調べて、問題を一覧にする"""
+    bad = 0
+    for rec in CHECK_LOG:
+        if not rec["items"]:
+            continue
+        probs = check_frame(rec)
+        for pr in probs:
+            warn(f"{rec['cut']}: {pr}")
+            bad += 1
+    n_items = sum(len(r["items"]) for r in CHECK_LOG)
+    print(f"文字の位置チェック: {len([r for r in CHECK_LOG if r['items']])}カット・文字 {n_items}か所を調べて、問題 {bad}件")
+    if report_path:
+        with open(report_path, "w", encoding="utf-8") as fp:
+            json.dump({"safe_area": {"top": SAFE_TOP, "bottom": SAFE_BOTTOM, "right": SAFE_RIGHT},
+                       "cuts": [r for r in CHECK_LOG if r["items"]]}, fp, ensure_ascii=False, indent=1)
+        print(f"文字の位置の一覧: {report_path}")
+    return bad
+
+
 def render(args):
     meta, cuts = parse_script(args.script)
     ctx = Ctx(meta, args.number, args.type)
-    total = plan_timing(cuts, args.voice)
+    total = plan_timing(cuts, args.voice, args.sync)
     allowed = TYPE_SCENES.get(args.type, set(SCENES))
     frames = []
     for c in cuts:
@@ -851,27 +1101,41 @@ def render(args):
             kind = "text"
         elif kind not in allowed:
             warn(f"{c['line']}行目: 型{args.type}では「{kind}」はふだん使いません")
+        begin_frame(f"{c['line']}行目（{kind}）")
         out = SCENES[kind](ctx, c)
         if isinstance(out, list):   # カウントダウンなど、1カットの中で絵が変わる場面
             frames += [(im, c["dur"] / len(out)) for im in out]
         else:
             frames.append((out, c["dur"]))
+    begin_frame("エンドカード")
     frames.append((scene_end(ctx), END_CARD_SEC))
+    _cur["items"] = None
     video_len = sum(d for _, d in frames)
     if not (30 <= video_len <= 45):
         warn(f"動画の長さが {video_len:.1f} 秒です（目安は30〜45秒）")
+    run_checks(args.report)
+    if args.check:   # 動画は作らず、チェックだけ
+        print(f"チェックだけ: {video_len:.1f}秒・カット数 {len(frames)}・注意 {len(WARNINGS)}件")
+        return
 
     if args.preview:
         os.makedirs(args.preview, exist_ok=True)
         for i, (im, _) in enumerate(frames):
             im.save(os.path.join(args.preview, f"cut{i + 1:02d}.png"))
+        with open(os.path.join(args.preview, "timing.txt"), "w", encoding="utf-8") as fp:
+            for c in cuts:
+                extra = f"  声 {c['a0']:.2f}-{c['a1']:.2f}" if "a0" in c else ""
+                extra += f"  ＋無音 {c['pad']:.2f}" if c.get("pad") else ""
+                fp.write(f"{c['t0']:6.2f}〜{c['t0'] + c['dur']:6.2f}  {c['kind']:8s} {c['text'].replace(chr(10), ' / ')}{extra}\n")
 
     if shutil.which("ffmpeg") is None:
         sys.exit("ffmpeg が見つかりません")
+    tmpdir = tempfile.mkdtemp(prefix="roots_shorts_")
     cmd = ["ffmpeg", "-y", "-loglevel", "error", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}",
            "-r", str(FPS), "-i", "-"]
     if args.voice:
-        cmd += ["-i", args.voice, "-filter_complex", "[1:a]apad[a]", "-map", "0:v", "-map", "[a]"]
+        track = build_voice_track(cuts, args.voice, os.path.join(tmpdir, "voice.wav"))
+        cmd += ["-i", track, "-filter_complex", "[1:a]apad[a]", "-map", "0:v", "-map", "[a]"]
     else:
         cmd += ["-f", "lavfi", "-i", "anullsrc=r=44100:cl=mono", "-map", "0:v", "-map", "1:a"]
     cmd += ["-c:v", "libx264", "-preset", "veryfast", "-crf", str(args.crf), "-pix_fmt", "yuv420p",
@@ -896,6 +1160,7 @@ def render(args):
     proc.stdin.close()
     if proc.wait() != 0:
         sys.exit("ffmpeg でエラーが出ました")
+    shutil.rmtree(tmpdir, ignore_errors=True)
     size = os.path.getsize(args.out) / 1e6
     print(f"できました: {args.out}  {video_len:.1f}秒  {size:.1f}MB  カット数 {len(frames)}")
     if WARNINGS:
@@ -910,7 +1175,11 @@ def main():
     ap.add_argument("--number", type=int, default=1, help="左上の連番（Roots #001）")
     ap.add_argument("--out", required=True, help="出力する MP4")
     ap.add_argument("--crf", type=int, default=26, help="画質（大きいほどファイルが小さい）")
-    ap.add_argument("--preview", help="各カットの静止画（PNG）を書き出すフォルダ（確認用）")
+    ap.add_argument("--preview", help="各カットの静止画（PNG）と時間の表（timing.txt）を書き出すフォルダ（確認用）")
+    ap.add_argument("--sync", default="chars", choices=["chars", "script", "mix"],
+                    help="録音の分け方 chars=文字数の割合（ふつう） script=台本の目安秒数の割合 mix=両方の平均")
+    ap.add_argument("--report", help="全部の文字の位置とチェック結果を書き出す JSON ファイル")
+    ap.add_argument("--check", action="store_true", help="動画は作らず、文字のはみ出しチェックだけする")
     args = ap.parse_args()
     render(args)
 
