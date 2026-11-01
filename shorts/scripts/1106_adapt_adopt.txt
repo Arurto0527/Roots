@@ -1,0 +1,13 @@
+# 型: ④ペア adapt / adopt（2026-11-06・Roots #4）
+# 語根: apt
+# メモ: 夜勤チームの台本（10/30 報告）をそのまま転記
+[0.0-3.0] {hook think} adapt と adopt
+[3.0-6.0] {hook teach} 語源で\n覚える英単語
+[6.0-9.0] {pair adapt adopt} 違いは a と o だけ
+[9.0-12.5] {root apt} apt＝ぴったり合う
+[12.5-16.0] {word adapt} adapt＝適応する
+[16.0-19.5] {root opt} opt＝選ぶ
+[19.5-23.0] {word adopt} adopt＝採用する
+[23.0-26.5] {text think} 養子にする＝adopt
+[26.5-29.5] {pairsum} apt合う／opt選ぶ
+[29.5-33.0] {hook cheer} o は\noption の o

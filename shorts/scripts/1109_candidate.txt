@@ -1,0 +1,15 @@
+# 型: ②雑学 candidate（2026-11-09・Roots #9）
+# 語根: cand
+# メモ: 夜勤チームの台本（10/31 報告）をそのまま転記
+[0.0-3.0] {trivia candidate} 候補者の語源は「白」
+[3.0-6.0] {hook teach} 英単語の覚え方は\n語源
+[6.0-9.0] {word candidate} candidate＝候補者
+[9.0-12.5] {origin candidate} candidus＝白い
+[12.5-16.0] {text} 古代ローマの選挙
+[16.0-19.5] {text} 立候補者は白い服
+[19.5-23.0] {text} トーガを白く目立たせた
+[23.0-26.5] {text think} 潔白アピールという説も
+[26.5-30.0] {root cand=白く輝く} cand＝白く輝く
+[30.0-33.0] {text} candle＝ろうそく
+[33.0-36.0] {summary} candidate＝白い服の人
+[36.0-39.0] {hook think} 選挙ポスターの\n候補者は…

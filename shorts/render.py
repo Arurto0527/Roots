@@ -25,6 +25,12 @@ try:
 except ImportError:  # ピクトグラムなしでも動くようにする
     cairosvg = None
 
+try:   # 日本語を「文節」で区切る道具（pip install budoux）。なければ1文字ずつ区切る
+    import budoux
+    _BUDOUX = budoux.load_default_japanese_parser()
+except Exception:
+    _BUDOUX = None
+
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
 
@@ -36,6 +42,7 @@ SAFE_RIGHT = W - 160      # 右160pxは文字を置かない（x=920 まで使�
 LEFT = 60
 CX = (LEFT + SAFE_RIGHT) // 2   # 文字を置ける範囲のまん中（x=490）
 CONTENT_W = SAFE_RIGHT - LEFT   # 860px
+RIGHT_PAD = 24            # 右の安全領域の線から、さらにこれだけ離す（線ぎりぎりにしない）
 END_CARD_SEC = 2.0
 FADE_SEC = 0.2
 
@@ -48,6 +55,8 @@ LINE = "#E0E0E0"
 BG = "#FFFFFF"
 TYPE_COLOR = {"prefix": "#2F5D9E", "root": "#B5652B", "suffix": "#4F7A5E"}
 TYPE_LABEL = {"prefix": "接頭", "root": "語根", "suffix": "接尾"}
+TYPE_CHIP = {"prefix": "接頭語", "root": "語根", "suffix": "接尾語"}
+MOODS = {"normal", "teach", "think", "cheer"}   # ルーツくんの表情
 
 FONT_DIR = "/usr/share/fonts/opentype/noto"
 FONT_FILES = {"bold": "NotoSansCJK-Bold.ttc", "black": "NotoSansCJK-Black.ttc",
@@ -153,6 +162,8 @@ def check_frame(rec):
         why = out_of_safe(it["box"])
         if why:
             rec["problems"].append(f"「{it['text']}」が{'・'.join(why)}に入っています {it['box']}")
+        elif it["box"][2] > SAFE_RIGHT - RIGHT_PAD / 2:
+            rec["problems"].append(f"「{it['text']}」が右の安全領域の線（x={SAFE_RIGHT}）に近すぎます {it['box']}")
     for i in range(len(items)):
         for j in range(i + 1, len(items)):
             a, b = items[i], items[j]
@@ -161,11 +172,9 @@ def check_frame(rec):
             ax0, ay0, ax1, ay1 = a["box"]
             bx0, by0, bx1, by1 = b["box"]
             iw, ih = min(ax1, bx1) - max(ax0, bx0), min(ay1, by1) - max(ay0, by0)
-            if iw <= 0 or ih <= 0:
-                continue
-            small = min((ax1 - ax0) * (ay1 - ay0), (bx1 - bx0) * (by1 - by0)) or 1
-            if iw * ih / small > 0.15:
-                rec["problems"].append(f"「{a['text']}」と「{b['text']}」が重なっています")
+            # 少しでも重なれば知らせる（大きな文字の p・g など下に伸びる部分が、下の行にかかるのも見つける）
+            if iw > 2 and ih > 2:
+                rec["problems"].append(f"「{a['text']}」と「{b['text']}」が重なっています（{round(iw)}×{round(ih)}px）")
     return rec["problems"]
 
 
@@ -203,6 +212,58 @@ def root_info(morph):
             if p["type"] == "root" and (p["canon"] == k or p["morph"].lower() == k):
                 return {"gloss": p["gloss"], "picto": p["picto"]}
     return {"gloss": "", "picto": None}
+
+
+def part_info(morph, want=None):
+    """パーツ（接頭・語根・接尾）の種類・意味・絵を、アプリの単語データから探す。
+    want を指定しなければ、データの中でいちばん多い種類（bene なら接頭）を返す"""
+    k = morph.lower()
+    tally = {}
+    for w in WORDS:
+        for p in w["parts"]:
+            if p["canon"] == k or p["morph"].lower() == k:
+                t = tally.setdefault(p["type"], {"n": 0, "gloss": {}, "picto": None})
+                t["n"] += 1
+                if p["gloss"]:
+                    t["gloss"][p["gloss"]] = t["gloss"].get(p["gloss"], 0) + 1
+                if p["picto"] and not t["picto"]:
+                    t["picto"] = p["picto"]
+    if not tally:
+        return {"type": want, "gloss": "", "picto": None}
+    typ = want if want in tally else max(tally, key=lambda x: tally[x]["n"])
+    t = tally[typ]
+    gloss = max(t["gloss"], key=t["gloss"].get) if t["gloss"] else ""
+    return {"type": typ, "gloss": gloss, "picto": t["picto"]}
+
+
+def parse_word_arg(arg):
+    """'export ex(外へ)+port(運ぶ)=輸出する think' → ('export', 'ex(外へ)+port(運ぶ)=輸出する', 'think')"""
+    toks = (arg or "").split()
+    name = toks[0] if toks else ""
+    mood = next((t for t in toks[1:] if t in MOODS), None)
+    spec = " ".join(t for t in toks[1:] if t not in MOODS)
+    return name, spec, mood
+
+
+def make_word(name, spec, root_morph=""):
+    """単語データから語を出す。台本にパーツや意味が書いてあれば、そちらを使う
+    （アプリの見出し語にない語でも {word export ex(外へ)+port(運ぶ)=輸出する} で出せる）"""
+    w = BY_WORD.get(name.lower())
+    if spec:
+        pspec, _, meaning = spec.partition("=")
+        out = dict(w) if w else {"word": name, "meaning": "", "parts": [], "eiken": ""}
+        if pspec.strip():
+            out["parts"] = parse_parts(pspec, root_morph)
+        if meaning.strip():
+            out["meaning"] = meaning.strip()
+        if not out["meaning"]:
+            warn(f"「{name}」の意味がありません（{{word {name} パーツ=意味}} のように = のあとに書けます）")
+        return out
+    if not w:
+        warn(f"単語データに「{name}」がありません（アプリの単語帳にない語）。"
+             f"{{word {name} ex(外へ)+port(運ぶ)=意味}} のように、パーツと意味を台本に書けます")
+        return {"word": name, "meaning": "", "parts": [], "eiken": ""}
+    return w
 
 
 # ---------------------------------------------------------------- ピクトグラム
@@ -254,6 +315,24 @@ def tokenize(s):
     return toks
 
 
+_SPLIT = {"n": 0}   # 文節（「インストラクター」など）を途中で切った回数
+
+
+def phrases(s, f, max_w):
+    """改行してよい区切り。日本語は文節（「知っ／てる」のように言葉の途中で切らない）。
+    1つの文節が枠より長いときだけ、その文節を1文字ずつに分ける"""
+    if _BUDOUX is None:
+        return tokenize(s)
+    out = []
+    for ph in _BUDOUX.parse(s):
+        if text_w(ph.strip(), f) > max_w:
+            _SPLIT["n"] += 1
+            out += tokenize(ph)
+        else:
+            out.append(ph)
+    return out
+
+
 def wrap(s, f, max_w):
     # 「、」「。」のあとで区切って、どれも1行に入るならそこで改行する（読みやすい）
     if "\n" not in s:
@@ -263,7 +342,7 @@ def wrap(s, f, max_w):
     lines = []
     for para in s.split("\n"):
         cur = ""
-        for t in tokenize(para):
+        for t in phrases(para, f, max_w):
             if cur and text_w(cur + t, f) > max_w and cur.strip():
                 lines.append(cur.rstrip())
                 cur = t.lstrip()
@@ -297,10 +376,13 @@ def fit_text(s, max_w, max_h, size, min_size, max_lines=3, weight="bold", spacin
     floor = max(24, int(min_size * 0.7))   # ふつうの最小より小さくしてでも、まず枠に入れる
     while True:
         f = font(sz, weight)
+        _SPLIT["n"] = 0
         lines = wrap(s, f, max_w)
         lh = int(sz * spacing)
         widest = max((text_w(l, f) for l in lines), default=0)
         ok = len(lines) <= max_lines and lh * len(lines) <= max_h and widest <= max_w
+        if ok and _SPLIT["n"] and sz > min_size:
+            ok = False   # 言葉の途中で切るより、まず文字を小さくして1つの言葉を1行に入れる
         if ok or sz <= floor:
             if not ok:
                 warn(f"文字が枠に入りきりません{where}: 「{s}」（{sz}pxまで小さくしても入らないので、台本を短くしてください）")
@@ -619,14 +701,23 @@ def parse_parts(spec, root_morph):
         m = re.match(r"^([^（(]+)(?:[（(]([^）)]*)[）)])?$", s)
         morph, gloss = (m.group(1).strip(), (m.group(2) or "").strip()) if m else (s, "")
         parts.append({"morph": morph, "gloss": gloss})
-    ri = next((i for i, p in enumerate(parts) if root_morph and p["morph"].lower() == root_morph.lower()), None)
+    roots = [r.lower() for r in re.split(r"[+＋]", root_morph or "") if r.strip()]
+    ri = next((i for i, p in enumerate(parts) if p["morph"].lower() in roots), None)
     for i, p in enumerate(parts):
+        info = part_info(p["morph"])
         if ri is None:
+            # 台本の語根がこの語にないときは、アプリのデータの種類を使う（なければ1つ目＝接頭・最後＝接尾）
+            p["type"] = info["type"] or ("root" if len(parts) == 1 else
+                                         "prefix" if i == 0 else "suffix" if i == len(parts) - 1 else "root")
+        elif p["morph"].lower() in roots:
             p["type"] = "root"
         else:
-            p["type"] = "root" if i == ri else ("prefix" if i < ri else "suffix")
-        if p["type"] == "root" and not p["gloss"] and root_morph:
-            p["gloss"] = root_info(root_morph)["gloss"]
+            p["type"] = "prefix" if i < ri else "suffix"
+        same = part_info(p["morph"], p["type"])
+        p["picto"] = same["picto"] if same["type"] == p["type"] else None
+        p["canon"] = p["morph"].lower()
+        if not p["gloss"]:
+            p["gloss"] = same["gloss"] if same["type"] == p["type"] else ""
     return parts
 
 
@@ -645,6 +736,7 @@ class Ctx:
         self.root = meta.get("語根") or meta.get("root") or ""
         self.katas = []
         self.words = []
+        self.root_list = []   # root 場面で出した語根・接頭語（まとめで使う）
 
 
 def scene_hook(ctx, c):
@@ -666,21 +758,41 @@ def scene_text(ctx, c):
 
 
 def scene_root(ctx, c):
+    """{root port} / {root port=運ぶ} / {root bene=良く}（接頭語は自動で青・「接頭語」）/ {root bene=良く 接頭}"""
     img, d = base(ctx.number)
-    arg = c["arg"] or ctx.root
-    morph, _, gloss = arg.partition("=")
+    KIND = {"接頭": "prefix", "接頭語": "prefix", "prefix": "prefix", "語根": "root", "root": "root",
+            "接尾": "suffix", "接尾語": "suffix", "suffix": "suffix"}
+    toks = (c["arg"] or ctx.root.split("+")[0]).split()
+    want = next((KIND[t] for t in toks if t in KIND), None)
+    morph, _, gloss = " ".join(t for t in toks if t not in KIND).partition("=")
     morph = morph.strip()
     ctx.root = ctx.root or morph
-    info = root_info(morph)
+    info = root_info(morph) if want in (None, "root") else {"gloss": "", "picto": None}
+    if want is None and not info["gloss"] and not info["picto"]:
+        info = part_info(morph)          # 語根として出てこない（bene など）→ データの種類を使う
+    typ = want or info.get("type") or "root"
+    if want and want != "root":
+        info = part_info(morph, want)
     gloss = gloss.strip() or info["gloss"]
     ctx.root_gloss = gloss
-    chip(d, "語根", CX, 400, TYPE_COLOR["root"], size=40)
+    if not any(r["morph"] == morph for r in ctx.root_list):
+        ctx.root_list.append({"morph": morph, "gloss": gloss, "type": typ, "picto": info["picto"]})
+    color = TYPE_COLOR[typ]
+    chip(d, TYPE_CHIP[typ], CX, 400, color, size=40)
     f = font(200, "black")
-    d.text((CX, 560), morph, font=f, fill=TYPE_COLOR["root"], anchor="mm")
-    d.text((CX, 720), "＝ " + gloss, font=font(84, "bold"), fill=TEXT, anchor="mm")
-    box = 380
-    rounded(d, (CX - box / 2, 800, CX + box / 2, 800 + box), 28, outline=LINE, width=4)
-    paste_center(img, picto_image(info["picto"], 300), CX, 800 + box / 2)
+    d.text((CX, 560), morph, font=f, fill=color, anchor="mm")
+    # 大きな文字の下に伸びる部分（p・g・y）まで測って、その下に意味を置く
+    bottom = d.textbbox((CX, 560), morph, font=f, anchor="mm")[3]
+    fg = font(84, "bold")
+    gb = d.textbbox((0, 0), "＝ " + gloss, font=fg, anchor="lt")
+    gy = max(bottom + 36, 680)
+    d.text((CX, gy - gb[1]), "＝ " + gloss, font=fg, fill=TEXT, anchor="mt")
+    pic = picto_image(info["picto"], 300)
+    if pic is not None:   # 絵がない（データにない）ときは、空の枠を出さない
+        box = 380
+        top = max(800, gy + (gb[3] - gb[1]) + 40)
+        rounded(d, (CX - box / 2, top, CX + box / 2, top + box), 28, outline=LINE, width=4)
+        paste_center(img, pic, CX, top + box / 2)
     telop(d, c["text"])
     return img
 
@@ -724,7 +836,7 @@ def word_block(img, d, w, top, show_parts=True, word_size=140):
     if not parts:
         return
     n = len(parts)
-    cell = min(250, (CONTENT_W - 30 * (n - 1)) // n)
+    cell = min(250, (CONTENT_W - 2 * RIGHT_PAD - 30 * (n - 1)) // n)
     gap = 30
     x = CX - (cell * n + gap * (n - 1)) / 2
     y = top + 380
@@ -740,13 +852,14 @@ def word_block(img, d, w, top, show_parts=True, word_size=140):
 
 def scene_word(ctx, c):
     img, d = base(ctx.number)
-    name = c["arg"].split()[0] if c["arg"] else ""
+    name, spec, _ = parse_word_arg(c["arg"])
     # 前の場面（ペアや推理）ですでに出た語なら、同じ番号のまま使う
     prev = next((i for i, x in enumerate(ctx.words) if x["word"].lower() == name.lower()), None)
     if prev is None:
-        w = find_word(name) or {"word": name, "meaning": "", "parts": [], "eiken": ""}
-        ctx.words.append(w)
+        ctx.words.append(make_word(name, spec, ctx.root))
         prev = len(ctx.words) - 1
+    elif spec:
+        ctx.words[prev] = make_word(name, spec, ctx.root)
     w = ctx.words[prev]
     chip(d, f"受験単語 {prev + 1}", CX, 400, TYPE_COLOR["root"], size=36, filled=True)
     word_block(img, d, w, 440)
@@ -757,28 +870,77 @@ def scene_word(ctx, c):
 def scene_summary(ctx, c):
     """まとめ画面（語根＋カタカナ語＋受験単語）。3秒止める"""
     img, d = base(ctx.number)
+    heads = ctx.root_list or [{"morph": m.strip(), "gloss": "", "type": None, "picto": None}
+                              for m in re.split(r"[+＋]", ctx.root) if m.strip()]
+    if len(heads) >= 2:
+        summary_heads(d, heads)
+    else:
+        summary_head1(img, d, ctx)
+    summary_rows(d, ctx)
+    telop(d, c["text"])
+    return img
+
+
+def summary_heads(d, heads):
+    """まとめの見出し（2つ以上）: bene＝良く ＋ vol＝望む（パーツの色で）"""
+    items = []
+    for h in heads[:3]:
+        info = part_info(h["morph"], h["type"]) if not h["gloss"] or not h["type"] else h
+        items.append((h["morph"], TYPE_COLOR[h["type"] or info["type"] or "root"], "＝" + (h["gloss"] or info["gloss"])))
+    big, small = 96, 56
+    while True:
+        fb, fs = font(big, "black"), font(small, "bold")
+        plus = text_w(" ＋ ", fs)
+        total = sum(text_w(m, fb) + text_w(g, fs) + 8 for m, _, g in items) + plus * (len(items) - 1)
+        if total <= CONTENT_W - 40 or big <= 56:
+            break
+        big, small = big - 6, small - 3
+    x = CX - total / 2
+    g = new_group()
+    for i, (m, col, gl) in enumerate(items):
+        d.text((x, 420), m, font=fb, fill=col, anchor="ls", group=g, shrink=False)
+        x += text_w(m, fb) + 8
+        d.text((x, 420), gl, font=fs, fill=TEXT, anchor="ls", group=g, shrink=False)
+        x += text_w(gl, fs)
+        if i < len(items) - 1:
+            d.text((x, 420), " ＋ ", font=fs, fill=SUB, anchor="ls", group=g, shrink=False)
+            x += plus
+
+
+def summary_head1(img, d, ctx):
     info = root_info(ctx.root) if ctx.root else {"gloss": "", "picto": None}
-    gloss = getattr(ctx, "root_gloss", "") or info["gloss"]
-    # 見出し: [絵] port ＝ 運ぶ
+    if ctx.root_list:
+        info = {"gloss": ctx.root_list[0]["gloss"], "picto": ctx.root_list[0]["picto"]}
+    elif ctx.root and not info["gloss"] and not info["picto"]:
+        info = part_info(ctx.root)
+    gloss = (ctx.root_list[0]["gloss"] if ctx.root_list else "") or getattr(ctx, "root_gloss", "") or info["gloss"]
+    color = TYPE_COLOR[ctx.root_list[0]["type"]] if ctx.root_list else TYPE_COLOR["root"]
+    # 見出し: [絵] port ＝ 運ぶ（長いときは文字を小さくして、右の線から離す）
     pic = picto_image(info["picto"], 150)
-    title_f = font(110, "black")
-    tw = text_w(ctx.root, title_f)
-    gf = font(64, "bold")
-    gw = text_w("＝" + gloss, gf)
-    total = (170 if pic else 0) + tw + 20 + gw
+    big, small = 110, 64
+    while True:
+        title_f, gf = font(big, "black"), font(small, "bold")
+        tw, gw = text_w(ctx.root, title_f), text_w("＝" + gloss, gf)
+        total = (170 if pic else 0) + tw + 20 + gw
+        if total <= CONTENT_W - 2 * RIGHT_PAD or small <= 44:
+            break
+        big, small = big - 6, small - 4
     x = CX - total / 2
     if pic:
         rounded(d, (x, 340, x + 150, 490), 18, outline=LINE, width=3)
         img.paste(pic, (int(x), 340), pic)
         x += 170
-    d.text((x, 415), ctx.root, font=title_f, fill=TYPE_COLOR["root"], anchor="lm")
+    d.text((x, 415), ctx.root, font=title_f, fill=color, anchor="lm")
     d.text((x + tw + 20, 425), "＝" + gloss, font=gf, fill=TEXT, anchor="lm")
 
+
+def summary_rows(d, ctx):
     y = 540
+    right_x = SAFE_RIGHT - RIGHT_PAD
 
     def section(title, rows, y):
         d.text((LEFT + 10, y), title, font=font(40, "bold"), fill=ACCENT, anchor="lm")
-        d.line((LEFT + 10 + text_w(title, font(40, "bold")) + 20, y, SAFE_RIGHT, y), fill=LINE, width=3)
+        d.line((LEFT + 10 + text_w(title, font(40, "bold")) + 20, y, right_x, y), fill=LINE, width=3)
         y += 34
         for segs, right in rows:
             fe = font(64, "black")
@@ -788,34 +950,40 @@ def scene_summary(ctx, c):
             x = draw_segs(d, segs, fe, LEFT + 20, y + 44)
             fr = font(44, "bold")
             r = right
-            while text_w(r, fr) > SAFE_RIGHT - max(x + 30, 560) and len(r) > 1:
+            while text_w(r, fr) > right_x - max(x + 30, 560) and len(r) > 1:
                 r = r[:-1]
             if r != right:
                 r = r[:-1] + "…"
-            d.text((SAFE_RIGHT, y + 46), r, font=fr, fill=SUB, anchor="rm")
+            d.text((right_x, y + 46), r, font=fr, fill=SUB, anchor="rm")
             y += 92
         return y + 40
 
     rows = [(split_colored(k["eng"], k["parts"]), k["kana"]) for k in ctx.katas]
     if rows:
         y = section("カタカナ語", rows, y)
-    rows = [(split_colored(w["word"], w["parts"]), w["meaning"].split("；")[0]) for w in ctx.words]
+    rows = [(split_colored(w["word"], w["parts"]), plain_meaning(w)) for w in ctx.words]
     if rows:
         y = section("受験単語", rows, y)
     if y > TELOP_BOX[1] - 10:
         warn("まとめ画面の行が多すぎて、テロップと重なります（6行までがおすすめ）")
-    telop(d, c["text"])
-    return img
 
 
 # ---------------------------------------------------------------- 型② 雑学（意外な語源の話）
 def get_word(ctx, c):
-    name = c["arg"].split()[0] if c["arg"] else (ctx.words[-1]["word"] if ctx.words else "")
-    if ctx.words and ctx.words[-1]["word"].lower() == name.lower():
-        return ctx.words[-1]
-    w = find_word(name) or {"word": name, "meaning": "", "parts": [], "eiken": ""}
+    name, spec, _ = parse_word_arg(c["arg"])
+    name = name or (ctx.words[-1]["word"] if ctx.words else "")
+    for i, x in enumerate(ctx.words):   # 前の場面で出た語（パーツを台本に書いた語も）をそのまま使う
+        if x["word"].lower() == name.lower():
+            if spec:
+                ctx.words[i] = make_word(name, spec, ctx.root)
+            return ctx.words[i]
+    w = make_word(name, spec, ctx.root)
     ctx.words.append(w)
     return w
+
+
+def mood_of(c, default):
+    return parse_word_arg(c["arg"])[2] or default
 
 
 def part_cells(img, d, parts, top, cell_max=250, plus=True):
@@ -825,7 +993,7 @@ def part_cells(img, d, parts, top, cell_max=250, plus=True):
         return top
     n = len(parts)
     gap = 70 if plus else 30
-    cell = min(cell_max, (CONTENT_W - gap * (n - 1)) // n)
+    cell = min(cell_max, (CONTENT_W - 2 * RIGHT_PAD - gap * (n - 1)) // n)   # 箱も右の線から離す
     x = CX - (cell * n + gap * (n - 1)) / 2
     bottom = top
     for i, p in enumerate(parts):
@@ -856,7 +1024,7 @@ def scene_trivia(ctx, c):
     d.text((CX, 600), w["word"], font=f, fill=TEXT, anchor="mm")
     fm, ml, mlh = fit_text(w["meaning"].split("；")[0], CONTENT_W - 60, 110, 72, 44, max_lines=1, where="（意味）")
     draw_lines(d, ml, fm, mlh, CX, 720, SUB)
-    paste_center(img, chara(c["arg"].split()[1] if len(c["arg"].split()) > 1 else "think", 300), CX, 1030)
+    paste_center(img, chara(mood_of(c, "think"), 300), CX, 1030)
     telop(d, c["text"])
     return img
 
@@ -909,7 +1077,7 @@ def scene_quiz(ctx, c):
     f = colored_font([(w["word"], None)], CONTENT_W - 40, 180)
     d.text((CX, 620), w["word"], font=f, fill=TEXT, anchor="mm")
     d.text((CX, 780), "この意味、わかる？", font=font(72, "black"), fill=ACCENT, anchor="mm")
-    paste_center(img, chara(c["arg"].split()[1] if len(c["arg"].split()) > 1 else "think", 280), CX, 1060)
+    paste_center(img, chara(mood_of(c, "think"), 280), CX, 1060)
     telop(d, c["text"])
     return img
 
@@ -975,12 +1143,20 @@ def pair_words(ctx, c):
 
 
 PAIR_GAP = 90
-HALF = (CONTENT_W - PAIR_GAP) // 2   # 左右それぞれの幅（385px）
+HALF = (CONTENT_W - RIGHT_PAD - PAIR_GAP) // 2   # 左右それぞれの幅（373px。右の箱を線から離す）
+PAIR_MID = LEFT + HALF + PAIR_GAP / 2              # 左右の箱のまん中
 
 
 def short_meaning(w):
     """「～より先に起こる，先行する」→「～より先に起こる」（せまい所用）"""
     return re.split(r"[；，,]", w["meaning"])[0].strip()
+
+
+def plain_meaning(w):
+    """「（案・方法を）採用する」→「採用する」（かっこの補足を省いて、大きく読みやすく）"""
+    m = short_meaning(w)
+    p = re.sub(r"[（(][^）)]*[）)]", "", m).strip()
+    return p or m
 
 
 def pair_column(img, d, w, x0, top, highlight):
@@ -1001,7 +1177,7 @@ def pair_column(img, d, w, x0, top, highlight):
         draw_lines(d, ll, fl, lhl, cx, y + 150, TYPE_COLOR[p["type"]])
         y += 150 + lhl + 20
     rounded(d, (x0 + 20, 1060, x0 + HALF - 20, 1180), 20, fill=ACCENT_SOFT)
-    fm, ml, mlh = fit_text(short_meaning(w), HALF - 70, 100, 52, 30, max_lines=2, weight="black", one_line_min=32,
+    fm, ml, mlh = fit_text(plain_meaning(w), HALF - 70, 100, 52, 30, max_lines=2, weight="black", one_line_min=32,
                            where="（ペアの意味）")
     draw_lines(d, ml, fm, mlh, cx, 1120 - mlh * len(ml) / 2, TEXT)
 
@@ -1010,10 +1186,10 @@ def scene_pair(ctx, c):
     """{pair precede proceed} 左右に2語を並べて比べる"""
     img, d = base(ctx.number)
     a, b = pair_words(ctx, c)
-    d.text((CX, 380), "似てる2語、どう違う？", font=font(56, "black"), fill=ACCENT, anchor="mm")
+    d.text((PAIR_MID, 380), "似てる2語、どう違う？", font=font(56, "black"), fill=ACCENT, anchor="mm")
     pair_column(img, d, a, LEFT, 440, TYPE_COLOR["prefix"])
     pair_column(img, d, b, LEFT + HALF + PAIR_GAP, 440, TYPE_COLOR["prefix"])
-    d.text((CX, 820), "vs", font=font(44, "black"), fill=SUB, anchor="mm")
+    d.text((PAIR_MID, 820), "vs", font=font(44, "black"), fill=SUB, anchor="mm")
     telop(d, c["text"])
     return img
 
@@ -1023,16 +1199,17 @@ def scene_pairsum(ctx, c):
     img, d = base(ctx.number)
     pair = getattr(ctx, "pair", None) or (ctx.words[-2:] if len(ctx.words) >= 2 else [])
     chip(d, "まとめ", CX, 400, ACCENT, size=40, filled=True)
+    # 1語ずつ「英単語」の下に「意味」を大きめに書く（右に小さく並べると読みにくいため）
     y = 520
     for w in pair:
         segs = split_colored(w["word"], w["parts"])
-        fe = colored_font(segs, 420, 84, min_size=48)
-        x = draw_segs(d, segs, fe, LEFT + 30, y)
-        fr, rl, rlh = fit_text(short_meaning(w), SAFE_RIGHT - max(x + 30, 520), 70, 46, 28, max_lines=1,
+        fe = colored_font(segs, CONTENT_W - RIGHT_PAD - 60, 84, min_size=48)
+        draw_segs(d, segs, fe, LEFT + 30, y)
+        fr, rl, rlh = fit_text(plain_meaning(w), CONTENT_W - RIGHT_PAD - 70, 70, 56, 40, max_lines=1,
                                where="（まとめの意味）")
-        d.text((SAFE_RIGHT - 10, y), rl[0], font=fr, fill=SUB, anchor="rm")
-        y += 130
-    d.line((LEFT + 20, y - 30, SAFE_RIGHT - 20, y - 30), fill=LINE, width=3)
+        d.text((LEFT + 40, y + 90), rl[0], font=fr, fill=SUB, anchor="lm")
+        y += 200
+    d.line((LEFT + 20, y - 40, SAFE_RIGHT - RIGHT_PAD, y - 40), fill=LINE, width=3)
     # 1行まとめは大きく（テロップの文をそのまま使う）
     f, lines, lh = fit_text(c["text"], CONTENT_W - 40, 1150 - y, 96, 52, max_lines=3, weight="black",
                             where="（1行まとめ）")
@@ -1089,6 +1266,8 @@ def run_checks(report_path=None):
 
 
 def render(args):
+    if cairosvg is None:
+        warn("cairosvg が入っていないので、ピクトグラム（絵）が出ません。pip install cairosvg で入れてください")
     meta, cuts = parse_script(args.script)
     ctx = Ctx(meta, args.number, args.type)
     total = plan_timing(cuts, args.voice, args.sync)

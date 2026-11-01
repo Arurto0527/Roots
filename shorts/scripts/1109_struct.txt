@@ -1,0 +1,15 @@
+# 型: ①カタカナ語 struct（2026-11-09・Roots #10）
+# 語根: struct
+# メモ: 夜勤チームの台本（10/31 報告）をそのまま転記。construct・instruct・obstruct はアプリの単語帳にないので text 場面
+#       （4晩目からは {word construct con(共に)+struct(積み上げる)=建設する} のようにも書ける）
+[0.0-3.0] {hook think} インストラクター？
+[3.0-6.0] {hook teach} 英単語の覚え方は\n語源
+[6.0-9.0] {kata ストラクチャー structure struct(積み上げる)+ure(こと)} ストラクチャー＝構造
+[9.0-12.5] {text} 共通点は struct
+[12.5-16.0] {root struct=積み上げる} struct＝積み上げる
+[16.0-20.0] {text} ①construct＝建設する
+[20.0-24.0] {text} ②instruct＝教える
+[24.0-27.5] {text} 教える人＝instructor
+[27.5-31.5] {text} ③obstruct＝妨げる
+[31.5-34.5] {summary} struct＝積む・建てる
+[34.5-37.5] {hook think} ジムのあの先生は…

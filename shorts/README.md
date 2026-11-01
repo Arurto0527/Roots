@@ -25,10 +25,12 @@ python3 shorts/render.py --script 台本.txt --voice 録音.m4a --type 1 --numbe
 - 書いた文字の位置をすべて記録して、安全領域（上220px・下420px・右160px）・画面の左はし・文字どうしの重なりを調べます
 - 安全領域に入りそうな文字は、その場で少しずつ小さくします（元の6割まで）。色分けした英単語は1語まとめて小さくします
 - 枠（テロップの箱など）に入らない文は、ふつうの最小の大きさよりさらに小さくして入れ、「○px まで小さくしました」と ⚠ を出します。それでも入らなければ「台本を短くしてください」と出ます
+- 右の安全領域の線から 12px 以内の文字も「近すぎます」と知らせます（文字・箱は線から24px離して置きます）
+- 文字どうしは少しでも重なれば知らせます（大きな文字の p・g など下に伸びる部分が下の行にかかるのも見つけます）
 - 最後に「文字の位置チェック: ○カット・文字 ○か所を調べて、問題 ○件」と出ます。問題が0件になるまで台本を直してください
 - 出力: 1080×1920・30fps・H.264（veryfast・CRF 26）。最後に2秒のエンドカード「Rootsで英単語｜プロフのリンクから無料」が自動で付きます
 
-必要なもの: Python 3、Pillow、cairosvg（`pip install cairosvg`。ピクトグラムを絵にする）、ffmpeg、Noto Sans CJK フォント
+必要なもの: Python 3、Pillow、cairosvg（`pip install cairosvg`。ピクトグラムを絵にする。ないと絵が出ず ⚠ が出ます）、budoux（`pip install budoux`。日本語を言葉の切れ目で改行する。なくても動きます）、ffmpeg、Noto Sans CJK フォント
 
 ## 台本の書き方（1行＝1テロップ＝1カット）
 ```
@@ -46,11 +48,14 @@ python3 shorts/render.py --script 台本.txt --voice 録音.m4a --type 1 --numbe
 | 場面 | 書き方 | 画面 |
 |---|---|---|
 | hook | `{hook}` / `{hook think}` | 大きな文字＋ルーツくん（normal / teach / think / cheer） |
-| root | `{root port}` / `{root port=運ぶ}` | 語根・意味・ピクトグラム（意味と絵はアプリのデータから） |
+| root | `{root port}` / `{root port=運ぶ}` / `{root bene=良く}` | 語根・意味・ピクトグラム（意味と絵はアプリのデータから）。bene のような接頭語は自動で青・「接頭語」になる（`{root bene=良く 接頭}` と書いてもよい）。絵がないときは枠を出さない |
 | kata | `{kata カタカナ 英語 パーツ}` | カタカナ語→英語（語源の色分け）→分解 |
-| word | `{word support}` | アプリの単語データから：色分け・意味・英検級・ピクトグラム |
-| summary | `{summary}` | ここまでに出た語根・カタカナ語・受験単語のまとめ（3秒以上止める） |
+| word | `{word support}` / `{word export ex(外へ)+port(運ぶ)=輸出する}` | アプリの単語データから：色分け・意味・英検級・ピクトグラム。**アプリにない語**は、単語のあとにパーツと `=意味` を書けば出せる（パーツの色と絵はアプリのデータから） |
+| summary | `{summary}` | ここまでに出た語根・カタカナ語・受験単語のまとめ（3秒以上止める）。root 場面を2つ以上出したときは「bene＝良く ＋ vol＝望む」のように全部を見出しにする |
 | text | `{text}` | テロップだけ（ルーツくん） |
+
+- trivia・origin・quiz・split・answer などの単語も、`{quiz benevolent bene(良く)+vol(望む)+ent(～な)=好意的な}` のようにパーツと意味を書ける。1回書けば、あとの場面は `{answer benevolent}` だけでよい
+- 単語のあとに表情（normal / teach / think / cheer）を書くと、ルーツくんの表情が変わる（例 `{trivia danger cheer}`）
 
 ### 型②雑学（意外な語源）
 | 場面 | 書き方 | 画面 |
@@ -74,6 +79,8 @@ python3 shorts/render.py --script 台本.txt --voice 録音.m4a --type 1 --numbe
 | pairsum | `{pairsum}` | 2語の一覧＋テロップの文を大きく（1行まとめ。3秒以上止める） |
 
 試作の台本: `scripts/001_port.txt`（①）・`002_danger.txt`（②）・`003_interrupt.txt`（③）・`004_precede_proceed.txt`（④）
+
+夜勤チームの台本（本番用の下書き）: `scripts/1105_muscle.txt`（②#1）・`1105_port.txt`（①#2）・`1106_benevolent.txt`（③#3）・`1106_adapt_adopt.txt`（④#4）・`1109_candidate.txt`（②#9）・`1109_struct.txt`（①#10）。仮動画（無音）は `samples/仮_*.mp4`
 
 ## データの作り直し（アプリの単語が増えたとき）
 ```

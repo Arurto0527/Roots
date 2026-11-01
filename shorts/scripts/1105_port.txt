@@ -1,0 +1,14 @@
+# 型: ①カタカナ語 port（2026-11-05・Roots #2）
+# 語根: port
+# メモ: 夜勤チームの台本（10/30 報告）を転記。export・transport はアプリの単語帳にないので、
+#       4晩目からの書き方 {word 単語 パーツ=意味} で出せるようにした（元は text 場面）
+[0.0-3.0] {hook} パスポート、\nエアポート
+[3.0-6.0] {hook think} もう port を\n知ってる
+[6.0-9.0] {hook teach} 語源で\n英単語を覚える
+[9.0-12.5] {kata エアポート airport air(空)+port(港)} port＝港
+[12.5-16.5] {root port=港・運ぶ} 港と運ぶは遠い親戚
+[16.5-20.0] {word import} import＝中へ運ぶ
+[20.0-23.5] {word export ex(外へ)+port(運ぶ)=輸出する} export＝外へ運ぶ
+[23.5-27.0] {word transport trans(向こうへ)+port(運ぶ)=輸送する} transport＝向こうへ
+[27.0-30.0] {summary} port＝港・運ぶ
+[30.0-33.0] {hook think} 空港で\n思い出して

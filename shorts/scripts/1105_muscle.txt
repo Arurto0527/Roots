@@ -1,0 +1,13 @@
+# 型: ②雑学 muscle（2026-11-05・Roots #1）
+# 語根: mus
+# メモ: 夜勤チームの台本（10/30 報告）をそのまま転記。末尾2秒のエンドカードは自動
+[0.0-3.0] {trivia muscle} 筋肉の語源はネズミ
+[3.0-6.0] {hook teach} 英単語の覚え方
+[6.0-9.0] {word muscle} muscle＝筋肉
+[9.0-12.5] {text} ラテン語 musculus
+[12.5-16.0] {origin muscle} mus＝ネズミ
+[16.0-20.0] {text think} 力こぶがネズミに？
+[20.0-23.5] {text} ギリシャ語も同じ
+[23.5-27.0] {hook cheer} 腕を\n曲げてみて
+[27.0-30.0] {summary} muscle＝小さいネズミ
+[30.0-33.0] {hook think} 腕にネズミが\nいる？

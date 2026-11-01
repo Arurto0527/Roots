@@ -1,0 +1,15 @@
+# 型: ③推理 benevolent（2026-11-06・Roots #3）
+# 語根: vol
+# メモ: 夜勤チームの台本（10/30 報告）を転記。benevolent はアプリの見出し語にないので、
+#       4晩目からの書き方 {quiz 単語 パーツ=意味} で split・answer も使えるようにした（元は root・hook で代用）
+[0.0-3.0] {hook think} 見たことなくても\nわかる
+[3.0-6.0] {hook teach} 語源で\n英単語を推理
+[6.0-9.0] {quiz benevolent bene(良く)+vol(望む)+ent(～な)=好意的な} benevolent
+[9.0-12.0] {count benevolent} 3秒考えて
+[12.0-15.5] {root bene=良く} bene＝良く
+[15.5-19.0] {root vol=望む} vol＝望む
+[19.0-22.5] {split benevolent} 良いことを望む…？
+[22.5-26.0] {answer benevolent} 正解：好意的な
+[26.0-29.5] {text} 逆は malevolent
+[29.5-32.5] {summary} bene＋vol＝良く望む
+[32.5-36.0] {hook think} 初見でも\n読める
