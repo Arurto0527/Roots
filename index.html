@@ -51634,6 +51634,10 @@ function PartPicker({C,words,part,onPick}){
   );
 }
 
+/* ショート動画などから ?root=port のように開いたとき、その語根（英小文字だけ。なければ null）。
+   ホームが出たら、その語根のシート（コラム・単語の一覧・「この語根の単語をやる」）を1回だけ開く */
+const URL_ROOT=(()=>{try{const v=String(new URLSearchParams(location.search).get("root")||"").trim().toLowerCase();
+  return /^[a-z]{1,14}$/.test(v)?v:null;}catch(e){return null;}})();
 /* QRコードなどで ?part=L7-1 のように開いたとき、その Part を返す（なければ null） */
 const URL_PART=(()=>{try{const v=new URLSearchParams(location.search).get("part");
   return PART_LIST.find(x=>String(x)===v)??null;}catch(e){return null;}})();
@@ -53706,6 +53710,7 @@ function App(){
   /* その日はじめてホームを開いたら、あいさつ（今日もえらい・開いた日数）を出す。案内中・お試し版では出さない */
   useEffect(()=>{
     if(screen!=="home"||intro||tour!==null||IS_DEMO)return;
+    if(URL_ROOT)return;   /* ?root= で来たときは語根のシートを先に見せる（あいさつは次に開いたとき） */
     const today=todayKey();
     const v=lsGet(VISIT_KEY);
     if(v&&v.last===today)return;
@@ -53754,6 +53759,7 @@ function App(){
   const [earned,setEarned]=useState([]);
   const [sheetWord,setSheetWord]=useState(null);
   const [rootEntry,setRootEntry]=useState(null);
+  const rootFromUrlRef=useRef(false);   /* ?root= のシートをもう開いたか */
   const [whyWord,setWhyWord]=useState(null);   /* 「なぜこの意味？」シートに出す単語 */
   const [modal,setModal]=useState(null);
   const [welcome,setWelcome]=useState(null);
@@ -54294,6 +54300,15 @@ function App(){
     else setRootEntry({morph:key,gloss:r.gloss||"",words:words.filter(w=>
       parseRoots(w).some(x=>canonRoot(x.morph)===key)),related:[],count:1});
   };
+
+  /* ?root=port で開いたとき：ホームが出て、はじめての案内が終わっていたら、その語根のシートを1回だけ開く。
+     アプリにない語根なら何もしない（ふつうのホームのまま） */
+  useEffect(()=>{
+    if(!URL_ROOT||rootFromUrlRef.current||screen!=="home"||intro||tour!==null)return;
+    rootFromUrlRef.current=true;
+    if(!words.some(w=>parseRoots(w).some(x=>canonRoot(x.morph)===canonRoot(URL_ROOT))))return;
+    openRootFromChip({morph:URL_ROOT});
+  },[screen,intro,tour]);
 
   if(screen==="loading")return <div style={shell}/>;
 
