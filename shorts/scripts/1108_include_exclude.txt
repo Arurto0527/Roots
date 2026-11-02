@@ -1,0 +1,13 @@
+# 型: ④ペア include / exclude（2026-11-08・Roots #8）
+# 語根: clude
+# メモ: exclude はアプリの見出し語にないので word 場面でパーツを指定（後の pair はそれを使う）
+[0.0-3.0] {hook think} in と ex で見分ける
+[3.0-6.0] {hook teach} 語源で\n覚える英単語
+[6.0-9.5] {root clude=閉じる} clude＝閉じる
+[9.5-12.5] {root in=中に 接頭} in＝中に
+[12.5-16.0] {word include in(中に)+clude(閉じる)} include＝含む
+[16.0-19.5] {root ex=外に 接頭} ex＝外に
+[19.5-23.0] {word exclude ex(外に)+clude(閉じる)=除外する} exclude＝除外する
+[23.0-26.5] {pair include exclude} 税込み＝included
+[26.5-29.5] {pairsum} in含む／ex除外
+[29.5-33.0] {hook think} in は中、ex は外

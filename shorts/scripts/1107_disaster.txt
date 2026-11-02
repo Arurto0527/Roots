@@ -1,0 +1,13 @@
+# 型: ②雑学 disaster（2026-11-07・Roots #5）
+# 語根: aster
+# メモ: アプリでは dis＝離れて だが、この回は Etymonline どおり「悪い」で上書き
+[0.0-3.0] {trivia disaster dis(悪い)+aster(星)=災害} 災害の語源は「悪い星」
+[3.0-6.0] {hook teach} 英単語の覚え方は\n語源
+[6.0-9.0] {word disaster} disaster＝災害
+[9.0-12.5] {origin disaster} dis＋aster
+[12.5-16.0] {root aster=星} aster＝星
+[16.0-19.5] {text} ＊＝小さい星
+[19.5-23.0] {root dis=悪い 接頭} dis＝悪い
+[23.0-27.0] {text think} 星の位置が悪い＝災い
+[27.0-30.0] {summary} disaster＝悪い星
+[30.0-33.0] {hook think} 夜空を見上げたら…

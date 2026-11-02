@@ -74,6 +74,16 @@ def warn(msg):
 _font_cache = {}
 
 
+_NOTES = set()
+
+
+def note(msg):
+    """問題ではないお知らせ（⚠ の数には入れない。同じ内容は1回だけ）"""
+    if msg not in _NOTES:
+        _NOTES.add(msg)
+        print(f"ℹ {msg}", file=sys.stderr)
+
+
 def font(size, weight="bold"):
     key = (int(size), weight)
     if key not in _font_cache:
@@ -222,10 +232,12 @@ def part_info(morph, want=None):
     for w in WORDS:
         for p in w["parts"]:
             if p["canon"] == k or p["morph"].lower() == k:
-                t = tally.setdefault(p["type"], {"n": 0, "gloss": {}, "picto": None})
+                t = tally.setdefault(p["type"], {"n": 0, "gloss": {}, "picto": None, "by_gloss": {}})
                 t["n"] += 1
                 if p["gloss"]:
                     t["gloss"][p["gloss"]] = t["gloss"].get(p["gloss"], 0) + 1
+                    if p["picto"]:
+                        t["by_gloss"].setdefault(p["gloss"], p["picto"])
                 if p["picto"] and not t["picto"]:
                     t["picto"] = p["picto"]
     if not tally:
@@ -233,7 +245,48 @@ def part_info(morph, want=None):
     typ = want if want in tally else max(tally, key=lambda x: tally[x]["n"])
     t = tally[typ]
     gloss = max(t["gloss"], key=t["gloss"].get) if t["gloss"] else ""
-    return {"type": typ, "gloss": gloss, "picto": t["picto"]}
+    # 絵は、いちばん多い意味の絵を使う（in なら「中へ」の絵。「否定」の絵にしない）
+    return {"type": typ, "gloss": gloss, "picto": t["by_gloss"].get(gloss) or t["picto"]}
+
+
+def gloss_stem(g):
+    """意味の「かなめ」＝ひらがな・記号を除いた部分（外へ・外に → 外／良く・良い → 良）"""
+    return re.sub(r"[ぁ-ん～~〜ー・\s]", "", g or "")
+
+
+def same_gloss(a, b):
+    """2つの意味が同じと言えるか（外へ＝外に、運ぶ＝運搬 など）"""
+    if a == b:
+        return True
+    x, y = gloss_stem(a), gloss_stem(b)
+    return bool(x and y and (x in y or y in x))
+
+
+def pick_picto(morph, typ, gloss, pic_opt=None):
+    """台本で意味を書いたパーツの絵を選ぶ。アプリの同じパーツの中で、意味が同じものの絵を使う。
+    意味が違うとき（dis＝悪い なのにアプリの絵は「離れて」）は、まちがった絵を出さないよう None を返す。
+    pic_opt: 「絵なし」＝必ず出さない／「絵あり」＝意味が違ってもアプリの絵を出す"""
+    if pic_opt == "絵なし":
+        return None
+    k = morph.lower()
+    found = {}
+    for w in WORDS:
+        for p in w["parts"]:
+            if (p["canon"] == k or p["morph"].lower() == k) and (typ is None or p["type"] == typ) and p["picto"]:
+                found[p["gloss"]] = found.get(p["gloss"]) or p["picto"]
+    if pic_opt == "絵あり":
+        return part_info(morph, typ)["picto"]
+    if not gloss:
+        return part_info(morph, typ)["picto"] if found else None
+    if gloss in found:
+        return found[gloss]
+    for g, pid in found.items():
+        if same_gloss(g, gloss):
+            return pid
+    if found:
+        note(f"{morph}＝{gloss}: アプリの絵は別の意味（{'・'.join(found)}）用なので、絵は出さず文字にします"
+             f"（出すなら {morph}({gloss}|絵あり)、{{root}} なら「絵あり」と書きます）")
+    return None
 
 
 def parse_word_arg(arg):
@@ -514,6 +567,42 @@ HOLD_SEC = 3.0
 MIN_CUT_SEC = 0.6
 
 
+def volume_of(path):
+    """録音の音量を測る（平均・いちばん大きい所。単位 dB、0 が上限）"""
+    out = subprocess.run(["ffmpeg", "-hide_banner", "-nostats", "-i", path, "-af", "volumedetect", "-f", "null", "-"],
+                         capture_output=True, text=True).stderr
+    mean = re.search(r"mean_volume: (-?[\d.]+|-inf) dB", out)
+    peak = re.search(r"max_volume: (-?[\d.]+|-inf) dB", out)
+    return (float(mean.group(1)) if mean else -91.0), (float(peak.group(1)) if peak else -91.0)
+
+
+VOICE_QUIET_DB = -20     # いちばん大きい所でもこれより小さければ「小さすぎ」
+VOICE_CLIP_DB = -0.1     # これ以上は「音割れ」のおそれ
+VOICE_SILENT_DB = -60    # これより小さければ「音が入っていない」
+VOICE_EDGE_SEC = 1.5     # 最初と最後の無音がこれより長ければ知らせる
+
+
+def check_voice(path):
+    """録音が使えるか調べる（ファイルがある・音が入っている・小さすぎ／割れていないか）。
+    いちばん大きい所の音量を返す"""
+    if not os.path.isfile(path):
+        sys.exit(f"録音ファイルが見つかりません: {path}")
+    probe = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "a", "-show_entries", "stream=codec_type",
+                            "-of", "csv=p=0", path], capture_output=True, text=True)
+    if probe.returncode != 0 or "audio" not in probe.stdout:
+        sys.exit(f"録音ファイルに音声が見つかりません（こわれているか、音声ではないファイルです）: {path}")
+    mean, peak = volume_of(path)
+    print(f"録音の音量: 平均 {mean:.1f}dB・いちばん大きい所 {peak:.1f}dB", file=sys.stderr)
+    if peak <= VOICE_SILENT_DB:
+        warn("録音に音が入っていないようです。マイクの設定を確かめて、録り直してください")
+    elif peak < VOICE_QUIET_DB:
+        warn(f"録音の音が小さすぎます（いちばん大きい所で {peak:.1f}dB。{VOICE_QUIET_DB}dB 以上がおすすめ）。"
+             "スマホをもう少し口に近づけて録り直すか、編集アプリで音量を上げてください")
+    elif peak >= VOICE_CLIP_DB:
+        warn("録音の音が大きすぎて、音が割れているかもしれません。聞いてみて割れていたら、少し離れて録り直してください")
+    return peak
+
+
 def detect_silences(path, noise_db=-35, min_sec=0.2):
     """録音の中の「間（無音）」を探す。[(始め, 終わり), ...] を返す"""
     out = subprocess.run(["ffmpeg", "-hide_banner", "-nostats", "-i", path, "-af",
@@ -587,6 +676,7 @@ def plan_voice(cuts, voice, sync="chars"):
     1) 文字数（--sync script なら台本の目安秒数）の割合で、区切りの時刻の見当をつける
     2) 区切りの近くに「間（無音）」があれば、そのまん中に区切りを合わせる（声の途中で画面が変わらないように）
     3) まとめ・カウントダウンは、声が短くても3秒止める（そのぶん録音に無音をはさむので、ずれない）"""
+    peak = check_voice(voice)
     total = ffprobe_duration(voice)
     if sync == "script":
         weights = [max(0.1, c["end"] - c["start"]) for c in cuts]
@@ -597,7 +687,16 @@ def plan_voice(cuts, voice, sync="chars"):
     else:
         weights = [count_chars(c["text"]) for c in cuts]
     sw = sum(weights)
-    sil = detect_silences(voice)
+    # 小さめの録音では「無音」の基準も下げる（声まで無音あつかいにしないため）
+    sil = detect_silences(voice, noise_db=max(-60, min(-35, peak - 30)))
+    head = next((b for a, b in sil if a <= 0.05), 0.0)
+    tail = next((total - a for a, b in sil if b >= total - 0.05), 0.0)
+    if peak <= VOICE_SILENT_DB:      # 全部が無音のときは、上の「音が入っていない」だけ知らせる
+        head = tail = 0.0
+    if head > VOICE_EDGE_SEC:
+        warn(f"録音の最初に {head:.1f}秒の無音があります。最初のテロップが長く止まって見えるので、切ると見やすくなります")
+    if tail > VOICE_EDGE_SEC:
+        warn(f"録音の最後に {tail:.1f}秒の無音があります。切ると、エンドカードまでの間が短くなります")
     # 録音の最初と最後の無音は、カットの区切りに使わない（最初のカット・最後のカットに入れる）
     inner = [(a, b) for a, b in sil if a > 0.05 and b < total - 0.05]
     bounds, snapped = choose_bounds(weights, inner, total)
@@ -700,7 +799,9 @@ def parse_parts(spec, root_morph):
     for s in items:
         m = re.match(r"^([^（(]+)(?:[（(]([^）)]*)[）)])?$", s)
         morph, gloss = (m.group(1).strip(), (m.group(2) or "").strip()) if m else (s, "")
-        parts.append({"morph": morph, "gloss": gloss})
+        # dis(悪い|絵なし) / dis(悪い|絵あり) で、絵の出し方を指定できる
+        gloss, _, opt = gloss.replace("｜", "|").partition("|")
+        parts.append({"morph": morph, "gloss": gloss.strip(), "pic_opt": opt.strip() or None})
     roots = [r.lower() for r in re.split(r"[+＋]", root_morph or "") if r.strip()]
     ri = next((i for i, p in enumerate(parts) if p["morph"].lower() in roots), None)
     for i, p in enumerate(parts):
@@ -714,7 +815,7 @@ def parse_parts(spec, root_morph):
         else:
             p["type"] = "prefix" if i < ri else "suffix"
         same = part_info(p["morph"], p["type"])
-        p["picto"] = same["picto"] if same["type"] == p["type"] else None
+        p["picto"] = pick_picto(p["morph"], p["type"], p["gloss"], p["pic_opt"]) if same["type"] == p["type"] else None
         p["canon"] = p["morph"].lower()
         if not p["gloss"]:
             p["gloss"] = same["gloss"] if same["type"] == p["type"] else ""
@@ -762,9 +863,11 @@ def scene_root(ctx, c):
     img, d = base(ctx.number)
     KIND = {"接頭": "prefix", "接頭語": "prefix", "prefix": "prefix", "語根": "root", "root": "root",
             "接尾": "suffix", "接尾語": "suffix", "suffix": "suffix"}
+    PIC = ("絵なし", "絵あり")
     toks = (c["arg"] or ctx.root.split("+")[0]).split()
     want = next((KIND[t] for t in toks if t in KIND), None)
-    morph, _, gloss = " ".join(t for t in toks if t not in KIND).partition("=")
+    pic_opt = next((t for t in toks if t in PIC), None)
+    morph, _, gloss = " ".join(t for t in toks if t not in KIND and t not in PIC).partition("=")
     morph = morph.strip()
     ctx.root = ctx.root or morph
     info = root_info(morph) if want in (None, "root") else {"gloss": "", "picto": None}
@@ -773,6 +876,8 @@ def scene_root(ctx, c):
     typ = want or info.get("type") or "root"
     if want and want != "root":
         info = part_info(morph, want)
+    if gloss.strip() or pic_opt:   # 台本で意味を書いたら、その意味に合う絵だけを出す
+        info = dict(info, picto=pick_picto(morph, typ, gloss.strip(), pic_opt))
     gloss = gloss.strip() or info["gloss"]
     ctx.root_gloss = gloss
     if not any(r["morph"] == morph for r in ctx.root_list):
@@ -821,6 +926,18 @@ def scene_kata(ctx, c):
     return img
 
 
+def cell_picto(img, d, p, cx, cy, box, pic_size, color=TEXT):
+    """箱の中身: 絵があれば絵、なければパーツの文字（どの場面でも同じ。空の箱にしない）"""
+    pic = picto_image(p.get("picto"), pic_size, color)
+    if pic is not None:
+        paste_center(img, pic, cx, cy)
+        return
+    size = min(64, int(box * 0.5))
+    while text_w(p["morph"], font(size, "black")) > box - 24 and size > 24:
+        size -= 2
+    d.text((cx, cy), p["morph"], font=font(size, "black"), fill=TYPE_COLOR[p["type"]], anchor="mm")
+
+
 def word_block(img, d, w, top, show_parts=True, word_size=140):
     segs = split_colored(w["word"], w["parts"])
     fe = colored_font(segs, CONTENT_W - 40, word_size)
@@ -842,7 +959,7 @@ def word_block(img, d, w, top, show_parts=True, word_size=140):
     y = top + 380
     for p in parts:
         rounded(d, (x, y, x + cell, y + cell), 22, outline=LINE, width=4)
-        paste_center(img, picto_image(p["picto"], int(cell * 0.72)), x + cell / 2, y + cell / 2)
+        cell_picto(img, d, p, x + cell / 2, y + cell / 2, cell, int(cell * 0.72))
         fm2 = font(44 if cell > 200 else 36, "black")
         d.text((x + cell / 2, y + cell + 44), p["morph"], font=fm2, fill=TYPE_COLOR[p["type"]], anchor="mm")
         fg, gl, glh = fit_text(p["gloss"] or TYPE_LABEL[p["type"]], cell + 20, 80, 34, 24, max_lines=2, weight="medium")
@@ -873,12 +990,26 @@ def scene_summary(ctx, c):
     heads = ctx.root_list or [{"morph": m.strip(), "gloss": "", "type": None, "picto": None}
                               for m in re.split(r"[+＋]", ctx.root) if m.strip()]
     if len(heads) >= 2:
-        summary_heads(d, heads)
+        summary_heads(d, order_heads(heads, ctx))
     else:
         summary_head1(img, d, ctx)
     summary_rows(d, ctx)
     telop(d, c["text"])
     return img
+
+
+def order_heads(heads, ctx):
+    """まとめの見出しを単語の並び（dis＋aster）にする。台本で出した順（aster→dis）のままにしない。
+    1つの単語に全部入っていなければ（import と export の im・ex・port など）、接頭→語根→接尾の順"""
+    keys = [h["morph"].lower() for h in heads]
+    for w in list(ctx.words) + list(ctx.katas):
+        names = [p["morph"].lower() for p in w["parts"]]
+        canon = [(p.get("canon") or "").lower() for p in w["parts"]]
+        pos = [names.index(k) if k in names else canon.index(k) if k in canon else None for k in keys]
+        if None not in pos:
+            return [h for _, h in sorted(zip(pos, heads), key=lambda x: x[0])]
+    rank = {"prefix": 0, "root": 1, "suffix": 2}
+    return sorted(heads, key=lambda h: rank.get(h["type"], 1))
 
 
 def summary_heads(d, heads):
@@ -998,12 +1129,7 @@ def part_cells(img, d, parts, top, cell_max=250, plus=True):
     bottom = top
     for i, p in enumerate(parts):
         rounded(d, (x, top, x + cell, top + cell), 22, outline=TYPE_COLOR[p["type"]], width=5)
-        pic = picto_image(p.get("picto"), int(cell * 0.72), TYPE_COLOR[p["type"]])
-        if pic is None:
-            fs = font(min(64, int(cell * 0.5)), "black")
-            d.text((x + cell / 2, top + cell / 2), p["morph"], font=fs, fill=TYPE_COLOR[p["type"]], anchor="mm")
-        else:
-            paste_center(img, pic, x + cell / 2, top + cell / 2)
+        cell_picto(img, d, p, x + cell / 2, top + cell / 2, cell, int(cell * 0.72), TYPE_COLOR[p["type"]])
         fm2 = font(48 if cell > 200 else 40, "black")
         d.text((x + cell / 2, top + cell + 46), p["morph"], font=fm2, fill=TYPE_COLOR[p["type"]], anchor="mm")
         fg, gl, glh = fit_text(p["gloss"] or TYPE_LABEL[p["type"]], cell + 40, 90, 38, 26, max_lines=2, weight="medium",
@@ -1166,12 +1292,8 @@ def pair_column(img, d, w, x0, top, highlight):
     draw_colored(d, segs, colored_font(segs, HALF - 40, 96, min_size=48), cx, top + 80)
     y = top + 160
     for p in w["parts"][:3]:
-        pic = picto_image(p.get("picto"), 120, TYPE_COLOR[p["type"]])
         rounded(d, (cx - 70, y, cx + 70, y + 140), 18, outline=LINE, width=3)
-        if pic is not None:
-            paste_center(img, pic, cx, y + 70)
-        else:
-            d.text((cx, y + 70), p["morph"], font=font(48, "black"), fill=TYPE_COLOR[p["type"]], anchor="mm")
+        cell_picto(img, d, p, cx, y + 70, 140, 120, TYPE_COLOR[p["type"]])
         label = f"{p['morph']}＝{p['gloss'] or TYPE_LABEL[p['type']]}"
         fl, ll, lhl = fit_text(label, HALF - 30, 60, 40, 26, max_lines=1, where="（ペアのパーツ）")
         draw_lines(d, ll, fl, lhl, cx, y + 150, TYPE_COLOR[p["type"]])
@@ -1290,7 +1412,12 @@ def render(args):
     frames.append((scene_end(ctx), END_CARD_SEC))
     _cur["items"] = None
     video_len = sum(d for _, d in frames)
-    if not (30 <= video_len <= 45):
+    if args.voice and video_len > 45:
+        warn(f"録音が長すぎます。動画が {video_len:.1f} 秒になるので、あと {video_len - 45:.1f} 秒ほど短くしてください"
+             "（少し速く読む・台本を1行減らす。目安は30〜45秒）")
+    elif args.voice and video_len < 30:
+        warn(f"録音が短めです。動画が {video_len:.1f} 秒になります（目安は30〜45秒）。台本を全部読めているか確かめてください")
+    elif not (30 <= video_len <= 45):
         warn(f"動画の長さが {video_len:.1f} 秒です（目安は30〜45秒）")
     run_checks(args.report)
     if args.check:   # 動画は作らず、チェックだけ

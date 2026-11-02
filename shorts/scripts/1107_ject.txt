@@ -1,0 +1,14 @@
+# 型: ①カタカナ語 ject（2026-11-07・Roots #6）
+# 語根: ject
+# メモ: inject はアプリの見出し語にないのでパーツを指定
+[0.0-3.0] {hook think} プロジェクト、ジェット機
+[3.0-6.0] {hook teach} もう ject を知ってる
+[6.0-9.0] {text} 語源で英単語を覚える
+[9.0-12.0] {root ject=投げる} ject＝投げる
+[12.0-15.5] {text} jet も「投げる」
+[15.5-19.0] {word project} project＝前に投げる
+[19.0-22.5] {word reject} reject＝投げ返す
+[22.5-26.0] {word inject in(中へ)+ject(投げる)=注射する} inject＝中に投げ込む
+[26.0-29.5] {word object} object＝投げつける
+[29.5-32.5] {summary} ject＝投げる
+[32.5-35.5] {hook think} 次に聞いたら思い出す

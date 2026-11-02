@@ -19,6 +19,7 @@ python3 shorts/render.py --script 台本.txt --voice 録音.m4a --type 1 --numbe
 3. まとめ（summary・pairsum）とカウントダウン（count）は、声が短くても3秒止めます。止めるぶんは録音に無音をはさむので、そのあとの声と画面はずれません
 - **録音のコツ**: 1行読んだら、半拍（0.4秒くらい）あけて次の行を読む。これだけで画面と声がぴったり合います
 - 間がほとんど見つからないときは ⚠ が出て、文字数の割合どおりに区切ります
+- **録音のチェック（毎回自動）**: ファイルがない・音声が入っていないファイルなら止まります。音が小さすぎ（いちばん大きい所が -20dB より小さい）・音割れのおそれ・音が入っていない・最初や最後の無音が1.5秒より長い・動画が45秒をこえる／30秒より短い ときは ⚠ で知らせます。`--check` でも調べられます
 - 試し: `python3 shorts/tools/make_test_voice.py 台本.txt にせ録音.wav breath` で、正しい区切りがわかっている「にせの録音」（ピー音）を作れます
 
 ## 文字のはみ出しチェック（毎回自動）
@@ -55,6 +56,10 @@ python3 shorts/render.py --script 台本.txt --voice 録音.m4a --type 1 --numbe
 | text | `{text}` | テロップだけ（ルーツくん） |
 
 - trivia・origin・quiz・split・answer などの単語も、`{quiz benevolent bene(良く)+vol(望む)+ent(～な)=好意的な}` のようにパーツと意味を書ける。1回書けば、あとの場面は `{answer benevolent}` だけでよい
+- **絵（ピクトグラム）の出し方**: 台本で書いた意味がアプリの絵の意味と合うときだけ、その絵を出します（in(中に) なら「中に」の絵。外へ／外に のような言い方の違いは同じとみなす）。合わないとき（dis(悪い) はアプリの絵が「離れて」用）は、まちがった絵を出さず、箱の中にパーツの文字を入れます（ℹ で知らせます。問題ではありません）
+  - 自分で決めるとき: `dis(悪い|絵なし)`・`dis(悪い|絵あり)`、root 場面は `{root dis=悪い 接頭 絵なし}`・`{root dis=悪い 接頭 絵あり}`
+- まとめの見出しは、台本で出した順ではなく単語の並び（dis ＋ aster）になります。1つの単語に全部入っていなければ 接頭→語根→接尾 の順です
+- 左上の「Roots #連番」は、エンドカードには出しません（エンドカードは名前と案内だけ）
 - 単語のあとに表情（normal / teach / think / cheer）を書くと、ルーツくんの表情が変わる（例 `{trivia danger cheer}`）
 
 ### 型②雑学（意外な語源）
@@ -80,7 +85,7 @@ python3 shorts/render.py --script 台本.txt --voice 録音.m4a --type 1 --numbe
 
 試作の台本: `scripts/001_port.txt`（①）・`002_danger.txt`（②）・`003_interrupt.txt`（③）・`004_precede_proceed.txt`（④）
 
-夜勤チームの台本（本番用の下書き）: `scripts/1105_muscle.txt`（②#1）・`1105_port.txt`（①#2）・`1106_benevolent.txt`（③#3）・`1106_adapt_adopt.txt`（④#4）・`1109_candidate.txt`（②#9）・`1109_struct.txt`（①#10）。仮動画（無音）は `samples/仮_*.mp4`
+夜勤チームの台本（本番用の下書き）: `scripts/1105_muscle.txt`（②#1）・`1105_port.txt`（①#2）・`1106_benevolent.txt`（③#3）・`1106_adapt_adopt.txt`（④#4）・`1107_disaster.txt`（②#5）・`1107_ject.txt`（①#6）・`1108_circumvent.txt`（③#7）・`1108_include_exclude.txt`（④#8）・`1109_candidate.txt`（②#9）・`1109_struct.txt`（①#10）。仮動画（無音）は `samples/仮_*.mp4`
 
 ## データの作り直し（アプリの単語が増えたとき）
 ```
