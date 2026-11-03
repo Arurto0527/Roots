@@ -1,0 +1,17 @@
+# 型: ①カタカナ語 tract（2026-11-11・Roots #14）
+# 語根: tract
+# メモ: tractor・attraction はアプリの見出し語にないので kata でパーツを指定。ad・dis・ex を root 場面にするとまとめの見出しから tract が落ちるので text 場面
+# メモ: まとめを0.3秒のばした（切り替えの0.2秒を除いて3秒止めるため）。ドキュメントの秒数との差はここだけ
+[0.0-3.0] {hook think} トラクターで英単語3つ
+[3.0-6.0] {hook teach} 入口はカタカナ語
+[6.0-9.0] {kata トラクター tractor tract(引く)+or(もの)} トラクター＝引く機械
+[9.0-12.0] {kata アトラクション attraction at(〜の方へ)+tract(引く)+ion(もの)} アトラクション＝客を引く
+[12.0-15.0] {root tract=引く} 共通はtract＝引く
+[15.0-18.0] {text} ad→at＝〜の方へ
+[18.0-21.0] {word attract at(〜の方へ)+tract(引く)} attract＝引きつける
+[21.0-24.0] {text} dis＝離れて
+[24.0-27.0] {word distract} distract＝そらす
+[27.0-30.0] {text} ex＝外へ
+[30.0-33.0] {word extract} extract＝取り出す
+[33.0-36.3] {summary} tract＝引く、方向で3語
+[36.3-39.0] {hook think} 忘れたら思い出すのは…

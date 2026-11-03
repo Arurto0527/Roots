@@ -1,0 +1,17 @@
+# 型: ③推理 malevolent（2026-11-10・Roots #11）
+# 語根: vol
+# メモ: malevolent・benevolent はアプリの見出し語にないのでパーツを指定。まとめの見出しを mal＋vol にするため vol も root 場面にした
+# メモ: malfunction は仲間として見せる語なので「番号なし」（受験単語 N の札を出さない）
+# メモ: まとめを0.3秒のばした（切り替えの0.2秒を除いて3秒止めるため）。ドキュメントの秒数との差はここだけ
+[0.0-3.0] {hook think} 悪い予感がする単語
+[3.0-5.5] {hook teach} 英検準1級レベル
+[5.5-8.0] {quiz malevolent mal(悪く)+vol(望む)+ent(～な)=悪意のある} malevolent
+[8.0-11.0] {count malevolent} 3秒考えて
+[11.0-14.5] {word benevolent bene(良く)+vol(望む)+ent(～な)=好意的な} 前回は benevolent
+[14.5-18.0] {root vol=望む} bene良く＋vol望む
+[18.0-21.0] {root mal=悪く 接頭} mal＝悪く
+[21.0-24.0] {split malevolent} 悪く＋望む…？
+[24.0-27.0] {answer malevolent} 正解：悪意のある
+[27.0-31.0] {word malfunction 番号なし mal(悪く)+function(働き)=故障} mal の仲間
+[31.0-34.3] {summary} mal悪く＋vol望む
+[34.3-36.5] {hook think} 頭に mal なら…

@@ -198,6 +198,11 @@ def load_data():
         words = json.load(fp)["words"]
     with open(ppath, encoding="utf-8") as fp:
         pictos = json.load(fp)
+    # 動画だけで絵を差しかえる（アプリの絵は変えない）。data/picto_override.json に {"p100": "<path .../>"} と書く
+    opath = os.path.join(HERE, "data", "picto_override.json")
+    if os.path.exists(opath):
+        with open(opath, encoding="utf-8") as fp:
+            pictos.update({k: v for k, v in json.load(fp).items() if not k.startswith("_")})
     by_word = {}
     for w in words:
         by_word.setdefault(w["word"].lower(), w)
@@ -289,9 +294,12 @@ def pick_picto(morph, typ, gloss, pic_opt=None):
     return None
 
 
+NO_NUMBER = "番号なし"   # {word malfunction 番号なし ...} … 「受験単語 N」の札を出さず、番号も数えない
+
+
 def parse_word_arg(arg):
     """'export ex(外へ)+port(運ぶ)=輸出する think' → ('export', 'ex(外へ)+port(運ぶ)=輸出する', 'think')"""
-    toks = (arg or "").split()
+    toks = [t for t in (arg or "").split() if t != NO_NUMBER]
     name = toks[0] if toks else ""
     mood = next((t for t in toks[1:] if t in MOODS), None)
     spec = " ".join(t for t in toks[1:] if t not in MOODS)
@@ -316,7 +324,7 @@ def make_word(name, spec, root_morph=""):
         warn(f"単語データに「{name}」がありません（アプリの単語帳にない語）。"
              f"{{word {name} ex(外へ)+port(運ぶ)=意味}} のように、パーツと意味を台本に書けます")
         return {"word": name, "meaning": "", "parts": [], "eiken": ""}
-    return w
+    return dict(w)
 
 
 # ---------------------------------------------------------------- ピクトグラム
@@ -463,6 +471,10 @@ def split_colored(word, parts):
     for p in parts:
         m = p["morph"].lower()
         i = low.find(m, pos)
+        # ex のあとの s は落ちる（ex＋spect → expect、ex＋sist → exist）。残りの形に色をつける
+        if i < 0 and m.startswith("s") and low[:pos].endswith("x") and low.startswith(m[1:], pos):
+            m = m[1:]
+            i = pos
         if i < 0:
             # つづりが変わる語（ad→ac など）は、残りを次のパーツへまわす
             continue
@@ -564,6 +576,14 @@ def ffprobe_duration(path):
 
 HOLD_KINDS = ("summary", "pairsum", "count")   # 3秒以上止める場面
 HOLD_SEC = 3.0
+
+
+def hold_sec(kind):
+    """止める場面に必要な長さ。まとめは最初の切り替え（FADE_SEC）を除いて、完全に3秒止める。
+    カウントダウンは数字が1秒ごとに変わる場面なので、ちょうど3秒"""
+    return HOLD_SEC if kind == "count" else HOLD_SEC + FADE_SEC
+
+
 MIN_CUT_SEC = 0.6
 
 
@@ -710,9 +730,9 @@ def plan_voice(cuts, voice, sync="chars"):
         c["a0"], c["a1"] = a, b
         c["dur"] = b - a
         c["pad"] = 0.0
-        if c["kind"] in HOLD_KINDS and c["dur"] < HOLD_SEC:
-            c["pad"] = HOLD_SEC - c["dur"]   # 声のあとに無音をはさんで止める
-            c["dur"] = HOLD_SEC
+        if c["kind"] in HOLD_KINDS and c["dur"] < hold_sec(c["kind"]):
+            c["pad"] = hold_sec(c["kind"]) - c["dur"]   # 声のあとに無音をはさんで止める
+            c["dur"] = hold_sec(c["kind"])
         if c["dur"] < MIN_CUT_SEC:
             warn(f"{c['line']}行目のカットが {c['dur']:.2f}秒しかありません（録音とテロップの量が合っていないかも）")
         c["t0"] = t
@@ -743,9 +763,11 @@ def plan_timing(cuts, voice, sync="chars"):
         nxt = cuts[i + 1]["start"] if i + 1 < len(cuts) else c["end"]
         c["dur"] = max(0.5, nxt - c["start"])
     for c in cuts:
-        if c["kind"] in ("summary", "pairsum", "count") and c["dur"] < 3.0:
-            warn(f"{c['line']}行目の{'カウントダウン' if c['kind'] == 'count' else 'まとめ画面'}が3秒より短いので、3秒にのばしました")
-            c["dur"] = 3.0
+        if c["kind"] in HOLD_KINDS and c["dur"] < hold_sec(c["kind"]):
+            if c["dur"] < HOLD_SEC:
+                warn(f"{c['line']}行目の{'カウントダウン' if c['kind'] == 'count' else 'まとめ画面'}が3秒より短いので、"
+                     f"{hold_sec(c['kind']):.1f}秒にのばしました")
+            c["dur"] = hold_sec(c["kind"])
     t = 0.0
     for c in cuts:
         c["t0"] = t
@@ -819,6 +841,12 @@ def parse_parts(spec, root_morph):
         p["canon"] = p["morph"].lower()
         if not p["gloss"]:
             p["gloss"] = same["gloss"] if same["type"] == p["type"] else ""
+    # アプリのデータにない語（malfunction の function）は、語根が1つもないとき語根にする（最後だからと接尾にしない）
+    if ri is None and len(parts) >= 2 and not any(p["type"] == "root" for p in parts):
+        for p in parts:
+            if not part_info(p["morph"])["type"]:
+                p["type"] = "root"
+                break
     return parts
 
 
@@ -978,7 +1006,11 @@ def scene_word(ctx, c):
     elif spec:
         ctx.words[prev] = make_word(name, spec, ctx.root)
     w = ctx.words[prev]
-    chip(d, f"受験単語 {prev + 1}", CX, 400, TYPE_COLOR["root"], size=36, filled=True)
+    if NO_NUMBER in (c["arg"] or "").split():
+        w["no_number"] = True
+    if not w.get("no_number"):
+        num = sum(1 for x in ctx.words[:prev] if not x.get("no_number")) + 1
+        chip(d, f"受験単語 {num}", CX, 400, TYPE_COLOR["root"], size=36, filled=True)
     word_block(img, d, w, 440)
     telop(d, c["text"])
     return img
@@ -989,13 +1021,26 @@ def scene_summary(ctx, c):
     img, d = base(ctx.number)
     heads = ctx.root_list or [{"morph": m.strip(), "gloss": "", "type": None, "picto": None}
                               for m in re.split(r"[+＋]", ctx.root) if m.strip()]
+    heads = choose_heads(heads, ctx)
     if len(heads) >= 2:
         summary_heads(d, order_heads(heads, ctx))
+    elif len(ctx.root_list) > 3:
+        summary_head1(img, d, ctx, heads[0])   # 語根が1つだけ残ったとき（tract ＋ ad・dis・ex）
     else:
         summary_head1(img, d, ctx)
     summary_rows(d, ctx)
     telop(d, c["text"])
     return img
+
+
+def choose_heads(heads, ctx):
+    """見出しに入るのは3つまで。4つ以上あるときは、語根だけを残す（先頭の3つで切ると語根が落ちるため）"""
+    if len(heads) <= 3:
+        return heads
+    roots = [h for h in heads if h["type"] == "root"]
+    keep = roots[:3] or heads[:3]
+    note(f"root 場面が{len(heads)}つあるので、まとめの見出しは {'・'.join(h['morph'] for h in keep)} だけにします")
+    return keep
 
 
 def order_heads(heads, ctx):
@@ -1038,7 +1083,11 @@ def summary_heads(d, heads):
             x += plus
 
 
-def summary_head1(img, d, ctx):
+def summary_head1(img, d, ctx, head=None):
+    if head:   # 語根を指定したとき
+        pic = picto_image(head["picto"], 150)
+        _summary_title(img, d, head["morph"], head["gloss"], TYPE_COLOR[head["type"]], pic)
+        return
     info = root_info(ctx.root) if ctx.root else {"gloss": "", "picto": None}
     if ctx.root_list:
         info = {"gloss": ctx.root_list[0]["gloss"], "picto": ctx.root_list[0]["picto"]}
@@ -1046,12 +1095,15 @@ def summary_head1(img, d, ctx):
         info = part_info(ctx.root)
     gloss = (ctx.root_list[0]["gloss"] if ctx.root_list else "") or getattr(ctx, "root_gloss", "") or info["gloss"]
     color = TYPE_COLOR[ctx.root_list[0]["type"]] if ctx.root_list else TYPE_COLOR["root"]
+    _summary_title(img, d, ctx.root, gloss, color, picto_image(info["picto"], 150))
+
+
+def _summary_title(img, d, title, gloss, color, pic):
     # 見出し: [絵] port ＝ 運ぶ（長いときは文字を小さくして、右の線から離す）
-    pic = picto_image(info["picto"], 150)
     big, small = 110, 64
     while True:
         title_f, gf = font(big, "black"), font(small, "bold")
-        tw, gw = text_w(ctx.root, title_f), text_w("＝" + gloss, gf)
+        tw, gw = text_w(title, title_f), text_w("＝" + gloss, gf)
         total = (170 if pic else 0) + tw + 20 + gw
         if total <= CONTENT_W - 2 * RIGHT_PAD or small <= 44:
             break
@@ -1061,7 +1113,7 @@ def summary_head1(img, d, ctx):
         rounded(d, (x, 340, x + 150, 490), 18, outline=LINE, width=3)
         img.paste(pic, (int(x), 340), pic)
         x += 170
-    d.text((x, 415), ctx.root, font=title_f, fill=color, anchor="lm")
+    d.text((x, 415), title, font=title_f, fill=color, anchor="lm")
     d.text((x + tw + 20, 425), "＝" + gloss, font=gf, fill=TEXT, anchor="lm")
 
 
@@ -1420,10 +1472,6 @@ def render(args):
     elif not (30 <= video_len <= 45):
         warn(f"動画の長さが {video_len:.1f} 秒です（目安は30〜45秒）")
     run_checks(args.report)
-    if args.check:   # 動画は作らず、チェックだけ
-        print(f"チェックだけ: {video_len:.1f}秒・カット数 {len(frames)}・注意 {len(WARNINGS)}件")
-        return
-
     if args.preview:
         os.makedirs(args.preview, exist_ok=True)
         for i, (im, _) in enumerate(frames):
@@ -1433,6 +1481,10 @@ def render(args):
                 extra = f"  声 {c['a0']:.2f}-{c['a1']:.2f}" if "a0" in c else ""
                 extra += f"  ＋無音 {c['pad']:.2f}" if c.get("pad") else ""
                 fp.write(f"{c['t0']:6.2f}〜{c['t0'] + c['dur']:6.2f}  {c['kind']:8s} {c['text'].replace(chr(10), ' / ')}{extra}\n")
+
+    if args.check:   # 動画は作らず、チェックだけ
+        print(f"チェックだけ: {video_len:.1f}秒・カット数 {len(frames)}・注意 {len(WARNINGS)}件")
+        return
 
     if shutil.which("ffmpeg") is None:
         sys.exit("ffmpeg が見つかりません")
@@ -1479,14 +1531,16 @@ def main():
     ap.add_argument("--voice", help="録音ファイル（m4a / mp3 / wav）。なければ無音の仮動画")
     ap.add_argument("--type", type=int, default=1, choices=[1, 2, 3, 4], help="型 1=カタカナ語 2=雑学 3=推理 4=ペア")
     ap.add_argument("--number", type=int, default=1, help="左上の連番（Roots #001）")
-    ap.add_argument("--out", required=True, help="出力する MP4")
+    ap.add_argument("--out", help="出力する MP4（--check のときは不要）")
     ap.add_argument("--crf", type=int, default=26, help="画質（大きいほどファイルが小さい）")
     ap.add_argument("--preview", help="各カットの静止画（PNG）と時間の表（timing.txt）を書き出すフォルダ（確認用）")
     ap.add_argument("--sync", default="chars", choices=["chars", "script", "mix"],
                     help="録音の分け方 chars=文字数の割合（ふつう） script=台本の目安秒数の割合 mix=両方の平均")
     ap.add_argument("--report", help="全部の文字の位置とチェック結果を書き出す JSON ファイル")
-    ap.add_argument("--check", action="store_true", help="動画は作らず、文字のはみ出しチェックだけする")
+    ap.add_argument("--check", action="store_true", help="動画は作らず、文字のはみ出しチェックだけする（--preview の静止画は出せる）")
     args = ap.parse_args()
+    if not args.out and not args.check:
+        ap.error("--out（出力する MP4）を指定してください。チェックだけなら --check")
     render(args)
 
 

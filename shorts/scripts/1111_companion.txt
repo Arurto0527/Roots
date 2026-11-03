@@ -1,0 +1,18 @@
+# 型: ②雑学 companion（2026-11-11・Roots #13）
+# 語根: pan
+# メモ: companion はアプリの見出し語にないのでパーツを指定
+# メモ: accompany の y は company とそろえて色をつけるため +y を足した（意味の箱には出ない）
+# メモ: まとめを0.3秒のばした（切り替えの0.2秒を除いて3秒止めるため）。ドキュメントの秒数との差はここだけ
+[0.0-3.0] {trivia companion com(共に)+pan(パン)+ion(名詞)=仲間} companionの語源はパン
+[3.0-6.0] {hook teach} 英単語の覚え方は\n語源
+[6.0-9.0] {hook think} なぜ仲間がパン？
+[9.0-12.0] {root com=共に 接頭} com＝共に
+[12.0-15.0] {root pan=パン} pan＝パン
+[15.0-18.0] {origin companion} 一緒にパンを食べる人
+[18.0-21.0] {text} 同じ食卓の仲間
+[21.0-24.0] {word company} companyも同じ語源
+[24.0-27.0] {text think} 会社も元は仲間の集まり
+[27.0-30.0] {word accompany ac(～へ)+com(共に)+pan(パン)+y} accompanyも親戚
+[30.0-33.0] {text} 仲間として連れ立つ
+[33.0-36.3] {summary} companion＝パン仲間
+[36.3-39.0] {hook think} 一緒にパンを食べる相手…
