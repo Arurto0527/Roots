@@ -1,0 +1,15 @@
+# 型: ④ペア increase / decrease（2026-11-12・Roots #16）
+# 語根: creas
+# メモ: decrease はアプリの見出し語にないので word 場面でパーツを指定（後の pair はそれを使う）。語根の表記はアプリの creas に合わせた
+[0.0-3.0] {hook think} 増える？減る？
+[3.0-6.0] {hook teach} 頭の文字で見分ける
+[6.0-9.5] {root creas=育つ} creas＝育つ
+[9.5-12.5] {root in=中へ 接頭} in＝中へ
+[12.5-16.0] {word increase} 中へ育つ→増えるイメージ
+[16.0-19.0] {root de=下へ 接頭} de＝下へ
+[19.0-22.5] {word decrease de(下へ)+creas(育つ)=減る} 育ちが下向き→減る
+[22.5-26.0] {text} クレッシェンドも仲間
+[26.0-29.5] {text think} デクレッシェンドは逆
+[29.5-33.0] {pair increase decrease} inとdeで逆になる
+[33.0-36.2] {pairsum} in中へ→増／\nde下へ→減
+[36.2-39.0] {hook think} 次に迷ったら…

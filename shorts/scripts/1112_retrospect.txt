@@ -1,0 +1,16 @@
+# 型: ③推理 retrospect（2026-11-12・Roots #15）
+# 語根: spect
+# メモ: count は3秒のまま（数字が1秒ずつ変わる）。声は「考えて」だけにして、声のあとの無音は render.py がはさむ
+# メモ: retrospect はアプリの見出し語にないのでパーツを指定。retro はアプリのデータにない。重心は retro（後ろを）
+[0.0-3.0] {hook think} 見たことなくても\nわかる
+[3.0-6.0] {hook teach} 語源で\n意味を推理
+[6.0-9.0] {quiz retrospect retro(後ろを)+spect(見る)=振り返り} retrospect
+[9.0-12.0] {count retrospect} 3秒考えて
+[12.0-15.5] {root retro=後ろを 接頭} retro＝後ろを
+[15.5-19.0] {text} レトロも同じretro
+[19.0-22.0] {root spect=見る} spect＝見る
+[22.0-25.5] {split retrospect} 後ろを見る…？
+[25.5-29.0] {answer retrospect} 正解：振り返り
+[29.0-32.5] {text think} 熟語なら「今思えば」
+[32.5-35.7] {summary} retro後ろ＋spect見る
+[35.7-38.5] {hook think} 語源を\nたどれば…

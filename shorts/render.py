@@ -394,10 +394,17 @@ def phrases(s, f, max_w):
     return out
 
 
+def soft_chunks(s, f, max_w):
+    """改行してよい切れ目で文を分ける。「、」「。」のあとはいつも、
+    「／」のあと（in中へ→増／de下へ→減 のような並び）は、全体が1行に入らないときだけ切れ目にする"""
+    pat = r"(?<=[、。！？])" if text_w(s, f) <= max_w else r"(?<=[、。！？／])"
+    return [c for c in re.split(pat, s) if c]
+
+
 def wrap(s, f, max_w):
     # 「、」「。」のあとで区切って、どれも1行に入るならそこで改行する（読みやすい）
     if "\n" not in s:
-        chunks = [c for c in re.split(r"(?<=[、。！？])", s) if c]
+        chunks = soft_chunks(s, f, max_w)
         if len(chunks) > 1 and all(text_w(c, f) <= max_w for c in chunks):
             return chunks
     lines = []
@@ -424,7 +431,7 @@ def fit_text(s, max_w, max_h, size, min_size, max_lines=3, weight="bold", spacin
                 return f, [s], int(sz * spacing)
             sz -= 4
     # 改行（\n）と「、」「。」で区切った固まりを、それぞれ1行に収められる大きさを探す
-    chunks = [c for part in s.split("\n") for c in re.split(r"(?<=[、。！？])", part) if c]
+    chunks = [c for part in s.split("\n") for c in soft_chunks(part, font(size, weight), max_w)]
     if 1 < len(chunks) <= max_lines:
         sz = size
         while sz >= min_size:
@@ -1260,6 +1267,14 @@ def scene_quiz(ctx, c):
     return img
 
 
+def split_durs(kind, n, dur):
+    """1カットの中の絵それぞれの長さ。カウントダウンは「1秒ずつ」を守るため、
+    カットが3秒より長いときは、のびた分を最初の「3」にまとめる（4.5秒なら 3を2.5秒 → 2を1秒 → 1を1秒）"""
+    if kind == "count" and dur >= n:
+        return [dur - (n - 1)] + [1.0] * (n - 1)
+    return [dur / n] * n
+
+
 def scene_count(ctx, c):
     """{count interrupt} 3・2・1 のカウントダウン（1秒ずつ数字が変わる）。3枚の絵を返す"""
     w = get_word(ctx, c)
@@ -1457,7 +1472,7 @@ def render(args):
         begin_frame(f"{c['line']}行目（{kind}）")
         out = SCENES[kind](ctx, c)
         if isinstance(out, list):   # カウントダウンなど、1カットの中で絵が変わる場面
-            frames += [(im, c["dur"] / len(out)) for im in out]
+            frames += list(zip(out, split_durs(kind, len(out), c["dur"])))
         else:
             frames.append((out, c["dur"]))
     begin_frame("エンドカード")
