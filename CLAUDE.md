@@ -16,6 +16,9 @@
   - 本体と同じ名前の関数・定数を授業用で作らない（`Overlay` がぶつかったことがある）
   - スマホ版の 430px ルールは対象外。sw.js の保存対象からも外してある（`/class/` はいつも最新版）
 - `class/join/index.html` … 「みんなで四択」の生徒用ページ（スマホ）。Supabase のリアルタイム配信だけを使い、データベースには何も保存しない
+- 管理画面の学習記録は、Supabase の集計係（`supabase/admin-summary.sql` の `admin_summary_logs`・`admin_summary_progress`）でまとめた数字だけを読む
+  - 無料プランは1回8秒で止められるので、回答記録は1週間ずつ・単語データは30人ずつに分けて同時に呼ぶ。集計係が使えないときは index.html の `adminAggregate()`（前の、全部ダウンロードする方法）にもどる
+  - 管理画面に出す数字を足すときは、SQL と `adminAggregate()` の両方を直す（返す形をそろえる）
 - `jisshu/index.html` … 教育実習（2026-10-13〜10-23）の予定表。実習生5人用。公開URL の `/jisshu/`。本体とは独立（React・Babel なし）
   - 5人共通のパスワード＝Supabase の共有アカウント `roots-jisshu@example.com` のパスワード。ログイン情報は `roots.jisshu.auth` に保存（本体のログインとまざらない）
   - 表 `jisshu_lessons`・`jisshu_feedback`・`jisshu_files` と Storage の `jisshu` バケット。作り方は `supabase/jisshu.sql`

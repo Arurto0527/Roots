@@ -52225,6 +52225,68 @@ async function sbFetchAll(make,onPage,onRetry,step=1000){
     onPage&&onPage(out.length);
   }
 }
+/* 管理画面のデータを読む。ふだんはサーバーの集計係（supabase/admin-summary.sql）に数えてもらい、まとめた数字だけ受け取る。
+   サーバーは1回の処理が8秒をこえると止めるので、回答記録は1週間ずつ、単語データは30人ずつに分けて、同時に何回か頼む。
+   集計係がまだ入っていないとき・何度やっても失敗するときは、前の方法（記録をまるごと読んで手元で数える）にもどる */
+async function adminRpc(name,args,onRetry){
+  for(let n=1;;n++){
+    let err;
+    try{
+      const r=await withTimeout(sb.rpc(name,args),60000);
+      if(!r.error&&r.data)return r.data;
+      err=r.error||new Error("empty");
+      if(err.code==="PGRST202"||err.code==="42883")throw err;   /* 集計係がない → やり直さない */
+    }catch(e){if(e&&(e.code==="PGRST202"||e.code==="42883"))throw e;err=e;}
+    if(n>=3)throw err;
+    onRetry(n);await new Promise(ok=>setTimeout(ok,1500*n));
+  }
+}
+async function adminFetchServer(since,tz,onRetry,setStage){
+  /* 回答記録・学習時間：since から1週間ずつ（最後のかたまりは終わりなし） */
+  const spans=[];
+  for(let t=Date.parse(since);;t+=7*DAY){
+    const last=t+7*DAY>Date.now();
+    spans.push({since:new Date(t).toISOString(),until:last?null:new Date(t+7*DAY).toISOString(),tz});
+    if(last)break;
+  }
+  const logsP=Promise.all(spans.map(a=>adminRpc("admin_summary_logs",a,onRetry)));
+  /* 単語データ：30人ずつ、6回ぶんずつ同時に */
+  const lim=30,par=6,p={};
+  for(let off=0;;off+=lim*par){
+    const res=await Promise.all(Array.from({length:par},(_,i)=>
+      adminRpc("admin_summary_progress",{off:off+i*lim,lim,master:MASTER_INTERVAL},onRetry)));
+    res.forEach(r=>Object.assign(p,r.p||{}));
+    setStage("単語の記録 "+Object.keys(p).length+"人分");
+    if(res.some(r=>!(r.n>=lim)))break;
+  }
+  setStage("回答の記録をまとめています");
+  const parts=await logsP;
+  /* 週ごとの結果をつなぐ（adminBuild は同じ日・同じ単語が何行あっても足し合わせる） */
+  const d={},w={},last={},s={};
+  const cat=(dst,src)=>Object.entries(src||{}).forEach(([u,v])=>{dst[u]=(dst[u]||[]).concat(v);});
+  parts.forEach(x=>{cat(d,x.d);cat(w,x.w);cat(s,x.s);
+    Object.entries(x.last||{}).forEach(([u,t])=>{if(!(last[u]>=t))last[u]=t;});});
+  return {d,w,last,s,p};
+}
+async function adminFetchSummary(since,{onRetry,setStage,setLoading,setTotal}){
+  let tz="Asia/Tokyo";
+  try{tz=Intl.DateTimeFormat().resolvedOptions().timeZone||tz;}catch(e){}
+  setStage("サーバーで集計しています");
+  try{return await adminFetchServer(since,tz,onRetry,setStage);}catch(e){}
+  setStage("");onRetry(0);
+  /* 先に件数だけ数えて、ダウンロードのように「何％」を出す（数えられなくても読みこみは続ける） */
+  withTimeout(sb.from("study_logs").select("id",{count:"exact",head:true}).gte("answered_at",since),30000)
+    .then(r=>{if(r&&r.count)setTotal(r.count);}).catch(()=>{});
+  const [g,l,s]=await Promise.all([
+    sbFetchAll(()=>sb.from("progress").select("user_id,words,updated_at").order("user_id"),
+      n=>setStage("単語の記録 "+n+"人分"),onRetry,50),   /* 1人分が大きいので50人ずつ */
+    sbFetchAll(()=>sb.from("study_logs").select("user_id,word_id,correct,hint_used,answered_at")
+      .gte("answered_at",since).order("answered_at").order("id"),n=>{setLoading(Math.max(1,n));onRetry(0);},onRetry),
+    sbFetchAll(()=>sb.from("study_sessions").select("user_id,started_at,active_seconds")
+      .gte("started_at",since).order("started_at").order("id"),null,onRetry),
+  ]);
+  return adminAggregate(g,l,s);
+}
 /* 一度読んだ管理データを覚えておく（タブを切りかえて戻ったとき、すぐ表示する） */
 let adminCache=null;
 
@@ -52270,61 +52332,92 @@ const idGroup=code=>{
   return (k?k[0]:code).toUpperCase();
 };
 
-function adminBuild(profiles,progress,logs,sessions){
-  const now=Date.now();const today=startOfDay(now);
-  const weekFrom=today-6*DAY;
-  const prog=new Map(progress.map(r=>[r.user_id,r]));
+/* 管理画面の集計。サーバーの admin_summary（supabase/admin-summary.sql）が返すのと同じ形を、
+   ダウンロードした記録から手元で作る。サーバーにその関数がないとき（入れる前・こわれたとき）の予備。
+   形：d[人]=[[日付,時,回答数,正解数,ヒント数]]／w[人]=[[単語ID,回答数,正解数,最後の時刻]]／last[人]=最後の時刻
+       s[人]=[[日付,学習秒数]]／p[人]={at,st:学習した語のID,ma:習得した語のID,due,wn:苦手な語の数,wk:苦手な語の上位10} */
+function adminAggregate(progress,logs,sessions){
+  const now=Date.now();
+  const d={},w={},last={},s={},p={};
+  const dm=new Map(),wm=new Map(),sm=new Map();
+  logs.forEach(l=>{
+    const u=l.user_id;const t=Date.parse(l.answered_at);const day=dayKey(t);const h=new Date(t).getHours();
+    let x=dm.get(u+"|"+day+"|"+h);
+    if(!x){x=[day,h,0,0,0];dm.set(u+"|"+day+"|"+h,x);(d[u]=d[u]||[]).push(x);}
+    x[2]++;if(l.correct)x[3]++;if(l.hint_used)x[4]++;
+    let y=wm.get(u+"|"+l.word_id);
+    if(!y){y=[l.word_id,0,0,0];wm.set(u+"|"+l.word_id,y);(w[u]=w[u]||[]).push(y);}
+    y[1]++;if(l.correct)y[2]++;if(t>y[3])y[3]=t;
+    if(!(last[u]>=t))last[u]=t;
+  });
+  sessions.forEach(x=>{
+    const u=x.user_id;const day=dayKey(Date.parse(x.started_at));
+    let y=sm.get(u+"|"+day);
+    if(!y){y=[day,0];sm.set(u+"|"+day,y);(s[u]=s[u]||[]).push(y);}
+    y[1]+=x.active_seconds||0;
+  });
+  progress.forEach(r=>{
+    const ws=Array.isArray(r.words)?r.words:[];
+    const miss=x=>(x.incorrectCount||0)+(x.lapses||0);
+    const weak=ws.filter(x=>miss(x)>0).sort((a,b)=>miss(b)-miss(a)||(a.correctCount||0)-(b.correctCount||0));
+    p[r.user_id]={at:Date.parse(r.updated_at),
+      st:ws.filter(x=>x.reps>0||x.lapses>0||x.correctCount>0||x.incorrectCount>0).map(x=>x.id),
+      ma:ws.filter(isMastered).map(x=>x.id),due:ws.filter(x=>isDue(x,now)).length,
+      wn:weak.length,wk:weak.slice(0,10).map(x=>[x.id,x.w,miss(x),x.correctCount||0])};
+  });
+  return {d,w,last,s,p};
+}
+function adminBuild(profiles,agg){
+  const now=Date.now();
   const byId=new Map(RAW_WORDS.map(w=>[String(w.id),w]));
   const students=profiles.filter(p=>p.role!=="admin");
   const ids=new Set(students.map(s=>s.user_id));
   const dayIdx=t=>daysBetween(t,now);   /* 0=今日 */
-
-  const per=new Map(students.map(s=>[s.user_id,{
-    days:Array(14).fill(0),dayOk:Array(14).fill(0),mins:Array(14).fill(0),week:0,weekOk:0,weekHint:0,weekSec:0,allSec:0,
-    all:0,allOk:0,lastLog:0,parts:new Map(),hours:Array(24).fill(0)}]));
+  const dayOf=k=>{const [y,m,d]=String(k).split("-").map(Number);return dayIdx(new Date(y,m-1,d).getTime());};
   const classHours=Array(24).fill(0);
   const classMins=Array(14).fill(0);
   const classParts=new Map();   /* Part ごと：{n,users:Set} */
   const wordStat=new Map();   /* 単語ごと：{n,ok,users:Set(まちがえた人)} */
   const classDays=Array.from({length:14},()=>new Set());
 
-  logs.forEach(l=>{
-    const s=per.get(l.user_id);if(!s)return;
-    const t=Date.parse(l.answered_at);const d=dayIdx(t);
-    s.all++;if(l.correct)s.allOk++;
-    const h=new Date(t).getHours();s.hours[h]++;classHours[h]++;
-    if(t>s.lastLog)s.lastLog=t;
-    if(d<14){s.days[d]++;if(l.correct)s.dayOk[d]++;classDays[d].add(l.user_id);}
-    if(t>=weekFrom){s.week++;if(l.correct)s.weekOk++;if(l.hint_used)s.weekHint++;}
-    const raw=byId.get(String(l.word_id));
-    if(raw&&raw.part!=null){
-      const pp=s.parts.get(raw.part)||{n:0,ok:0,last:0};
-      pp.n++;if(l.correct)pp.ok++;if(t>pp.last)pp.last=t;s.parts.set(raw.part,pp);
-      const cp=classParts.get(raw.part)||{n:0,users:new Set()};
-      cp.n++;cp.users.add(l.user_id);classParts.set(raw.part,cp);
-    }
-    const w=wordStat.get(l.word_id)||{n:0,ok:0,users:new Set(),tried:new Set()};
-    w.n++;if(l.correct)w.ok++;else w.users.add(l.user_id);w.tried.add(l.user_id);
-    wordStat.set(l.word_id,w);
-  });
-  sessions.forEach(x=>{
-    const s=per.get(x.user_id);if(!s)return;
-    const t=Date.parse(x.started_at);const d=dayIdx(t);
-    if(d<14){s.mins[d]+=x.active_seconds/60;classMins[d]+=x.active_seconds/60;}
-    if(t>=weekFrom)s.weekSec+=x.active_seconds;
-    s.allSec+=x.active_seconds||0;
-  });
-
   const rows=students.map(p=>{
-    const s=per.get(p.user_id);const pr=prog.get(p.user_id);
-    const ws=Array.isArray(pr&&pr.words)?pr.words:[];
-    const studied=ws.filter(w=>w.reps>0||w.lapses>0||w.correctCount>0||w.incorrectCount>0);
-    const weak=ws.filter(w=>(w.lapses||0)+(w.incorrectCount||0)>0).map(w=>{
-      const raw=byId.get(String(w.id));
-      return {id:w.id,word:(raw&&raw.word)||w.w||String(w.id),meaning:raw?raw.meaning:"",
-        miss:(w.incorrectCount||0)+(w.lapses||0),ok:w.correctCount||0};
-    }).sort((a,b)=>b.miss-a.miss||a.ok-b.ok);
-    const lastAt=s.lastLog||(pr&&studied.length?Date.parse(pr.updated_at):0)||null;
+    const u=p.user_id;
+    const s={days:Array(14).fill(0),dayOk:Array(14).fill(0),mins:Array(14).fill(0),week:0,weekOk:0,weekHint:0,weekSec:0,allSec:0,
+      all:0,allOk:0,lastLog:(agg.last&&agg.last[u])||0,parts:new Map(),hours:Array(24).fill(0)};
+    ((agg.d&&agg.d[u])||[]).forEach(([day,h,n,ok,hint])=>{
+      const d=dayOf(day);
+      s.all+=n;s.allOk+=ok;s.hours[h]+=n;classHours[h]+=n;
+      if(d>=0&&d<14){s.days[d]+=n;s.dayOk[d]+=ok;classDays[d].add(u);}
+      if(d<=6){s.week+=n;s.weekOk+=ok;s.weekHint+=hint;}   /* 今週＝今日を含む7日間 */
+    });
+    ((agg.w&&agg.w[u])||[]).forEach(([wid,n,ok,last])=>{
+      const raw=byId.get(String(wid));
+      if(raw&&raw.part!=null){
+        const pp=s.parts.get(raw.part)||{n:0,ok:0,last:0};
+        pp.n+=n;pp.ok+=ok;if(last>pp.last)pp.last=last;s.parts.set(raw.part,pp);
+        const cp=classParts.get(raw.part)||{n:0,users:new Set()};
+        cp.n+=n;cp.users.add(u);classParts.set(raw.part,cp);
+      }
+      const k=String(wid);
+      const w=wordStat.get(k)||{n:0,ok:0,users:new Set(),tried:new Set()};
+      w.n+=n;w.ok+=ok;if(n>ok)w.users.add(u);w.tried.add(u);
+      wordStat.set(k,w);
+    });
+    ((agg.s&&agg.s[u])||[]).forEach(([day,sec])=>{
+      const d=dayOf(day);
+      if(d>=0&&d<14){s.mins[d]+=sec/60;classMins[d]+=sec/60;}
+      if(d<=6)s.weekSec+=sec;
+      s.allSec+=sec||0;
+    });
+
+    const pr=agg.p&&agg.p[u];
+    const studied=pr?pr.st.map(String):[];
+    const masteredIds=new Set(pr?pr.ma.map(String):[]);
+    const weak=(pr?pr.wk:[]).map(([id,w0,miss,ok])=>{
+      const raw=byId.get(String(id));
+      return {id,word:(raw&&raw.word)||w0||String(id),meaning:raw?raw.meaning:"",miss,ok};
+    });
+    const lastAt=s.lastLog||(pr&&studied.length?pr.at:0)||null;
     const away=lastAt?dayIdx(lastAt):null;
     const weekRate=s.week?s.weekOk/s.week:null;
     const reasons=[];
@@ -52334,20 +52427,20 @@ function adminBuild(profiles,progress,logs,sessions){
     /* Part ごとの様子：学習した語・習得した語は全期間、回答数・正答率は直近の記録から */
     const pm=new Map();
     const pget=k=>{if(!pm.has(k))pm.set(k,{part:k,studied:0,mastered:0,n:0,ok:0,last:0});return pm.get(k);};
-    studied.forEach(w=>{const raw=byId.get(String(w.id));if(!raw||raw.part==null)return;
-      const x=pget(raw.part);x.studied++;if(isMastered(w))x.mastered++;});
+    studied.forEach(id=>{const raw=byId.get(id);if(!raw||raw.part==null)return;
+      const x=pget(raw.part);x.studied++;if(masteredIds.has(id))x.mastered++;});
     s.parts.forEach((v,k)=>{const x=pget(k);x.n=v.n;x.ok=v.ok;x.last=v.last;});
     const parts=[...pm.values()].map(x=>({...x,size:PART_SIZE.get(x.part)||0}))
       .sort((a,b)=>b.last-a.last||partRank(a.part)-partRank(b.part)||(typeof a.part==="number"&&typeof b.part==="number"?a.part-b.part:0));
     const code=(p.student_code||"").trim();
     return {id:p.user_id,code,label:code||"ID未設定",email:p.email||"",group:idGroup(code),lastAt,away,
-      studied:studied.length,mastered:ws.filter(isMastered).length,
-      due:ws.filter(w=>isDue(w,now)).length,
+      studied:studied.length,mastered:pr?pr.ma.length:0,
+      due:pr?pr.due:0,
       week:s.week,weekRate,weekMin:Math.round(s.weekSec/60),
       hintRate:s.week?s.weekHint/s.week:null,
       days:s.days,dayRate:s.days.map((n,i)=>n?s.dayOk[i]/n:null),mins:s.mins.map(Math.round),allMin:Math.round(s.allSec/60),parts,hours:s.hours,mainTime:mainTime(s.hours),
       recentParts:parts.filter(x=>x.last).slice(0,5).map(x=>partName(x.part)),activeDays:s.days.slice(0,7).filter(n=>n>0).length,
-      weak,reasons};
+      weak,weakN:pr?pr.wn:0,reasons};   /* weak は上位10語だけ。苦手な語の数は weakN */
   });
 
   const hard=[...wordStat.entries()].map(([id,w])=>{
@@ -52667,21 +52760,13 @@ function AdminScreen({C}){
     setErr(null);setLoading(1);setTotal(0);setRetry(0);setStage("");
     try{
       const since=new Date(startOfDay(Date.now())-ADMIN_DAYS*DAY).toISOString();
-      /* 先に件数だけ数えて、ダウンロードのように「何％」を出す（数えられなくても読みこみは続ける） */
-      withTimeout(sb.from("study_logs").select("id",{count:"exact",head:true}).gte("answered_at",since),30000)
-        .then(r=>{if(r&&r.count)setTotal(r.count);}).catch(()=>{});
       const onRetry=n=>setRetry(n);
-      const [p,g,l,s]=await Promise.all([
+      const [p,a]=await Promise.all([
         sbFetchAll(()=>sb.from("profiles").select("user_id,student_code,role,email").order("user_id"),null,onRetry),
-        sbFetchAll(()=>sb.from("progress").select("user_id,words,updated_at").order("user_id"),
-          n=>setStage("単語の記録 "+n+"人分"),onRetry,50),   /* 1人分が大きいので50人ずつ */
-        sbFetchAll(()=>sb.from("study_logs").select("user_id,word_id,correct,hint_used,answered_at")
-          .gte("answered_at",since).order("answered_at").order("id"),n=>{setLoading(Math.max(1,n));setRetry(0);},onRetry),
-        sbFetchAll(()=>sb.from("study_sessions").select("user_id,started_at,active_seconds")
-          .gte("started_at",since).order("started_at").order("id"),null,onRetry),
+        adminFetchSummary(since,{onRetry,setStage,setLoading,setTotal}),
       ]);
-      const at=Date.now();adminCache={raw:{p,g,l,s},at};
-      setRaw({p,g,l,s});setLoadedAt(at);
+      const at=Date.now();adminCache={raw:{p,a},at};
+      setRaw({p,a});setLoadedAt(at);
     }catch(e){setErr((e&&e.message)||"読み込めませんでした");}
     setLoading(0);
   },[]);
@@ -52703,7 +52788,7 @@ function AdminScreen({C}){
       if(group!=="all"&&idGroup(code)!==group)return false;
       return match(x);
     });
-    return {...adminBuild(ps,raw.g,raw.l,raw.s),slots};
+    return {...adminBuild(ps,raw.a),slots};
   },[raw,group,query]);
 
   const fmtLast=t=>{
@@ -52722,7 +52807,7 @@ function AdminScreen({C}){
     const lines=[head.map(q).join(",")].concat(data.rows.map(r=>[
       r.code,r.email,r.lastAt?new Date(r.lastAt).toLocaleDateString("ja-JP"):"",r.week,
       r.weekRate==null?"":Math.round(r.weekRate*100),r.weekMin,r.activeDays,r.allMin,r.parts.length,r.recentParts.join(" / "),r.mainTime,
-      r.studied,r.mastered,r.due,r.weak.length,r.weak.slice(0,5).map(w=>w.word).join(" / ")].map(q).join(",")));
+      r.studied,r.mastered,r.due,r.weakN,r.weak.slice(0,5).map(w=>w.word).join(" / ")].map(q).join(",")));
     const blob=new Blob(["﻿"+lines.join("\r\n")],{type:"text/csv"});
     const a=document.createElement("a");a.href=URL.createObjectURL(blob);
     a.download="roots-"+(group==="all"?"":(group||"ID未設定")+"-")+todayKey()+".csv";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
