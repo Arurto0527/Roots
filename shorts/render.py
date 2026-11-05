@@ -475,15 +475,21 @@ def draw_lines(d, lines, f, lh, cx, top, fill, align="center", x_left=None):
 def split_colored(word, parts):
     """word の文字列を、parts（morph と type）に合わせて色つきの区切りにする"""
     segs, pos, low = [], 0, word.lower()
-    for p in parts:
+    for k, p in enumerate(parts):
         m = p["morph"].lower()
         i = low.find(m, pos)
         # ex のあとの s は落ちる（ex＋spect → expect、ex＋sist → exist）。残りの形に色をつける
         if i < 0 and m.startswith("s") and low[:pos].endswith("x") and low.startswith(m[1:], pos):
             m = m[1:]
             i = pos
+        if i < 0 and p["type"] == "prefix" and k + 1 < len(parts):
+            # 接頭語の形が変わる語（sub→su の suspect、ad→ac の accept）。
+            # 次のパーツの手前までが、同じ文字で始まる短い形なら、そこを接頭語の色にする
+            nxt = low.find(parts[k + 1]["morph"].lower(), pos + 1)
+            if 0 < nxt - pos <= len(m) and low[pos] == m[0]:
+                m, i = low[pos:nxt], pos
         if i < 0:
-            # つづりが変わる語（ad→ac など）は、残りを次のパーツへまわす
+            # それでも見つからないときは、残りを次のパーツへまわす
             continue
         if i > pos:
             segs.append((word[pos:i], None))
@@ -1035,7 +1041,9 @@ def scene_summary(ctx, c):
         summary_head1(img, d, ctx, heads[0])   # 語根が1つだけ残ったとき（tract ＋ ad・dis・ex）
     else:
         summary_head1(img, d, ctx)
-    summary_rows(d, ctx)
+    # {summary 欄=今日の単語} で「受験単語」の欄の名前を変えられる（breakfast など受験向けでない語の回）
+    label = next((t.split("=", 1)[1] for t in (c["arg"] or "").split() if t.startswith("欄=")), "受験単語")
+    summary_rows(d, ctx, label)
     telop(d, c["text"])
     return img
 
@@ -1124,7 +1132,7 @@ def _summary_title(img, d, title, gloss, color, pic):
     d.text((x + tw + 20, 425), "＝" + gloss, font=gf, fill=TEXT, anchor="lm")
 
 
-def summary_rows(d, ctx):
+def summary_rows(d, ctx, word_label="受験単語"):
     y = 540
     right_x = SAFE_RIGHT - RIGHT_PAD
 
@@ -1153,7 +1161,7 @@ def summary_rows(d, ctx):
         y = section("カタカナ語", rows, y)
     rows = [(split_colored(w["word"], w["parts"]), plain_meaning(w)) for w in ctx.words]
     if rows:
-        y = section("受験単語", rows, y)
+        y = section(word_label, rows, y)
     if y > TELOP_BOX[1] - 10:
         warn("まとめ画面の行が多すぎて、テロップと重なります（6行までがおすすめ）")
 
@@ -1454,6 +1462,21 @@ def run_checks(report_path=None):
     return bad
 
 
+def verify_mp4(path, want_len):
+    """動画がちゃんと再生できる形か調べる。問題があれば理由を返す（48バイトの空の動画を保存しないため）"""
+    out = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "v", "-show_entries",
+                          "stream=width,height:format=duration", "-of", "default=nw=1", path],
+                         capture_output=True, text=True)
+    info = dict(l.split("=", 1) for l in out.stdout.split() if "=" in l)
+    if out.returncode != 0 or "duration" not in info:
+        return "ffprobe で読めません（" + out.stderr.strip()[:80] + "）"
+    if (info.get("width"), info.get("height")) != (str(W), str(H)):
+        return f"大きさが {info.get('width')}×{info.get('height')} です"
+    if abs(float(info["duration"]) - want_len) > 0.5:
+        return f"長さが {float(info['duration']):.1f}秒で、予定の {want_len:.1f}秒と違います"
+    return None
+
+
 def render(args):
     if cairosvg is None:
         warn("cairosvg が入っていないので、ピクトグラム（絵）が出ません。pip install cairosvg で入れてください")
@@ -1504,6 +1527,10 @@ def render(args):
     if shutil.which("ffmpeg") is None:
         sys.exit("ffmpeg が見つかりません")
     tmpdir = tempfile.mkdtemp(prefix="roots_shorts_")
+    # いったん別の名前で書き出す。途中で止まっても、前からある動画をこわさない
+    out_dir = os.path.dirname(os.path.abspath(args.out))
+    os.makedirs(out_dir, exist_ok=True)
+    tmp_out = os.path.join(out_dir, f".tmp_{os.getpid()}.mp4")
     cmd = ["ffmpeg", "-y", "-loglevel", "error", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{W}x{H}",
            "-r", str(FPS), "-i", "-"]
     if args.voice:
@@ -1512,7 +1539,7 @@ def render(args):
     else:
         cmd += ["-f", "lavfi", "-i", "anullsrc=r=44100:cl=mono", "-map", "0:v", "-map", "1:a"]
     cmd += ["-c:v", "libx264", "-preset", "veryfast", "-crf", str(args.crf), "-pix_fmt", "yuv420p",
-            "-c:a", "aac", "-b:a", "96k", "-shortest", "-movflags", "+faststart", args.out]
+            "-c:a", "aac", "-b:a", "96k", "-shortest", "-movflags", "+faststart", tmp_out]
     proc = subprocess.Popen(cmd, stdin=subprocess.PIPE)
     fade_n = int(FADE_SEC * FPS)
     prev = None
@@ -1532,8 +1559,15 @@ def render(args):
         prev = im
     proc.stdin.close()
     if proc.wait() != 0:
+        if os.path.exists(tmp_out):
+            os.remove(tmp_out)
         sys.exit("ffmpeg でエラーが出ました")
     shutil.rmtree(tmpdir, ignore_errors=True)
+    problem = verify_mp4(tmp_out, video_len)
+    if problem:
+        os.remove(tmp_out)
+        sys.exit(f"できた動画に問題があるので保存しませんでした: {problem}")
+    os.replace(tmp_out, args.out)
     size = os.path.getsize(args.out) / 1e6
     print(f"できました: {args.out}  {video_len:.1f}秒  {size:.1f}MB  カット数 {len(frames)}")
     if WARNINGS:

@@ -1,0 +1,20 @@
+# 型: ①カタカナ語 spect（2026-11-13・Roots #18）
+# 語根: spect
+# メモ: パーツの意味はアプリの words.json に合わせた（re 後ろへ／sub 下で／pro 前へ／per 通して）
+# メモ: suspect の意味はアプリでは「～ではないかと思う」。テロップに合わせて「疑う」で上書き（アプリの related と同じ語）
+# メモ: suspect は sub の b が落ちて su＋spect。render.py が su に色をつけるようになったのでパーツは sub のまま（箱に sub の絵が出る）。sub を root 場面にするとまとめの見出しから spect が落ちるので text 場面
+# メモ: spectacle の a・perspective の ive が黒にならないよう、パーツに足した（意味の箱には出ない）
+# メモ: まとめを0.3秒のばした（切り替えの0.2秒を除いて3秒止めるため）。ドキュメントの秒数との差はここだけ
+[0.0-3.0] {hook think} リスペクトで英単語3つ
+[3.0-6.0] {hook teach} 入口はカタカナ語
+[6.0-9.0] {kata リスペクト respect re(後ろへ)+spect(見る)} リスペクト＝振り返り尊敬
+[9.0-12.0] {kata スペクタクル spectacle spect(見る)+a+cle(もの)} スペクタクル＝見もの
+[12.0-15.0] {root spect=見る} 共通はspect＝見る
+[15.0-18.0] {text} sub→su＝下で
+[18.0-21.0] {word suspect sub(下で)+spect(見る)=疑う} suspect＝疑う
+[21.0-24.0] {text} pro＝前へ
+[24.0-27.0] {word prospect} prospect＝見通し
+[27.0-30.0] {text} per＝通して
+[30.0-33.0] {word perspective per(通して)+spect(見る)+ive} perspective＝見方
+[33.0-36.3] {summary} spect＝見る、向きで3語
+[36.3-39.0] {hook think} 忘れたら戻る入口は…

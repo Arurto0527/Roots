@@ -87,7 +87,11 @@ python3 shorts/render.py --script 台本.txt --voice 録音.m4a --type 1 --numbe
 
 試作の台本: `scripts/001_port.txt`（①）・`002_danger.txt`（②）・`003_interrupt.txt`（③）・`004_precede_proceed.txt`（④）
 
-夜勤チームの台本（本番用の下書き）: `scripts/1105_muscle.txt`（②#1）・`1105_port.txt`（①#2）・`1106_benevolent.txt`（③#3）・`1106_adapt_adopt.txt`（④#4）・`1107_disaster.txt`（②#5）・`1107_ject.txt`（①#6）・`1108_circumvent.txt`（③#7）・`1108_include_exclude.txt`（④#8）・`1109_candidate.txt`（②#9）・`1109_struct.txt`（①#10）・`1110_malevolent.txt`（③#11）・`1110_inspect_expect.txt`（④#12）・`1111_companion.txt`（②#13）・`1111_tract.txt`（①#14）。仮動画（無音）は `samples/仮_*.mp4`
+動画をコミットする前に `python3 shorts/tools/check_samples.py` を実行します（`samples/` の動画が再生できるか調べます。NG が出たら作り直す）。
+
+まとめの「受験単語」欄の名前は `{summary 欄=今日の単語}` で変えられます（受験向けでない語の回に）。
+
+夜勤チームの台本（本番用の下書き）: `scripts/1105_muscle.txt`（②#1）・`1105_port.txt`（①#2）・`1106_benevolent.txt`（③#3）・`1106_adapt_adopt.txt`（④#4）・`1107_disaster.txt`（②#5）・`1107_ject.txt`（①#6）・`1108_circumvent.txt`（③#7）・`1108_include_exclude.txt`（④#8）・`1109_candidate.txt`（②#9）・`1109_struct.txt`（①#10）・`1110_malevolent.txt`（③#11）・`1110_inspect_expect.txt`（④#12）・`1111_companion.txt`（②#13）・`1111_tract.txt`（①#14）・`1112_retrospect.txt`（③#15）・`1112_increase_decrease.txt`（④#16）・`1113_breakfast.txt`（②#17）・`1113_spect.txt`（①#18）。仮動画（無音）は `samples/仮_*.mp4`
 
 ## データの作り直し（アプリの単語が増えたとき）
 ```
