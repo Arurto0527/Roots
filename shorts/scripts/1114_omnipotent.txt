@@ -1,0 +1,17 @@
+# 型: ③推理 omnipotent（2026-11-14・Roots #19）
+# 語根: pot
+# メモ: omnipotent はアプリの見出し語にないのでパーツを指定。omni はアプリのパーツにないので 接頭 を指定（語根を pot にすると split・answer の色と札が正しく出る）
+# メモ: count は3秒のまま。声は「3秒で考えて」だけにして、声のあとの無音は render.py がはさむ
+# メモ: まとめを0.2秒のばした（カット3.2秒）。ドキュメントの秒数も同じ
+[0.0-3.0] {hook think} 見たことなくても\n語源でわかる
+[3.0-6.0] {quiz omnipotent omni(すべて)+pot(力がある)+ent(～な)=全能の} omnipotent
+[6.0-9.0] {count omnipotent} 3秒で考えて
+[9.0-12.0] {root omni=すべて 接頭} omni＝すべて
+[12.0-15.5] {text} バスの元はomnibus
+[15.5-18.5] {root pot=力がある} pot＝力がある
+[18.5-21.5] {text} ポテンシャルも仲間
+[21.5-25.0] {split omnipotent} すべてに力がある…？
+[25.0-28.5] {answer omnipotent} 正解：全能の
+[28.5-32.0] {text think} もとは神さまに使う語
+[32.0-35.2] {summary} omniすべて＋pot力
+[35.2-38.0] {hook think} だから次に出会う…

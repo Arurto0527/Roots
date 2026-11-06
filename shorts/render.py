@@ -430,6 +430,18 @@ def fit_text(s, max_w, max_h, size, min_size, max_lines=3, weight="bold", spacin
             if text_w(s, f) <= max_w and int(sz * spacing) <= max_h:
                 return f, [s], int(sz * spacing)
             sz -= 4
+    # 台本に \n があるときは、書いた人の改行をいちばん大事にする（「登る？降りる？\n語源で一発」を
+    # 「？」のあとでさらに切らない）。どの行も1行に入るなら、その改行のまま
+    if "\n" in s:
+        given = [p for p in s.split("\n") if p]
+        if 1 < len(given) <= max_lines:
+            sz = size
+            while sz >= min_size:
+                f = font(sz, weight)
+                lh = int(sz * spacing)
+                if all(text_w(c, f) <= max_w for c in given) and lh * len(given) <= max_h:
+                    return f, given, lh
+                sz -= 4
     # 改行（\n）と「、」「。」で区切った固まりを、それぞれ1行に収められる大きさを探す
     chunks = [c for part in s.split("\n") for c in soft_chunks(part, font(size, weight), max_w)]
     if 1 < len(chunks) <= max_lines:
@@ -804,11 +816,44 @@ def base(number):
     return img, d
 
 
-def telop(d, text, box=TELOP_BOX):
+PART_GAP = re.compile(r"(?<=[A-Za-z])(?=[\u3040-\u30ff\u3400-\u9fff\uff5e])")
+
+
+def part_gap(s):
+    """まとめの「omniすべて＋pot力」のように、パーツ（英字）のすぐあとに意味（日本語）が続くところに
+    細い空白（U+2009、文字の約5分の1の幅）を入れて「pot力」が1語に見えないようにする。
+    まとめ（summary・pairsum）の文だけに使う（ほかの場面の見た目は変えない）"""
+    return PART_GAP.sub("\u2009", s)
+
+
+def fit_gapped(s, *a, **k):
+    """part_gap を入れて fit_text する。空白のせいで行が増えたり文字が小さくなったりする
+    （apt合う／opt選ぶ が2行になる）ときは、もっと細い空白（U+2006）→ 空白なし の順にもどす"""
+    def quiet(t):   # ためしに入れてみるだけ（⚠ は出さない）
+        n = len(WARNINGS)
+        _err, sys.stderr = sys.stderr, open(os.devnull, "w")
+        try:
+            return fit_text(t, *a, **k)
+        finally:
+            sys.stderr.close()
+            sys.stderr = _err
+            del WARNINGS[n:]
+    if not PART_GAP.search(s):
+        return fit_text(s, *a, **k)
+    f0, l0, _ = quiet(s)
+    for gap in ("\u2009", "\u2006"):
+        t = PART_GAP.sub(gap, s)
+        f, l, _ = quiet(t)
+        if len(l) <= len(l0) and f.size >= f0.size:
+            return fit_text(t, *a, **k)
+    return fit_text(s, *a, **k)
+
+
+def telop(d, text, box=TELOP_BOX, gap=False):
     if not text:
         return
     x0, y0, x1, y1 = box
-    f, lines, lh = fit_text(text, x1 - x0 - 64, y1 - y0 - 40, 72, 44, max_lines=2, where="（テロップ）", one_line_min=56)
+    f, lines, lh = (fit_gapped if gap else fit_text)(text, x1 - x0 - 64, y1 - y0 - 40, 72, 44, max_lines=2, where="（テロップ）", one_line_min=56)
     h = lh * len(lines) + 44
     top = y1 - h
     rounded(d, (x0, top, x1, y1), 28, fill=ACCENT_SOFT, outline=ACCENT, width=4)
@@ -1044,7 +1089,7 @@ def scene_summary(ctx, c):
     # {summary 欄=今日の単語} で「受験単語」の欄の名前を変えられる（breakfast など受験向けでない語の回）
     label = next((t.split("=", 1)[1] for t in (c["arg"] or "").split() if t.startswith("欄=")), "受験単語")
     summary_rows(d, ctx, label)
-    telop(d, c["text"])
+    telop(d, c["text"], gap=True)
     return img
 
 
@@ -1408,7 +1453,7 @@ def scene_pairsum(ctx, c):
         y += 200
     d.line((LEFT + 20, y - 40, SAFE_RIGHT - RIGHT_PAD, y - 40), fill=LINE, width=3)
     # 1行まとめは大きく（テロップの文をそのまま使う）
-    f, lines, lh = fit_text(c["text"], CONTENT_W - 40, 1150 - y, 96, 52, max_lines=3, weight="black",
+    f, lines, lh = fit_gapped(c["text"], CONTENT_W - 40, 1150 - y, 96, 52, max_lines=3, weight="black",
                             where="（1行まとめ）")
     draw_lines(d, lines, f, lh, CX, y + 20, TEXT)
     paste_center(img, chara("cheer", 240), CX, 1330)
