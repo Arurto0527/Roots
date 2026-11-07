@@ -1,0 +1,7 @@
+# ショート動画の道具（render.py）に必要な Python の部品
+# 入れ方: pip install -r shorts/requirements.txt
+#（この夜勤の環境では pip install -r shorts/requirements.txt --break-system-packages）
+# ほかに ffmpeg（ffprobe も）と Noto Sans CJK フォントが必要です
+Pillow>=10
+cairosvg>=2.7   # ピクトグラム（SVG）を絵にする。ないと絵が出ず ⚠ が出る
+budoux>=0.6     # 日本語を言葉の切れ目で改行する。なくても動く

@@ -1,0 +1,17 @@
+# 型: ②雑学 nice（2026-11-15・Roots #21）
+# 語根: sci
+# メモ: nice はアプリの見出し語になく、つづりが語源パーツ（ne+sci）と一致しないので nice は黒1色になる。ラテン語 nescius を word 場面（番号なし）で見せる
+# メモ: nice はラテン語から古フランス語 nice を経て英語へ（Etymonline）。意味の変化は おろか→こだわる→上品→すてき（1769年）
+[0.0-3.0] {trivia nice ne(～ない)+sci(知る)=すてきな} niceの語源は「無知」
+[3.0-6.0] {hook teach} 英単語の覚え方は\n語源
+[6.0-9.0] {hook think} ほめ言葉なのに無知？
+[9.0-12.0] {root ne=～ない 接頭} ne＝～ない
+[12.0-15.0] {root sci=知る} sci＝知る
+[15.0-18.0] {word nescius 番号なし ne(～ない)+sci(知る)+us=知らない} ラテン語のnescius
+[18.0-21.0] {text} 意味は「知らない」
+[21.0-24.5] {text} 昔の英語では「おろかな」
+[24.5-28.0] {text think} こだわる→上品→すてき
+[28.0-31.0] {word science 番号なし sci(知る)+ence(名詞)=科学} scienceも同じsci
+[31.0-34.0] {word conscious} consciousも仲間
+[34.0-37.3] {summary 欄=今日の単語} nice＝知らない→すてき
+[37.3-40.0] {hook think} 次にniceと言われたら…
