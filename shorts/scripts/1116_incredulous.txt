@@ -1,0 +1,19 @@
+# 型: ③推理 incredulous（2026-11-16・Roots #23）
+# 語根: cred
+# メモ: incredulous はアプリの見出し語にないのでパーツを指定。ulous はラテン語 credulus（信じやすい）の -ulus から（Etymonline credulous）
+# メモ: count は3秒のまま。声は「3秒で考えて」だけ
+# メモ: credit・incredible はアプリの見出し語。incredible（信じられない＝物事）と incredulous（信じない＝人）のちがいを見せる
+# メモ: まとめを0.2秒のばした（カット3.2秒）。ドキュメントの秒数も同じ
+[0.0-3.0] {hook think} 難しい英単語も\n語源で解ける
+[3.0-5.5] {quiz incredulous in(否定)+cred(信じる)+ulous(～しがち)=疑うような} incredulous
+[5.5-8.5] {count incredulous} 3秒で考えて
+[8.5-11.5] {root in=否定 接頭} in＝否定（中へもある）
+[11.5-14.5] {root cred=信じる} cred＝信じる
+[14.5-17.5] {word credit} 信じて後払い＝クレジット
+[17.5-20.5] {text think} ulous＝～しがち
+[20.5-23.5] {split incredulous} 信じがち…じゃない？
+[23.5-27.0] {answer incredulous} 正解：疑うような
+[27.0-30.5] {word incredible} incredibleとは別物
+[30.5-33.5] {text think} 信じない人や表情に
+[33.5-36.7] {summary} in否定＋cred信じる
+[36.7-39.0] {hook think} 次にこの単語を見たら…

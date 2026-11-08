@@ -856,6 +856,9 @@ def telop(d, text, box=TELOP_BOX, gap=False):
     f, lines, lh = (fit_gapped if gap else fit_text)(text, x1 - x0 - 64, y1 - y0 - 40, 72, 44, max_lines=2, where="（テロップ）", one_line_min=56)
     h = lh * len(lines) + 44
     top = y1 - h
+    # 枠の右はしが右の安全領域の線（x=920）にぴったり接しないよう、12px 内側までにする（夜勤 11/07 の報告）。
+    # 改行の幅は前と同じ（文字の折り返しは変わらない）。文字は新しい枠のまん中に置く
+    x1 = min(x1, SAFE_RIGHT - RIGHT_PAD // 2)
     rounded(d, (x0, top, x1, y1), 28, fill=ACCENT_SOFT, outline=ACCENT, width=4)
     draw_lines(d, lines, f, lh, (x0 + x1) / 2, top + 22, TEXT)
 

@@ -1,0 +1,19 @@
+# 型: ④ペア import / export（2026-11-16・Roots #24）
+# 語根: port
+# メモ: #2（11/5 port 回）の続き。#2 は import＝中へ運ぶ／export＝外へ運ぶ を見せただけなので、今回は「in が p の前で im になる」「important も同じ形」「EXIT の ex」で見分ける
+# メモ: export・important はアプリの見出し語にないのでパーツを指定。important は仲間として見せる語なので「番号なし」
+# メモ: exit は ex＋ire（行く）で port ではないので、text 場面で ex だけ見せる（Etymonline exit）
+# メモ: まとめを0.2秒のばした（カット3.2秒）。ドキュメントの秒数も同じ
+[0.0-3.0] {hook think} 輸入？輸出？\n語源で一発
+[3.0-5.5] {hook teach} #2 portの続き
+[5.5-8.5] {root port=運ぶ} port＝運ぶ
+[8.5-11.5] {root im=中へ 接頭} im＝中へ
+[11.5-15.0] {text think} pの前でinがimに
+[15.0-18.5] {word import} 中へ運ぶ→輸入する
+[18.5-22.0] {word important 番号なし im(中へ)+port(運ぶ)+ant(～な)=重要な} 重みを持ちこむ→重要
+[22.0-25.0] {root ex=外へ 接頭} ex＝外へ
+[25.0-28.5] {word export ex(外へ)+port(運ぶ)=輸出する} 外へ運ぶ→輸出する
+[28.5-31.5] {text think} 非常口EXITもex
+[31.5-35.0] {pair import export} imは中、exは外
+[35.0-38.2] {pairsum} im中へ→輸入\nex外へ→輸出
+[38.2-41.0] {hook think} 次に港で荷物を見たら…
