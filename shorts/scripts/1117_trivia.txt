@@ -1,0 +1,20 @@
+# 型: ②雑学 trivia（2026-11-17・Roots #25）
+# 語根: via
+# メモ: trivia はアプリの見出し語にない（trivial の related）のでパーツを指定。つづりは tri＋via で全部色がつく
+# メモ: 語源は Etymonline（trivia: ラテン語 trivium「三本の道が交わる所」→「開けた所・公共の場」／trivial: trivialis「ありふれた」＝「三叉路の」）と Merriam-Webster（trivial: tri- + via way）。「三叉路の世間話」は辞書にない通説なので「という説」で話す
+# メモ: trivial の英検級は根拠がないのでナレーションで言わない
+# メモ: tri・via はアプリのデータ（trivial: tri＝3／via＝道）に合わせた。obvious は ob＋via（Etymonline obvious）
+# メモ: まとめを0.3秒のばした（切り替えの0.2秒を除いて3秒止めるため）
+[0.0-3.0] {trivia trivia tri(3)+via(道)=雑学} triviaの語源は「三叉路」
+[3.0-6.0] {hook teach} 英単語の覚え方は\n語源
+[6.0-9.0] {hook think} 雑学なのに道？
+[9.0-12.0] {root tri=3 接頭} tri＝3
+[12.0-15.0] {root via=道} via＝道
+[15.0-18.5] {origin trivia} 3本の道が交わる所
+[18.5-22.0] {text think} 人が行き交う＝ありふれた
+[22.0-25.5] {text} 道ばたの世間話という説も
+[25.5-28.5] {reveal trivia} ささいな話→雑学
+[28.5-31.5] {word trivial} trivial＝ささいな
+[31.5-34.5] {word obvious} obviousもvia
+[34.5-37.8] {summary 欄=今日の単語} trivia＝三叉路→雑学
+[37.8-40.5] {hook think} 次にtriviaを聞いたら…

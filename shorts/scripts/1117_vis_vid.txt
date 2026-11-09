@@ -1,0 +1,21 @@
+# 型: ①カタカナ語 vis / vid（2026-11-17・Roots #26）
+# 語根: vis
+# メモ: television・video はアプリの見出し語にないので kata でパーツを指定。tele はアプリのデータにないので絵なし（Etymonline tele-: ギリシャ語 tēle「遠く」）
+# メモ: revise はアプリの意味が「改訂する，見直して書き直す」なので、テロップに合わせて「見直す」で上書き
+# メモ: provide はアプリのパーツが pro＋vis なので、つづりに合わせて vid を指定（Etymonline provide: pro "ahead" + videre "to see"）
+# メモ: re・e・pro を root 場面にするとまとめの見出しから vis が落ちるので text 場面
+# メモ: まとめを0.3秒のばした（切り替えの0.2秒を除いて3秒止めるため）
+[0.0-3.0] {hook think} ビジョン、テレビ…
+[3.0-6.0] {hook teach} あなたはもうvisを知ってる
+[6.0-9.0] {kata ビジョン vision vis(見る)+ion(名詞)} ビジョン＝見通し
+[9.0-12.0] {kata テレビ television tele(遠く)+vis(見る)+ion(名詞)} テレビ＝遠くを見る
+[12.0-15.0] {kata ビデオ video vid(見る)+eo} ビデオ＝「私は見る」
+[15.0-18.0] {root vis=見る} vis・vid＝見る
+[18.0-21.0] {text} re＝再び
+[21.0-24.0] {word revise re(再び)+vis(見る)=見直す} revise＝見直す
+[24.0-27.0] {text} e＝外へ
+[27.0-30.0] {word evidence} evidence＝証拠
+[30.0-33.0] {text} pro＝前へ
+[33.0-36.0] {word provide pro(前へ)+vid(見る)=供給する} provide＝供給する
+[36.0-39.3] {summary} vis・vid＝見る、で3語
+[39.3-42.0] {hook think} 次にテレビを見たら…

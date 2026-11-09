@@ -816,7 +816,8 @@ def base(number):
     return img, d
 
 
-PART_GAP = re.compile(r"(?<=[A-Za-z])(?=[\u3040-\u30ff\u3400-\u9fff\uff5e])")
+# 「・」（U+30FB）と「ー」（U+30FC）は意味ではないので除く（vis・vid の vis のあとに空白を入れない。夜勤 11/08 の報告）
+PART_GAP = re.compile(r"(?<=[A-Za-z])(?=[\u3041-\u30fa\u30fd-\u30ff\u3400-\u9fff\uff5e])")
 
 
 def part_gap(s):
@@ -915,6 +916,30 @@ def breakdown_text(parts):
     return " ＋ ".join(f"{p['morph']}（{p['gloss']}）" if p["gloss"] else p["morph"] for p in parts)
 
 
+def fit_breakdown(parts, max_w, max_h, size, min_size, where="（分解）"):
+    """分解の文「tele（遠く） ＋ vis（見る） ＋ ion（名詞）」を枠に入れる。
+    2行にするときは「＋」の所だけで切り、「ion」と「（名詞）」を別の行に分けない（夜勤 11/08 の報告）。
+    1行に入る大きさがあれば1行、なければ1行目にできるだけ多く入れて2行にする"""
+    units = [f"{p['morph']}（{p['gloss']}）" if p["gloss"] else p["morph"] for p in parts]
+    weight, spacing = "medium", 1.25
+    sz = size
+    while sz >= min_size:
+        f = font(sz, weight)
+        lh = int(sz * spacing)
+        one = " ＋ ".join(units)
+        if text_w(one, f) <= max_w and lh <= max_h:
+            return f, [one], lh
+        if len(units) >= 2 and lh * 2 <= max_h:
+            # 1行目にできるだけ多く入れる（今までの折り返しと同じ形。「＋」は2行目の頭に置く）
+            for k in range(len(units) - 1, 0, -1):
+                ls = [" ＋ ".join(units[:k]), "＋ " + " ＋ ".join(units[k:])]
+                if all(text_w(l, f) <= max_w for l in ls):
+                    return f, ls, lh
+        sz -= 4
+    # どう切っても入らないときは、今までの方法（文字の途中でも切る）
+    return fit_text(breakdown_text(parts), max_w, max_h, size, min_size, max_lines=2, weight=weight, where=where)
+
+
 # ---------------------------------------------------------------- 場面（カット）ごとの絵
 class Ctx:
     """台本全体で共有する情報（語根・ここまでに出た語など）"""
@@ -1009,7 +1034,7 @@ def scene_kata(ctx, c):
     segs = split_colored(eng, parts)
     fe = colored_font(segs, CONTENT_W - 40, 130)
     draw_colored(d, segs, fe, CX, 860)
-    fb, bl, blh = fit_text(breakdown_text(parts), CONTENT_W - 40, 150, 50, 34, max_lines=2, weight="medium", where="（分解）")
+    fb, bl, blh = fit_breakdown(parts, CONTENT_W - 40, 150, 50, 34)
     draw_lines(d, bl, fb, blh, CX, 980, SUB)
     telop(d, c["text"])
     return img
