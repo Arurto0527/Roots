@@ -10,7 +10,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Klee+One:wght@400;600&display=swap" rel="stylesheet">
 <style>
   /* 黒板ふうの色（スライドと同じ） */
-  :root{--board:#213a2e;--wood:#7a5232;--wood-d:#5a3a22;--w:#f4f1e8;--y:#f7e27a;--p:#f5a3b5;--b:#9fd3f2;--g:#b9e2a0;--m:#b8c6b9;}
+  /* 使う色は 白・黄・赤 の3色だけ（スライドと同じ） */
+  :root{--board:#213a2e;--wood:#7a5232;--wood-d:#5a3a22;--w:#f4f1e8;--y:#f7e27a;--p:#ff8f8f;--b:#f4f1e8;--g:#f7e27a;--m:#c9d1c8;}
   *,*::before,*::after{box-sizing:border-box;}
   html,body{margin:0;height:100%;}
   body{background:var(--board);color:var(--w);font-family:"Klee One","Hiragino Maru Gothic ProN","Hiragino Sans",sans-serif;
@@ -49,8 +50,8 @@
   .tile .t{flex:1;}
   .tile .n{font-size:2.6vw;}
   .tile.ng{opacity:.28;}
-  .tile.ok{background:rgba(247,226,122,.12);box-shadow:0 0 0 .5vw var(--w);}
-  .tile .okmark{position:absolute;top:-1.6vw;right:1.6vw;background:var(--w);color:var(--board);border-radius:2vw;padding:0 1.2vw;font-size:1.8vw;}
+  .tile.ok{background:rgba(247,226,122,.12);border-color:var(--y)!important;color:var(--y)!important;box-shadow:0 0 0 .4vw var(--y);}
+  .tile .okmark{position:absolute;top:-1.6vw;right:1.6vw;background:var(--y);color:var(--board);border-radius:2vw;padding:0 1.2vw;font-size:1.8vw;}
   .bar{position:absolute;left:0;bottom:0;height:.6vw;border-radius:0 0 0 1vw;opacity:.8;}
   .exp{font-size:2.2vw;color:var(--y);text-align:center;margin-top:1.4vw;line-height:1.4;}
   .status{font-size:1.9vw;color:var(--m);}
@@ -93,26 +94,27 @@
   var MAX_PLAYERS=300;          // いたずらで名前を大量に送られたとき用の上限
   var DUR=20000;                // 1問の制限時間（ミリ秒）
   var STORE="kyutoku.host.v1";
-  var COLORS=[{c:"#f5a3b5",s:"▲"},{c:"#9fd3f2",s:"◆"},{c:"#f7e27a",s:"●"},{c:"#b9e2a0",s:"■"}];
+  var COLORS=[{c:"#f4f1e8",s:"▲"},{c:"#f4f1e8",s:"◆"},{c:"#f4f1e8",s:"●"},{c:"#f4f1e8",s:"■"}];   // 形で見分ける。正解は黄色で示す
 
   /* 問題（スライドの3・7・11・13・15枚目と同じ順番・同じ並び） */
   var QS=[
-    {q:"給特法が「給料の4％」を決めたとき、もとにした先生の残業は、月に何時間？",
-     c:["約41時間","約8時間","約20時間","約58時間"],a:1,
-     exp:"1966年の調査で残業は月約8時間 → その分として4％。いまは小学校 約41時間・中学校 約58時間"},
-    {q:"最高裁は、ある時間が「労働時間」かどうかを何で決めると言った？",
-     c:["本人のやる気","就業規則の書き方","指揮命令下にあるか","給料が出ているか"],a:2,
-     exp:"三菱重工長崎造船所事件（2000年）：準備を義務づけられた・余儀なくされたなら、命令がなくても労働時間"},
-    {q:"給料が月20万円の若手。調整額が4％→10％になると、月にいくら増える？",
-     c:["6,000円","4万円","2万4,000円","1万2,000円"],a:3,
-     exp:"20万円 × 6％ ＝ 1万2,000円。月40万円のベテランなら 2万4,000円（若手は半分）"},
-    {q:"教職をあきらめた学生のうち「長時間労働のイメージ」が理由の人は、約何％？",
-     c:["約24％","約84％","約44％","約64％"],a:3,
-     exp:"約64％。「給与などの待遇が不十分」の約55％より多い"},
-    {q:"4％＝残業 月8時間分とすると、10％は月何時間分？",
-     c:["10時間分","30時間分","41時間分","20時間分"],a:3,
-     exp:"1％＝2時間 → 10％＝20時間。2029年度の目標（30時間）にも実態にも届かない"}
+    {q:"給特法が「4％」を決めたとき、もとにした先生の残業は、月に何時間？",
+     c:["約8時間","約20時間","約41時間","約58時間"],a:0,
+     exp:"1966年の調査で月約8時間 → その分として4％。いまは小学校 約41時間・中学校 約58時間（5〜7倍）"},
+    {q:"公立学校の先生に、校長が残業を「命令」できる仕事は、いくつ？",
+     c:["ひとつもない","4つだけ","10こ","制限なし"],a:1,
+     exp:"実習・学校行事・職員会議・非常災害の「超勤4項目」だけ。採点や授業準備は入っていない"},
+    {q:"私立学校の先生が、学校の指示で夜に授業準備。法律ではどうなる？",
+     c:["残業代は出ない","給料の4％が上乗せ","25％以上増しの残業代","代休がもらえるだけ"],a:2,
+     exp:"私立には給特法がなく、労働基準法37条がそのまま使われる。同じ準備でも公立では「自発的」扱い"},
+    {q:"会社のルールで「始業前に着がえておくこと」。この着がえの時間は？",
+     c:["始業前だから労働時間ではない","労働時間にあたる","本人の自由時間","就業規則しだい"],a:1,
+     exp:"三菱重工長崎造船所事件（2000年）：ルールの書き方ではなく実際のようすで決まる。義務づけられた準備は労働時間"},
+    {q:"4％＝月8時間分とすると、10％は月何時間分？",
+     c:["10時間分","20時間分","30時間分","41時間分"],a:1,
+     exp:"1％＝2時間 → 10％＝20時間。2029年度の目標（30時間）にも、実態（41・58時間）にも届かない"}
   ];
+
 
   var app=document.getElementById("app");
   function h(tag,attrs){
@@ -297,7 +299,7 @@
         h("span",{class:"s","aria-hidden":"true",text:COLORS[k].s}),h("span",{class:"t",text:t}),
         mode!=="ask"?h("span",{class:"n",text:(S.counts?S.counts[k]:0)+"人"}):null,
         mode!=="ask"&&k===q.a?h("span",{class:"okmark",text:"✓ 正解"}):null,
-        mode!=="ask"&&tot?h("span",{class:"bar",style:"background:"+COLORS[k].c+";width:"+Math.round(100*S.counts[k]/tot)+"%"}):null);
+        mode!=="ask"&&tot?h("span",{class:"bar",style:"background:"+(k===q.a?"#f7e27a":"#f4f1e8")+";width:"+Math.round(100*S.counts[k]/tot)+"%"}):null);
       g.appendChild(el);
     });
     return g;
