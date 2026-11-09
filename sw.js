@@ -13,7 +13,7 @@
    （roots-voice-kokoro は音声を入れ替える前に公開してしまい、Piper の音が入りうるので -2 にした）
    何本かだけ作り直したときは、名前は変えずに REDONE に「us/ハッシュ」を足す。
    保存済みの中からその音声だけを消して取り直すので、ほかの音声はダウンロードし直さなくてよい */
-const VERSION = "v108";
+const VERSION = "v109";
 const AUDIO_CACHE = "roots-voice-kokoro-2";
 const APP_CACHE = "roots-app-" + VERSION;
 /* 2026-10-19 聞き取りチェックで聞きまちがえられた短い音声を作り直した56本 */
@@ -78,8 +78,8 @@ self.addEventListener("fetch", (e) => {
   if (req.method !== "GET") return;
   const url = new URL(req.url);
 
-  // 授業用ページ（class/）と教育実習の予定表（jisshu/）は保存しない。いつも最新版を出す
-  if (url.pathname.includes("/class/") || url.pathname.includes("/jisshu/")) return;
+  // 授業用ページ（class/）と教育実習の予定表（jisshu/）と発表用クイズ（kyutoku/）は保存しない。いつも最新版を出す
+  if (url.pathname.includes("/class/") || url.pathname.includes("/jisshu/") || url.pathname.includes("/kyutoku/")) return;
 
   // ログインや学習データの通信（Supabase）は保存しない
   if (url.hostname.endsWith("supabase.co")) return;

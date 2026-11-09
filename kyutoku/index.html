@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>給特法クイズ（発表者用）</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Klee+One:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  /* 黒板ふうの色（スライドと同じ） */
+  :root{--board:#213a2e;--wood:#7a5232;--wood-d:#5a3a22;--w:#f4f1e8;--y:#f7e27a;--p:#f5a3b5;--b:#9fd3f2;--g:#b9e2a0;--m:#b8c6b9;}
+  *,*::before,*::after{box-sizing:border-box;}
+  html,body{margin:0;height:100%;}
+  body{background:var(--board);color:var(--w);font-family:"Klee One","Hiragino Maru Gothic ProN","Hiragino Sans",sans-serif;
+    border:1.2vw solid var(--wood);border-bottom:2.2vw solid var(--wood-d);overflow:hidden;}
+  button{font-family:inherit;cursor:pointer;}
+  #app{height:100%;display:flex;flex-direction:column;padding:2.2vw 3vw 1.6vw;}
+  .top{display:flex;align-items:center;gap:2vw;font-size:1.6vw;color:var(--m);min-height:3vw;}
+  .top .grow{flex:1;}
+  .mini{display:flex;align-items:center;gap:1vw;background:rgba(255,255,255,.06);border-radius:1vw;padding:.4vw 1vw;}
+  .mini .qr{width:5.5vw;height:5.5vw;background:#fff;border-radius:.5vw;padding:.3vw;}
+  .mini b{color:var(--y);font-size:2vw;letter-spacing:.15em;}
+  .qr svg{width:100%;height:100%;display:block;}
+  h1{font-size:4.2vw;margin:0;line-height:1.25;font-weight:600;}
+  .ul{height:.35vw;width:40%;background:var(--y);border-radius:1vw;margin:1vw 0 1.6vw;}
+  .lobby{flex:1;display:flex;gap:4vw;align-items:center;}
+  .lobby .left{flex:1;min-width:0;}
+  .lobby .bigqr{width:31vw;height:31vw;background:#fff;border-radius:1.4vw;padding:1.2vw;flex-shrink:0;}
+  .steps{font-size:2.2vw;line-height:1.7;margin:0 0 1.6vw;}
+  .code{font-size:7vw;color:var(--y);letter-spacing:.2em;font-weight:600;line-height:1;}
+  .url{font-size:1.5vw;color:var(--b);word-break:break-all;margin-top:.8vw;}
+  .count{font-size:2.6vw;margin-top:2vw;}
+  .count b{color:var(--p);font-size:4vw;}
+  .names{display:flex;flex-wrap:wrap;gap:.6vw;margin-top:1vw;max-height:9vw;overflow:hidden;}
+  .names span{border:2px solid var(--m);border-radius:2vw;padding:.1vw 1vw;font-size:1.5vw;}
+  .qhead{display:flex;align-items:center;gap:2vw;margin-bottom:1.6vw;}
+  .badge{width:7vw;height:7vw;border-radius:50%;background:var(--p);color:var(--board);display:flex;align-items:center;justify-content:center;
+    font-size:2.8vw;font-weight:600;flex-shrink:0;}
+  .qtext{font-size:3.3vw;font-weight:600;line-height:1.35;flex:1;}
+  .timer{width:7vw;height:7vw;border-radius:50%;border:.5vw solid var(--y);display:flex;align-items:center;justify-content:center;
+    font-size:3.2vw;font-weight:600;color:var(--y);flex-shrink:0;}
+  .timer.low{border-color:var(--p);color:var(--p);}
+  .tiles{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:1.6vw;align-content:center;}
+  .tile{border:.35vw solid;border-radius:1.4vw;min-height:9vw;display:flex;align-items:center;gap:1.4vw;padding:1vw 2vw;position:relative;
+    font-size:3vw;font-weight:600;}
+  .tile .s{font-size:2.6vw;}
+  .tile .t{flex:1;}
+  .tile .n{font-size:2.6vw;}
+  .tile.ng{opacity:.28;}
+  .tile.ok{background:rgba(247,226,122,.12);box-shadow:0 0 0 .5vw var(--w);}
+  .tile .okmark{position:absolute;top:-1.6vw;right:1.6vw;background:var(--w);color:var(--board);border-radius:2vw;padding:0 1.2vw;font-size:1.8vw;}
+  .bar{position:absolute;left:0;bottom:0;height:.6vw;border-radius:0 0 0 1vw;opacity:.8;}
+  .exp{font-size:2.2vw;color:var(--y);text-align:center;margin-top:1.4vw;line-height:1.4;}
+  .status{font-size:1.9vw;color:var(--m);}
+  .status b{color:var(--w);}
+  .rank{flex:1;display:flex;flex-direction:column;justify-content:center;gap:1vw;max-width:70vw;margin:0 auto;width:100%;}
+  .row{display:flex;align-items:center;gap:2vw;font-size:3vw;border-bottom:2px dashed rgba(244,241,232,.3);padding:.6vw 1vw;}
+  .row .r{width:6vw;color:var(--y);font-weight:600;}
+  .row .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .row .sc{color:var(--b);}
+  .row:first-child .r,.row:first-child .nm{color:var(--p);}
+  .foot{display:flex;align-items:center;gap:1.4vw;margin-top:1.2vw;}
+  .foot .grow{flex:1;font-size:1.4vw;color:var(--m);}
+  .btn{background:var(--w);color:var(--board);border:none;border-radius:1vw;font-size:1.9vw;font-weight:600;padding:.8vw 2.4vw;min-height:56px;}
+  .btn.ghost{background:transparent;color:var(--m);border:2px solid var(--m);font-size:1.4vw;padding:.5vw 1.4vw;}
+  .btn:focus-visible{outline:4px solid var(--y);outline-offset:3px;}
+  .center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:1.4vw;}
+  .warn{color:var(--p);font-size:1.6vw;}
+  @keyframes pop{0%{transform:scale(.7);opacity:0}100%{transform:scale(1);opacity:1}}
+  .pop{animation:pop .3s ease-out both;}
+  @media (prefers-reduced-motion:reduce){.pop{animation:none;}}
+</style>
+</head>
+<body>
+<div id="app"><div class="center"><div style="font-size:3vw">読み込んでいます…</div></div></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script>
+/* ============================================================
+   給特法クイズ（発表者のパソコン・プロジェクター用）
+   参加者はスマホで kyutoku/join/ を開く。通信は Supabase のリアルタイム配信だけ
+   （データベースには何も保存しない）。仕組みは class/ の「みんなで四択」と同じ
+   ・発表者 → 参加者：kyutoku-live-コード（問題・答え・順位を配る）
+   ・参加者 → 発表者：kyutoku-live-コード-in（参加・回答）
+   名前と点数は、このパソコンの中（localStorage）にだけ残す。うっかり再読み込みしても続きから
+   ============================================================ */
+(function(){
+  var SUPABASE_URL="https://jidcvzmfjmlxwlazaixz.supabase.co";
+  var SUPABASE_KEY="sb_publishable_Vjo96oWVhIjWKFGIN6OMKA_keM8C011";
+  var MAX_PLAYERS=300;          // いたずらで名前を大量に送られたとき用の上限
+  var DUR=20000;                // 1問の制限時間（ミリ秒）
+  var STORE="kyutoku.host.v1";
+  var COLORS=[{c:"#f5a3b5",s:"▲"},{c:"#9fd3f2",s:"◆"},{c:"#f7e27a",s:"●"},{c:"#b9e2a0",s:"■"}];
+
+  /* 問題（スライドの3・7・11・13・15枚目と同じ順番・同じ並び） */
+  var QS=[
+    {q:"給特法が「給料の4％」を決めたとき、もとにした先生の残業は、月に何時間？",
+     c:["約41時間","約8時間","約20時間","約58時間"],a:1,
+     exp:"1966年の調査で残業は月約8時間 → その分として4％。いまは小学校 約41時間・中学校 約58時間"},
+    {q:"最高裁は、ある時間が「労働時間」かどうかを何で決めると言った？",
+     c:["本人のやる気","就業規則の書き方","指揮命令下にあるか","給料が出ているか"],a:2,
+     exp:"三菱重工長崎造船所事件（2000年）：準備を義務づけられた・余儀なくされたなら、命令がなくても労働時間"},
+    {q:"給料が月20万円の若手。調整額が4％→10％になると、月にいくら増える？",
+     c:["6,000円","4万円","2万4,000円","1万2,000円"],a:3,
+     exp:"20万円 × 6％ ＝ 1万2,000円。月40万円のベテランなら 2万4,000円（若手は半分）"},
+    {q:"教職をあきらめた学生のうち「長時間労働のイメージ」が理由の人は、約何％？",
+     c:["約24％","約84％","約44％","約64％"],a:3,
+     exp:"約64％。「給与などの待遇が不十分」の約55％より多い"},
+    {q:"4％＝残業 月8時間分とすると、10％は月何時間分？",
+     c:["10時間分","30時間分","41時間分","20時間分"],a:3,
+     exp:"1％＝2時間 → 10％＝20時間。2029年度の目標（30時間）にも実態にも届かない"}
+  ];
+
+  var app=document.getElementById("app");
+  function h(tag,attrs){
+    var el=document.createElement(tag);
+    if(attrs)for(var k in attrs){
+      if(attrs[k]==null)continue;
+      if(k==="class")el.className=attrs[k];
+      else if(k==="text")el.textContent=attrs[k];
+      else if(k==="html")el.innerHTML=attrs[k];
+      else if(k==="style")el.setAttribute("style",attrs[k]);
+      else if(k.slice(0,2)==="on")el.addEventListener(k.slice(2),attrs[k]);
+      else el.setAttribute(k,attrs[k]);
+    }
+    for(var i=2;i<arguments.length;i++){var c=arguments[i];if(c==null||c===false)continue;el.appendChild(typeof c==="string"?document.createTextNode(c):c);}
+    return el;
+  }
+  function show(){app.textContent="";for(var i=0;i<arguments.length;i++)if(arguments[i])app.appendChild(arguments[i]);}
+  function qrSvg(text){
+    try{var q=qrcode(0,"M");q.addData(text);q.make();return q.createSvgTag({cellSize:4,margin:2,scalable:true});}catch(e){return "";}
+  }
+  function newCode(){return String(1000+Math.floor(Math.random()*9000));}
+
+  /* ---------- 状態（再読み込みしても続きからできるように保存） ---------- */
+  var S={code:newCode(),phase:"lobby",qi:0,game:1,players:{},counts:null,startAt:0};
+  var answers={};   // pid → {choice,t}（いまの問題）
+  try{
+    var saved=JSON.parse(localStorage.getItem(STORE)||"null");
+    if(saved&&saved.code&&saved.phase!=="end"){
+      S=saved;S.counts=null;
+      if(S.phase==="question"||S.phase==="reveal")S.phase=S.qi>0||S.phase==="reveal"?"rank":"lobby";
+      if(S.phase==="rank"&&!Object.keys(S.players).length)S.phase="lobby";
+    }
+  }catch(e){}
+  function save(){try{localStorage.setItem(STORE,JSON.stringify(S));}catch(e){}}
+  var joinUrl=new URL("join/?c="+S.code,location.href).href;
+
+  /* ---------- 順位 ---------- */
+  function ranked(){
+    return Object.keys(S.players).map(function(pid){var p=S.players[pid];return {pid:pid,name:p.name,score:p.score,last:p.last};})
+      .sort(function(a,b){return b.score-a.score||a.name.localeCompare(b.name);});
+  }
+  function resMap(){
+    var res={},rank=0,prev=null;
+    ranked().forEach(function(p,k){if(p.score!==prev){rank=k+1;prev=p.score;}var l=p.last||{ok:-1,g:0};res[p.pid]=[l.ok,l.g,p.score,rank];});
+    return res;
+  }
+  function topN(n){return ranked().slice(0,n).map(function(p){return {name:p.name,score:p.score};});}
+  function nPlayers(){return Object.keys(S.players).length;}
+
+  /* ---------- 配信 ---------- */
+  var sbc=null,outCh=null,inCh=null,conn="connecting",resendT=null,checked=false;
+  function payload(){
+    var q=QS[S.qi];
+    var b={phase:S.phase,code:S.code,n:S.qi+1,total:QS.length,dir:"ja",players:nPlayers()};
+    if(q&&(S.phase==="question"||S.phase==="reveal"||S.phase==="rank"))
+      Object.assign(b,{qid:S.game+":"+S.qi,prompt:q.q,pos:"",choices:q.c});
+    if(S.phase==="question")Object.assign(b,{endsIn:Math.max(0,DUR-(Date.now()-S.startAt)),dur:DUR});
+    if(S.phase==="reveal"||S.phase==="rank"||S.phase==="end"){b.res=resMap();if(q&&S.phase!=="end"){b.correct=q.a;b.exp=q.exp;}}
+    if(S.phase==="reveal")b.counts=S.counts;
+    if(S.phase==="rank"||S.phase==="end")b.top=topN(5);
+    return b;
+  }
+  function send(){if(outCh&&checked)outCh.send({type:"broadcast",event:"state",payload:payload()}).catch(function(){});}
+  function resendSoon(){clearTimeout(resendT);resendT=setTimeout(send,800);}
+
+  function connect(){
+    if(!window.supabase){conn="error";render();return;}
+    sbc=sbc||window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,
+      {auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false,storageKey:"kyutoku.live.host"}});
+    var ok=0,alive=true,code=S.code;
+    function onSub(s){
+      if(!alive)return;
+      if(s==="SUBSCRIBED"){ok++;if(ok>=2){conn="ok";render();send();}}
+      else if(s==="CHANNEL_ERROR"||s==="TIMED_OUT"){conn="error";render();}
+    }
+    inCh=sbc.channel("kyutoku-live-"+code+"-in",{config:{broadcast:{self:false}}})
+      .on("broadcast",{event:"join"},function(m){
+        var p=m.payload;
+        if(!p||typeof p.pid!=="string"||typeof p.key!=="string")return;
+        var name=String(p.name||"").replace(/\s+/g," ").trim().slice(0,10)||"なまえなし";
+        var pl=S.players[p.pid];
+        if(pl){if(pl.key!==p.key)return;}          // 他人の pid を名のる参加は受けつけない
+        else if(nPlayers()>=MAX_PLAYERS)return;
+        var taken={};Object.keys(S.players).forEach(function(id){if(id!==p.pid)taken[S.players[id].name]=1;});
+        if(taken[name]){var k=2;while(taken[name+"("+k+")"])k++;name=name+"("+k+")";}
+        if(pl)pl.name=name;else S.players[p.pid]={name:name,key:p.key,score:0,last:null};
+        save();
+        if(S.phase==="lobby")render();
+        resendSoon();
+      })
+      .on("broadcast",{event:"answer"},function(m){
+        var p=m.payload,pl=p&&S.players[p.pid];
+        if(!pl||pl.key!==p.key||S.phase!=="question"||p.qid!==S.game+":"+S.qi||answers[p.pid])return;
+        var c=Number(p.choice);
+        if(!(c>=0&&c<=3))return;
+        answers[p.pid]={choice:c,t:Date.now()-S.startAt};
+        updateStatus();
+      });
+    /* 同じ参加コードの部屋がほかで動いていないか確かめる（動いていたら別のコードに変える） */
+    outCh=sbc.channel("kyutoku-live-"+code,{config:{broadcast:{self:false}}})
+      .on("broadcast",{event:"hostcheck"},function(){if(alive&&checked)outCh.send({type:"broadcast",event:"taken",payload:{code:code}}).catch(function(){});})
+      .on("broadcast",{event:"taken"},function(){
+        if(alive&&!checked){alive=false;sbc.removeChannel(inCh);sbc.removeChannel(outCh);S.code=newCode();save();
+          joinUrl=new URL("join/?c="+S.code,location.href).href;conn="connecting";render();connect();}
+      });
+    inCh.subscribe(onSub);
+    outCh.subscribe(function(s){
+      if(s==="SUBSCRIBED"&&alive){
+        outCh.send({type:"broadcast",event:"hostcheck",payload:{}}).catch(function(){});
+        setTimeout(function(){if(alive){checked=true;onSub("SUBSCRIBED");}},1500);
+      }else onSub(s);
+    });
+  }
+
+  /* ---------- 進行 ---------- */
+  var tickI=null;
+  function startQ(i){
+    answers={};S.qi=i;S.phase="question";S.startAt=Date.now();S.counts=null;save();render();send();
+    clearInterval(tickI);
+    tickI=setInterval(function(){
+      var l=Math.max(0,DUR-(Date.now()-S.startAt));
+      var t=document.getElementById("timer");
+      if(t){t.textContent=Math.ceil(l/1000);t.className="timer"+(l<=5000?" low":"");}
+      var n=nPlayers();
+      if(l<=0||(n>0&&Object.keys(answers).length>=n))reveal();
+    },200);
+  }
+  function reveal(){
+    if(S.phase!=="question")return;
+    clearInterval(tickI);
+    var q=QS[S.qi],counts=[0,0,0,0];
+    Object.keys(S.players).forEach(function(pid){
+      var pl=S.players[pid],a=answers[pid];
+      if(!a){pl.last={ok:-1,g:0};return;}
+      counts[a.choice]++;
+      var ok=a.choice===q.a;
+      var g=ok?Math.round(1000*(1-0.5*Math.min(1,a.t/DUR))):0;   // 正解は500〜1000点。早いほど高い
+      pl.score+=g;pl.last={ok:ok?1:0,g:g};
+    });
+    S.counts=counts;S.phase="reveal";save();render();send();
+  }
+  function next(){
+    if(conn!=="ok")return;
+    if(S.phase==="lobby")startQ(0);
+    else if(S.phase==="question")reveal();
+    else if(S.phase==="reveal"){S.phase="rank";save();render();send();}
+    else if(S.phase==="rank"){if(S.qi<QS.length-1)startQ(S.qi+1);else{S.phase="end";save();render();send();}}
+  }
+  function resetAll(){
+    if(!confirm("参加者と点数を消して、最初からやり直しますか？（参加コードも新しくなります）"))return;
+    if(outCh&&checked)outCh.send({type:"broadcast",event:"state",payload:{phase:"closed",code:S.code}}).catch(function(){});
+    try{localStorage.removeItem(STORE);}catch(e){}
+    setTimeout(function(){location.reload();},300);
+  }
+  document.addEventListener("keydown",function(e){
+    if(e.target&&e.target.tagName==="BUTTON"&&(e.key===" "||e.key==="Enter"))return;   // ボタンの上ではボタンに任せる
+    if(e.key===" "||e.key==="Enter"||e.key==="ArrowRight"){e.preventDefault();next();}
+  });
+  window.addEventListener("beforeunload",function(e){if(S.phase==="question"){e.preventDefault();e.returnValue="";}});
+
+  /* ---------- 画面 ---------- */
+  function topBar(){
+    var label=S.phase==="lobby"?"":S.phase==="end"?"結果発表":"第"+(S.qi+1)+"問 / "+QS.length;
+    return h("div",{class:"top"},
+      h("span",{text:"給特法クイズ"}),h("span",{text:label}),h("span",{class:"grow"}),
+      conn==="error"?h("span",{class:"warn",text:"⚠ つながっていません（ネットを確かめて再読み込み）"}):null,
+      S.phase!=="lobby"&&S.phase!=="end"?h("div",{class:"mini"},h("div",{class:"qr",html:qrSvg(joinUrl)}),h("div",null,"途中参加OK",h("br"),h("b",{text:S.code}))):null);
+  }
+  function foot(label){
+    return h("div",{class:"foot"},
+      h("button",{class:"btn ghost",text:"最初からやり直す",onclick:resetAll}),
+      h("div",{class:"grow",text:"スペースキー・→ でも進めます。スライドに戻っても、このタブは閉じないでね"}),
+      label?h("button",{class:"btn",text:label,onclick:next,disabled:conn!=="ok"?"disabled":null}):null);
+  }
+  function tiles(mode){
+    var q=QS[S.qi],tot=0;
+    if(S.counts)S.counts.forEach(function(n){tot+=n;});
+    var g=h("div",{class:"tiles"});
+    q.c.forEach(function(t,k){
+      var st=mode==="ask"?"":k===q.a?" ok":" ng";
+      var el=h("div",{class:"tile"+st,style:"border-color:"+COLORS[k].c+";color:"+COLORS[k].c},
+        h("span",{class:"s","aria-hidden":"true",text:COLORS[k].s}),h("span",{class:"t",text:t}),
+        mode!=="ask"?h("span",{class:"n",text:(S.counts?S.counts[k]:0)+"人"}):null,
+        mode!=="ask"&&k===q.a?h("span",{class:"okmark",text:"✓ 正解"}):null,
+        mode!=="ask"&&tot?h("span",{class:"bar",style:"background:"+COLORS[k].c+";width:"+Math.round(100*S.counts[k]/tot)+"%"}):null);
+      g.appendChild(el);
+    });
+    return g;
+  }
+  function updateStatus(){
+    var el=document.getElementById("status");
+    if(el)el.innerHTML="回答 <b>"+Object.keys(answers).length+"</b> / "+nPlayers()+" 人";
+  }
+  function render(){
+    var p=S.phase;
+    if(p==="lobby"){
+      var names=h("div",{class:"names"});
+      ranked().slice(-40).reverse().forEach(function(x){names.appendChild(h("span",{text:x.name}));});
+      show(topBar(),
+        h("div",{class:"lobby"},
+          h("div",{class:"left"},
+            h("h1",{text:"スマホでクイズに参加しよう"}),h("div",{class:"ul"}),
+            h("p",{class:"steps",html:"① 右の QR コードをカメラで読む<br>② ニックネームを入れて「参加する」<br>③ 問題が出たら、スマホで答える"}),
+            h("div",{style:"font-size:1.8vw;color:var(--m)",text:"参加コード"}),
+            h("div",{class:"code",text:S.code}),
+            h("div",{class:"url",text:joinUrl}),
+            h("div",{class:"count",html:"いま <b>"+nPlayers()+"</b> 人が参加中"}),
+            names),
+          h("div",{class:"bigqr qr",html:qrSvg(joinUrl)})),
+        foot(conn==="ok"?"はじめる（第1問へ）":"つないでいます…"));
+      return;
+    }
+    if(p==="question"||p==="reveal"){
+      var q=QS[S.qi],l=Math.max(0,DUR-(Date.now()-S.startAt));
+      show(topBar(),
+        h("div",{class:"qhead"},h("div",{class:"badge",text:"Q"+(S.qi+1)}),h("div",{class:"qtext",text:q.q}),
+          p==="question"?h("div",{id:"timer",class:"timer",text:String(Math.ceil(l/1000))}):null),
+        tiles(p==="question"?"ask":"show"),
+        p==="reveal"?h("div",{class:"exp pop",text:q.exp}):h("div",{id:"status",class:"status",style:"text-align:center;margin-top:1vw"}),
+        foot(p==="question"?"締め切る":"順位を見る"));
+      if(p==="question")updateStatus();
+      return;
+    }
+    if(p==="rank"||p==="end"){
+      var list=h("div",{class:"rank"});
+      var rk=ranked(),rank=0,prev=null;
+      rk.slice(0,p==="end"?8:5).forEach(function(x,k){
+        if(x.score!==prev){rank=k+1;prev=x.score;}
+        list.appendChild(h("div",{class:"row pop",style:"animation-delay:"+(k*0.08)+"s"},
+          h("span",{class:"r",text:rank+"位"}),h("span",{class:"nm",text:x.name}),h("span",{class:"sc",text:x.score+"点"})));
+      });
+      if(!rk.length)list.appendChild(h("div",{class:"center",style:"font-size:2.4vw",text:"まだ参加者がいません"}));
+      show(topBar(),
+        h("h1",{text:p==="end"?"結果発表！ おつかれさまでした":"いまの順位（第"+(S.qi+1)+"問まで）"}),h("div",{class:"ul"}),
+        list,
+        foot(p==="end"?null:S.qi<QS.length-1?"第"+(S.qi+2)+"問へ":"結果発表へ"));
+      return;
+    }
+  }
+
+  render();
+  connect();
+})();
+</script>
+</body>
+</html>

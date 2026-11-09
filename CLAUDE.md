@@ -23,6 +23,9 @@
   - 5人共通のパスワード＝Supabase の共有アカウント `roots-jisshu@example.com` のパスワード。ログイン情報は `roots.jisshu.auth` に保存（本体のログインとまざらない）
   - 表 `jisshu_lessons`・`jisshu_feedback`・`jisshu_files` と Storage の `jisshu` バケット。作り方は `supabase/jisshu.sql`
   - sw.js の保存対象から外してある
+- `kyutoku/index.html`（発表者用・プロジェクター）と `kyutoku/join/index.html`（参加者用・スマホ）… EDU213 の発表（給特法改正）で使う四択クイズ。公開URL の `/kyutoku/`
+  - 「みんなで四択」と同じしくみ（Supabase のリアルタイム配信だけ・データベースに保存しない）。チャンネル名は `kyutoku-live-コード`
+  - 問題は kyutoku/index.html の `QS`。選択肢の並びは Google スライドの問題スライドと合わせてある。本体とは独立。sw.js の保存対象から外してある
 
 ## 音声のしくみ
 - ファイル名 = 英文（前後の空白を除く）の FNV-1a 32bit ハッシュ（UTF-16 の charCodeAt で計算）を8桁の16進数にしたもの
