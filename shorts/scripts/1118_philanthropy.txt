@@ -1,0 +1,19 @@
+# 型: ③推理 philanthropy（2026-11-18・Roots #27）
+# 語根: phil・anthrop
+# メモ: philanthropy・philanthropist はアプリの見出し語にないのでパーツを指定（philanthropist は anthropologist の related）。philanthropist は仲間として見せる語なので「番号なし」
+# メモ: 語源の根拠: Etymonline philanthropy（ギリシャ語 philanthrōpia＝人類への愛。phil-「愛する」＋anthrōpos「人間」）、Merriam-Webster philanthropy（phil- + anthrōpos human being／人類への善意・人の幸せのための活動）
+# メモ: 英検級は辞書で裏が取れないので言わない（「難しい英単語」と表現）
+# メモ: まとめを0.2秒のばした（カット3.2秒）。ドキュメントの秒数も同じ
+[0.0-3.0] {hook think} 語源で推理\n英単語の覚え方
+[3.0-5.5] {quiz philanthropy phil(愛する)+anthrop(人間)+y(名詞)=慈善活動} philanthropy
+[5.5-8.5] {count philanthropy} 3秒で考えて
+[8.5-11.5] {root phil=愛する} phil＝愛する
+[11.5-14.5] {word philosophy} 知恵を愛する→哲学
+[14.5-17.5] {root anthrop=人間} anthrop＝人間
+[17.5-21.0] {word anthropologist} 人間を学ぶ人→人類学者
+[21.0-24.0] {text think} 最後のyは名詞の印
+[24.0-27.0] {split philanthropy} 人間を愛すること…？
+[27.0-30.5] {answer philanthropy} 正解：慈善活動
+[30.5-34.0] {word philanthropist 番号なし phil(愛する)+anthrop(人間)+ist(人)=慈善家} istがつくと慈善家
+[34.0-37.2] {summary} 人間を愛する→慈善活動
+[37.2-40.0] {hook think} 知らない単語こそ…

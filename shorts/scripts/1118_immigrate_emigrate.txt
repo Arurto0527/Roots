@@ -1,0 +1,20 @@
+# 型: ④ペア immigrate / emigrate（2026-11-18・Roots #28）
+# 語根: migr
+# メモ: #24（11/16 import/export）の続き。#24 は「pの前でinがim」「ex＝外へ」。今回は「mの前でもinがim（mが2つ並ぶ）」「exのxが落ちてe」で見分ける
+# メモ: immigrate・emigrate・migrate はアプリの見出し語にないのでパーツを指定（immigrant の related に migrate・emigrant）。migrate は仲間として見せる語なので「番号なし」
+# メモ: 語源の根拠: Etymonline immigrate（ラテン語 immigrare。in- が m の前で im- に同化＋migrare「移る」）、Etymonline emigrate（ラテン語 emigrare＝ex「外へ」＋migrare「移る」）、Etymonline ex-（-m- などの前でしばしば e- に縮む。例 emerge）、Merriam-Webster emigrate（emigrate は出ていく国、immigrate は入っていく国から見た言い方）
+# メモ: immigrate・emigrate は ate を色分けしないで2パーツにした（pair 場面は3パーツだと「ate＝動詞」と意味の箱が重なるため。過去の pair もすべて2パーツ）
+# メモ: まとめを0.2秒のばした（カット3.2秒）。ドキュメントの秒数も同じ
+[0.0-3.0] {hook think} 来る？出ていく？\n英単語を語源で
+[3.0-5.5] {hook teach} #24の続き
+[5.5-8.5] {root migr=移る} migr＝移る
+[8.5-11.5] {word migrate 番号なし migr(移る)+ate(動詞)=移動する} 鳥の渡りもmigrate
+[11.5-14.5] {root im=中へ 接頭} im＝中へ
+[14.5-18.0] {text think} mの前でinはimに
+[18.0-21.5] {word immigrate im(中へ)+migr(移る)=移住してくる} 国の中へ移り住む
+[21.5-24.5] {root e=外へ 接頭} e＝外へ
+[24.5-27.5] {text think} exのxが落ちた形
+[27.5-31.0] {word emigrate e(外へ)+migr(移る)=移住していく} 国の外へ移り住む
+[31.0-34.5] {pair immigrate emigrate} mが2つなら入ってくる
+[34.5-37.7] {pairsum} im中へ→来る\ne外へ→出ていく
+[37.7-40.5] {hook think} 次にニュースで見たら…

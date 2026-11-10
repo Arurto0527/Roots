@@ -1439,13 +1439,20 @@ def pair_column(img, d, w, x0, top, highlight):
     segs = split_colored(w["word"], w["parts"])
     draw_colored(d, segs, colored_font(segs, HALF - 40, 96, min_size=48), cx, top + 80)
     y = top + 160
-    for p in w["parts"][:3]:
-        rounded(d, (cx - 70, y, cx + 70, y + 140), 18, outline=LINE, width=3)
-        cell_picto(img, d, p, cx, y + 70, 140, 120, TYPE_COLOR[p["type"]])
+    parts = w["parts"][:3]
+    # 2パーツまでは今までと同じ大きさ。3パーツ（im＋migr＋ate など）は意味の箱（y=1060〜）に
+    # 重ならないよう、箱と文字を小さくして縦につめる
+    if len(parts) <= 2:
+        box, pic, lsize, lmin, gap1, gap2 = 140, 120, 40, 26, 150, 20
+    else:
+        box, pic, lsize, lmin, gap1, gap2 = 96, 80, 32, 24, 102, 10
+    for p in parts:
+        rounded(d, (cx - box / 2, y, cx + box / 2, y + box), 18, outline=LINE, width=3)
+        cell_picto(img, d, p, cx, y + box / 2, box, pic, TYPE_COLOR[p["type"]])
         label = f"{p['morph']}＝{p['gloss'] or TYPE_LABEL[p['type']]}"
-        fl, ll, lhl = fit_text(label, HALF - 30, 60, 40, 26, max_lines=1, where="（ペアのパーツ）")
-        draw_lines(d, ll, fl, lhl, cx, y + 150, TYPE_COLOR[p["type"]])
-        y += 150 + lhl + 20
+        fl, ll, lhl = fit_text(label, HALF - 30, lsize * 1.5, lsize, lmin, max_lines=1, where="（ペアのパーツ）")
+        draw_lines(d, ll, fl, lhl, cx, y + gap1, TYPE_COLOR[p["type"]])
+        y += gap1 + lhl + gap2
     rounded(d, (x0 + 20, 1060, x0 + HALF - 20, 1180), 20, fill=ACCENT_SOFT)
     fm, ml, mlh = fit_text(plain_meaning(w), HALF - 70, 100, 52, 30, max_lines=2, weight="black", one_line_min=32,
                            where="（ペアの意味）")
