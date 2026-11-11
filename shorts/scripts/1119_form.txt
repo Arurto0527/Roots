@@ -1,0 +1,17 @@
+# 型: ①カタカナ語 form（2026-11-19・Roots #30）
+# 語根: form
+# メモ: form・uniform・information・transform・reform・conform はアプリの見出し語（パーツと意味はアプリのデータ）
+# メモ: 語源の根拠: Etymonline form・uniform（uniformis「1つの形の」）・inform（informare「形を与える」→心に形を与える＝教える・知らせる）・transform・reform・conform（conformare「形づくる・合わせる」）
+# メモ: まとめは3.2秒
+[0.0-3.0] {hook think} フォーム、ユニフォーム…
+[3.0-6.0] {hook teach} あなたはもうformを知ってる
+[6.0-9.0] {kata フォーム form form(形)} フォーム＝形
+[9.0-12.0] {kata ユニフォーム uniform uni(1つの)+form(形)} 1つの形→制服
+[12.0-15.0] {kata インフォメーション information in(中へ)+form(形)+ation(名詞)} 心に形を与える→情報
+[15.0-18.0] {root form=形} form＝形
+[18.0-21.0] {word transform} transform＝変える
+[21.0-24.0] {word reform} reform＝改革する
+[24.0-27.5] {word conform} conform＝従う
+[27.5-30.5] {text think} 変える・直す・合わせる
+[30.5-33.7] {summary} form＝形、受験の3語
+[33.7-36.5] {hook think} 次にユニフォームを着たら…

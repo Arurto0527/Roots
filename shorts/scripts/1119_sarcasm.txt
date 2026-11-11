@@ -1,0 +1,20 @@
+# 型: ②雑学 sarcasm（2026-11-19・Roots #29）
+# 語根: sarc
+# メモ: sarcasm・sarcastic・sarcophagus はアプリの見出し語にないのでパーツを指定。sarcastic・sarcophagus は仲間として見せる語なので「番号なし」
+# メモ: 語源の根拠: Etymonline sarcasm（ギリシャ語 sarkasmos ← sarkazein「肉をはぎ取る」← sarx/sarkos「肉」）、Etymonline sarcophagus（sarx「肉」＋phagein「食べる」＝肉を食べる石）
+# メモ: sarkazein「肉をはぎ取る」は MW では推測とされるのでテロップは「？」、ナレーションは「と言われます」
+# メモ: 日本語の「皮肉」に肉が入っているのは偶然（語源のつながりはない）と言う
+# メモ: 受験向けの語ではないので、まとめの欄は「今日の単語」。まとめは3.2秒
+[0.0-3.0] {trivia sarcasm sarc(肉)+asm(名詞)=皮肉} sarcasmの語源は「肉」
+[3.0-6.0] {hook teach} 英単語の覚え方は\n語源
+[6.0-9.0] {hook think} 皮肉なのに肉？
+[9.0-12.0] {root sarc=肉} sarc＝肉
+[12.0-15.5] {origin sarcasm} 肉をはぎ取る？
+[15.5-19.0] {text think} 肉をはぐほど痛い一言
+[19.0-22.0] {reveal sarcasm} 肉をはぐ→皮肉
+[22.0-25.0] {word sarcastic 番号なし sarc(肉)+astic(形容詞)=皮肉な} sarcastic＝皮肉な
+[25.0-28.5] {text} sarcophagusも肉
+[28.5-32.0] {word sarcophagus 番号なし sarc(肉)+phag(食べる)+us=石棺} 肉を食べる石→石棺
+[32.0-35.0] {text think} 日本語の皮肉の肉は偶然
+[35.0-38.2] {summary 欄=今日の単語} sarcasm＝肉をはぐ言葉
+[38.2-41.0] {hook think} 次に皮肉を言われたら…

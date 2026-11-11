@@ -1219,9 +1219,16 @@ def summary_rows(d, ctx, word_label="受験単語"):
             while text_w(word, fe) > 470 and fe.size > 40:
                 fe = font(fe.size - 4, "black")
             x = draw_segs(d, segs, fe, LEFT + 20, y + 44)
+            # 右の意味（カタカナ語など）: ふつうは x=560 より右に置く。入らないときは
+            # ①英単語のすぐ右（30px あけて）まで使う ②文字を36pxまで小さくする ③それでもだめなら「…」で省略
             fr = font(44, "bold")
             r = right
-            while text_w(r, fr) > right_x - max(x + 30, 560) and len(r) > 1:
+            room = right_x - max(x + 30, 560)
+            if text_w(r, fr) > room:
+                room = right_x - (x + 30)
+                while text_w(r, fr) > room and fr.size > 36:
+                    fr = font(fr.size - 2, "bold")
+            while text_w(r, fr) > room and len(r) > 1:
                 r = r[:-1]
             if r != right:
                 r = r[:-1] + "…"
