@@ -1,0 +1,35 @@
+# 型: ③推理 unanimous（2026-11-20・Roots #31）
+# タイトル: Roots #31 ③推理 unanimous（11/20 投稿1）｜Rootsで英単語｜語源で一発暗記
+# 語根: anim
+# メモ: unanimous・uniform・animate はアプリの見出し語なのでパーツ指定なし（アプリ: uni(1つ)+anim(命・息)+ous(～に満ちた)＝満場一致の，全員が賛成の）
+# メモ: 語源の根拠: Merriam-Webster unanimous（Latin unanimus, from unus one + animus mind）、Merriam-Webster animate（anima breath, soul／animus spirit と同じ仲間）。Etymonline unanimous・animus（unanimus＝unus＋animus。animus と anima は同じ「息」の根。チェック係の確認による。こちらからは Etymonline を取得できなかった）
+# メモ: 注意: 辞書では anim は animus「心」。今回はアプリの「命・息」に合わせ「息が1つ＝息ぴったり」で解く（anima「息」と animus「心」は同じ根）。11/22 magnanimous で「anim＝心」を使うので、今回は「心」という言葉を使っていない
+# メモ: 英検級はテロップ・ナレーションで言わない（answer 画面にはアプリの級が出る）。例文はオリジナル（全員賛成＝unanimous）
+# メモ: まとめを0.2秒のばした（カット3.2秒）
+# ナレーション: [0.0-3.0] 見たことなくても、語源でわかる
+# ナレーション: [3.0-5.5] unanimous
+# ナレーション: [5.5-8.5] 3秒で考えて
+# ナレーション: [8.5-11.5] uni は「1つ」
+# ナレーション: [11.5-14.5] みんな同じ形、ユニフォーム
+# ナレーション: [14.5-17.5] anim は「命・息」
+# ナレーション: [17.5-20.5] 絵に息を吹きこむ、アニメ
+# ナレーション: [20.5-23.5] 1つの息…？
+# ナレーション: [23.5-26.5] みんなの息がぴったり
+# ナレーション: [26.5-30.0] 正解は「満場一致の」
+# ナレーション: [30.0-33.0] 全員賛成なら unanimous
+# ナレーション: [33.0-36.2] uni「1つ」＋ anim「息」
+# ナレーション: [36.2-39.0] 難しい英単語も…
+# メモ: 録音のコツ: 1行読んだら半拍（0.4秒）あけ、unanimous は「ユーナニマス」と「ナ」を強く、ゆっくり1回だけ読む
+[0.0-3.0] {hook think} 見たことなくても\n語源でわかる
+[3.0-5.5] {quiz unanimous} unanimous
+[5.5-8.5] {count unanimous} 3秒で考えて
+[8.5-11.5] {root uni=1つ} uni＝1つ
+[11.5-14.5] {word uniform} みんな同じ形＝制服
+[14.5-17.5] {root anim=命・息} anim＝命・息
+[17.5-20.5] {word animate} 絵に息を吹きこむ
+[20.5-23.5] {split unanimous} 1つの息…？
+[23.5-26.5] {text think} みんなの息がぴったり
+[26.5-30.0] {answer unanimous} 正解：満場一致の
+[30.0-33.0] {text} 全員賛成＝unanimous
+[33.0-36.2] {summary} uni1つ＋anim息
+[36.2-39.0] {hook think} 難しい英単語も…

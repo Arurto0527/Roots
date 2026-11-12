@@ -817,7 +817,9 @@ def base(number):
 
 
 # 「・」（U+30FB）と「ー」（U+30FC）は意味ではないので除く（vis・vid の vis のあとに空白を入れない。夜勤 11/08 の報告）
-PART_GAP = re.compile(r"(?<=[A-Za-z])(?=[\u3041-\u30fa\u30fd-\u30ff\u3400-\u9fff\uff5e])")
+# 「uni1つ」のように意味が数字で始まるとき（数字のあとに日本語が続くとき）も空白を入れる（夜勤 11/11 の台本 unanimous）
+_JA = r"[\u3041-\u30fa\u30fd-\u30ff\u3400-\u9fff\uff5e]"
+PART_GAP = re.compile(r"(?<=[A-Za-z])(?=" + _JA + r"|[0-9\uff10-\uff19]+" + _JA + r")")
 
 
 def part_gap(s):

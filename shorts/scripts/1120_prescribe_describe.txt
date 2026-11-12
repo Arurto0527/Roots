@@ -1,0 +1,35 @@
+# 型: ④ペア prescribe / describe（2026-11-20・Roots #32）
+# タイトル: Roots #32 ④ペア prescribe / describe（11/20 投稿2）｜Rootsで英単語｜語源で一発暗記
+# 語根: scrib
+# メモ: prescribe・describe・script はアプリの見出し語なのでパーツ指定なし（アプリ: pre(先に)+scrib(書く)＝処方する／de(下へ)+scrib(書く)＝描写する）。語根の表記はアプリの scrib に合わせた
+# メモ: prescription はアプリの見出し語にない（script の related）のでパーツを指定し「番号なし」
+# メモ: 語源の根拠: Merriam-Webster prescribe（Latin praescribere「初めに書く・命じる」= prae- + scribere to write）、Merriam-Webster describe（Latin describere = de- + scribere to write）、Etymonline describe（de-「下へ」＋scribere。describere＝書き下ろす・書き写す。チェック係の確認による。こちらからは Etymonline を取得できなかった）
+# メモ: 注意: describe の de＝「下へ」はアプリの意味とも Etymonline（de 'down'）とも合う（describere＝書き下ろす・書き写す）。prescription の script は [9.0] に合わせて「書いたもの」。英検級は言わない（word 画面にはアプリの級が出る）
+# メモ: まとめを0.2秒のばした（カット3.2秒）
+# ナレーション: [0.0-3.0] 描写する？処方する？英単語は語源で見分ける
+# ナレーション: [3.0-6.0] 頭の文字で決まる
+# ナレーション: [6.0-9.0] scrib は「書く」
+# ナレーション: [9.0-12.0] 書いたもの、script は台本
+# ナレーション: [12.0-15.0] de は「下へ」
+# ナレーション: [15.0-18.5] 見たままを書き下ろす、describe
+# ナレーション: [18.5-21.5] pre は「先に」
+# ナレーション: [21.5-25.0] 先に書いて指示する、prescribe
+# ナレーション: [25.0-28.0] 薬の飲み方を先に書く
+# ナレーション: [28.0-31.0] 処方せん prescription も仲間
+# ナレーション: [31.0-34.5] pre は先、de は下へ
+# ナレーション: [34.5-37.7] pre 先に→処方、de 下へ→描写
+# ナレーション: [37.7-40.5] もう混ざらない。どっちか迷ったら…
+# メモ: 録音のコツ: 1行ごとに半拍（0.4秒）あけ、「プリ」「ディ」の頭の音だけ少し強く言う
+[0.0-3.0] {hook think} 描写？処方？\n語源で見分ける
+[3.0-6.0] {hook teach} 頭の文字で決まる
+[6.0-9.0] {root scrib=書く} scrib＝書く
+[9.0-12.0] {word script} 書いたもの＝台本
+[12.0-15.0] {root de=下へ 接頭} de＝下へ
+[15.0-18.5] {word describe} 見たままを書き下ろす
+[18.5-21.5] {root pre=先に 接頭} pre＝先に
+[21.5-25.0] {word prescribe} 先に書いて指示する
+[25.0-28.0] {text think} 薬の飲み方を先に書く
+[28.0-31.0] {word prescription 番号なし pre(先に)+script(書いたもの)+ion(名詞)=処方せん} 処方せんも仲間
+[31.0-34.5] {pair prescribe describe} preは先、deは下へ
+[34.5-37.7] {pairsum} pre先に→処方\nde下へ→描写
+[37.7-40.5] {hook think} どっちか迷ったら…
