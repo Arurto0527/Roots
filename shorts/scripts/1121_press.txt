@@ -1,0 +1,35 @@
+# 型: ①カタカナ語 press（2026-11-21・Roots #34）
+# タイトル: Roots #34 ①カタカナ語 press（11/21 投稿2）｜Rootsで英単語｜語源で一発暗記
+# 語根: press
+# メモ: press・express・impress・depress はアプリの見出し語（パーツと意味はアプリのデータ: ex(外へ)・im(中へ)・de(下へ)＋press(押す)）。pressure はアプリの見出し語にないので kata でパーツを指定（ure はアプリの「名詞」）
+# メモ: ex・im・de を root 場面にするとまとめの見出しが語根だけになるので、1111_tract と同じく text 場面
+# メモ: 語源の根拠: Etymonline press（Latin pressare ← premere「押す」）、Merriam-Webster pressure（Late Latin pressura ← pressus ← premere to press）、Merriam-Webster express・Etymonline express（exprimere「外へ押し出す」＝ex-＋premere）、Merriam-Webster impress（imprimere＝in-＋premere to press）、Merriam-Webster depress・Etymonline depress（deprimere「押し下げる」＝de-＋premere。気持ちを沈める意味は1620年代から）
+# メモ: 注意: エスプレッソは Etymonline では「押し出された」、Merriam-Webster では「その場で（特別に）いれたコーヒー」と説が分かれるので使わない。英検級は言わない（word 画面にはアプリの級が出る）
+# メモ: まとめは3.2秒
+# ナレーション: [0.0-3.0] プレス、プレッシャー…英単語の覚え方は語源
+# ナレーション: [3.0-6.0] あなたはもう press を知っています
+# ナレーション: [6.0-9.0] プレスは、ぎゅっと押すこと
+# ナレーション: [9.0-12.0] 押される力、プレッシャー
+# ナレーション: [12.0-15.0] press は「押す」
+# ナレーション: [15.0-18.0] ex は「外へ」
+# ナレーション: [18.0-21.5] 気持ちを外へ押し出す、express
+# ナレーション: [21.5-24.5] im は「中へ」
+# ナレーション: [24.5-28.0] 心の中へ押しつける、impress
+# ナレーション: [28.0-31.0] de は「下へ」
+# ナレーション: [31.0-34.5] 気持ちを下へ押す、depress
+# ナレーション: [34.5-37.7] press は押す、方向で3語
+# ナレーション: [37.7-40.5] 次にボタンを押すとき…
+# メモ: 録音のコツ: 1行読んだら半拍（0.4秒）あけ、express・impress・depress は「プレス」の前の ex・im・de を少し強く読む
+[0.0-3.0] {hook think} プレス、プレッシャー…
+[3.0-6.0] {hook teach} もうpressを\n知ってる
+[6.0-9.0] {kata プレス press press(押す)} プレス＝押す
+[9.0-12.0] {kata プレッシャー pressure press(押す)+ure(名詞)} 押される力→重圧
+[12.0-15.0] {root press=押す} press＝押す
+[15.0-18.0] {text} ex＝外へ
+[18.0-21.5] {word express} 気持ちを外へ押し出す
+[21.5-24.5] {text} im＝中へ
+[24.5-28.0] {word impress} 心の中へ押しつける
+[28.0-31.0] {text} de＝下へ
+[31.0-34.5] {word depress} 気持ちを下へ押す
+[34.5-37.7] {summary} press＝押す、方向で3語
+[37.7-40.5] {hook think} 次にボタンを\n押すとき…

@@ -379,13 +379,66 @@ def tokenize(s):
 _SPLIT = {"n": 0}   # 文節（「インストラクター」など）を途中で切った回数
 
 
+def _kind(ch):
+    if re.match(r"[ぁ-ゖ]", ch):
+        return "hira"
+    if re.match(r"[ァ-ヺー]", ch):
+        return "kata"
+    if re.match(r"[一-龯々〆]", ch):
+        return "kanji"
+    if re.match(r"[A-Za-z0-9'’\-\.]", ch):
+        return "latin"
+    return "other"
+
+
+def simple_phrases(s):
+    """budoux がないときの、かんたんな文節の区切り。
+    ・ひらがなのあとに漢字・カタカナ・英字が来たら、その前で切ってよい（「次に｜給料を」）
+    ・漢字・カタカナ・英字のあとの「を」「は」「が」「に」「で」「と」「も」「へ」のあとで切ってよい（「給料を｜もらったら」）
+    ・「、」「。」「？」「！」「…」のあとで切ってよい
+    ・「「」「（」の前で切ってよい
+    ・「お金」「ご飯」の「お」「ご」は、あとの漢字といっしょにする。「持ち帰る」のような動詞のつながりは切らない
+    それ以外（「もら｜ったら」のような言葉の途中）では切らない"""
+    out, cur = [], ""
+    for i, ch in enumerate(s):
+        if cur:
+            prev = cur[-1]
+            kp, kc = _kind(prev), _kind(ch)
+            cut = False
+            if prev in "、。！？!?…" and ch not in NO_HEAD:
+                cut = True
+            elif ch in "「（" and cur not in "「（":
+                cut = True
+            elif kp == "hira" and kc in ("kanji", "kata", "latin"):
+                # 「持ち帰る」「思い出す」のような2つの動詞のつながり（漢字＋ち・い・し…＋漢字）は切らない
+                cut = not (kc == "kanji" and prev in "ちいしりきみびけえ" and len(cur) >= 2
+                           and _kind(cur[-2]) == "kanji")
+            elif (kp == "hira" and prev in "をはがにでともへ" and len(cur) >= 2
+                  and _kind(cur[-2]) in ("kanji", "kata", "latin") and kc == "hira"
+                  and prev + ch not in ("では", "には", "とは", "でも", "にも", "とも", "への", "との", "での", "がち")):
+                cut = True
+            elif kp in ("kanji", "kata") and kc == "latin" or kp == "latin" and kc in ("kanji", "kata"):
+                cut = True
+            if cut and kc == "kanji" and cur in ("お", "ご"):
+                cut = False
+            if cut and ch not in NO_HEAD:
+                if kc == "kanji" and prev in "おご" and len(cur) >= 2:   # 「お金」「ご飯」の お・ご は次の言葉につける
+                    out.append(cur[:-1])
+                    cur = prev
+                else:
+                    out.append(cur)
+                    cur = ""
+        cur += ch
+    if cur:
+        out.append(cur)
+    return out
+
+
 def phrases(s, f, max_w):
     """改行してよい区切り。日本語は文節（「知っ／てる」のように言葉の途中で切らない）。
     1つの文節が枠より長いときだけ、その文節を1文字ずつに分ける"""
-    if _BUDOUX is None:
-        return tokenize(s)
     out = []
-    for ph in _BUDOUX.parse(s):
+    for ph in (_BUDOUX.parse(s) if _BUDOUX is not None else simple_phrases(s)):
         if text_w(ph.strip(), f) > max_w:
             _SPLIT["n"] += 1
             out += tokenize(ph)
@@ -1569,6 +1622,8 @@ def verify_mp4(path, want_len):
 def render(args):
     if cairosvg is None:
         warn("cairosvg が入っていないので、ピクトグラム（絵）が出ません。pip install cairosvg で入れてください")
+    if _BUDOUX is None:
+        warn("budoux が入っていないので、かんたんな区切り方で改行します。pip install -r shorts/requirements.txt で入れてください")
     meta, cuts = parse_script(args.script)
     ctx = Ctx(meta, args.number, args.type)
     total = plan_timing(cuts, args.voice, args.sync)

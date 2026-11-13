@@ -31,7 +31,7 @@ python3 shorts/render.py --script 台本.txt --voice 録音.m4a --type 1 --numbe
 - 最後に「文字の位置チェック: ○カット・文字 ○か所を調べて、問題 ○件」と出ます。問題が0件になるまで台本を直してください
 - 出力: 1080×1920・30fps・H.264（veryfast・CRF 26）。最後に2秒のエンドカード「Rootsで英単語｜プロフのリンクから無料」が自動で付きます
 
-必要なもの（`pip install -r shorts/requirements.txt` でまとめて入る）: Python 3、Pillow、cairosvg（`pip install cairosvg`。ピクトグラムを絵にする。ないと絵が出ず ⚠ が出ます）、budoux（`pip install budoux`。日本語を言葉の切れ目で改行する。なくても動きます）、ffmpeg、Noto Sans CJK フォント
+必要なもの（**新しい環境では、最初に `pip install -r shorts/requirements.txt` を実行**。まとめて入る）: Python 3、Pillow、cairosvg（`pip install cairosvg`。ピクトグラムを絵にする。ないと絵が出ず ⚠ が出ます）、budoux（`pip install budoux`。日本語を言葉の切れ目で改行する。ないときは ⚠ を出して、かんたんな区切り方（「次に｜給料を｜もらったら…」のように、ひらがな→漢字の前や「を」のあとで切る）で改行します。それでも budoux があるほうが正確です）、ffmpeg、Noto Sans CJK フォント
 
 ## 台本の書き方（1行＝1テロップ＝1カット）
 ```
