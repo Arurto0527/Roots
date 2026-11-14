@@ -1,0 +1,38 @@
+# 型: ③推理 magnanimous（2026-11-22・Roots #35）
+# タイトル: Roots #35 ③推理 magnanimous（11/22 投稿1）｜Rootsで英単語｜語源で一発暗記
+# 語根: anim
+# メモ: magnanimous はアプリの見出し語にないのでパーツを指定（magn(大きい)+anim(心)+ous(～に満ちた)＝寛大な）。magnificent・unanimous はアプリの見出し語なのでパーツ指定なし（アプリ: magnificent＝magn(大きい)+fic(作る)、unanimous＝uni(1つ)+anim(命・息)+ous）
+# メモ: 11/20 #31 unanimous（anim＝命・息）の続き。今回は辞書どおり anim＝animus「心」で解く。unanimous は 番号なし で仲間として出す
+# メモ: （開発係 11/14）夜勤の改善メモ1を受けて、unanimous のパーツを台本で上書き（uni(1つ)+anim(心)+ous(～に満ちた)）。テロップ・声の「心が1つ」と表示をそろえた。意味はアプリのまま
+# メモ: anim(心) はアプリの絵（命・息）と意味が合わないので、絵は出ず箱にパーツの文字が入る（ℹ。問題ではない）
+# メモ: 語源の根拠: Etymonline magnanimous（Latin magnanimus「大きな魂・心をもった」＝magnus「大きい」＋animus「心・魂・精神」）、Etymonline animus（animus「心・精神」は anima「息・命」と同じ根）、Merriam-Webster magnanimous（Latin magnanimus, from magnus great + animus spirit）、Merriam-Webster animus（Latin, spirit, mind）。WebSearch で4ページの存在を確認（本文はこちらから取得できなかったので、チェック係が本文で再確認すること）
+# メモ: 英検級はテロップ・ナレーションで言わない（answer 画面にはアプリの級が出る）。例文はオリジナル（失敗を笑って許せる人＝magnanimous）
+# メモ: まとめを0.2秒のばした（カット3.2秒）。count は3秒のまま、声は「3秒で考えて」だけ
+# メモ: ループ: 最後「次に初めて見る単語も…」→ 冒頭「知らない英単語も、語源でわかる」
+# ナレーション: [0.0-3.0] 知らない英単語も、語源でわかる
+# ナレーション: [3.0-5.5] magnanimous
+# ナレーション: [5.5-8.5] 3秒で考えて
+# ナレーション: [8.5-11.5] magn は「大きい」
+# ナレーション: [11.5-14.5] 大きく作る、magnificent「壮大な」
+# ナレーション: [14.5-17.5] anim は「心」
+# ナレーション: [17.5-20.5] 心が1つで、unanimous「満場一致の」
+# ナレーション: [20.5-23.5] 大きな心…？
+# ナレーション: [23.5-27.0] 正解は「寛大な」
+# ナレーション: [27.0-30.0] 友だちの失敗を、笑って許せる人
+# ナレーション: [30.0-33.0] そんな広い心が magnanimous
+# ナレーション: [33.0-36.2] magn「大きい」＋ anim「心」
+# ナレーション: [36.2-39.0] 次に初めて見る単語も…
+# メモ: 録音のコツ: 1行読んだら半拍（0.4秒）あけ、magnanimous は「マグナニマス」と2つ目の「ナ」を強く、ゆっくり1回だけ読む
+[0.0-3.0] {hook think} 知らない英単語も\n語源でわかる
+[3.0-5.5] {quiz magnanimous magn(大きい)+anim(心)+ous(～に満ちた)=寛大な} magnanimous
+[5.5-8.5] {count magnanimous} 3秒で考えて
+[8.5-11.5] {root magn=大きい} magn＝大きい
+[11.5-14.5] {word magnificent} 大きく作る＝壮大な
+[14.5-17.5] {root anim=心} anim＝心
+[17.5-20.5] {word unanimous 番号なし uni(1つ)+anim(心)+ous(～に満ちた)} 心が1つ＝満場一致
+[20.5-23.5] {split magnanimous} 大きな心…？
+[23.5-27.0] {answer magnanimous} 正解：寛大な
+[27.0-30.0] {text think} 失敗を笑って許せる人
+[30.0-33.0] {text} 広い心＝magnanimous
+[33.0-36.2] {summary} magn大きい＋anim心
+[36.2-39.0] {hook think} 次に初めて見る単語も…
