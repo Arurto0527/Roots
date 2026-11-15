@@ -15,6 +15,10 @@
     そこから `\nfunction App(){` の手前までの部品と授業用の JSX だけを Babel で変換して動かす。**この2行の目印を変えると授業用が動かなくなる**
   - 本体と同じ名前の関数・定数を授業用で作らない（`Overlay` がぶつかったことがある）
   - スマホ版の 430px ルールは対象外。sw.js の保存対象からも外してある（`/class/` はいつも最新版）
+- `jun1/index.html` … 英検準1級版（公開URL の `/jun1/`）。画面と部品は本体 index.html をそのまま読みこみ、単語だけ `jun1/words.js` の `JUN1_WORDS` に入れかえる
+  - `JUN1_WORDS` は上から No.1, 2, …。`"affect"`（本編のデータを使い回す）／`{from:"affect", meaning:…}`（一部だけ上書き）／`{word:…, …}`（本編にない語を全部書く）の3とおり
+  - 本体と同じサイトなので、保存の名前を `roots.` → `roots-jun1.` に変えている（ログイン `roots.auth` だけ共通）。クラウドの学習記録は本体と同じ表なので送受信しない（記録は端末の中だけ）
+  - 本体の目印 `const RAW_WORDS=[`・`\nconst {useState`・`\nfunction App(){`・`const ALPHA_FROM=数字;`・`const LEGACY={…}`・`"audio/"+acc` を変えると動かなくなる
 - `class/join/index.html` … 「みんなで四択」の生徒用ページ（スマホ）。Supabase のリアルタイム配信だけを使い、データベースには何も保存しない
 - 管理画面の学習記録は、Supabase の集計係（`supabase/admin-summary.sql` の `admin_summary_logs`・`admin_summary_progress`）でまとめた数字だけを読む
   - 無料プランは1回8秒で止められるので、回答記録は1週間ずつ・単語データは30人ずつに分けて同時に呼ぶ。集計係が使えないときは index.html の `adminAggregate()`（前の、全部ダウンロードする方法）にもどる

@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#FFFFFF" id="themeColorMeta">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Roots 準1級">
+<meta name="description" content="語源から覚える英単語アプリ Roots（英検準1級版）">
+<title>Roots 準1級 — 語源で覚える英単語</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  html,body{margin:0;padding:0;background:#FFFFFF;}
+  #boot{
+    position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+    padding:32px;text-align:center;color:#767A85;font-size:14px;line-height:1.8;white-space:pre-wrap;
+    font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif;
+  }
+</style>
+<!--
+  Roots 準1級版（公開URL の /jun1/）
+  ・画面と部品は本体 ../index.html をそのまま使う（本体を直せば、こちらも自動で新しくなる）
+  ・単語だけ words.js の JUN1_WORDS に入れかえる
+  ・本体と同じサイトの中にあるので、まざらないように次のことをしている
+    - スマホに保存する名前（localStorage のキー）を "roots." → "roots-jun1." に変える
+      （ログイン "roots.auth" だけは本体と共通。本体でログインしていれば、こちらもそのまま入れる）
+    - クラウドの学習記録（progress・study_logs・study_sessions）は本体と同じ表なので、送りも受けもしない。
+      記録はこの端末の中だけに残る
+    - 音声・キャラ画像・マンガは本体の ../audio/ ../chara/ ../manga/ を使う
+  ・本体の次の目印を変えると、このページが動かなくなる
+      const RAW_WORDS=[ ／ \nconst {useState ／ \nfunction App(){ ／ const ALPHA_FROM=数字; ／
+      const LEGACY={ ／ "audio/"+acc ／ "chara/ ／ "manga/
+-->
+</head>
+<body>
+<div id="boot">読み込んでいます…</div>
+<div id="root"></div>
+<script>
+  window.__ROOTS_BOOT_ERROR__ = function(msg){
+    var b = document.getElementById("boot");
+    if(!b){ b = document.createElement("div"); b.id = "boot"; document.body.appendChild(b); }
+    b.style.display = "flex";
+    b.textContent = msg;
+  };
+  window.onerror = function(message){
+    window.__ROOTS_BOOT_ERROR__("エラーが発生しました。ページを再読み込みしてください。\n" + message);
+  };
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/dist/umd/supabase.min.js"></script>
+<script>
+  (function(){
+    var BABEL="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.26.4/babel.min.js";
+    var STORE="roots-jun1-compiled";
+    var fail=window.__ROOTS_BOOT_ERROR__;
+    var boot=document.getElementById("boot");
+    function say(t){boot.textContent=t;}
+    if(!window.React||!window.ReactDOM){fail("React の読み込みに失敗しました。インターネットに接続した状態で開いてください。");return;}
+    function run(code){var s=document.createElement("script");s.textContent=code;document.body.appendChild(s);}
+    function loadBabel(){
+      return new Promise(function(ok,ng){
+        if(window.Babel)return ok();
+        var s=document.createElement("script");s.src=BABEL;s.onload=ok;s.onerror=ng;document.head.appendChild(s);
+      });
+    }
+    /* <script id="..."> の中身を取り出す（5MB あるので DOM にせず文字のまま切り出す） */
+    function scriptBody(html,id){
+      var i=html.indexOf('id="'+id+'"');
+      if(i<0)return null;
+      var s=html.indexOf(">",i)+1,e=html.indexOf("<\/script>",s);
+      return e<0?null:html.slice(s,e);
+    }
+    /* 決まった文字を置きかえる。見つからないときは止める（本体の形が変わったら気づけるように） */
+    function swap(src,from,to,label){
+      if(src.indexOf(from)<0)throw new Error("本体の形が変わりました（"+label+" が見つかりません）");
+      return src.split(from).join(to);
+    }
+    function text(url){
+      return fetch(url,{cache:"no-cache"}).then(function(r){
+        if(!r.ok)throw new Error(url+" "+r.status);
+        return r.text();
+      });
+    }
+    Promise.all([text("../index.html"),text("words.js")]).then(function(res){
+      var html=res[0],list=res[1];
+      var full=scriptBody(html,"roots-app");
+      var audio=scriptBody(html,"roots-audio-index");
+      if(!full)throw new Error("roots-app が見つかりません");
+      /* 見た目（CSS）は本体のものをそのまま使う */
+      var st=html.indexOf("<style>"),se=html.indexOf("</style>",st);
+      if(st>=0&&se>st){var css=document.createElement("style");css.textContent=html.slice(st+7,se);document.head.appendChild(css);}
+      if(audio){
+        var a=document.createElement("script");a.type="application/json";a.id="roots-audio-index";
+        a.textContent=audio;document.body.appendChild(a);
+      }
+      var split=full.indexOf("\nconst {useState");
+      if(split<0)throw new Error("本体の形が変わりました（const {useState が見つかりません）");
+      var m=/const ALPHA_FROM=(\d+);/.exec(full);
+      if(!m)throw new Error("本体の形が変わりました（ALPHA_FROM が見つかりません）");
+
+      /* ---- 前半：単語データ（変換いらない。そのまま動かす） ---- */
+      var data=swap(full.slice(0,split),"const RAW_WORDS=[","const MAIN_WORDS=[","RAW_WORDS");
+      data+="\n"+list+"\n"+
+        "const MAIN_ALPHA_FROM="+m[1]+";\n"+
+        "const RAW_WORDS=("+buildWords.toString()+")(MAIN_WORDS,JUN1_WORDS,MAIN_ALPHA_FROM);\n"+
+        "window.__JUN1_COUNT=RAW_WORDS.length;\n";
+      run(data);
+      if(!window.__JUN1_COUNT){fail("単語リストがまだ入っていません（jun1/words.js）");return;}
+
+      /* ---- 後半：画面の部品（JSX なので Babel で変換する） ---- */
+      var src=full.slice(split);
+      src=swap(src,"const ALPHA_FROM="+m[1]+";","const ALPHA_FROM=RAW_WORDS.length+1;","ALPHA_FROM");
+      src=swap(src,'const LEGACY={words:"words_v7",settings:"settings_v7",stats:"stats_v7",badges:"badges_v7"};',
+        'const LEGACY={words:"roots-jun1.legacy.words",settings:"roots-jun1.legacy.settings",stats:"roots-jun1.legacy.stats",badges:"roots-jun1.legacy.badges"};',"LEGACY");
+      src=swap(src,'"roots.','"roots-jun1.','保存の名前');
+      src=src.split('"roots-jun1.auth"').join('"roots.auth"').split('"roots-jun1.demo.auth"').join('"roots.demo.auth"');
+      src=swap(src,'"audio/"+acc','"../audio/"+acc',"音声の場所");
+      src=swap(src,'"chara/','"../chara/',"キャラ画像の場所");
+      src=swap(src,'"manga/','"../manga/',"マンガの場所");
+      src=swap(src,"\nfunction App(){",
+        "\n/* 準1級版：クラウドの学習記録は本体と同じ表なので、まざらないよう送りも受けもしない */\n"+
+        "Object.assign(Cloud,{pull:async()=>false,push:async()=>{},"+
+        "markDirty(){lsSet(\"roots-jun1.localAt\",Date.now());},log(){},unlog(){},flush:async()=>{}});\n"+
+        "\nfunction App(){","function App");
+
+      var h=0x811c9dc5;
+      for(var i=0;i<src.length;i++){h^=src.charCodeAt(i);h=Math.imul(h,0x01000193)>>>0;}
+      var name="./__jun1/"+h.toString(16)+"-"+src.length+".js";
+      var cacheP=window.caches?caches.open(STORE).catch(function(){return null;}):Promise.resolve(null);
+      return cacheP.then(function(c){
+        return (c?c.match(name).then(function(r){return r?r.text():null;}):Promise.resolve(null)).then(function(code){
+          if(code)return run(code);
+          say("画面を組み立てています…（最初の1回だけ時間がかかります）");
+          return loadBabel().then(function(){
+            return new Promise(function(ok){setTimeout(ok,30);});   // 表示を更新してから変換する
+          }).then(function(){
+            var out=Babel.transform(src,{compact:true,presets:[[Babel.availablePresets["react"],{runtime:"classic"}]]}).code;
+            run(out);
+            if(c)c.keys().then(function(ks){return Promise.all(ks.map(function(k){return c.delete(k);}));})
+              .then(function(){return c.put(name,new Response(out,{headers:{"Content-Type":"text/javascript"}}));}).catch(function(){});
+          });
+        });
+      });
+    }).catch(function(e){
+      fail("読み込みに失敗しました。インターネットに接続して開き直してください。\n"+(e&&e.message||e));
+    });
+
+    /* words.js の並びから RAW_WORDS を作る（本編にある語はそのデータを使い回す） */
+    function buildWords(main,list,alphaFrom){
+      var byWord=new Map();
+      /* 本編の語を先に、お試し用（Part α）は後にして、同じ語なら本編のデータを使う */
+      main.filter(function(w){return w.id<alphaFrom;}).concat(main.filter(function(w){return w.id>=alphaFrom;}))
+        .forEach(function(w){var k=String(w.word).trim().toLowerCase();if(!byWord.has(k))byWord.set(k,w);});
+      var out=[],miss=[];
+      (list||[]).forEach(function(e){
+        var base=null,over={};
+        if(typeof e==="string"){base=byWord.get(e.trim().toLowerCase());if(!base){miss.push(e);return;}}
+        else if(e&&e.from){base=byWord.get(String(e.from).trim().toLowerCase());if(!base){miss.push(e.from);return;}over=e;}
+        else if(e&&e.word){over=e;}
+        else return;
+        var w=Object.assign({},base||{},over);
+        delete w.from;delete w.lesson;delete w.part;
+        w.id=out.length+1;
+        out.push(w);
+      });
+      if(miss.length)console.warn("[準1級版] 本編に無いので飛ばした語（"+miss.length+"）: "+miss.join(", "));
+      return out;
+    }
+  })();
+</script>
+<script>
+  /* 本体と同じ保存係（Service Worker）を使う。一度開けば、次からはネットなしでも起動できる */
+  if("serviceWorker" in navigator && location.protocol.startsWith("http")){
+    window.addEventListener("load",function(){navigator.serviceWorker.register("../sw.js").catch(function(){});});
+  }
+</script>
+</body>
+</html>
