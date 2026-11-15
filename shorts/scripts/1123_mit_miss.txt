@@ -1,0 +1,39 @@
+# 型: ①カタカナ語 mit / miss（2026-11-23・Roots #38）
+# タイトル: Roots #38 ①カタカナ語 mit / miss（11/23 投稿2）｜Rootsで英単語｜語源で一発暗記
+# 語根: mit
+# メモ: transmit・submit・dismiss・mission はアプリの見出し語（パーツと意味はアプリのデータ: trans(越えて)・sub(下で)＋mit(送る)、dis(離れて)＋mis(送る)）。missile はアプリの見出し語にないので kata でパーツを指定（ile はアプリの「できる」）。mission も kata ではつづりに合わせて miss を指定
+# メモ: kata の miss(送る) はアプリの miss の絵（的を外す）と意味が違うので、絵は出ず文字になる（ℹ。問題ではない。kata 画面はもともと絵なし）。dismiss はアプリのパーツ（dis＋mis）のまま出すので、最後の s だけ黒になる（アプリと同じ表示）
+# メモ: trans・sub・dis を root 場面にするとまとめの見出しから mit が落ちるので、1121_press と同じく text 場面
+# メモ: 前後の日と重ねない: 11/22 magn/anim、11/24 bene/dict・in/ex と重ならない（ex-/e-/in- の語は使わない。emit・emission は使わない）
+# メモ: 語源の根拠: Merriam-Webster mission（Latin missio「送り出すこと」← mittere to send）、Merriam-Webster missile（Latin missilis ← mittere to throw, send）、Merriam-Webster transmit（Latin transmittere ← trans- ＋ mittere to send）、Merriam-Webster submit（Latin submittere to lower, submit ← sub- ＋ mittere to send）、Merriam-Webster dismiss（Latin dimissus ← dimittere ← dis- ＋ mittere to send）、Etymonline message（Latin missus ← mittere "to release, let go; send, throw"。メッセージは今回は声に出さないが同じ仲間）
+# メモ: 英検級は言わない（word 画面にはアプリの級が出る）。例文はオリジナル
+# メモ: まとめは3.2秒
+# メモ: 開発係（11/15）: まとめの見出しに miss も出すため {summary 見出し=mit・miss} にした
+# メモ: ループ: 最後「次に何かを送るとき、思い出すのは…」→ 冒頭「ミッション、ミサイル…」
+# ナレーション: [0.0-3.0] ミッション、ミサイル…英単語の覚え方は語源
+# ナレーション: [3.0-6.0] あなたはもう mit を知っています
+# ナレーション: [6.0-9.0] ミッションは、送り出されてやる任務
+# ナレーション: [9.0-12.0] ミサイルは、遠くへ送り飛ばすもの
+# ナレーション: [12.0-15.0] mit と miss は「送る」
+# ナレーション: [15.0-18.0] trans は「越えて」
+# ナレーション: [18.0-21.5] 向こうへ越えて送る、transmit「伝える」
+# ナレーション: [21.5-24.5] sub は「下で」
+# ナレーション: [24.5-28.0] 下から差し出して送る、submit「提出する」
+# ナレーション: [28.0-31.0] dis は「離れて」
+# ナレーション: [31.0-34.5] 離れたところへ送る、dismiss「退ける」
+# ナレーション: [34.5-37.7] mit・miss は送る、方向で3語
+# ナレーション: [37.7-40.5] 次に何かを送るとき、思い出すのは…
+# メモ: 録音のコツ: 1行読んだら半拍（0.4秒）あけ、transmit・submit は後ろの「ミット」を強く、dismiss は「ディスミス」の「ミス」を強く読む
+[0.0-3.0] {hook think} ミッション、ミサイル…
+[3.0-6.0] {hook teach} もうmitを\n知ってる
+[6.0-9.0] {kata ミッション mission miss(送る)+ion(名詞)} 送り出される任務
+[9.0-12.0] {kata ミサイル missile miss(送る)+ile(できる)} 遠くへ送り飛ばす物
+[12.0-15.0] {root mit=送る} mit・miss＝送る
+[15.0-18.0] {text} trans＝越えて
+[18.0-21.5] {word transmit} 越えて送る＝伝える
+[21.5-24.5] {text} sub＝下で
+[24.5-28.0] {word submit} 下から送る＝提出する
+[28.0-31.0] {text} dis＝離れて
+[31.0-34.5] {word dismiss} 離れて送る＝退ける
+[34.5-37.7] {summary 見出し=mit・miss} mit・miss＝送る→3語
+[37.7-40.5] {hook think} 次に何かを\n送るとき…

@@ -931,6 +931,9 @@ def chip(d, text, cx, cy, color, size=40, filled=False):
         d.text((cx, cy), text, font=f, fill=color, anchor="mm")
 
 
+PART_KIND = {"接頭": "prefix", "接頭語": "prefix", "語根": "root", "接尾": "suffix", "接尾語": "suffix"}
+
+
 def parse_parts(spec, root_morph):
     """'re(もとへ)+port(運ぶ)' → [{morph,gloss,type}]（語根の前は接頭・後ろは接尾の色）"""
     items = [s.strip() for s in re.split(r"[+＋]", spec) if s.strip()]
@@ -939,8 +942,11 @@ def parse_parts(spec, root_morph):
         m = re.match(r"^([^（(]+)(?:[（(]([^）)]*)[）)])?$", s)
         morph, gloss = (m.group(1).strip(), (m.group(2) or "").strip()) if m else (s, "")
         # dis(悪い|絵なし) / dis(悪い|絵あり) で、絵の出し方を指定できる
-        gloss, _, opt = gloss.replace("｜", "|").partition("|")
-        parts.append({"morph": morph, "gloss": gloss.strip(), "pic_opt": opt.strip() or None})
+        # drome(競走路|語根) で、パーツの種類（接頭・語根・接尾）も指定できる（最後のパーツが接尾にされてしまうとき）
+        gloss, *opts = [o.strip() for o in gloss.replace("｜", "|").split("|")]
+        kind = next((PART_KIND[o] for o in opts if o in PART_KIND), None)
+        opt = next((o for o in opts if o and o not in PART_KIND), None)
+        parts.append({"morph": morph, "gloss": gloss, "pic_opt": opt, "kind": kind})
     roots = [r.lower() for r in re.split(r"[+＋]", root_morph or "") if r.strip()]
     ri = next((i for i, p in enumerate(parts) if p["morph"].lower() in roots), None)
     for i, p in enumerate(parts):
@@ -953,6 +959,8 @@ def parse_parts(spec, root_morph):
             p["type"] = "root"
         else:
             p["type"] = "prefix" if i < ri else "suffix"
+        if p.get("kind"):
+            p["type"] = p["kind"]
         same = part_info(p["morph"], p["type"])
         p["picto"] = pick_picto(p["morph"], p["type"], p["gloss"], p["pic_opt"]) if same["type"] == p["type"] else None
         p["canon"] = p["morph"].lower()
@@ -961,7 +969,7 @@ def parse_parts(spec, root_morph):
     # アプリのデータにない語（malfunction の function）は、語根が1つもないとき語根にする（最後だからと接尾にしない）
     if ri is None and len(parts) >= 2 and not any(p["type"] == "root" for p in parts):
         for p in parts:
-            if not part_info(p["morph"])["type"]:
+            if not part_info(p["morph"])["type"] and not p.get("kind"):
                 p["type"] = "root"
                 break
     return parts
@@ -1168,7 +1176,9 @@ def scene_summary(ctx, c):
     elif len(ctx.root_list) > 3:
         summary_head1(img, d, ctx, heads[0])   # 語根が1つだけ残ったとき（tract ＋ ad・dis・ex）
     else:
-        summary_head1(img, d, ctx)
+        # {summary 見出し=vis・vid} で見出しの文字だけ変えられる（意味・絵は語根のまま。別つづりの vid も出したいとき）
+        title = next((t.split("=", 1)[1] for t in (c["arg"] or "").split() if t.startswith("見出し=")), None)
+        summary_head1(img, d, ctx, title=title)
     # {summary 欄=今日の単語} で「受験単語」の欄の名前を変えられる（breakfast など受験向けでない語の回）
     label = next((t.split("=", 1)[1] for t in (c["arg"] or "").split() if t.startswith("欄=")), "受験単語")
     summary_rows(d, ctx, label)
@@ -1226,7 +1236,7 @@ def summary_heads(d, heads):
             x += plus
 
 
-def summary_head1(img, d, ctx, head=None):
+def summary_head1(img, d, ctx, head=None, title=None):
     if head:   # 語根を指定したとき
         pic = picto_image(head["picto"], 150)
         _summary_title(img, d, head["morph"], head["gloss"], TYPE_COLOR[head["type"]], pic)
@@ -1238,7 +1248,7 @@ def summary_head1(img, d, ctx, head=None):
         info = part_info(ctx.root)
     gloss = (ctx.root_list[0]["gloss"] if ctx.root_list else "") or getattr(ctx, "root_gloss", "") or info["gloss"]
     color = TYPE_COLOR[ctx.root_list[0]["type"]] if ctx.root_list else TYPE_COLOR["root"]
-    _summary_title(img, d, ctx.root, gloss, color, picto_image(info["picto"], 150))
+    _summary_title(img, d, title or ctx.root, gloss, color, picto_image(info["picto"], 150))
 
 
 def _summary_title(img, d, title, gloss, color, pic):

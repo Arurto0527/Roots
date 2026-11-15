@@ -17,5 +17,5 @@
 [27.0-30.0] {word evidence} evidence＝証拠
 [30.0-33.0] {text} pro＝前へ
 [33.0-36.0] {word provide pro(前へ)+vid(見る)=供給する} provide＝供給する
-[36.0-39.3] {summary} vis・vid＝見る、で3語
+[36.0-39.3] {summary 見出し=vis・vid} vis・vid＝見る、で3語
 [39.3-42.0] {hook think} 次にテレビを見たら…

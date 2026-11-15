@@ -1,0 +1,37 @@
+# 型: ②雑学 hippopotamus（2026-11-23・Roots #37）
+# タイトル: Roots #37 ②雑学 hippopotamus（11/23 投稿1）｜Rootsで英単語｜語源で一発暗記
+# 語根: hippo+potam
+# メモ: hippopotamus・Mesopotamia・hippodrome はアプリの見出し語にないのでパーツを指定（us・ia は意味なし）。Mesopotamia・hippodrome は仲間として見せる語なので「番号なし」
+# メモ: 語源の根拠: Etymonline hippopotamus（Greek hippopotamos "riverhorse" ← ho hippos potamios "the horse of the river"、hippos "horse" ＋ potamos "river, rushing water"）、Merriam-Webster hippopotamus（Greek hippopotamos, alteration of hippos potamios, literally, riverine horse）
+# メモ: 語源の根拠（仲間）: Etymonline Mesopotamia（"a country between two rivers"、mesos "middle" ＋ potamos "river"）、Merriam-Webster hippodrome（Greek hippos ＋ dromos racecourse。古代ギリシャの馬・戦車レース用の楕円の競技場）
+# メモ: 注意: 「なぜ馬に見えたか」は辞書に書いていないので理由は言わない（「ギリシャでの呼び名」まで）。hippo は hippopotamus を略した形（Merriam-Webster hippo）。英検級は言わない
+# メモ: 開発係（11/15）: hippodrome の drome は最後のパーツなので接尾（緑・箱なし）にされていた → drome(競走路|語根) で語根にした
+# メモ: 受験向けでない語なので、まとめの欄は「今日の単語」。まとめは3.2秒
+# メモ: ループ: 最後「次に動物園でカバを見たら…」→ 冒頭「カバの語源は、馬」
+# ナレーション: [0.0-3.0] カバの語源は、馬。英単語の覚え方は語源
+# ナレーション: [3.0-6.0] なぜカバが馬なの？
+# ナレーション: [6.0-9.0] hippo はギリシャ語で「馬」
+# ナレーション: [9.0-12.0] potamos は「川」
+# ナレーション: [12.0-15.0] 合わせて「川の馬」
+# ナレーション: [15.0-18.5] 古代ギリシャで、カバはこう呼ばれました
+# ナレーション: [18.5-21.5] 川の馬から、カバへ
+# ナレーション: [21.5-24.5] 略すと hippo。本当は馬だけ
+# ナレーション: [24.5-28.0] Mesopotamia は、川と川の間の土地
+# ナレーション: [28.0-31.5] hippodrome は、馬が走る競技場
+# ナレーション: [31.5-34.5] 世界史の地名も、英単語とつながる
+# ナレーション: [34.5-37.7] hippo「馬」＋ potam「川」
+# ナレーション: [37.7-40.5] 次に動物園でカバを見たら…
+# メモ: 録音のコツ: 1行読んだら半拍（0.4秒）あけ、hippopotamus は「ヒポポタマス」と「ポタ」を強く、Mesopotamia は「メソポテイミア」とゆっくり読む
+[0.0-3.0] {trivia hippopotamus hippo(馬)+potam(川)+us=カバ} カバの語源は「馬」
+[3.0-6.0] {hook think} なぜカバが馬？
+[6.0-9.0] {root hippo=馬} hippo＝馬
+[9.0-12.0] {root potam=川} potam＝川
+[12.0-15.0] {origin hippopotamus} 川の馬
+[15.0-18.5] {text} 古代ギリシャでの呼び名
+[18.5-21.5] {reveal hippopotamus} 川の馬→カバ
+[21.5-24.5] {text think} 略すとhippo、実は馬だけ
+[24.5-28.0] {word Mesopotamia 番号なし meso(間)+potam(川)+ia=メソポタミア} 川と川の間の土地
+[28.0-31.5] {word hippodrome 番号なし hippo(馬)+drome(競走路|語根)=競馬場} 馬が走る競技場
+[31.5-34.5] {text} 世界史も英単語もつながる
+[34.5-37.7] {summary 欄=今日の単語} hippo馬＋potam川
+[37.7-40.5] {hook think} 次に動物園で\nカバを見たら…
