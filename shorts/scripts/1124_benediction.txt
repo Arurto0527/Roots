@@ -1,0 +1,37 @@
+# 型: ③推理 benediction（2026-11-24・Roots #39）
+# タイトル: Roots #39 ③推理 benediction（11/24 投稿1）｜Rootsで英単語｜語源で一発暗記
+# 語根: bene+dict
+# メモ: benediction はアプリの見出し語にないのでパーツを指定（bene(良い)+dict(言う)+ion(名詞)＝祝福）。bene・dict の意味はアプリに合わせた（bene＝良い、dict＝言う）
+# メモ: benefit（bene(良い)+fic(作る)＝恩恵）・predict（pre(先に)+dict(言う)＝予測する）はアプリの見出し語なのでパーツ指定なし
+# メモ: #3 benevolent・#11 malevolent で bene は出ているが、今回は bene＋dict（言う）の組み合わせで解く。dict は「言う」だけを言い、11/25 の duce/duct（導く）と混ざらないよう、つづりは dict に統一し duce/duct の語（produce・conduct など）は出さない
+# メモ: 語源の根拠: Merriam-Webster benediction（Late Latin benedictio ← benedicere「祝福する」、もとはラテン語で「良く言う」← bene "well" ＋ dicere "to say"）、Etymonline benedict（benedicere「良く言う・祝福する」は古典ラテン語では bene dicere の2語。bene「良い・良く」、dicere「言う・話す」。benediction は後期ラテン語 benedictionem「祝福」から。英語での最初の意味は食前のお祈り）。Etymonline の benediction の本文はこちらから取得できなかった（benedict の項で確認）
+# メモ: 英検級は言わない（word・answer 画面にはアプリの級が出る）。例文はオリジナル（旅立つ友だちへ「元気でね」と贈る言葉）
+# メモ: まとめは3.2秒。count は3秒のまま、声は「3秒で考えて」だけ
+# メモ: ループ: 最後「初めて見る長い単語だって…」→ 冒頭「英単語は、語源で解ける」
+# ナレーション: [0.0-3.0] 英単語は、語源で解ける
+# ナレーション: [3.0-5.5] benediction
+# ナレーション: [5.5-8.5] 3秒で考えて
+# ナレーション: [8.5-11.5] bene は「良い」
+# ナレーション: [11.5-14.5] 良いことを作る、benefit「恩恵」
+# ナレーション: [14.5-17.5] dict は「言う」
+# ナレーション: [17.5-20.5] 先に言う、predict「予測する」
+# ナレーション: [20.5-23.5] 良いことを言う…？
+# ナレーション: [23.5-27.0] 正解は「祝福」
+# ナレーション: [27.0-30.0] 旅立つ友だちに「元気でね」と贈る言葉
+# ナレーション: [30.0-33.0] それが benediction
+# ナレーション: [33.0-36.2] bene「良い」＋ dict「言う」
+# ナレーション: [36.2-39.0] 初めて見る長い単語だって…
+# メモ: 録音のコツ: 1行読んだら半拍（0.4秒）あけ、benediction は「ベネディクション」と「ディク」を強く、ゆっくり1回だけ読む
+[0.0-3.0] {hook think} 英単語は\n語源で解ける
+[3.0-5.5] {quiz benediction bene(良い)+dict(言う)+ion(名詞)=祝福} benediction
+[5.5-8.5] {count benediction} 3秒で考えて
+[8.5-11.5] {root bene=良い} bene＝良い
+[11.5-14.5] {word benefit} 良いことを作る＝恩恵
+[14.5-17.5] {root dict=言う} dict＝言う
+[17.5-20.5] {word predict} 先に言う＝予測する
+[20.5-23.5] {split benediction} 良いことを言う…？
+[23.5-27.0] {answer benediction} 正解：祝福
+[27.0-30.0] {text think} 旅立つ友に「元気で」
+[30.0-33.0] {text} それがbenediction
+[33.0-36.2] {summary} bene良い＋dict言う
+[36.2-39.0] {hook think} 初めて見る長い単語だって…

@@ -1,0 +1,35 @@
+# 型: ④ペア inhale / exhale（2026-11-24・Roots #40）
+# タイトル: Roots #40 ④ペア inhale / exhale（11/24 投稿2）｜Rootsで英単語｜語源で一発暗記
+# 語根: hale
+# メモ: inhale・exhale・inhaler はアプリの見出し語にないのでパーツを指定（in(中へ)+hale(息をする)＝息を吸いこむ／ex(外へ)+hale(息をする)＝息を吐き出す）。inhaler は仲間として見せる語なので「番号なし」
+# メモ: hale は最後のパーツなので自動で接尾にならないよう |語根 を付けた
+# メモ: in/ex・im/e は #8・#12・#16・#24・#28 で何度も出ているので、今回は in/ex の説明はペア画面だけにして、hale＝息・ぜんそくの吸入器 inhaler・深呼吸（4秒吸って6秒吐く）の「呼吸」の切り口にした
+# メモ: 語源の根拠: Etymonline exhale（ラテン語 exhalare「息を吐く・蒸発させる」＝ex「外へ」＋halare「息を吐く・呼吸する」。inhale の反対語）、Etymonline inhalation／inhale（ラテン語 inhalare「息を吹きかける」＝in-＋halare「呼吸する」。英語の inhale「息を吸う・肺に空気を入れる」は1725年から）、Merriam-Webster exhale（Latin exhalare, from ex- + halare to breathe）、Merriam-Webster inhale（語源は in- ＋ exhale）、Merriam-Webster Medical inhaler（a device by means of which medicinal material is inhaled＝薬を吸いこむための器具）
+# メモ: 注意: ラテン語 inhalare の in はもともと「上に（吹きかける）」の意味だったという説明がある（Etymonline）。今の英語 inhale は「息を中へ入れる」なので、in＝中へ で見分けるのは英語の意味に合わせた覚え方
+# メモ: 英検級は言わない（word 画面にはアプリの級が出る）。例文はオリジナル（深呼吸で4秒吸って6秒吐く）
+# メモ: 前後の日と重ねない: 11/23 trans・sub・dis・mit、11/25 mort・duce/duct の語は使わない。11/24 投稿1の bene・dict も使わない
+# メモ: まとめは3.2秒
+# メモ: ループ: 最後「次に深呼吸するときは…」→ 冒頭「吸う？吐く？語源で見分けよう」
+# ナレーション: [0.0-3.0] 吸う？吐く？語源で見分けよう
+# ナレーション: [3.0-6.0] hale は「息をする」
+# ナレーション: [6.0-9.0] もとはラテン語の halare
+# ナレーション: [9.0-12.5] 息を中へ入れる、inhale「吸いこむ」
+# ナレーション: [12.5-16.0] ぜんそくなどの吸入器も inhaler
+# ナレーション: [16.0-19.5] 息を外へ出す、exhale「吐き出す」
+# ナレーション: [19.5-22.5] たとえば深呼吸、4秒 inhale
+# ナレーション: [22.5-25.5] 6秒かけて exhale
+# ナレーション: [25.5-29.0] 中へなら吸う、外へなら吐く
+# ナレーション: [29.0-32.2] in 中へ→吸う、ex 外へ→吐く
+# ナレーション: [32.2-35.0] 次に深呼吸するときは…
+# メモ: 録音のコツ: 1行読んだら半拍（0.4秒）あけ、inhale は「イン・ヘイル」、exhale は「エクス・ヘイル」と、頭の in／ex をはっきり分けて読む
+[0.0-3.0] {hook think} 吸う？吐く？\n語源で見分ける
+[3.0-6.0] {root hale=息をする} hale＝息をする
+[6.0-9.0] {text think} 元はラテン語halare
+[9.0-12.5] {word inhale in(中へ)+hale(息をする|語根)=息を吸いこむ} 息を中へ＝吸いこむ
+[12.5-16.0] {word inhaler 番号なし in(中へ)+hale(息をする|語根)+er(道具)=吸入器} 吸入器もinhaler
+[16.0-19.5] {word exhale ex(外へ)+hale(息をする|語根)=息を吐き出す} 息を外へ＝吐き出す
+[19.5-22.5] {text think} 例：吸って4秒＝inhale
+[22.5-25.5] {text} 吐いて6秒＝exhale
+[25.5-29.0] {pair inhale exhale} inは吸う、exは吐く
+[29.0-32.2] {pairsum} in中へ→吸う\nex外へ→吐く
+[32.2-35.0] {hook think} 次に深呼吸するときは…

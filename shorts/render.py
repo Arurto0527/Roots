@@ -547,6 +547,10 @@ def split_colored(word, parts):
         if i < 0 and m.startswith("s") and low[:pos].endswith("x") and low.startswith(m[1:], pos):
             m = m[1:]
             i = pos
+        # 前のパーツと1文字が重なる語（hale＋er → inhaler の e）。残りの形に色をつける
+        if i < 0 and 0 < pos and len(m) >= 2 and low[pos - 1] == m[0] and low.startswith(m[1:], pos):
+            m = m[1:]
+            i = pos
         if i < 0 and p["type"] == "prefix" and k + 1 < len(parts):
             # 接頭語の形が変わる語（sub→su の suspect、ad→ac の accept）。
             # 次のパーツの手前までが、同じ文字で始まる短い形なら、そこを接頭語の色にする

@@ -107,3 +107,4 @@ cd shorts/tools && npm install && node extract_assets.js
 ```
 index.html から `shorts/data/words.json`（単語・意味・語源パーツ・色の種類）と `shorts/data/picto.json`（ピクトグラム）を作り直します。
 色はアプリと同じ（接頭 #2F5D9E・語根 #B5652B・接尾 #4F7A5E、アクセント紫 #534AB7）。
+前のパーツと1文字が重なる語（hale＋er → inhaler、via＋al → trivial）は、アプリと同じく残りの文字（r・l）を接尾の色にします。
