@@ -1,0 +1,40 @@
+# 型: ①カタカナ語 duce / duct（2026-11-25・Roots #42）
+# タイトル: Roots #42 ①カタカナ語 duce / duct（11/25 投稿2）｜Rootsで英単語｜語源で一発暗記
+# 語根: duc
+# メモ: produce・reduce・deduce はアプリの見出し語（パーツと意味はアプリのデータ: pro(前へ)・re(後ろへ)・de(下へ)＋duc(導く)）。duct は見出し語にないので kata でパーツを指定。conductor は conduct の related にある語（con(共に)＋duct(導く)＋or(人)）なので kata でパーツを指定
+# メモ: pro・re を root 場面にするとまとめの見出しから duc が落ちるので、1121_press・1123_mit_miss と同じく text 場面。deduce の de はアプリでは「下へ」だが、Merriam-Webster では deducere＝lead away（導き離す）で「下へ」と言うとずれるので、de の意味は声に出さず「手がかりから答えを導き出す」（アプリの imagery の考え方）で説明する
+# メモ: 前後の日と重ねない: 11/23 trans・sub・dis・mit、11/24 bene・dict・in/ex・hale、11/26 carn・vor・flat、11/25 投稿1の mort・gage は使わない。in- の induce・intro- の introduce・e(外へ) の education は 11/24 の in/ex と近いので使わない。dict・predict も使わない
+# メモ: 語源の根拠: Merriam-Webster duct（New Latin ductus ← Latin「導くこと」← ducere to lead。Medieval Latin では aqueduct）、Merriam-Webster conductor（Medieval Latin conductor「escort, guide」← condūcere、Medieval Latin では to lead, escort）、Merriam-Webster produce（Latin producere ← pro- forward ＋ ducere to lead）、Merriam-Webster reduce（Middle English「to lead back」← Latin reducere ← re- ＋ ducere to lead）、Merriam-Webster deduce（Latin deducere, literally, to lead away ← de- ＋ ducere to lead）
+# メモ: 注意: コンダクターは日本語では「ツアーコンダクター（添乗員）」「指揮者」。どちらも「みんなを導く人」なので語源とずれない。英検級は言わない（word 画面にはアプリの級が出る）
+# メモ: 開発係へ: まとめの見出しに duct も出すため {summary 見出し=duc・duct} にした
+# メモ: 語源チェック係の提案を反映: deduce は「推定する（estimate と誤解されやすい）」→「推論する」
+# メモ: 開発係（11/17）: deduce の画面の訳がアプリの「推定する」のままだったので、{word deduce =推論する} にして画面とまとめの訳を「推論する」にした（パーツはアプリのまま。アプリのデータは変えていない）
+# メモ: まとめは3.2秒
+# メモ: ループ: 最後「次に天井のダクトを見かけたら…」→ 冒頭「ダクト、コンダクター…」
+# ナレーション: [0.0-3.0] ダクト、コンダクター…英単語の覚え方は語源
+# ナレーション: [3.0-6.0] あなたはもう duct を知っています
+# ナレーション: [6.0-9.0] ダクトは、空気を導く管
+# ナレーション: [9.0-12.0] コンダクターは、みんなを導く人
+# ナレーション: [12.0-15.0] duc と duct は「導く」
+# ナレーション: [15.0-18.0] pro は「前へ」
+# ナレーション: [18.0-21.5] 前へ導き出す、produce「生産する」
+# ナレーション: [21.5-24.5] re は「後ろへ」
+# ナレーション: [24.5-28.0] 後ろへ引き戻す、reduce「減らす」
+# ナレーション: [28.0-31.0] 探偵のように、手がかりをたどると…
+# ナレーション: [31.0-34.5] 答えを導き出す、deduce「推論する」
+# ナレーション: [34.5-37.7] duc・duct は導く、で3語
+# ナレーション: [37.7-40.5] 次に天井のダクトを見かけたら…
+# メモ: 録音のコツ: 1行読んだら半拍（0.4秒）あけ、produce・reduce・deduce は後ろの「デュース」を強く、duct は「ダクト」と短く切って読む
+[0.0-3.0] {hook think} ダクト、コンダクター…
+[3.0-6.0] {hook teach} もうductを\n知ってる
+[6.0-9.0] {kata ダクト duct duct(導く)} 空気を導く管
+[9.0-12.0] {kata コンダクター conductor con(共に)+duct(導く)+or(人)} みんなを導く人
+[12.0-15.0] {root duc=導く} duc・duct＝導く
+[15.0-18.0] {text} pro＝前へ
+[18.0-21.5] {word produce} 前へ導き出す＝生産する
+[21.5-24.5] {text} re＝後ろへ
+[24.5-28.0] {word reduce} 後ろへ引き戻す＝減らす
+[28.0-31.0] {text think} 手がかりをたどると…
+[31.0-34.5] {word deduce =推論する} 答えを導き出す＝推論する
+[34.5-37.7] {summary 見出し=duc・duct} duc・duct＝導く→3語
+[37.7-40.5] {hook think} 次にダクトを\n見かけたら…

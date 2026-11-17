@@ -1,0 +1,37 @@
+# 型: ②雑学 mortgage（2026-11-25・Roots #41）
+# タイトル: Roots #41 ②雑学 mortgage（11/25 投稿1）｜Rootsで英単語｜語源で一発暗記
+# 語根: mort+gage
+# メモ: mortgage はアプリの見出し語でなく mortality の related にだけある語なので、パーツを指定（mort はアプリの「死」、gage は engage と同じ「担保」）。mortality・murder はアプリの見出し語（パーツと意味はアプリのデータ: mort(死)＋ity(名詞)、murd(死)）
+# メモ: 語源の根拠: Merriam-Webster mortgage（Middle English morgage ← Anglo-French mortgage ← mort dead (Latin mortuus) ＋ gage。法律版は gage security。「なぜ死か」の説明はない。「more at murder」と murder へつないでいる）
+# メモ: 語源の根拠: Etymonline mortgage は本サイト（etymonline.com）が取得エラーで読めず、Etymonline の日本語版（etymonline.net/jp、AI翻訳と明記）で確認：「死の担保」、借金が返済されると取引が「死ぬ」か、返済が失敗すると「死ぬ」ためにこう呼ばれる。Coke upon Littleton（1664）の引用：返せなければ土地は永久に取られて dead、返せば the pledge is dead
+# メモ: 注意: 「なぜ死か」は Etymonline の説明（Coke の古い法律書の説明）なので、ナレーションは「〜と説明されている」にして言い切らない。murder はゲルマン系の語で、mort とは印欧祖語 *mer- を共有する遠い親戚（Etymonline murder・Merriam-Webster mortgage「more at murder」）。ラテン語 mort から来た語ではないので声は「遠い親戚」と言う（語源チェック係の提案を反映）。英検級は言わない（word 画面にはアプリの級が出る）
+# メモ: 前後の日と重ねない: 11/23 trans・sub・dis・mit、11/24 bene・dict・in/ex・hale、11/26 carn・vor・flat、11/25 投稿2の duc・duct（導く）の語は出さない（engage も en＝中へ なので出さない）
+# メモ: まとめは3.2秒
+# メモ: ループ: 最後「次に『住宅ローン』と聞いたら…」→ 冒頭「住宅ローンの語源は、死」
+# ナレーション: [0.0-3.0] 住宅ローンの語源は、死。英単語の覚え方は語源
+# ナレーション: [3.0-6.0] なぜローンが「死」なの？
+# ナレーション: [6.0-9.0] mort は「死」
+# ナレーション: [9.0-12.0] gage は「担保」、借金のかた
+# ナレーション: [12.0-15.0] 合わせて「死んだ担保」
+# ナレーション: [15.0-18.5] 借金を返し終えると、約束が死ぬ
+# ナレーション: [18.5-22.0] 返せないと、担保の土地を失う
+# ナレーション: [22.0-25.5] どちらでも「死ぬ」約束、と説明されています
+# ナレーション: [25.5-28.5] 死んだ担保から、住宅ローンへ
+# ナレーション: [28.5-32.0] mortality は、死亡率
+# ナレーション: [32.0-35.0] murder「殺人」も、死の遠い親戚
+# ナレーション: [35.0-38.2] mortgage、死んだ担保
+# ナレーション: [38.2-41.0] 次に「住宅ローン」と聞いたら…
+# メモ: 録音のコツ: 1行読んだら半拍（0.4秒）あけ、mortgage は t を読まず「モーギッジ」と「モー」を強く、mortality は「モータリティ」の「タ」を強く読む
+[0.0-3.0] {trivia mortgage mort(死)+gage(担保)=住宅ローン} 住宅ローンの語源は「死」
+[3.0-6.0] {hook think} なぜローンが死？
+[6.0-9.0] {root mort=死} mort＝死
+[9.0-12.0] {root gage=担保} gage＝担保
+[12.0-15.0] {origin mortgage} 死んだ担保
+[15.0-18.5] {text} 返し終えたら約束が死ぬ
+[18.5-22.0] {text think} 返せないと担保を失う
+[22.0-25.5] {text} どちらでも「死ぬ」約束
+[25.5-28.5] {reveal mortgage} 死んだ担保→住宅ローン
+[28.5-32.0] {word mortality} 死すべき運命→死亡率
+[32.0-35.0] {word murder} murderも死の親戚
+[35.0-38.2] {summary} mort死＋gage担保
+[38.2-41.0] {hook think} 次に「住宅ローン」と\n聞いたら…
