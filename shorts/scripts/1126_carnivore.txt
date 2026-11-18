@@ -1,0 +1,38 @@
+# 型: ③推理 carnivore（2026-11-26・Roots #43）
+# タイトル: Roots #43 ③推理 carnivore（11/26 投稿1）｜Rootsで英単語｜語源で一発暗記
+# 語根: carn+vor
+# メモ: carnivore はアプリの見出し語（carn(肉)+vor(食べる)＝肉食動物）なのでパーツ指定なし。herbivore・omnivore はアプリでは related にだけある語なので、パーツを指定して「番号なし」で仲間として出す（vor が最後のパーツで自動で接尾にならないよう |語根、omni は 接頭 を指定）
+# メモ: voracious はアプリにない語なのでパーツを指定（vor(食べる|語根)+acious(～な)＝食欲旺盛な）。「番号なし」
+# メモ: 語源の根拠: Etymonline carnivore（1839年、フランス語 carnivore ← ラテン語 carnivorus「肉を食べる」）・carnivorous（ラテン語 caro（属格 carnis）「肉」＋vorare「むさぼり食う」）。Merriam-Webster carnivorous（Latin carnivorus, from carn-, caro ＋ -vorus -vorous）。Merriam-Webster voracious（Latin vorac-, vorax, from vorare to devour。意味 having a huge appetite）。herbivore はラテン語 herba「草」＋vorare、omnivore は omnis「すべて」＋vorare（Etymonline の本文はこちらから取得できず、検索結果の要約と etymologist.ai で確認。チェック係は本文で再確認すること）
+# メモ: 注意: carnival は「carne vale（肉よさらば）」の説明が有名だが、根拠のない民間語源とされる（vocabulary.com Word Routes。Etymonline carnival の本文は取得エラー）。Etymonline の本筋は イタリア語 carnevale ← carnelevare「肉を取り除く」（caro 肉＋levare 取り除く）→四旬節（肉を断つ期間）の前の祭り。ナレーションは「〜という説」として言い切らない（語源チェック係が Etymonline 本文で確認済）。「さらば」は使わない
+# メモ: 英検級は言わない（answer 画面にはアプリの級が出る）。例はオリジナル（ライオン・ウサギ・人間）
+# メモ: 前後の日と重ねない: 11/24 bene・dict・in/ex・hale、11/25 mort・gage・duc/duct、11/27 quar・pend、11/26 投稿2の in/de・flat の語は出さない（devour は de＋vor なので使わず voracious にした）。omni は 11/14 omnipotent で出ている（12日前なのでOK）
+# メモ: まとめは3.2秒。count は3秒のまま、声は「3秒で考えて」だけ
+# メモ: ループ: 最後「肉食も、草食も、雑食も…」→ 冒頭「動物の英単語も、語源で解ける」
+# ナレーション: [0.0-3.0] 動物の英単語も、語源で解ける
+# ナレーション: [3.0-5.5] carnivore
+# ナレーション: [5.5-8.5] 3秒で考えて
+# ナレーション: [8.5-11.5] carn は「肉」
+# ナレーション: [11.5-15.0] carnival にも carn。肉を断つ前の祭りという説
+# ナレーション: [15.0-18.0] vor は「食べる」
+# ナレーション: [18.0-21.0] がつがつ食べる、voracious「食欲旺盛な」
+# ナレーション: [21.0-24.0] 肉を食べる…？
+# ナレーション: [24.0-27.5] 正解は「肉食動物」、ライオンみたいな
+# ナレーション: [27.5-30.5] 草を食べるウサギは herbivore
+# ナレーション: [30.5-33.5] 何でも食べる人間は omnivore
+# ナレーション: [33.5-36.7] carn「肉」＋ vor「食べる」
+# ナレーション: [36.7-39.5] 肉食も、草食も、雑食も…
+# メモ: 録音のコツ: 1行読んだら半拍（0.4秒）あけ、carnivore は「カーニヴォア」と「カー」を強く、ゆっくり1回だけ読む。herbivore は「ハービヴォア」、omnivore は「オムニヴォア」、voracious は「ヴォレイシャス」の「レイ」を強く
+[0.0-3.0] {hook think} 動物の英単語も\n語源で解ける
+[3.0-5.5] {quiz carnivore} carnivore
+[5.5-8.5] {count carnivore} 3秒で考えて
+[8.5-11.5] {root carn=肉} carn＝肉
+[11.5-15.0] {text think} carnivalにもcarn
+[15.0-18.0] {root vor=食べる} vor＝食べる
+[18.0-21.0] {word voracious 番号なし vor(食べる|語根)+acious(～な)=食欲旺盛な} がつがつ食べる＝食欲旺盛
+[21.0-24.0] {split carnivore} 肉を食べる…？
+[24.0-27.5] {answer carnivore} 正解：肉食動物
+[27.5-30.5] {word herbivore 番号なし herb(草|語根)+vor(食べる|語根)=草食動物} 草ならherbivore
+[30.5-33.5] {word omnivore 番号なし omni(すべて|接頭)+vor(食べる|語根)=雑食動物} 何でもならomnivore
+[33.5-36.7] {summary} carn肉＋vor食べる
+[36.7-39.5] {hook think} 肉食も草食も雑食も…

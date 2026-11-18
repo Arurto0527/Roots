@@ -101,7 +101,7 @@ python3 shorts/render.py --script 台本.txt --voice 録音.m4a --type 1 --numbe
 
 単語のパーツの種類は `drome(競走路|語根)` のように `|接頭`・`|語根`・`|接尾` で指定できます（最後のパーツが自動で接尾〈緑・箱なし〉にされてしまうとき）。`|絵なし` と一緒に使うときは `drome(競走路|語根|絵なし)`。
 
-夜勤チームの台本（本番用の下書き）: `scripts/1105_muscle.txt`（②#1）・`1105_port.txt`（①#2）・`1106_benevolent.txt`（③#3）・`1106_adapt_adopt.txt`（④#4）・`1107_disaster.txt`（②#5）・`1107_ject.txt`（①#6）・`1108_circumvent.txt`（③#7）・`1108_include_exclude.txt`（④#8）・`1109_candidate.txt`（②#9）・`1109_struct.txt`（①#10）・`1110_malevolent.txt`（③#11）・`1110_inspect_expect.txt`（④#12）・`1111_companion.txt`（②#13）・`1111_tract.txt`（①#14）・`1112_retrospect.txt`（③#15）・`1112_increase_decrease.txt`（④#16）・`1113_breakfast.txt`（②#17）・`1113_spect.txt`（①#18）ほか（〜`1125_mortgage.txt`（②#41）・`1125_duce_duct.txt`（①#42））。仮動画（無音）は `samples/仮_*.mp4`
+夜勤チームの台本（本番用の下書き）: `scripts/1105_muscle.txt`（②#1）・`1105_port.txt`（①#2）・`1106_benevolent.txt`（③#3）・`1106_adapt_adopt.txt`（④#4）・`1107_disaster.txt`（②#5）・`1107_ject.txt`（①#6）・`1108_circumvent.txt`（③#7）・`1108_include_exclude.txt`（④#8）・`1109_candidate.txt`（②#9）・`1109_struct.txt`（①#10）・`1110_malevolent.txt`（③#11）・`1110_inspect_expect.txt`（④#12）・`1111_companion.txt`（②#13）・`1111_tract.txt`（①#14）・`1112_retrospect.txt`（③#15）・`1112_increase_decrease.txt`（④#16）・`1113_breakfast.txt`（②#17）・`1113_spect.txt`（①#18）ほか（〜`1126_carnivore.txt`（③#43）・`1126_inflate_deflate.txt`（④#44））。仮動画（無音）は `samples/仮_*.mp4`
 
 ## データの作り直し（アプリの単語が増えたとき）
 ```

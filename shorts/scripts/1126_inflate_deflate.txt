@@ -1,0 +1,35 @@
+# 型: ④ペア inflate / deflate（2026-11-26・Roots #44）
+# タイトル: Roots #44 ④ペア inflate / deflate（11/26 投稿2）｜Rootsで英単語｜語源で一発暗記
+# 語根: flat
+# メモ: inflate・deflate はアプリの見出し語にないので word 場面でパーツを指定（in(中へ)+flat(吹く)＝ふくらませる／de(下へ)+flat(吹く)＝空気を抜く）。後の pair はそれを使う。flat は最後のパーツなので自動で接尾にならないよう |語根 を付けた。語根の表記は英語のつづりに見える flat にした（ラテン語の動詞は flare）
+# メモ: flat はアプリのパーツにないので root 場面の意味は台本で指定（flat=吹く）。アプリの flav(吹いてくる、flavor) とは別の語根として扱い、flavor は出さない（Etymonline でも flavor と flare のつながりは「かもしれない」程度のため）
+# メモ: in＝中へ は 11/24 inhale/exhale で出ているので、今回は「インフレ・デフレ（inflation / deflation）」というカタカナ語の切り口にした。de はアプリの「下へ」（絵あり）に合わせた
+# メモ: 語源の根拠: Etymonline inflate（15世紀初め、ラテン語 inflatus ← inflare「吹きこむ・ふくらませる」＝in-「中へ」＋flare「吹く」。物価・通貨の意味は1843年から）、Etymonline inflation（経済の意味は1838年から）、Etymonline deflate（1891年、気球について。英語で inflate の in- を de- に取りかえて作った語。ラテン語 deflare は「吹き飛ばす」だが、英語の de- は「下へ」の意味）・deflation（1891年「空気を抜くこと」、経済の意味は1916年から）。Merriam-Webster inflate（Latin inflatus, past participle of inflare, from in- ＋ flare to blow）
+# メモ: 注意: deflate は「ラテン語 de＋flare」から直接来た語ではなく、英語で inflate をもとに作られた語（Etymonline）。ナレーションでは「ラテン語から」と言わず、パーツの見分け方として説明する
+# メモ: 英検級は言わない（word 画面に級は出ない語）。例はオリジナル（風船・物価）
+# メモ: 前後の日と重ねない: 11/24 bene・dict・in/ex・hale、11/25 mort・gage・duc/duct、11/27 quar・pend、11/26 投稿1の carn・vor の語は出さない。increase/decrease（#16）の語も出さない
+# メモ: まとめは3.2秒
+# メモ: ループ: 最後「次にニュースで『インフレ』と聞いたら…」→ 冒頭「インフレとデフレ、語源で見分けよう」
+# ナレーション: [0.0-3.0] インフレとデフレ、英単語の語源で見分けよう
+# ナレーション: [3.0-6.0] flat は「吹く」
+# ナレーション: [6.0-9.0] もとはラテン語の flare
+# ナレーション: [9.0-12.5] 中へ吹きこむ、inflate「ふくらませる」
+# ナレーション: [12.5-16.0] 風船に息を吹きこむのも inflate
+# ナレーション: [16.0-19.5] 空気が下へしぼむ、deflate「空気を抜く」
+# ナレーション: [19.5-23.0] 物価がふくらむのが inflation、インフレ
+# ナレーション: [23.0-26.5] しぼんで下がるのが deflation、デフレ
+# ナレーション: [26.5-30.0] in ならふくらむ、de ならしぼむ
+# ナレーション: [30.0-33.2] in 中へ→膨らむ、de 下へ→縮む
+# ナレーション: [33.2-36.0] 次にニュースで「インフレ」と聞いたら…
+# メモ: 録音のコツ: 1行読んだら半拍（0.4秒）あけ、inflate は「イン・フレイト」、deflate は「ディ・フレイト」と、頭の in／de をはっきり分けて読む。inflation は「インフレイション」
+[0.0-3.0] {hook think} インフレとデフレ\n語源で見分ける
+[3.0-6.0] {root flat=吹く} flat＝吹く
+[6.0-9.0] {text think} 元はラテン語flare
+[9.0-12.5] {word inflate in(中へ)+flat(吹く|語根)=ふくらませる} 中へ吹く＝ふくらませる
+[12.5-16.0] {text} 風船に吹きこむ＝inflate
+[16.0-19.5] {word deflate de(下へ)+flat(吹く|語根)=空気を抜く} 下へしぼむ＝空気を抜く
+[19.5-23.0] {text think} 物価がふくらむ＝インフレ
+[23.0-26.5] {text} 物価がしぼむ＝デフレ
+[26.5-30.0] {pair inflate deflate} inは膨らむ、deは縮む
+[30.0-33.2] {pairsum} in中へ→膨らむ\nde下へ→縮む
+[33.2-36.0] {hook think} 次に「インフレ」と\n聞いたら…
