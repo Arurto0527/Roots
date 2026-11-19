@@ -1,0 +1,38 @@
+# 型: ②雑学 quarantine（2026-11-27・Roots #45）
+# タイトル: Roots #45 ②雑学 quarantine（11/27 投稿1）｜Rootsで英単語｜語源で一発暗記
+# 語根: quarant
+# メモ: quarantine はアプリの見出し語にないのでパーツを指定（quarant＝40、ine はアプリの「名詞」）。quarter はアプリの見出し語（パーツと意味はアプリのデータ: quart(4番目)＋er(もの)）。quartet は quarter の related にある語なので パーツを指定して「番号なし」
+# メモ: 語源の根拠: Merriam-Webster quarantine（partly French quarantaine ← quarante forty ← Latin quadraginta ← quadra-（akin to quattuor four）＋-ginta、partly Italian quarantena「quarantine of a ship」← quaranta forty。sense 1 は「a period of 40 days」）
+# メモ: 語源の根拠: Etymonline quarantine は本サイト（etymonline.com）の各言語版が取得エラーで読めず、日本語版（etymonline.com/jp）で確認：1660年代「疫病の疑いのある船を隔離する期間」、Italian quaranta giorni「40日間」← Latin quadraginta。ヴェネツィアの政策で、ペストの国から来た船を港の外で40日待たせ、潜伏した病気がないか確かめた。1520年代の英語では「未亡人が夫の家に残れる40日」の意味もあった
+# メモ: 語源の根拠（仲間）: Merriam-Webster quarter（Latin quartarius ← quartus fourth）、Merriam-Webster quartet（Italian quartetto ← quarto fourth ← Latin quartus）。quadraginta の quadra- は quattuor「4」の仲間（Merriam-Webster quarantine）
+# メモ: 注意: 「なぜ40日なのか」（聖書の40日など）は Etymonline・Merriam-Webster とも理由を書いていないので「諸説あります」とだけ言う。ラグーサ（ドゥブロヴニク）の30日、1377年という年は辞書どうしで書き方が一致しないので声に出さない。ヴェネツィアの話は Etymonline の説明として「〜と説明されています」にする。英検級は言わない（word 画面にはアプリの級が出る）
+# メモ: 前後の日と重ねない: 11/25 mort・gage・duc、11/26 carn・vor・in/de・flat、11/28 ambi・dext・com・ple/pli、同日の投稿2の pend は使わない
+# メモ: 受験向けでない語（quartet）も出すので、まとめの欄は「今日の単語」。まとめは3.2秒
+# メモ: ループ: 最後「次に『隔離』と聞いたら…」→ 冒頭「隔離の語源は、40日」
+# ナレーション: [0.0-3.0] 隔離の語源は、40日。英単語の覚え方は語源
+# ナレーション: [3.0-6.0] quarantine は、なぜ40日なの？
+# ナレーション: [6.0-9.0] イタリア語の quaranta は「40」
+# ナレーション: [9.0-12.0] quaranta giorni、40日間
+# ナレーション: [12.0-15.5] 疫病がはやった時代のヴェネツィア
+# ナレーション: [15.5-19.0] あやしい船は、港の外で待たされた
+# ナレーション: [19.0-22.5] その期間が40日、と説明されています
+# ナレーション: [22.5-25.5] なぜ40なのかは、諸説あります
+# ナレーション: [25.5-28.5] 40日間から、隔離へ
+# ナレーション: [28.5-32.0] quarter「4分の1」も、4の仲間
+# ナレーション: [32.0-35.0] カルテットも、4人で組むグループ
+# ナレーション: [35.0-38.2] quarantine、40日間
+# ナレーション: [38.2-41.0] 次に「隔離」と聞いたら…
+# メモ: 録音のコツ: 1行読んだら半拍（0.4秒）あけ、quarantine は「クウォランティーン」の「クウォ」を強く、quaranta giorni は「クァランタ・ジョルニ」とゆっくり読む
+[0.0-3.0] {trivia quarantine quarant(40|語根)+ine(名詞)=隔離} 隔離の語源は「40日」
+[3.0-6.0] {hook think} なぜ隔離が40日？
+[6.0-9.0] {root quarant=40} quarant＝40
+[9.0-12.0] {origin quarantine} 40日間
+[12.0-15.5] {text think} 疫病の時代のヴェネツィア
+[15.5-19.0] {text} あやしい船は港の外で待機
+[19.0-22.5] {text} その期間が40日
+[22.5-25.5] {text think} なぜ40かは諸説あり
+[25.5-28.5] {reveal quarantine} 40日間→隔離
+[28.5-32.0] {word quarter} quarterも4の仲間
+[32.0-35.0] {word quartet 番号なし quart(4番目)+et(小さい)=四重奏団} カルテットも4人組
+[35.0-38.2] {summary 欄=今日の単語} quarantine＝40日間
+[38.2-41.0] {hook think} 次に「隔離」と\n聞いたら…

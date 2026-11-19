@@ -1,0 +1,38 @@
+# 型: ①カタカナ語 pend（2026-11-27・Roots #46）
+# タイトル: Roots #46 ①カタカナ語 pend（11/27 投稿2）｜Rootsで英単語｜語源で一発暗記
+# 語根: pend
+# メモ: suspend はアプリの見出し語（パーツと意味はアプリのデータ: sub(下で)＋pend(ぶら下がる)）。pendant・pending は depend・suspend の related にある語なので kata でパーツを指定（ant はアプリの「もの」、ing はアプリの「～している」）。append・perpendicular はアプリの見出し語にないのでパーツを指定（ap はアプリの「～へ」、per はアプリの「すっかり」）
+# メモ: sub・ap を root 場面にするとまとめの見出しから pend が落ちるので、1121_press・1125_duce_duct と同じく text 場面。perpendicular の per は声に出さず「おもりをぶら下げた糸」で説明する
+# メモ: 前後の日と重ねない: 11/25 mort・gage・duc、11/26 carn・vor・in/de・flat（depend・independent は使わない。in- と同じ im- の impending も使わない）、11/28 ambi・dext・com・ple/pli（compensate は使わない）、同日の投稿1の quar は使わない
+# メモ: 語源の根拠: Merriam-Webster pendant（Middle English pendaunt「ベルトの垂れた端」← Anglo-French pendant「hanging, dangling」）、Merriam-Webster pending（French pendant「during」← pendre「to hang」の現在分詞。法律で「まだ決まっていない訴訟」に使われた）、Merriam-Webster suspend（Latin suspendere ← sus-（sub-「up from below」）＋ pendere、pendere はもとは「to hang」の意味だったらしい）、Merriam-Webster append（Middle French apendre「to hang on, suspend」← Late Latin appendere ← ad- ＋ pendere）、Merriam-Webster perpendicular（Latin perpendiculum「plumb line（下げ振り）」から。Kids 版は per- thoroughly ＋ pendēre to hang）
+# メモ: 語源の根拠: Etymonline の *(s)pen- の項（etymonline.com）で pendere「to hang, cause to hang; weigh; pay」と、pendant・pending・suspend・append・pendulum が同じ仲間として並ぶことを確認
+# メモ: 注意: append は古典ラテン語では「量って払う」の意味（Merriam-Webster）。ぶら下げる意味はフランス語経由なので、ナレーションは「後ろにぶら下げて足す」までにして、ラテン語の意味は言い切らない。perpendicular の perpendere「慎重に量る」の説もあるので、声は「下げ振り（ぶら下げたおもり）から」とだけ言う。英検級は言わない（word 画面にはアプリの級が出る）
+# メモ: まとめは3.2秒
+# メモ: ループ: 最後「次にペンダントをつけるとき…」→ 冒頭「ペンダント、ペンディング…」
+# ナレーション: [0.0-3.3] ペンダント、ペンディング…英単語の覚え方は語源
+# ナレーション: [3.3-6.0] あなたはもう pend を知っています
+# ナレーション: [6.0-9.0] ペンダントは、首からぶら下げる飾り
+# ナレーション: [9.0-12.0] ペンディングは、決まらず宙ぶらりん
+# ナレーション: [12.0-15.0] pend は「ぶら下がる」
+# ナレーション: [15.0-18.0] sus は sub と同じ「下で」
+# ナレーション: [18.0-21.5] 宙につるして止める、suspend「一時停止する」
+# ナレーション: [21.5-24.5] ap は「〜へ」
+# ナレーション: [24.5-28.0] 後ろにぶら下げて足す、append「付け加える」
+# ナレーション: [28.0-31.0] 糸におもりをぶら下げると…
+# ナレーション: [31.0-34.5] まっすぐ下へ。perpendicular「垂直の」
+# ナレーション: [34.5-37.7] pend はぶら下がる、で3語
+# ナレーション: [37.7-40.5] 次にペンダントをつけるとき…
+# メモ: 録音のコツ: 1行読んだら半拍（0.4秒）あけ、suspend・append は後ろの「ペンド」を強く、perpendicular は「パーペンディキュラー」の「ディ」を強くゆっくり読む
+[0.0-3.3] {hook think} ペンダント、ペンディング…
+[3.3-6.0] {hook teach} もうpendを\n知ってる
+[6.0-9.0] {kata ペンダント pendant pend(ぶら下がる)+ant(もの)} 首から下げる飾り
+[9.0-12.0] {kata ペンディング pending pend(ぶら下がる)+ing(～している)} 決まらず宙ぶらりん
+[12.0-15.0] {root pend=ぶら下がる} pend＝ぶら下がる
+[15.0-18.0] {text} sus・sub＝下で
+[18.0-21.5] {word suspend} 宙につるして止める
+[21.5-24.5] {text} ap＝～へ
+[24.5-28.0] {word append ap(～へ)+pend(ぶら下がる)=付け加える} 後ろにぶら下げて足す
+[28.0-31.0] {text think} おもりをぶら下げると…
+[31.0-34.5] {word perpendicular per(すっかり)+pend(ぶら下がる)+icular(～の)=垂直の} まっすぐ下＝垂直の
+[34.5-37.7] {summary} pend＝ぶら下がる→3語
+[37.7-40.5] {hook think} 次にペンダントを\nつけるとき…
