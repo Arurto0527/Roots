@@ -1,0 +1,43 @@
+# 型: ④ペア complement / compliment（2026-11-28・Roots #48）
+# タイトル: Roots #48 ④ペア complement / compliment（11/28 投稿2）｜Rootsで英単語｜語源で一発暗記
+# 語根: ple
+# メモ: compliment・complete はアプリの見出し語（compliment id1005 com(すっかり)+ple(満たす)＝褒め言葉／complete com(すっかり)+ple(満たす)＝完全な）。complete はパーツ指定なし。compliment はつづりどおり pli を見せるため com(すっかり)+pli(満たす)+ment(名詞) を指定（後の pair もこれを使う）。complement はアプリでは complete の related にだけある語なのでパーツを指定（com(すっかり)+ple(満たす)+ment(名詞)＝補うもの）。後の pair はそれを使う
+# メモ: 語源の根拠: Etymonline complement（14世紀後半「完成させる手段」、古フランス語 compliement ← ラテン語 complementum ← complere「満たす」＝ com-（強め）＋ plere「満たす」）。Merriam-Webster complement（Latin complēmentum ← complēre to fill up, complete ＋ -mentum）。Etymonline compliment（1570年代「礼儀・敬意の行い」、もとのつづりは complement。1650年ごろフランス語を通して compliment に。イタリア語 complimento ← complire ← ラテン語 complere。「礼儀の務めを満たすもの」という考え方。「褒め言葉」の意味は19世紀初めから）。Merriam-Webster compliment（イタリア語 complimento はスペイン語 cumplimiento「礼儀として申し出ること」から。cumplir「果たす・満たす」＋-miento）
+# メモ: 発音: Merriam-Webster で complement（名詞）・compliment（名詞）とも ˈkäm-plə-mənt で同じ（アプリの compliment は /ˈkɑːmplɪmənt/）
+# メモ: 注意: 「e は complete の e」「i は I（私）をほめて」は語源ではなく覚え方。ナレーションでも「覚え方」と言う。compliment の経路は辞書で「スペイン語→イタリア語→フランス語→英語」（MW）なので「スペイン語などを通って来た」とだけ言い、細かい順番は言わない
+# メモ: 英検級は言わない（word 画面にはアプリの級が出る）。例はオリジナル（礼儀の決まりを満たす言葉）
+# メモ: 前後の日と重ねない: 11/26 carn・vor・in/de・flat、11/27 quar・pend、11/29 riv、同日の投稿1の ambi・dext の語は出さない。supplement（sub）・comply も出さない
+# メモ: まとめは3.2秒
+# メモ: 修正（チェック係）: [22.0] ナレーションを「スペイン語などを通って来た」に。スペイン語経由は MW のみで Etymonline はイタリア語→フランス語のため。秒を 22.0-25.5 にのばし、次の行を 25.5-28.5 に（7.1字/秒・7.3字/秒）
+# メモ: 修正（チェック係）: compliment の word 場面のパーツを com(すっかり)+pli(満たす)+ment(名詞) に。つづりは pli で、ple と見せると e/i の見分けとぶつかるため（pair も同じパーツを使う）
+# メモ: 修正（チェック係）: [19.0] テロップを「eはcompleteのe」に。漢字の「完全」には e がないため
+# メモ: 修正（チェック係）: pairsum を「e→complete／i→I＝私」に。ナレーション「e は complete、i は I」とそろえるため
+# メモ: 修正（チェック係）: [28.5] ナレーションの「覚え方。」を削った。速さを下げるため（テロップには「覚え方」が残る）
+# メモ: ループ: 最後「次に e か i か迷ったら…」→ 冒頭「そっくりな英単語、語源で見分けよう」
+# ナレーション: [0.0-3.0] そっくりな英単語、語源で見分けよう
+# ナレーション: [3.0-6.5] complement と compliment、音も同じ
+# ナレーション: [6.5-9.5] 2語とも元はラテン語 complere
+# ナレーション: [9.5-12.5] ple は「満たす」
+# ナレーション: [12.5-15.5] すっかり満たす、complete「完全な」
+# ナレーション: [15.5-19.0] 欠けた所を満たす、complement「補うもの」
+# ナレーション: [19.0-22.0] 覚え方。e は complete の e
+# ナレーション: [22.0-25.5] compliment は、スペイン語などを通って来た
+# ナレーション: [25.5-28.5] 礼儀の決まりを満たす言葉、つまり「褒め言葉」
+# ナレーション: [28.5-31.5] i は「I、私をほめて」の i
+# ナレーション: [31.5-35.0] e は補う、i はほめる
+# ナレーション: [35.0-38.2] e は complete、i は I
+# ナレーション: [38.2-41.0] 次に e か i か迷ったら…
+# メモ: 録音のコツ: 1行読んだら半拍（0.4秒）あけ、complement・compliment はどちらも「カンプリメント」と「カン」を強く、同じ音で読む。e・i は「イー」「アイ」とアルファベット読みではっきり
+[0.0-3.0] {hook think} そっくり英単語\n語源で見分ける
+[3.0-6.5] {hook teach} 1文字ちがい・発音同じ
+[6.5-9.5] {text think} 元はラテン語complere
+[9.5-12.5] {root ple=満たす} ple＝満たす
+[12.5-15.5] {word complete} すっかり満たす＝完全な
+[15.5-19.0] {word complement com(すっかり)+ple(満たす)+ment(名詞)=補うもの} 欠けた所を満たすもの
+[19.0-22.0] {text teach} eはcompleteのe
+[22.0-25.5] {word compliment com(すっかり)+pli(満たす)+ment(名詞)} スペイン語などを経由
+[25.5-28.5] {text think} 礼儀を満たす＝褒め言葉
+[28.5-31.5] {text teach} 覚え方：i＝I（私）をほめて
+[31.5-35.0] {pair complement compliment} eは補う、iはほめる
+[35.0-38.2] {pairsum} e→complete\ni→I＝私
+[38.2-41.0] {hook think} 次にeかiか\n迷ったら…

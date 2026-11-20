@@ -1,0 +1,42 @@
+# 型: ③推理 ambidextrous（2026-11-28・Roots #47）
+# タイトル: Roots #47 ③推理 ambidextrous（11/28 投稿1）｜Rootsで英単語｜語源で一発暗記
+# 語根: ambi+dextr
+# メモ: ambidextrous はアプリにない語なのでパーツを指定（ambi(両方|接頭|絵なし)+dextr(右の|語根)+ous(～な)＝両手利きの）。アプリの ambi は gloss が「まわりを」（ambition・ambiguous 用の絵）なので、意味が合わない今回は |絵なし にした。root 場面も {root ambi=両方 接頭 絵なし}
+# メモ: dexterity・ambivalent もアプリにない語なのでパーツを指定して「番号なし」。dexter はアプリのパーツにないので意味は台本で指定（dexter=右の）。ambivalent の val はアプリの「力がある」（value・valid と同じ。Etymonline の valere「強い」とも合う）に合わせ、絵はアプリのまま
+# メモ: 語源の根拠: Etymonline ambidextrous（1640年代「両手を同じように使える」、中世ラテン語 ambidexter から。14世紀末には「二枚舌の人」の意味もあった）・Etymonline ambi-（"both, on both sides"、もとはラテン語 ambi-「まわりに」）・Etymonline dexterity（1520年代「手先の器用さ」、ラテン語 dexteritas ← dexter「器用な」「右（手）の」）。Merriam-Webster ambidextrous（Late Latin ambidexter ＝ ambi- (both) ＋ dexter (right-hand side, skillful) ＋ -ous。意味 using both hands with equal ease）。Etymonline ambivalent（1916年の心理学用語、ambi-「両方」＋ラテン語 valentia「強さ」← valere「強い」。相反する気持ちを同時にもつこと）
+# メモ: 雑学: Etymonline sinister（ラテン語 sinister「左の」は dexter「右の」の反対。占いで左に見えるしるし〈鳥など〉が不吉とされ「不吉な・悪い」の意味に。ギリシャの影響とされ、ローマ本来の占いでは左が吉だったという話もあるので、ナレーションは「今は不吉な」だけにして理由は言わない）
+# メモ: 注意: 「右手が器用→器用」は Etymonline の dexter "skillful" と "right (hand)" の2つの意味をつないだ言い方。ambi はアプリでは「まわりを」だが、Etymonline・Merriam-Webster とも ambidextrous の ambi は "both" なので画面は「両方」
+# メモ: 英検級は言わない（アプリにない語なので answer 画面にも級は出ない）。例はオリジナル（両手で字が書ける人）
+# メモ: 前後の日と重ねない: 11/26 carn・vor・in/de・flat、11/27 quar・pend、11/29 riv、同日の投稿2の com・ple/pli の語は出さない（complete・ambiguous〈アプリでは ambi＋ag〉は使わない。in-/de- の語も出さない）
+# メモ: まとめは3.2秒。count は3秒のまま、声は「3秒で考えて」だけ
+# メモ: ループ: 最後「両手で字が書ける人を表す、」→ 冒頭「この難しい英単語も、語源でわかる」
+# メモ: 修正（チェック係）: 最後の行を「両手で字が書ける人を表す、」に。前の「英単語も…」だと冒頭の「この難しい英単語も」と重なるため
+# メモ: 修正（チェック係）: [28.0] テロップを「両手とも右手並みに器用」に。ナレーションの「右手みたいに器用」とそろえるため
+# メモ: 修正（チェック係）: [18.0] ナレーションを「『器用な』の意味も」に。Etymonline の dexter には「器用な」の意味もあると直接言えるため（6.9字/秒）
+# ナレーション: [0.0-3.0] この難しい英単語も、語源でわかる
+# ナレーション: [3.0-5.5] ambidextrous
+# ナレーション: [5.5-8.5] 3秒で考えて
+# ナレーション: [8.5-11.5] ambi は「両方」
+# ナレーション: [11.5-15.0] 好きも嫌いも両方ある、ambivalent
+# ナレーション: [15.0-18.0] dexter はラテン語で「右の」
+# ナレーション: [18.0-21.5] 「器用な」の意味も。dexterity「器用さ」
+# ナレーション: [21.5-24.5] 両方とも右手…？
+# ナレーション: [24.5-28.0] 正解は「両手利きの」
+# ナレーション: [28.0-31.0] 両手とも、右手みたいに器用
+# ナレーション: [31.0-34.5] 「左」の sinister は、今「不吉な」
+# ナレーション: [34.5-37.7] ambi「両方」＋ dexter「右の」
+# ナレーション: [37.7-40.5] 両手で字が書ける人を表す、
+# メモ: 録音のコツ: 1行読んだら半拍（0.4秒）あけ、ambidextrous は「アンビデクストラス」と「デク」を強く、ゆっくり1回だけ読む。dexterity は「デクステリティ」の「テ」を強く、ambivalent は「アンビヴァレント」の「ビ」を強く、sinister は「シニスター」
+[0.0-3.0] {hook think} 難しい英単語も\n語源でわかる
+[3.0-5.5] {quiz ambidextrous ambi(両方|接頭|絵なし)+dextr(右の|語根)+ous(～な)=両手利きの} ambidextrous
+[5.5-8.5] {count ambidextrous} 3秒で考えて
+[8.5-11.5] {root ambi=両方 接頭 絵なし} ambi＝両方
+[11.5-15.0] {word ambivalent 番号なし ambi(両方|接頭|絵なし)+val(力がある|語根)+ent(～な)=相反する気持ちの} 好きも嫌いも両方ある
+[15.0-18.0] {root dexter=右の} dexter＝右の
+[18.0-21.5] {word dexterity 番号なし dexter(右の|語根)+ity(名詞)=器用さ} 右の＝器用な→器用さ
+[21.5-24.5] {split ambidextrous} 両方とも右手…？
+[24.5-28.0] {answer ambidextrous} 正解：両手利きの
+[28.0-31.0] {text think} 両手とも右手並みに器用
+[31.0-34.5] {text} 左のsinister＝不吉な
+[34.5-37.7] {summary} ambi両方＋dexter右の
+[37.7-40.5] {hook think} 両手で字が書ける\n人を表す…
